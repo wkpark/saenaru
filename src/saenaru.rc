@@ -1,0 +1,262 @@
+//Microsoft Developer Studio generated resource script.
+//
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winuser.h"
+#include "immdev.h"
+#include "saenaru.h"
+#include "resource.h"
+#include "winver.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Korean resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_GENERAL             ICON    DISCARDABLE     "..\\resource\\general.ico"
+SAENARUICON             ICON    DISCARDABLE     "..\\resource\\saenaru.ico"
+INDICOPENICON           ICON    DISCARDABLE     "..\\resource\\penindic.ico"
+IDI_ABOUT               ICON    DISCARDABLE     "..\\resource\\about.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+STATUSBMP               BITMAP  DISCARDABLE     "..\\resource\\status.bmp"
+CLOSEBMP                BITMAP  DISCARDABLE     "..\\resource\\close.bmp"
+CHECKBMP                BITMAP  DISCARDABLE     "..\\resource\\check.bmp"
+UNCHECKBMP              BITMAP  DISCARDABLE     "..\\resource\\uncheck.bmp"
+FACEBMP                 BITMAP  DISCARDABLE     "..\\resource\\face.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+DLG_GENERAL DIALOG DISCARDABLE  30, 65, 215, 135
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "자판 일반 설정"
+FONT 9, "굴림"
+BEGIN
+    ICON            IDI_GENERAL,IDC_STATIC,2,5,20,20
+    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,59
+    CONTROL         "새두벌 자판 (&2)",IDC_LAYOUT_NEW2BUL,"Button",
+                    BS_AUTORADIOBUTTON,33,15,70,11
+    CONTROL         "새세벌 자판 (&3)",IDC_LAYOUT_NEW3BUL,"Button",
+                    BS_AUTORADIOBUTTON,33,29,70,11
+    CONTROL         "안마태 자판 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
+                    BS_AUTORADIOBUTTON,33,43,70,11
+    CONTROL         "표준 두벌식 자판 (&D)",IDC_LAYOUT_OLD2BUL,"Button",
+                    BS_AUTORADIOBUTTON,115,15,77,11
+    CONTROL         "세벌식 390 자판 (&9)",IDC_LAYOUT_390,"Button",
+                    BS_AUTORADIOBUTTON,115,29,77,11
+    CONTROL         "세벌식 최종 자판 (&F)",IDC_LAYOUT_3BULFINAL,"Button",
+                    BS_AUTORADIOBUTTON,115,43,77,11
+    CONTROL         "모아치기 지원 (&C)",IDC_CONCURRENT_TYPING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26,70,156,10
+    CONTROL         "자소 단위로 지우기 (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26,82,156,10
+    CONTROL         "KS X 1002 확장한자 지원 (&X)",IDC_KSX1002_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,94,156,10
+    CONTROL         "KS X 1001으로 한글 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,106,156,10
+    CONTROL         "고어 자모를 포함한 전체 단자모 조합 사용 (&O)",
+                    IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    26,118,156,10
+END
+
+DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "새나루에 대해..."
+FONT 9, "굴림"
+BEGIN
+    LTEXT           "새나루 한글 입력기 버전 1.0",IDC_STATIC,63,36,88,8
+    ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
+    LTEXT           "장혜식 <perky@FreeBSD.org> 만듦 2003",IDC_STATIC,41,54,
+                    132,8
+    LTEXT           "이 소프트웨어는 올바른 동작이나 특정 목적에의 적합성에 대한 어떠한 보증없이 ""있는 그대로"" 배포됩니다.",
+                    IDC_STATIC,8,81,198,18
+    LTEXT           "이 소프트웨어는 대한민국 저작권법에 의해 보호됩니다. 자세한 저작권 사항은 같이 배포되는 관련 문서 또는 프로젝트 홈페이지(http://saenaru.i18n.org/)를 참조하십시오.",
+                    IDC_STATIC,8,101,198,24
+    GROUPBOX        "",IDC_STATIC,3,72,209,58
+END
+
+DLG_DEBUG DIALOG DISCARDABLE  30, 65, 215, 135
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "DebugOptions"
+FONT 9, "굴림"
+BEGIN
+    CONTROL         "LOGF_ENTRY",IDC_LOGF_ENTRY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,5,9,98,14
+    CONTROL         "LOGF_API",IDC_LOGF_API,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,5,23,98,14
+    CONTROL         "LOGF_KEY",IDC_LOGF_KEY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,5,37,98,14
+    CONTROL         "DEBF_THREADID",IDC_DEBF_THREADID,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,70,98,14
+    CONTROL         "Show GuideLine on Ctrl-G",IDC_DEBF_GUIDELINE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,89,98,14
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0xbL
+#else
+ FILEFLAGS 0xaL
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x3L
+ FILESUBTYPE 0xbL
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041203b5"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "OpenLook Initiatives\0"
+            VALUE "FileDescription", "새나루 1.0\0"
+            VALUE "FileVersion", "1.0\0"
+            VALUE "InternalName", "새나루 한글 입력기\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003 장혜식.\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "SAENARU.IME\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "새나루\0"
+            VALUE "ProductVersion", "1.00\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 949
+    END
+END
+
+#endif    // !_MAC
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resrc1.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winuser.h""\r\n"
+    "#include ""immdev.h""\r\n"
+    "#include ""saenaru.h""\r\n"
+    "#include ""resource.h""\r\n"
+    "#include ""winver.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+RIGHTCLKMENU MENU DISCARDABLE 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Reconversion",                IDM_RECONVERT
+        MENUITEM "About",                       IDM_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    DLG_GENERAL, DIALOG
+    BEGIN
+        RIGHTMARGIN, 214
+        BOTTOMMARGIN, 133
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DICFILENAME         "SAENARU.DIC"
+    IDS_CONFIGNAME          "새나루 한글 입력기"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_GL_NODICTIONARY     "Can not find dictionary"
+    IDS_GL_TYPINGERROR      "Typing Error No Roman"
+    IDS_GL_TESTGUIDELINESTR "TestGuideLine String"
+    IDS_GL_TESTGUIDELINEPRIVATE "TestGuideLine Private"
+    IDS_NOREADING           "There is no reading string\r\nPlease enter the reading string"
+    IDS_NOSTRING            "There is no string\r\nPlease enter the string"
+    IDS_NOMEMORY            "메모리가 부족합니다."
+    IDS_REGWORDRET          "Fail to register Word"
+END
+
+#endif    // Korean resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
