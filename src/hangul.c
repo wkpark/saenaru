@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.7 2004/10/11 14:40:24 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.8 2004/10/13 11:10:46 wkpark Exp $
  */
 
 #include <windows.h>
@@ -936,6 +936,7 @@ static const WCHAR keyboard_table_3yet[] = {
   0x11f0,	/* GDK_asciitilde:	jongseong yesieung		*/
 };
 
+/*
 struct _HangulCompose 
 {
   UINT key;
@@ -943,6 +944,7 @@ struct _HangulCompose
 };
 
 typedef struct _HangulCompose	HangulCompose;
+*/
 
 static const HangulCompose compose_table_default[] = {
   { 0x11001100, 0x1101 }, /* choseong  kiyeok + kiyeok	= ssangkiyeok	*/
@@ -1264,27 +1266,53 @@ static const HangulCompose compose_table_yet[] = {
 };
 
 //#define compose_table compose_table_default
+static HangulCompose compose_table_user[256];
 static HangulCompose *compose_table = (HangulCompose *) compose_table_2set;
 static int compose_table_size = sizeof(compose_table_2set) / sizeof(HangulCompose);
 
 int PASCAL set_compose(UINT type)
 {
+    INT atype,i;
     switch (type)
     {
 	case 1:
+           compose_table = (HangulCompose *) compose_table_default;
+           compose_table_size =
+		   sizeof(compose_table_default) / sizeof(HangulCompose);
+	   dwComposeFlag=1;
+           break;
+	case 2:
            compose_table = (HangulCompose *) compose_table_2set;
            compose_table_size =
 		   sizeof(compose_table_2set) / sizeof(HangulCompose);
+	   dwComposeFlag=2;
            break;
         case 3:
            compose_table = (HangulCompose *) compose_table_ahnmatae;
            compose_table_size =
 		   sizeof(compose_table_ahnmatae) / sizeof(HangulCompose);
+	   dwComposeFlag=3;
 	   break;
 	default:
-           compose_table = (HangulCompose *) compose_table_default;
-           compose_table_size =
+	    // User defined compose map
+#define USER_DEFINED_COMPOSE_OFFSET	4
+	    type-=USER_DEFINED_COMPOSE_OFFSET;
+            atype=
+             load_compose_map_from_reg(NULL,type,compose_table_user);
+	    if (atype) {
+                compose_table=(HangulCompose *) compose_table_user;
+	        for (i=0;i<256;i++) {
+		    if (compose_table_user[i].key == (UINT)-1) break;
+		}
+		MyDebugPrint((TEXT("compose map size: %d\r\n"), i));
+		compose_table_size = i;
+	    } else {
+                compose_table=(HangulCompose *) compose_table_default;
+                compose_table_size =
 		   sizeof(compose_table_default) / sizeof(HangulCompose);
+                break;
+	    }
+
            break;
     }
     return 0;
@@ -1327,36 +1355,36 @@ int PASCAL set_keyboard(UINT type)
         case LAYOUT_OLD2BUL:
             keyboard_table=(WCHAR *)keyboard_table_2;
 	    atype=2;
-	    ctype=1;
+	    ctype=2;
 	    break;
 	case LAYOUT_3FIN:
             keyboard_table=(WCHAR *)keyboard_table_3final;
 	    atype=3;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_390:
             keyboard_table=(WCHAR *)keyboard_table_390;
 	    atype=3;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_3SUN:
             keyboard_table=(WCHAR *)keyboard_table_3sun;
 	    atype=3;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_NEW2BUL:
             atype=
 	     load_keyboard_map_from_reg(TEXT("货滴国"),0,keyboard_table_user);
 	    if (atype)
 	        keyboard_table=keyboard_table_user;
-	    ctype=1;
+	    ctype=2;
 	    break;
 	case LAYOUT_NEW3BUL:
             atype=
              load_keyboard_map_from_reg(TEXT("货技国"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_AHNMATAE:
             atype=
@@ -2003,8 +2031,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
 			last = hangul_jongseong_to_choseong(ic->last);
-		    if (last == jamo && (jamo == 0x1100 || jamo == 0x1103 ||
-			jamo == 0x1107 || jamo == 0x110c )) // あ え こ す
+		    if (jong != 0x11af && last == jamo &&
+			(jamo == 0x1100 || jamo == 0x1103 ||
+			 jamo == 0x1107 || jamo == 0x110c )) // あ え こ す
 		    {
 			ic->jong=jong;
 			jamo= hangul_compose(last,last); // make ssang cho

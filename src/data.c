@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/data.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/data.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include "windows.h"
@@ -70,6 +70,7 @@ DWORD dwLogFlag = 0L;
 DWORD dwDebugFlag = 0L;
 #endif
 DWORD dwLayoutFlag = 0L;
+DWORD dwComposeFlag = 0L;
 DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
 /* local flags */
 DWORD dwImeFlag = SAENARU_ONTHESPOT;

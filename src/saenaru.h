@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.4 2004/10/10 10:59:48 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -66,6 +66,7 @@
 #define FULL_MULTIJOMO         0x00000040
 #define USE_SHIFT_SPACE        0x00000080
 #define DVORAK_SUPPORT         0x00000100
+#define ESCENG_SUPPORT         0x00000200
 
 
 /**********************************************************************/
@@ -331,6 +332,14 @@ typedef struct _tagHangulIC {
     BOOL  syllable;
 } HangulIC;
 
+struct _HangulCompose 
+{
+  UINT key;
+  WCHAR code;
+};
+
+typedef struct _HangulCompose	HangulCompose;
+
 /**********************************************************************/
 /*                                                                    */
 /*      Externs                                                       */
@@ -363,6 +372,7 @@ extern DWORD dwDebugFlag;
 #endif
 
 extern DWORD dwLayoutFlag;
+extern DWORD dwComposeFlag;
 extern DWORD dwOptionFlag;
 
 extern DWORD dwImeFlag;
@@ -460,6 +470,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lP
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 UINT load_keyboard_map_from_reg(LPCTSTR, UINT, WCHAR *);
+UINT load_compose_map_from_reg(LPCTSTR, UINT, HangulCompose *);
 
 /* DIC.C         */
 BOOL PASCAL IsEat(WORD);
@@ -483,6 +494,7 @@ void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 /* hangul.c       */
 void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
 int PASCAL set_keyboard(UINT);
+int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);
 
 /* DIC2.C        */

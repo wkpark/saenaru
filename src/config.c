@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/config.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include "windows.h"
@@ -208,6 +208,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp |= USE_SHIFT_SPACE;
                     if (IsDlgButtonChecked(hDlg, IDC_DVORAK_SUPPORT))
                         dwTemp |= DVORAK_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_ESCENG_SUPPORT))
+                        dwTemp |= ESCENG_SUPPORT;
                     dwOptionFlag = dwTemp;
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
@@ -283,6 +285,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwOptionFlag & FULL_MULTIJOMO) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_DVORAK_SUPPORT, 
                                 (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_ESCENG_SUPPORT, 
+                                (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
                                 (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0);
 
@@ -579,6 +583,152 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
     return type;
 }
 #endif
+
+UINT
+load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *compose_map)
+{
+    WCHAR *line, *p, *saved_position;
+    TCHAR buf[256];
+    //FILE* file;
+    UINT key1, key2;
+    DWORD value;
+    //NabiComposeItem *citem;
+    UINT map_size;
+    //GSList *list = NULL;
+    INT sz, len;
+    WCHAR name[256];
+    //LPTSTR kbuf=NULL;
+    LPTSTR kbuf=NULL;
+    UINT _key[256];
+    WCHAR _code[256];
+    UINT id=0,i;
+
+    WCHAR achValue[256];
+
+    if (lpszCompose == NULL && nCompose <10)
+    {
+        DWORD cchValue = 256;
+        DWORD retCode;
+        HKEY hKey;
+
+        if (!GetRegKeyHandle(TEXT("\\Compose"), &hKey))
+            return 0;
+
+        achValue[0] = '\0'; 
+        retCode = RegEnumValue(hKey, nCompose, 
+            achValue, 
+            &cchValue, 
+            NULL, 
+            NULL,
+            NULL,
+            NULL);
+
+        if (retCode != ERROR_SUCCESS ) 
+        { 
+            MyDebugPrint((TEXT("(%d) %s\n"), nCompose, achValue));
+            return 0;
+        }
+        lpszCompose = (LPCTSTR) &achValue;
+    }
+
+    sz= GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,NULL);
+    if (sz <= 0) {
+            MyDebugPrint((TEXT("Saenaru: ComposeMap not found\n")));
+            return 0;
+    }
+
+    MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
+    kbuf=(LPTSTR) malloc(sz);
+    //
+    if (kbuf == (LPTSTR)NULL) {
+            MyDebugPrint((TEXT("Saenaru: Can't read compose map registry\n")));
+            return 0;
+    }
+
+    GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,kbuf);
+    /* init */
+    //compose_map->name = NULL;
+    //compose_map->map = NULL;
+    //compose_map->size = 0;
+
+    for (line = Mystrtok(kbuf, TEXT("\0"));id<256
+	 ;
+	 line = Mystrtok(saved_position, TEXT("\0"))) {
+        len=Mylstrlen(line);
+        saved_position=line+len+1;
+
+        if (len==0) break;
+
+	p = Mystrtok(line, TEXT(" \t\0"));
+        MyDebugPrint((TEXT("tok: %s\n"),p));
+	/* comment */
+	if (p == NULL || p[0] == '#')
+	    continue;
+
+	if (Mylstrcmp(p, TEXT("Name:")) == 0) {
+	    p = Mystrtok(NULL, TEXT("\0"));
+	    if (p == NULL)
+		continue;
+	    //compose_map->name = g_strdup(p);
+	    continue;
+	} else {
+	    key1 = string_to_hex(p);
+	    if (key1 == 0)
+		continue;
+
+	    p = Mystrtok(NULL, TEXT(" \t"));
+	    if (p == NULL)
+		continue;
+	    key2 = string_to_hex(p);
+	    if (key2 == 0)
+		continue;
+
+	    p = Mystrtok(NULL, TEXT(" \t"));
+	    if (p == NULL)
+		continue;
+	    value = string_to_hex(p);
+	    if (value == 0)
+		continue;
+
+	    _key[id] = key1 << 16 | key2;
+	    _code[id] = (WCHAR)value;
+            id++;
+	}
+    }
+    free(kbuf);
+    map_size=(UINT)id;
+
+    //if (compose_map == NULL) {
+	/* on error free the list */
+//	while (list != NULL) {
+//	    g_free(list->data);
+//	    list = list->next;
+//	}
+//	g_slist_free(list);
+//
+//	return FALSE;
+//    }
+
+    /* sort compose map */
+//    list = g_slist_reverse(list);
+//    list = g_slist_sort(list, compose_item_compare);
+
+    /* move data to map */
+//    map_size = g_slist_length(list);
+//    compose_map->map = (NabiComposeItem**)
+//		g_malloc(map_size * sizeof(NabiComposeItem*));
+    for (i = 0; i < map_size; i++) {
+	compose_map[i].key = _key[i];
+	compose_map[i].code = _code[i];
+    }
+    compose_map[map_size].key=(UINT)-1;
+
+    /* free the list */
+    //g_slist_free(list);
+
+    return TRUE;
+}
+
 
 /*
  * ex: ts=8 sts=4 sw=4 et

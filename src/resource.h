@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 //{{NO_DEPENDENCIES}}
@@ -75,6 +75,7 @@
 #define IDC_BACKSPACE_BY_JAMO   2005
 #define IDC_FULL_MULTIJOMO      2006
 #define IDC_USE_SHIFT_SPACE     2007
+#define IDC_ESCENG_SUPPORT      2008
 
 /* string tables */
 #define IDS_DICFILENAME             1000

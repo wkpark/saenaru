@@ -90,8 +90,10 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,83,79,53,10
     CONTROL         "드보락 지원 (&V)",IDC_DVORAK_SUPPORT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,79,60,10
-    CONTROL         "자소 단위로 지우기 (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,26, 91,90,10
+    CONTROL         "자소 단위 지움 (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26, 91,71,10
+    CONTROL         "<ESC> 영문전환 (&E)",IDC_ESCENG_SUPPORT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,104, 91,83,10
     CONTROL         "<Shift>-<SPACE> 한/영 전환 (&H)",IDC_USE_SHIFT_SPACE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,26,103,124,10
     CONTROL         "확장한자(KS X 1002) 지원 (&X)",IDC_KSX1002_SUPPORT,

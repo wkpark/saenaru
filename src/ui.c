@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.5 2004/10/09 02:43:56 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.6 2004/10/13 11:23:33 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -661,6 +661,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
 
         case IMN_SETCONVERSIONMODE:
             UpdateStatusWindow(lpUIExtra);
+            UpdateIndicIcon(hUICurIMC);
 
             UpdateSoftKeyboard(lpUIExtra,
             lpIMC->fdwConversion & IME_CMODE_SOFTKBD);
@@ -1205,6 +1206,10 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
     lpmsg = (LPMSG)lParam;
     vKey = lpmsg->wParam;
+
+    if (vKey == VK_PROCESSKEY) {
+        MyDebugPrint((TEXT("\t** VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
+    }
 
     switch (lpmsg->message)
     {

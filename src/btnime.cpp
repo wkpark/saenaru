@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
  */
 
 #if !defined (NO_TSF)
@@ -59,12 +59,17 @@ static void  _Menu_Property (UINT);
 static void  _Menu_Reconversion (UINT);
 static void  _Menu_ToggleShowKeyboard (UINT);
 static void  _Menu_ToggleDvorak (UINT);
+static void  _Menu_ToggleEscEng (UINT);
 static void  _Menu_ToggleOnTheSpot (UINT);
 static void  _Menu_SelectKeyboard (UINT);
+static void  _Menu_SelectCompose (UINT);
 static DWORD _MenuItem_GetNormalFlag (UINT);
 static DWORD _MenuItem_GetKeyboardFlag (UINT);
+static DWORD _MenuItem_GetComposeFlag (UINT);
 static DWORD _MenuItem_GetToggleKeyboardFlag (UINT);
+static DWORD _MenuItem_GetToggleComposeFlag (UINT);
 static DWORD _MenuItem_GetToggleDvorakFlag (UINT);
+static DWORD _MenuItem_GetToggleEscEngFlag (UINT);
 static DWORD _MenuItem_GetToggleOnTheSpotFlag (UINT);
 static DWORD _UserKeyboardMenu_GetKeyboardFlag (UINT);
 
@@ -80,6 +85,7 @@ static const TSFLBMENUINFOEX c_rgMenuItems[] = {
 //  { L"재설정(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
     { NULL, NULL, NULL },
     { L"드보락(&V)",   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
+    { L"ESC 영문전환(&E)", _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
     { L"단어단위 편집(&W)", _MenuItem_GetToggleOnTheSpotFlag,_Menu_ToggleOnTheSpot },
     { NULL, NULL, NULL },
     { L"키보드 보기",  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
@@ -101,6 +107,7 @@ static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
     { L"안마태(&A)",        NULL },
     { L"세벌식 순아래(&N)", NULL },
     { L"사용자 자판(&U)",   TF_LBMENUF_SUBMENU },
+    { L"사용자 조합(&C)",   TF_LBMENUF_SUBMENU },
 };
 
 enum {
@@ -302,6 +309,9 @@ CLangBarItemImeButton::InitMenu (
     ITfMenu *pUserKeyboardMenu;
     int     idUserKeyboardMenu=0;
 
+    ITfMenu *pUserComposeMenu;
+    int     idUserComposeMenu=0;
+
     DEBUGPRINTFEX (100, (TEXT ("CLangBarItemImeButton::InitMenu (ITfMenu:%p)\n"), pMenu));
 
     if (pMenu == NULL)
@@ -325,6 +335,7 @@ CLangBarItemImeButton::InitMenu (
 
     // Add default Keyboard lists
     pUserKeyboardMenu=NULL;
+    pUserComposeMenu=NULL;
     for (i = 0; i < ARRAYSIZE (c_rgKeyboardItems); i++)
     {
         wstrDesc = c_rgKeyboardItems [i].pchDesc;
@@ -335,10 +346,15 @@ CLangBarItemImeButton::InitMenu (
             dwFlag = _MenuItem_GetKeyboardFlag(id);
             pMenu->AddMenuItem (id++,
                    dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
-        } else {
+        } else if (idUserKeyboardMenu == 0) {
             idUserKeyboardMenu = id;
             pMenu->AddMenuItem (id++,
                    dwFlag, NULL, NULL, wstrDesc, nstrDesc, &pUserKeyboardMenu);
+        } else {
+	    id=20;
+            idUserComposeMenu = id;
+            pMenu->AddMenuItem (id++,
+                   dwFlag, NULL, NULL, wstrDesc, nstrDesc, &pUserComposeMenu);
         }
     }
     // add seperator
@@ -347,7 +363,7 @@ CLangBarItemImeButton::InitMenu (
                         TF_LBMENUF_SEPARATOR , NULL, NULL, NULL, 0, NULL);
 
     // add extra config menus
-    id=20;
+    id=30;
     for (i = 2; i < ARRAYSIZE (c_rgMenuItems); i++)
     {
         wstrDesc = c_rgMenuItems [i].pchDesc;
@@ -361,7 +377,7 @@ CLangBarItemImeButton::InitMenu (
         pMenu->AddMenuItem (id++, dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
     }
     
-    // addd User defined Keyboads (SubMenu)
+    // add User defined Keyboads (SubMenu)
     if (idUserKeyboardMenu) {
         HKEY hKey;
 
@@ -398,6 +414,43 @@ CLangBarItemImeButton::InitMenu (
         }
         pUserKeyboardMenu->Release();
     }
+    // add User defined Composes (SubMenu)
+    if (idUserComposeMenu) {
+        HKEY hKey;
+
+        id = idUserComposeMenu;
+
+        if (!GetRegKeyHandle(TEXT("\\Compose"), &hKey))
+            return S_OK;
+        for (i=0;i<10;i++)
+        {
+            WCHAR achValue[256]; 
+            DWORD cchValue = 256;
+            DWORD retCode;
+
+            achValue[0] = '\0'; 
+            retCode = RegEnumValue(hKey, i, 
+                achValue, 
+                &cchValue, 
+                NULL, 
+                NULL,
+                NULL,
+                NULL);
+ 
+            if (retCode != ERROR_SUCCESS ) 
+            { 
+                break;
+                MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
+            }     
+            wstrDesc = achValue;
+            nstrDesc = wcslen (wstrDesc);
+            dwFlag = _MenuItem_GetComposeFlag(id);
+            pUserComposeMenu->AddMenuItem (id++,
+            //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,
+                            dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
+        }
+        pUserComposeMenu->Release();
+    }
     return S_OK;
 }
 
@@ -409,14 +462,16 @@ CLangBarItemImeButton::OnMenuSelect (
 //        return    E_FAIL;
     MyDebugPrint((TEXT("MenuSelect:%x\n"), wID));
 
-    if (wID == 0 || wID >= 20 ){
-        if (wID >= 20) wID-= 18;
+    if (wID == 0 || wID >= 30 ){
+        if (wID >= 30) wID-= 28;
         if (c_rgMenuItems [wID].pfnHandler != NULL) {
             c_rgMenuItems [wID].pfnHandler (wID);
             //UpdateLanguageBar ();
         }
-    } else {
+    } else if (wID < 20) {
         _Menu_SelectKeyboard (wID);
+    } else {
+        _Menu_SelectCompose (wID);
     }
     return    S_OK;
 }
@@ -582,6 +637,17 @@ _Menu_SelectKeyboard (UINT wID)
     return;
 }
 
+void
+_Menu_SelectCompose (UINT wID)
+{
+    wID-=16;
+    //dwLayoutFlag &= 0xffff0000;
+    //dwLayoutFlag |= wID;
+    dwComposeFlag = wID;
+    set_compose(wID);
+    return;
+}
+
 DWORD
 _MenuItem_GetKeyboardFlag (UINT wID)
 {
@@ -589,6 +655,17 @@ _MenuItem_GetKeyboardFlag (UINT wID)
     DEBUGPRINTFEX (100, (TEXT ("GetKeyboardFlag:%d)\n"), wID));
     //if ( flag & dwLayoutFlag)
     if ( wID == dwLayoutFlag)
+        return 1;
+    return    0;
+}
+
+DWORD
+_MenuItem_GetComposeFlag (UINT wID)
+{
+    wID-=16;
+    DEBUGPRINTFEX (100, (TEXT ("GetComposeFlag:%d)\n"), wID));
+    //if ( flag & dwLayoutFlag)
+    if ( wID == dwComposeFlag)
         return 1;
     return    0;
 }
@@ -625,19 +702,19 @@ _Menu_ToggleShowKeyboard (UINT wID)
 void
 _Menu_ToggleDvorak (UINT wID)
 {
-    //static HKL hkl=NULL;
     if (dwOptionFlag & DVORAK_SUPPORT)
-    {
         dwOptionFlag &= ~DVORAK_SUPPORT;
-	//if (hkl)
-	//    UnloadKeyboardLayout(hkl);
-	//hkl=NULL;
-    }
     else
-    {
         dwOptionFlag |= DVORAK_SUPPORT;
-	//hkl=LoadKeyboardLayout(TEXT("00010409"),KLF_ACTIVATE);
-    }
+    return;
+}
+void
+_Menu_ToggleEscEng (UINT wID)
+{
+    if (dwOptionFlag & ESCENG_SUPPORT)
+        dwOptionFlag &= ~ESCENG_SUPPORT;
+    else
+        dwOptionFlag |= ESCENG_SUPPORT;
     return;
 }
 
@@ -661,6 +738,12 @@ DWORD
 _MenuItem_GetToggleDvorakFlag (UINT wID)
 {
     return (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0;
+}
+
+DWORD
+_MenuItem_GetToggleEscEngFlag (UINT wID)
+{
+    return (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0;
 }
 
 DWORD
