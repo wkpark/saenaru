@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.4 2003/12/30 01:43:57 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -98,7 +98,8 @@ HANDLE hInstance;
     wc.hIcon          = NULL;
     wc.lpszMenuName   = (LPTSTR)NULL;
     wc.lpszClassName  = (LPTSTR)szCompStrClassName;
-    wc.hbrBackground  = NULL;
+    //wc.hbrBackground  = NULL;
+    wc.hbrBackground  = (HBRUSH)(COLOR_BTNFACE + 1);
     wc.hIconSm        = NULL;
 
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
@@ -144,7 +145,7 @@ HANDLE hInstance;
 
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
         return FALSE;
-
+#if 1
     //
     // register class of guideline window.
     //
@@ -164,6 +165,7 @@ HANDLE hInstance;
 
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
         return FALSE;
+#endif
 
     return TRUE;
 }
@@ -244,8 +246,10 @@ LPARAM lParam;
             lpUIExtra->uiDefComp.pt.y = -1;
             lpUIExtra->uiCand.pt.x = -1;
             lpUIExtra->uiCand.pt.y = -1;
+#if 1
             lpUIExtra->uiGuide.pt.x = -1;
             lpUIExtra->uiGuide.pt.y = -1;
+#endif
 #if 1
             lpUIExtra->uiSoftKbd.pt.x = -1;
             lpUIExtra->uiSoftKbd.pt.y = -1;
@@ -451,8 +455,10 @@ LPARAM lParam;
                     DestroyWindow(lpUIExtra->uiComp[i].hWnd);
             }
 
+#if 1
             if (IsWindow(lpUIExtra->uiGuide.hWnd))
                 DestroyWindow(lpUIExtra->uiGuide.hWnd);
+#endif
 
             if (lpUIExtra->hFont)
                 DeleteObject(lpUIExtra->hFont);
@@ -509,7 +515,7 @@ LPARAM lParam;
             ImmUnlockIMC(hUICurIMC);
             GlobalUnlock(hUIExtra);
             break;
-
+#if 1
         case WM_UI_GUIDEMOVE:
             //
             // Set the position of the status window to UIExtra.
@@ -521,6 +527,7 @@ LPARAM lParam;
             lpUIExtra->uiGuide.pt.y = (long)HIWORD(lParam);
             GlobalUnlock(hUIExtra);
             break;
+#endif
 
         default:
             if (HIWORD(lParam) == WM_LBUTTONDOWN)
@@ -716,6 +723,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             HideCandWindow(lpUIExtra);
             break;
 
+#if 1
         case IMN_GUIDELINE:
             if (ImmGetGuideLine(hUICurIMC,GGL_LEVEL,NULL,0))
             {
@@ -757,6 +765,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 UpdateGuideWindow(lpUIExtra);
             }
             break;
+#endif
 
         case IMN_SETCANDIDATEPOS:
             // SAENARU supports only one candidate list.
@@ -1020,12 +1029,13 @@ void PASCAL ShowUIWindows(HWND hWnd, BOOL fFlag)
         ShowWindow(lpUIExtra->uiDefComp.hWnd,nsw);
         lpUIExtra->uiDefComp.bShow = fFlag;
     }
-
+#if 1
     if (IsWindow(lpUIExtra->uiGuide.hWnd))
     {
         ShowWindow(lpUIExtra->uiGuide.hWnd,nsw);
         lpUIExtra->uiGuide.bShow = fFlag;
     }
+#endif 
 
     GlobalUnlock(hUIExtra);
 

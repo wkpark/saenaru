@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -129,10 +129,8 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
     }
 
     // Root window style XXX
-    // skkime에서 이것이 rootwindow style이라고 나와있다. 그러나
-    // 아래의 윈도우는 이상하게 열리고 잔상이 계속 남는 희안한
-    // 문제점을 가진다. 그래서 아예 기능을 꺼버렸다. 2003/11/15
-    if (1 && !IsWindow(lpUIExtra->uiDefComp.hWnd))
+    // skkime에서 이것이 rootwindow style이라고 나와있다.
+    if (!IsWindow(lpUIExtra->uiDefComp.hWnd))
     {
         lpUIExtra->uiDefComp.hWnd = 
             CreateWindowEx( WS_EX_WINDOWEDGE,
@@ -144,10 +142,13 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
                          hUIWnd,NULL,hInst,NULL);
     }
 
+    if (IsWindow(lpUIExtra->uiDefComp.hWnd))
+    {
     SetWindowLongPtr(lpUIExtra->uiDefComp.hWnd,FIGWL_FONT,(LONG_PTR)lpUIExtra->hFont);
     SetWindowLongPtr(lpUIExtra->uiDefComp.hWnd,FIGWL_SVRWND,(LONG_PTR)hUIWnd);
     ShowWindow(lpUIExtra->uiDefComp.hWnd,SW_HIDE);
     lpUIExtra->uiDefComp.bShow = FALSE;
+    }
 
     return;
 }
@@ -437,6 +438,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
         //
         // When the style is DEFAULT, show the default composition window.
         //
+        // root window style XXX
         if (IsWindow(lpUIExtra->uiDefComp.hWnd))
         {
             for (i = 0; i < MAXCOMPWND; i++)
@@ -466,6 +468,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
             ReleaseDC(lpUIExtra->uiDefComp.hWnd,hDC);
         
             GetWindowRect(lpUIExtra->uiDefComp.hWnd,&rc);
+
             lpUIExtra->uiDefComp.pt.x = rc.left;
             lpUIExtra->uiDefComp.pt.y = rc.top;
             MoveWindow(lpUIExtra->uiDefComp.hWnd,
@@ -474,10 +477,16 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                        width+ 2 * GetSystemMetrics(SM_CXEDGE),
                        height+ 2 * GetSystemMetrics(SM_CYEDGE),
                        TRUE);
-
-            ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_SHOWNOACTIVATE);
-            lpUIExtra->uiDefComp.bShow = TRUE;
-            InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
+            if (lpCompStr->dwCompStrLen > 0) {
+                // comp str이 없을 경우는 감춘다.
+                // 긴 줄의 잔상이 남는 버그 해결 XXX
+                ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_SHOWNOACTIVATE);
+                lpUIExtra->uiDefComp.bShow = TRUE;
+                InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
+            } else {
+                ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_HIDE);
+                lpUIExtra->uiDefComp.bShow = FALSE;
+            }
         }
     }
 
@@ -617,14 +626,18 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
 
                 lpstr = GETLPCOMPSTR(lpCompStr);
                 lpattr = GETLPCOMPATTR(lpCompStr);
-                SetBkMode(hDC,TRANSPARENT);
+                //SetBkMode(hDC,TRANSPARENT);
                 if (lpIMC->cfCompForm.dwStyle)
                 {
+                    // 이곳의 색을 조절하면
+                    // 한글을 제대로 지원하지 않는 어플에서
+                    // 좀 더 깔끔한 한글 출력을 지원할 수 있을 것이다.
                     HDC hPDC;
 
                     hPDC = GetDC(GetParent(hCompWnd));
                     GetClientRect (hCompWnd,&rc);
                     SetBkColor(hDC,GetBkColor(hPDC));
+                    //SetTextColor(hDC,RGB(127,127,127));
                     SetBkMode(hDC,OPAQUE);
 
                     lstart = GetWindowLong(hCompWnd,FIGWL_COMPSTARTSTR);
