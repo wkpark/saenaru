@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.6 2004/10/09 06:50:47 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.7 2004/11/29 17:06:14 wkpark Exp $
  */
 
 #include "windows.h"
@@ -170,7 +170,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
     {
-        WORD ch;
         MyDebugPrint((TEXT("\t** vKey is 0x%x\r\n"),vKey));
     }
 
@@ -285,6 +284,16 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         if (lpCompStr)
             ImmUnlockIMCC(lpIMC->hCompStr);
     }
+    // with some application WM_CHAR events with VK_PROCESSKEY
+    // is not accepted. then we need to following hack for this appls.
+    //ToAscii(vKey,(lpmsg->lParam | 0xff0000)>>16,pbKeyState,&ch,0);
+    ToAscii(vKey,(lKeyData | 0xff0000)>>16,lpbKeyState,&ch,0);
+    ch = 0xff & ch;
+    ch=keyToHangulKey((WORD)ch);
+    if ( !ch || (ch >= TEXT('!') && ch <= TEXT('~')) )
+        fRet=FALSE;
+    // XXX hack hack hack
+    
     if (!fRet && IsCompStr(hIMC))
         MakeResultString(hIMC,TRUE);
 
