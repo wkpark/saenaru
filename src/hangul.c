@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.6 2004/10/09 07:10:32 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.7 2004/10/11 14:40:24 wkpark Exp $
  */
 
 #include <windows.h>
@@ -960,6 +960,9 @@ static const HangulCompose compose_table_default[] = {
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
+  { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
+  { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
+
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
   { 0x11ab11bd, 0x11ac }, /* jongseong nieun  + cieuc	= nieun-cieuc	*/
@@ -1001,6 +1004,8 @@ static const HangulCompose compose_table_2set[] = {
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
+  { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
+  { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
 
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
@@ -1993,6 +1998,18 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                         return 0;
                     }
                 }
+                hangul_jongseong_dicompose(ic->jong, &jong, &cho);
+		if (jong && cho) {
+		    last=ic->last;
+		    if ( hangul_is_jongseong(ic->last) )
+			last = hangul_jongseong_to_choseong(ic->last);
+		    if (last == jamo && (jamo == 0x1100 || jamo == 0x1103 ||
+			jamo == 0x1107 || jamo == 0x110c )) // ㄲ ㄸ ㅃ ㅉ
+		    {
+			ic->jong=jong;
+			jamo= hangul_compose(last,last); // make ssang cho
+		    }
+		}
                 {
                     // 초성을 compose할 수 없다.
                     *cs = hangul_ic_commit(ic);
@@ -2226,7 +2243,9 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 break;
             case 2: // 중성 + 중성
                 comb = hangul_compose(ic->jung, jamo);
-                if ( hangul_is_jungseong(comb) ) {
+		if (ctyping && !comb )
+		    comb = hangul_compose(jamo,ic->jung);
+                if ( comb ) {
                     ic->jung=comb;
                     hangul_ic_pop(ic);
                     hangul_ic_push(ic,comb);
