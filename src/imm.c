@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.4 2004/10/06 18:18:52 wkpark Exp $
  */
 
 #include "windows.h"
@@ -615,7 +615,12 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
 
             if (!(lpIMC->fdwInit & INIT_CONVERSION))
             {
-                lpIMC->fdwConversion = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
+                // 한자 전용
+                //lpIMC->fdwConversion = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
+                // 시작부터 한글 ??
+                //lpIMC->fdwConversion = IME_CMODE_ROMAN | IME_CMODE_NATIVE;
+                lpIMC->fdwConversion = IME_CMODE_ROMAN;
+                lpIMC->fdwConversion &= ~IME_CMODE_NATIVE;
                 lpIMC->fdwInit |= INIT_CONVERSION;
             }
 
