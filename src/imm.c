@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/imm.c,v 1.4 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -53,13 +53,18 @@ BOOL WINAPI ImeInquire(LPIMEINFO lpIMEInfo,LPTSTR lpszClassName,DWORD dwSystemIn
     lpIMEInfo->dwPrivateDataSize = sizeof(UIEXTRA);
     lpIMEInfo->fdwProperty = IME_PROP_KBD_CHAR_FIRST |
                              IME_PROP_UNICODE |
+//                             IME_PROP_COMPLETE_ON_UNSELECT |
                              IME_PROP_AT_CARET;
     lpIMEInfo->fdwConversionCaps = IME_CMODE_LANGUAGE |
                                 IME_CMODE_FULLSHAPE |
+                                IME_CMODE_NOCONVERSION |
                                 IME_CMODE_ROMAN |
+                                IME_CMODE_SOFTKBD |
                                 IME_CMODE_CHARCODE;
     lpIMEInfo->fdwSentenceCaps = 0L;
-    lpIMEInfo->fdwUICaps = UI_CAP_2700;
+    lpIMEInfo->fdwUICaps = UI_CAP_2700
+	                   | UI_CAP_SOFTKBD
+			   ;
 
     lpIMEInfo->fdwSCSCaps = SCS_CAP_COMPSTR |
                             SCS_CAP_MAKEREAD |
@@ -80,7 +85,6 @@ BOOL WINAPI ImeInquire(LPIMEINFO lpIMEInfo,LPTSTR lpszClassName,DWORD dwSystemIn
 DWORD WINAPI ImeConversionList(HIMC hIMC,LPCTSTR lpSource,LPCANDIDATELIST lpCandList,DWORD dwBufLen,UINT uFlags)
 {
     ImeLog(LOGF_API, TEXT("ImeConversionList"));
-
 
     return 0;
 }
@@ -165,14 +169,75 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     LPINPUTCONTEXT lpIMC;
     LPCOMPOSITIONSTRING lpCompStr;
 
+    DWORD dwConversion, dwSentense ;
+    WORD ch;
+
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
+    {
+	WORD ch;
+        MyDebugPrint((TEXT("\t** vKey is 0x%x\r\n"),vKey));
+    }
 
     if (lKeyData & 0x80000000)
+    {
         return FALSE;
+    }
+    MyDebugPrint((TEXT("\t** lKeyData is 0x%x\r\n"),lKeyData));
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
+
+    // SHIFT-SPACE
+    // See ui.c how to hook the shift-space event.
+    if ( (LOWORD(vKey) & 0x00FF) == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
+    {
+        //SHORT ShiftState = (GetKeyState(VK_SHIFT) >> 31) & 1;
+        SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
+	if (ShiftState)
+	    vKey = VK_HANGUL;
+    }
+
+    switch ( ( LOWORD(vKey) & 0x00FF ) ){
+        case VK_HANGUL:
+            // Toggle Hangul composition state
+	    //
+	    if (IsCompStr(hIMC))
+                 MakeResultString(hIMC,TRUE);
+
+            fOpen = ImmGetOpenStatus(hIMC);
+	    if (!fOpen)
+                ImmSetOpenStatus(hIMC,TRUE);
+
+            if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
+            {
+                if (fOpen)
+		{
+                    dwConversion &= ~IME_CMODE_NATIVE;
+                    dwConversion &= ~IME_CMODE_FULLSHAPE;
+                    MyDebugPrint((TEXT("O Hangul key\n")));
+		    fOpen=FALSE;
+		}
+                else
+		{
+                    dwConversion &= ~IME_CMODE_FULLSHAPE;
+                    dwConversion |= IME_CMODE_NATIVE;
+                    MyDebugPrint((TEXT("O Hangul key\n")));
+		    fOpen=TRUE;
+		}
+                ImmSetConversionStatus (hIMC, dwConversion, 0) ;
+            }
+	    if (!fOpen)
+                ImmSetOpenStatus(hIMC,FALSE);
+
+	    return FALSE;
+	    break;
+	case VK_SHIFT:
+	    return FALSE;
+	    break;
+        default:
+	    break;
+    }
 
     fOpen = lpIMC->fOpen;
 
@@ -187,6 +252,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
         if (lpbKeyState[VK_MENU] & 0x80)
         {
+            MakeResultString(hIMC,TRUE);
             fRet = FALSE;
         }
         else if (lpbKeyState[VK_CONTROL] & 0x80)
@@ -214,6 +280,8 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         if (lpCompStr)
             ImmUnlockIMCC(lpIMC->hCompStr);
     }
+    if (!fRet && IsCompStr(hIMC))
+        MakeResultString(hIMC,TRUE);
 
     ImmUnlockIMC(hIMC);
     return fRet;
@@ -277,7 +345,7 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      break;
 
                  case CPS_CONVERT:
-                     ConvKanji(hIMC);
+                     ConvHanja(hIMC,1, 0);
                      bRet = TRUE;
                      break;
 
@@ -545,7 +613,7 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             // Init the general member of IMC.
             if (!(lpIMC->fdwInit & INIT_LOGFONT))
             {
-                lpIMC->lfFont.A.lfCharSet = SHIFTJIS_CHARSET;
+                lpIMC->lfFont.A.lfCharSet = NATIVE_CHARSET;
                 lpIMC->fdwInit |= INIT_LOGFONT;
             }
 
@@ -569,9 +637,18 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }
         }
+        ImmUnlockIMC(hIMC);
+#if !defined (NO_TSF)
+        if (fSelect) {
+            if (InitLanguageBar ()) {
+                ActivateLanguageBar (TRUE) ;
+            }
+        } else {
+            ActivateLanguageBar (FALSE) ;
+        }
+#endif
     }
 
-    ImmUnlockIMC(hIMC);
     return TRUE;
 }
 
@@ -608,7 +685,12 @@ void DumpRS(LPRECONVERTSTRING lpRS)
 /**********************************************************************/
 BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWORD dwComp, LPVOID lpRead, DWORD dwRead)
 {
+    LPCOMPOSITIONSTRING lpCompStr;
+    LPINPUTCONTEXT lpIMC;
+    
     ImeLog(LOGF_API, TEXT("ImeSetCompositionString"));
+
+    MyDebugPrint((TEXT("ImeSetCompoitionString\n")));
 
     switch (dwIndex)
     {
@@ -620,6 +702,7 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
             if (lpRead)
                 DumpRS((LPRECONVERTSTRING)lpRead);
 #endif
+	    return TRUE;
             break;
 
         case SCS_SETRECONVERTSTRING:
@@ -630,7 +713,44 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
             if (lpRead)
                 DumpRS((LPRECONVERTSTRING)lpRead);
 #endif
+	    return TRUE;
             break;
+	case SCS_CHANGEATTR:
+	    MyDebugPrint((TEXT("SCS_CHANGEATTR\n")));
+	    break;
+	case SCS_SETSTR:
+	    MyDebugPrint((TEXT("*** SCS_SETSTR start\n")));
+	    lpIMC = ImmLockIMC (hIMC) ;
+	    if (!lpIMC)
+		break ;
+
+	    lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+	    if (lpCompStr != NULL) {
+	        if (lpComp != NULL && dwComp > 0) {
+		    //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
+		    MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));
+		    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,dwComp);
+		} else if (lpRead != NULL && dwRead >0) {
+		    MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
+		    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,dwRead / sizeof(TCHAR));
+		    if (!Mylstrlen(lpRead)) {
+			// 고고타자의 행동을 분석해서 얻은 결론:
+			// lpRead가 지워지면 다시 조합에 들어감.
+			// ImeSetCompostionString()을 쓰는 어플이 많지 않아서
+			// 이 행동이 올바른 행동인지 알 수가 없다 ;p
+			hangul_ic_init(&ic);
+		        InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
+		    }
+		}
+		ImmUnlockIMCC (lpIMC->hCompStr);
+	    }
+	    ImmUnlockIMC (hIMC) ;
+	    MyDebugPrint((TEXT("*** SCS_SETSTR end\n")));
+	    return TRUE ;
+	    break;
+	case SCS_CHANGECLAUSE:
+	    MyDebugPrint((TEXT("SCS_CHANGECLAUSE\n")));
+	    break;
     }
 
     return FALSE;

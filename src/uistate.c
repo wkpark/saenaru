@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/uistate.c,v 1.3 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -46,8 +46,8 @@ Module Name:
 /*                                                                    */
 /* StatusWndProc()                                                    */
 /* IME UI window procedure                                            */
-/*                                                                    */
 /**********************************************************************/
+// 상태창 : 별도의 상태창이 만들어지므로 이 기능을 꺼둔 상태 wkpark
 LRESULT CALLBACK StatusWndProc( hWnd, message, wParam, lParam )
 HWND hWnd;
 UINT message;
@@ -133,24 +133,16 @@ DWORD PASCAL CheckPushedStatus( HWND hStatusWnd, LPPOINT lppt)
         if (!PtInRect(&rc,pt))
             return 0;
 
-        if (pt.y > GetSystemMetrics(SM_CYSMCAPTION))
+        if (pt.y > 0)
         {
             if (pt.x < BTX)
                 return PUSHED_STATUS_HDR;
             else if (pt.x < (BTX * 2))
                 return PUSHED_STATUS_MODE;
+#if 0
             else if (pt.x < (BTX * 3))
                 return PUSHED_STATUS_ROMAN;
-        }
-        else
-        {
-            RECT rc;
-            rc.left = STCLBT_X; 
-            rc.top = STCLBT_Y; 
-            rc.right = STCLBT_X + STCLBT_DX; 
-            rc.bottom = STCLBT_Y + STCLBT_DY; 
-            if (PtInRect(&rc,pt))
-                return PUSHED_STATUS_CLOSE;
+#endif
         }
     }
     return 0;
@@ -165,19 +157,11 @@ int PASCAL BTXFromCmode( DWORD dwCmode)
 {
     if (dwCmode & IME_CMODE_FULLSHAPE)
     {
-        if (!(dwCmode & IME_CMODE_LANGUAGE))
-            return BTFALPH;
-        else if ((dwCmode & IME_CMODE_LANGUAGE) == IME_CMODE_NATIVE)
-            return BTFHIRA;
-        else
-            return BTFKATA;
+        return 80;
     }
     else
     {
-        if ((dwCmode & IME_CMODE_LANGUAGE) == IME_CMODE_ALPHANUMERIC)
-            return BTHALPH;
-        else
-            return BTHKATA;
+        return 60;
     }
 
 }
@@ -194,6 +178,7 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
     HBITMAP hbmpOld;
     int x;
     HWND hSvrWnd;
+    return; /* XXX */
 
     hSvrWnd = (HWND)GetWindowLongPtr(hStatusWnd,FIGWL_SVRWND);
 
@@ -201,12 +186,14 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
     {
         HBITMAP hbmpStatus;
         HBRUSH hOldBrush,hBrush;
-        int nCyCap = GetSystemMetrics(SM_CYSMCAPTION);
+//      int nCyCap = GetSystemMetrics(SM_CYSMCAPTION);
+        int nCyCap = 0;
         RECT rc;
 
         lpIMC = ImmLockIMC(hIMC);
         hMemDC = CreateCompatibleDC(hDC);
 
+#if 0
         // Paint Caption.
         hBrush = CreateSolidBrush(GetSysColor(COLOR_ACTIVECAPTION));
         hOldBrush = SelectObject(hDC,hBrush);
@@ -227,7 +214,7 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
         else
             BitBlt(hDC,STCLBT_X,STCLBT_Y,STCLBT_DX,STCLBT_DY,
                    hMemDC,STCLBT_DX,0,SRCCOPY);
-
+#endif
 
         hbmpStatus = (HBITMAP)GetWindowLongPtr(hStatusWnd,FIGWL_STATUSBMP);
         SelectObject(hMemDC,hbmpStatus);
@@ -250,6 +237,7 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
         else
             BitBlt(hDC,BTX,nCyCap,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
 
+#if 0
         // Paint Roman MODE.
         x = BTEMPT;
         if (lpIMC->fdwConversion & IME_CMODE_ROMAN)
@@ -259,8 +247,10 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
             BitBlt(hDC,BTX*2,nCyCap,BTX,BTY,hMemDC,x,0,SRCCOPY);
         else
             BitBlt(hDC,BTX*2,nCyCap,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
-
+#endif
+#if 0
         SelectObject(hMemDC,hbmpOld);
+#endif
         DeleteDC(hMemDC);
         ImmUnlockIMC(hIMC);
     }
@@ -279,48 +269,24 @@ DWORD PASCAL GetUINextMode( DWORD fdwConversion, DWORD dwPushed)
     BOOL fFullShape = ((fdwConversion & IME_CMODE_FULLSHAPE) != 0);
 
     //
-    // When the mode button is pushed, the convmode will be chage as follow
-    // rotation.
+    // When the mode button is pushed,
+    // the convmode will be switched as following
     //
-    //     FULLSHAPE,HIRAGANA     ->
-    //     FULLSHAPE,KATAKANA     ->
-    //     FULLSHAPE,ALPHANUMERIC ->
-    //     HALFSHAPE,KATAKANA     ->
-    //     HALFSHAPE,ALPHANUMERIC ->
-    //     FULLSHAPE,HIRAGANA 
+    //     FULLSHAPE -> HALFSHAPE
+    //     NATIVE -> ROMAN
     //
     if (dwPushed == PUSHED_STATUS_MODE)
     {
         dwTemp = fdwConversion & IME_CMODE_LANGUAGE;
 
-        if ((fFullShape) && (dwTemp == IME_CMODE_NATIVE))
-            return (fdwConversion & ~IME_CMODE_LANGUAGE) | IME_CMODE_KATAKANA | IME_CMODE_NATIVE;
-
-        if ((fFullShape) && (dwTemp == (IME_CMODE_KATAKANA | IME_CMODE_NATIVE)))
-            return (fdwConversion & ~IME_CMODE_LANGUAGE);
-
-        if ((fFullShape) && (dwTemp == 0))
+        if (fFullShape)
         {
             fdwConversion &= ~IME_CMODE_FULLSHAPE;
-            return (fdwConversion & ~IME_CMODE_LANGUAGE) 
-                           | IME_CMODE_KATAKANA | IME_CMODE_NATIVE;
         }
-
-        if ((!fFullShape) && (dwTemp == (IME_CMODE_KATAKANA | IME_CMODE_NATIVE)))
-            return (fdwConversion & ~IME_CMODE_LANGUAGE);
-
-        if ((!fFullShape) && (!dwTemp))
-        {
+	else
+	{
             fdwConversion |= IME_CMODE_FULLSHAPE;
-            return (fdwConversion & ~IME_CMODE_LANGUAGE) | IME_CMODE_NATIVE;
-        }
-    }
-    if (dwPushed == PUSHED_STATUS_ROMAN)
-    {
-         if (fdwConversion & IME_CMODE_ROMAN)
-            return fdwConversion & ~IME_CMODE_ROMAN;
-         else
-            return fdwConversion | IME_CMODE_ROMAN;
+	}
     }
     return fdwConversion;
 
@@ -423,6 +389,8 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
             {
                 int cmd;
                 POINT pt;
+                LPINPUTCONTEXT lpIMC;
+
                 HMENU hSubMenu = GetSubMenu(hMenu, 0);
 
                 pt.x = (int)LOWORD(lParam), 
@@ -490,7 +458,10 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                     }
 
                     case IDM_ABOUT:
-                        ImmConfigureIME(GetKeyboardLayout(0), NULL, IME_CONFIG_GENERAL, 0);
+		        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+		        (void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
+                        //ImmConfigureIME(GetKeyboardLayout(0), NULL, IME_CONFIG_GENERAL, 0);
+			ImmUnlockIMC(hIMC);
                         break;
 
                     default:

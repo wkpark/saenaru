@@ -1,8 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                                    ;;
-;;      SAENARU.DEF - Windows 95 SAENARU                              ;;
+;;      SAENARU.DEF - Windows SAENARU                              ;;
 ;;                                                                    ;;
-;;      Copyright (c) 1994-1995  Microsoft Corporation                ;;
 ;;                                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 LIBRARY         SAENARU

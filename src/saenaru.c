@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/saenaru.c,v 1.3 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -68,6 +68,7 @@ BOOL WINAPI DLLEntry (
             // CreateSecurityAttributes() will create
             // the proper security attribute for IME.
             //
+#if 1
             psa = CreateSecurityAttributes();
             if ( psa != NULL ) {
                  hMutex = CreateMutex( psa, FALSE, TEXT("SaeNaru_Mutex"));
@@ -78,7 +79,8 @@ BOOL WINAPI DLLEntry (
             }
             else {
                   // Failed, not NT system
-                  }
+            }
+#endif
 
             hInst= hInstDLL;
             IMERegisterClass( hInst );
@@ -90,7 +92,10 @@ BOOL WINAPI DLLEntry (
                 *lpDicFileName++ = TEXT('\\');
             LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
 
+	    // read registry
             SetGlobalFlags();
+            // set keyboard layout
+	    set_keyboard(dwLayoutFlag);
 
 #ifdef DEBUG
             wsprintf(szDev,TEXT("DLLEntry Process Attach hInst is %lx"),hInst);
@@ -127,4 +132,3 @@ BOOL WINAPI DLLEntry (
     }
     return TRUE;
 }
-

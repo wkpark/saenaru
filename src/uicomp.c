@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/uicomp.c,v 1.4 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -66,16 +66,22 @@ LPARAM lParam;
         case WM_MOUSEMOVE:
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
+#if 1
+//	Comp창은 움직일 필요가 없는 창이다. 
             DragUI(hWnd,message,wParam,lParam);
             if ((message == WM_SETCURSOR) &&
                 (HIWORD(lParam) != WM_LBUTTONDOWN) &&
                 (HIWORD(lParam) != WM_RBUTTONDOWN)) 
                 return DefWindowProc(hWnd,message,wParam,lParam);
+#endif
+#if 1
             if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP))
                 SetWindowLong(hWnd,FIGWL_MOUSE,0L);
+#endif
             break;
 
         case WM_MOVE:
+            OutputDebugString(TEXT("MOVE\r\n"));
             hUIWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
             if (IsWindow(hUIWnd))
                 SendMessage(hUIWnd,WM_UI_DEFCOMPMOVE,wParam,lParam);
@@ -128,7 +134,11 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpUIExtra->uiDefComp.pt.y = rc.bottom + 1;
     }
 
-    if (!IsWindow(lpUIExtra->uiDefComp.hWnd))
+    // Root window style XXX
+    // skkime에서 이것이 rootwindow style이라고 나와있다. 그러나
+    // 아래의 윈도우는 이상하게 열리고 잔상이 계속 남는 희안한
+    // 문제점을 가진다. 그래서 아예 기능을 꺼버렸다. 2003/11/15
+    if (1 && !IsWindow(lpUIExtra->uiDefComp.hWnd))
     {
         lpUIExtra->uiDefComp.hWnd = 
             CreateWindowEx( WS_EX_WINDOWEDGE,
@@ -140,7 +150,7 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
                          hUIWnd,NULL,hInst,NULL);
     }
 
-    //SetWindowLong(lpUIExtra->uiDefComp.hWnd,FIGWL_FONT,(DWORD)lpUIExtra->hFont);
+    SetWindowLongPtr(lpUIExtra->uiDefComp.hWnd,FIGWL_FONT,(LONG_PTR)lpUIExtra->hFont);
     SetWindowLongPtr(lpUIExtra->uiDefComp.hWnd,FIGWL_SVRWND,(LONG_PTR)hUIWnd);
     ShowWindow(lpUIExtra->uiDefComp.hWnd,SW_HIDE);
     lpUIExtra->uiDefComp.bShow = FALSE;
@@ -518,9 +528,15 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
             lpattr++;
             cnt++;
         }
+
+        //TextOut(hDC,x,y,lpstr,cnt);
         switch (bAttr)
         {
             case ATTR_INPUT:
+                SetTextColor(hDC,RGB(0,0,0));
+                //SetBkMode(hDC,TRANSPARENT);
+		MoveToEx(hDC, rc.right, rc.top, NULL);
+		LineTo  (hDC, rc.right, rc.bottom);
                 break;
 
             case ATTR_TARGET_CONVERTED:
@@ -550,6 +566,11 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
         TextOut(hDC,x,y,lpstr,cnt);
         GetTextExtentPoint(hDC,lpstr,cnt,&sz);
         lpstr += cnt;
+	if (bAttr == ATTR_INPUT)
+	{
+		MoveToEx(hDC, rc.right, rc.top, NULL);
+		LineTo  (hDC, rc.right, rc.bottom);
+	}
 
         if (!fVert)
             x += sz.cx;

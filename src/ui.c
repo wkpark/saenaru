@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/ui.c,v 1.4 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -37,13 +37,24 @@ Module Name:
 ++*/
 
 /**********************************************************************/
-#include "windows.h"
-#include "immdev.h"
+#include <windows.h>
+#include <immdev.h>
 #include "saenaru.h"
+#include "vksub.h"
 
 void PASCAL ShowUIWindows(HWND hWnd, BOOL fFlag);
+
+void PASCAL UpdateSoftKeyboard(LPUIEXTRA, int);
 #ifdef DEBUG
 void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra);
+#endif
+
+LRESULT CALLBACK SAENARUKbdProc(int, WPARAM, LPARAM);
+BOOL WINAPI SetHookFunc(void);
+BOOL WINAPI UnsetHookFunc(void);
+#if 0
+void PASCAL HideGuideLine (LPUIEXTRA lpUIExtra);
+void PASCAL CreateGuideLine (HWND, LPUIEXTRA, LPINPUTCONTEXT);
 #endif
 
 #define CS_SAENARU (CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS | CS_IME)
@@ -112,7 +123,8 @@ HANDLE hInstance;
     wc.hIcon          = NULL;
     wc.lpszMenuName   = (LPTSTR)NULL;
     wc.lpszClassName  = (LPTSTR)szCandClassName;
-    wc.hbrBackground  = GetStockObject(LTGRAY_BRUSH);
+    wc.hbrBackground  = (HBRUSH)(COLOR_BTNFACE + 1);
+    //wc.hbrBackground  = GetStockObject(LTGRAY_BRUSH);
     wc.hIconSm        = NULL;
 
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
@@ -132,7 +144,8 @@ HANDLE hInstance;
     wc.lpszMenuName   = (LPTSTR)NULL;
     wc.lpszClassName  = (LPTSTR)szStatusClassName;
     wc.hbrBackground  = NULL;
-    wc.hbrBackground  = GetStockObject(LTGRAY_BRUSH);
+    wc.hbrBackground  = (HBRUSH)(COLOR_BTNFACE + 1);
+    //wc.hbrBackground  = GetStockObject(LTGRAY_BRUSH);
     wc.hIconSm        = NULL;
 
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
@@ -199,7 +212,7 @@ LPARAM lParam;
             case WM_IME_COMPOSITIONFULL:
             case WM_IME_SELECT:
             case WM_IME_CHAR:
-#ifdef _DEBUG
+#ifdef DEBUG
                 {
                 TCHAR szDev[80];
                 OutputDebugString((LPTSTR)TEXT("Why hUICurIMC is NULL????\r\n"));
@@ -239,14 +252,22 @@ LPARAM lParam;
             lpUIExtra->uiCand.pt.y = -1;
             lpUIExtra->uiGuide.pt.x = -1;
             lpUIExtra->uiGuide.pt.y = -1;
+#if 1
+            lpUIExtra->uiSoftKbd.pt.x = -1;
+            lpUIExtra->uiSoftKbd.pt.y = -1;
+#endif
             lpUIExtra->hFont = (HFONT)NULL;
 
             GlobalUnlock(hUIExtra);
             SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
 
+            MyDebugPrint((TEXT("WM_CREATE\n")));
+            SetHookFunc();
+
             break;
 
         case WM_IME_SETCONTEXT:
+            MyDebugPrint((TEXT("WM_IME_SETCONTEXT\n")));
             if (wParam)
             {
                 hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
@@ -285,12 +306,32 @@ LPARAM lParam;
 
                         if (lParam & ISC_SHOWUICANDIDATEWINDOW)
                         {
-                            if (lpCompStr->dwCompStrLen)
+                            if (0 && lpCompStr->dwCompStrLen)
                             {
                                 CreateCompWindow(hWnd,lpUIExtra,lpIMC );
                                 MoveCompWindow(lpUIExtra,lpIMC);
                             }
                         }
+#if 0
+                        if (lParam & ISC_SHOWUIGUIDELINE) {
+                            DWORD dwLevel, dwSize = 0;
+                            if (ImmGetGuideLine (hUICurIMC, GGL_LEVEL, NULL, 0))
+                            {
+                                dwLevel = ImmGetGuideLine (hUICurIMC, GGL_LEVEL, NULL, 0);
+                                if (dwLevel) 
+                                    dwSize = ImmGetGuideLine (hUICurIMC, GGL_STRING, NULL, 0);
+                            }
+                            if (dwSize > 0) {
+                                CreateGuideLine (hWnd, lpUIExtra, lpIMC);
+                                ShowWindow (lpUIExtra->uiGuide.hWnd, SW_SHOWNOACTIVATE);
+                                lpUIExtra->uiGuide.bShow = TRUE;
+                            } else {
+                                HideGuideLine (lpUIExtra);
+                            }
+                        } else {
+                            HideGuideLine (lpUIExtra);
+                        }
+#endif
 
                         ImmUnlockIMCC(lpIMC->hCompStr);
                         ImmUnlockIMCC(lpIMC->hCandInfo);
@@ -307,7 +348,6 @@ LPARAM lParam;
                 {
                     HideCandWindow(lpUIExtra);
                     HideCompWindow(lpUIExtra);
-                    
                 }
                 GlobalUnlock(hUIExtra);
             }
@@ -320,13 +360,17 @@ LPARAM lParam;
             //
             // Start composition! Ready to display the composition string.
             //
+            lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
-            lpIMC = ImmLockIMC(hUICurIMC);
             CreateCompWindow(hWnd,lpUIExtra,lpIMC );
-            ImmUnlockIMC(hUICurIMC);
+
             GlobalUnlock(hUIExtra);
+            ImmUnlockIMC(hUICurIMC);
             break;
+            // Windows XP notepad bug ??
+            // 한글 IME일 경우 STARTCOMPOSITION 메시지가 제대로 전달되지
+            // 않는다.
 
         case WM_IME_COMPOSITION:
             //
@@ -335,10 +379,22 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
+            // STARTCOMPOSITION 메시지가 전달되지 않는 경우
+            if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
+            {
+                LPCOMPOSITIONSTRING lpCompStr;
+                lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                if (lpCompStr->dwCompStrLen)
+                {
+                      CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+                }
+            }
+            //
             MoveCompWindow(lpUIExtra,lpIMC);
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
             GlobalUnlock(hUIExtra);
             ImmUnlockIMC(hUICurIMC);
+
             break;
 
         case WM_IME_ENDCOMPOSITION:
@@ -347,8 +403,12 @@ LPARAM lParam;
             //
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
+
+	    //hangul_ic_init(&ic);
+
             HideCompWindow(lpUIExtra);
             GlobalUnlock(hUIExtra);
+
             break;
 
         case WM_IME_COMPOSITIONFULL:
@@ -362,6 +422,8 @@ LPARAM lParam;
                 lpUIExtra->hIMC = hUICurIMC;
                 GlobalUnlock(hUIExtra);
             }
+            // XXX
+            //
             break;
 
         case WM_IME_CONTROL:
@@ -385,7 +447,10 @@ LPARAM lParam;
 
             if (IsWindow(lpUIExtra->uiDefComp.hWnd))
                 DestroyWindow(lpUIExtra->uiDefComp.hWnd);
-
+#if 1
+            if (IsWindow(lpUIExtra->uiSoftKbd.hWnd))
+                ImmDestroySoftKeyboard(lpUIExtra->uiSoftKbd.hWnd);
+#endif
             for (i = 0; i < MAXCOMPWND; i++)
             {
                 if (IsWindow(lpUIExtra->uiComp[i].hWnd))
@@ -400,6 +465,10 @@ LPARAM lParam;
 
             GlobalUnlock(hUIExtra);
             GlobalFree(hUIExtra);
+
+            MyDebugPrint((TEXT("WM_DELETE\n")));
+            UnsetHookFunc();
+
             break;
 
         case WM_UI_STATEMOVE:
@@ -434,10 +503,16 @@ LPARAM lParam;
             // Set the position of the candidate window to UIExtra.
             // This message is sent by the candidate window.
             //
+            lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             lpUIExtra->uiCand.pt.x = (long)LOWORD(lParam);
             lpUIExtra->uiCand.pt.y = (long)HIWORD(lParam);
+
+	    MyDebugPrint((TEXT(" * CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+            //MoveCandWindow(hWnd,lpIMC,lpUIExtra,FALSE);
+
+            ImmUnlockIMC(hUICurIMC);
             GlobalUnlock(hUIExtra);
             break;
 
@@ -453,8 +528,13 @@ LPARAM lParam;
             GlobalUnlock(hUIExtra);
             break;
 
-
         default:
+            if (HIWORD(lParam) == WM_LBUTTONDOWN)
+            {
+                 if (hUICurIMC && IsCompStr(hUICurIMC))
+                 MakeResultString(hUICurIMC,TRUE);
+            }
+
             return DefWindowProc(hWnd,message,wParam,lParam);
     }
 
@@ -507,6 +587,18 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
     switch (wParam)
     {
         case IMN_CLOSESTATUSWINDOW:
+#ifndef NO_USE_SOFTKBD
+            if (IsWindow(lpUIExtra->uiSoftKbd.hWnd))
+            {
+                GetWindowRect(lpUIExtra->uiSoftKbd.hWnd,(LPRECT)&rc);
+                lpUIExtra->uiSoftKbd.pt.x = rc.left;
+                lpUIExtra->uiSoftKbd.pt.y = rc.top;
+                //ShowWindow(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+                ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+                lpUIExtra->uiSoftKbd.bShow = FALSE;
+            }
+#endif
+#ifdef USE_STATUS_WIN98_XXX
             if (IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 GetWindowRect(lpUIExtra->uiStatus.hWnd,(LPRECT)&rc);
@@ -515,9 +607,30 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 ShowWindow(lpUIExtra->uiStatus.hWnd,SW_HIDE);
                 lpUIExtra->uiStatus.bShow = FALSE;
             }
-            break;
-
+#endif
+        break;
         case IMN_OPENSTATUSWINDOW:
+#ifndef NO_USE_SOFTKBD
+            if (lpUIExtra->uiSoftKbd.pt.x == -1)
+            {
+                GetWindowRect(lpIMC->hWnd,&rc);
+                lpUIExtra->uiSoftKbd.pt.x = rc.right + 1;
+                lpUIExtra->uiSoftKbd.pt.y = rc.top;
+            }
+            if (!IsWindow(lpUIExtra->uiSoftKbd.hWnd))
+            {
+                lpUIExtra->uiSoftKbd.hWnd = 
+                ImmCreateSoftKeyboard(SOFTKEYBOARD_TYPE_C1, hWnd,
+                0, 0);
+            }
+
+            //ShowWindow(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
+            ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+
+            //lpUIExtra->uiSoftKbd.bShow = TRUE;
+            //SetWindowLongPtr(lpUIExtra->uiSoftKbd.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
+#endif
+#ifdef USE_STATUS_WIN98_XXX
             if (lpUIExtra->uiStatus.pt.x == -1)
             {
                 GetWindowRect(lpIMC->hWnd,&rc);
@@ -527,14 +640,14 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 lpUIExtra->uiStatus.hWnd = 
-                      CreateWindowEx( WS_EX_WINDOWEDGE | WS_EX_DLGMODALFRAME,
+                      CreateWindowEx(WS_EX_WINDOWEDGE,
                             (LPTSTR)szStatusClassName,NULL,
-                            WS_DISABLED | WS_POPUP | WS_BORDER ,
+                            WS_COMPDEFAULT | WS_DLGFRAME,
                             lpUIExtra->uiStatus.pt.x,
                             lpUIExtra->uiStatus.pt.y,
-                            BTX * 3 + 2 * GetSystemMetrics(SM_CXBORDER)
+                            BTX * 2 + 2 * GetSystemMetrics(SM_CXBORDER)
                                     + 2 * GetSystemMetrics(SM_CXEDGE),
-                            BTX + GetSystemMetrics(SM_CYSMCAPTION)
+                            BTX // + GetSystemMetrics(SM_CYSMCAPTION)
                                 + 2 * GetSystemMetrics(SM_CYBORDER)
                                 + 2 * GetSystemMetrics(SM_CYEDGE),
                             hWnd,NULL,hInst,NULL);
@@ -543,10 +656,20 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             ShowWindow(lpUIExtra->uiStatus.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiStatus.bShow = TRUE;
             SetWindowLongPtr(lpUIExtra->uiStatus.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
+#endif
             break;
 
         case IMN_SETCONVERSIONMODE:
             UpdateStatusWindow(lpUIExtra);
+
+            UpdateSoftKeyboard(lpUIExtra,
+            lpIMC->fdwConversion & IME_CMODE_SOFTKBD);
+#if 0
+        if (!lpIMC->fdwConversion & IME_CMODE_SOFTKBD )
+                ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+        else 
+                ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
+#endif
             break;
 
         case IMN_SETSENTENCEMODE:
@@ -566,8 +689,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             }
 
             //
-            // if current font can't display Japanese characters, 
-            // try to find Japanese font
+            // if current font can't display Korean characters, 
+            // try to find Korean font
             //
             if (lf.lfCharSet != NATIVE_CHARSET) {
                 lf.lfCharSet = NATIVE_CHARSET;
@@ -582,6 +705,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
 
         case IMN_SETOPENSTATUS:
             UpdateStatusWindow(lpUIExtra);
+            UpdateSoftKeyboard(lpUIExtra,
+            lpIMC->fdwConversion & IME_CMODE_SOFTKBD);
             break;
 
         case IMN_OPENCANDIDATE:
@@ -689,6 +814,7 @@ LONG PASCAL ControlCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wPara
 
     switch (wParam)
     {
+        TCHAR szDev[80];
         case IMC_GETCANDIDATEPOS:
             if (IsWindow(lpUIExtra->uiCand.hWnd))
             {
@@ -696,6 +822,15 @@ LONG PASCAL ControlCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wPara
                 *(LPCANDIDATEFORM)lParam  = lpIMC->cfCandForm[0]; 
                 lRet = 0;
             }
+            break;
+        case IMC_SETCANDIDATEPOS:
+            MyDebugPrint((TEXT("IMC_SETCANDIDATEPOS\n")));
+            break;
+
+        case IMC_SETCOMPOSITIONFONT:
+            wsprintf((LPTSTR)szDev,TEXT("SETCOMPOSITIONFONT\r\n"));
+            OutputDebugString((LPTSTR)szDev);
+
             break;
 
         case IMC_GETCOMPOSITIONWINDOW:
@@ -772,8 +907,11 @@ void PASCAL DragUI( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if ( HIWORD(lParam) == WM_LBUTTONDOWN
                 || HIWORD(lParam) == WM_RBUTTONDOWN ) 
             {
+                SetCursor(LoadCursor(NULL,IDC_SIZEALL));
+
                 GetCursorPos( &pt );
                 SetCapture(hWnd);
+
                 GetWindowRect(hWnd,&drc);
                 ptdif.x = pt.x - drc.left;
                 ptdif.y = pt.y - drc.top;
@@ -782,6 +920,10 @@ void PASCAL DragUI( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 rc.bottom -= rc.top;
                 SetWindowLong(hWnd,FIGWL_MOUSE,FIM_CAPUTURED);
             }
+#if (WINVER >= 0x0500)
+	      else
+                SetCursor(LoadCursor(NULL,IDC_HAND));
+#endif
             break;
 
         case WM_MOUSEMOVE:
@@ -894,6 +1036,280 @@ void PASCAL ShowUIWindows(HWND hWnd, BOOL fFlag)
     GlobalUnlock(hUIExtra);
 
 }
+
+/**********************************************************************/
+/* UpdateSoftKbd()                                                    */
+/**********************************************************************/
+void PASCAL UpdateSoftKeyboard(
+    LPUIEXTRA   lpUIExtra, int mode)
+{
+    LPINPUTCONTEXT lpIMC;
+
+    if (!mode)
+    {
+        ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+    }
+    else
+    {
+        SetSoftKbdData(lpUIExtra->uiSoftKbd.hWnd);
+
+        ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
+    }
+    return;
+}
+
+static HHOOK hHookWnd = 0;
+
+BOOL WINAPI SetHookFunc(void)
+{
+    if((hHookWnd=SetWindowsHookEx(WH_GETMESSAGE, SAENARUKbdProc, (HINSTANCE) NULL, GetCurrentThreadId())) == NULL)
+        return FALSE;
+    return TRUE;
+}
+
+BOOL WINAPI UnsetHookFunc(void)
+{
+    if(UnhookWindowsHookEx(hHookWnd) == 0)
+        return FALSE;
+    return TRUE;
+}
+
+static const WCHAR qwerty2dvorak_table[] = {
+    0x021,    /* GDK_exclam */
+    0x05f,    /* GDK_underscore */
+    0x023,    /* GDK_numbersign */
+    0x024,    /* GDK_dollar */
+    0x025,    /* GDK_percent */
+    0x026,    /* GDK_ampersand */
+    0x02d,    /* GDK_minus */
+    0x028,    /* GDK_parenleft */
+    0x029,    /* GDK_parenright */
+    0x02a,    /* GDK_asterisk */
+    0x07d,    /* GDK_braceright */
+    0x077,    /* GDK_w */
+    0x05b,    /* GDK_bracketleft */
+    0x076,    /* GDK_v */
+    0x07a,    /* GDK_z */
+    0x030,    /* GDK_0 */
+    0x031,    /* GDK_1 */
+    0x032,    /* GDK_2 */
+    0x033,    /* GDK_3 */
+    0x034,    /* GDK_4 */
+    0x035,    /* GDK_5 */
+    0x036,    /* GDK_6 */
+    0x037,    /* GDK_7 */
+    0x038,    /* GDK_8 */
+    0x039,    /* GDK_9 */
+    0x053,    /* GDK_S */
+    0x073,    /* GDK_s */
+    0x057,    /* GDK_W */
+    0x05d,    /* GDK_bracketright */
+    0x056,    /* GDK_V */
+    0x05a,    /* GDK_Z */
+    0x040,    /* GDK_at */
+    0x041,    /* GDK_A */
+    0x058,    /* GDK_X */
+    0x04a,    /* GDK_J */
+    0x045,    /* GDK_E */
+    0x03e,    /* GDK_greater */
+    0x055,    /* GDK_U */
+    0x049,    /* GDK_I */
+    0x044,    /* GDK_D */
+    0x043,    /* GDK_C */
+    0x048,    /* GDK_H */
+    0x054,    /* GDK_T */
+    0x04e,    /* GDK_N */
+    0x04d,    /* GDK_M */
+    0x042,    /* GDK_B */
+    0x052,    /* GDK_R */
+    0x04c,    /* GDK_L */
+    0x022,    /* GDK_quotedbl */
+    0x050,    /* GDK_P */
+    0x04f,    /* GDK_O */
+    0x059,    /* GDK_Y */
+    0x047,    /* GDK_G */
+    0x04b,    /* GDK_K */
+    0x03c,    /* GDK_less */
+    0x051,    /* GDK_Q */
+    0x046,    /* GDK_F */
+    0x03a,    /* GDK_colon */
+    0x02f,    /* GDK_slash */
+    0x05c,    /* GDK_backslash */
+    0x03d,    /* GDK_qual */
+    0x05e,    /* GDK_asciicircum */
+    0x07b,    /* GDK_braceleft */
+    0x060,    /* GDK_grave */
+    0x061,    /* GDK_a */
+    0x078,    /* GDK_x */
+    0x06a,    /* GDK_j */
+    0x065,    /* GDK_e */
+    0x02e,    /* GDK_period */
+    0x075,    /* GDK_u */
+    0x069,    /* GDK_i */
+    0x064,    /* GDK_d */
+    0x063,    /* GDK_c */
+    0x068,    /* GDK_h */
+    0x074,    /* GDK_t */
+    0x06e,    /* GDK_n */
+    0x06d,    /* GDK_m */
+    0x062,    /* GDK_b */
+    0x072,    /* GDK_r */
+    0x06c,    /* GDK_l */
+    0x027,    /* GDK_apostrophe */
+    0x070,    /* GDK_p */
+    0x06f,    /* GDK_o */
+    0x079,    /* GDK_y */
+    0x067,    /* GDK_g */
+    0x06b,    /* GDK_k */
+    0x02c,    /* GDK_comma */
+    0x071,    /* GDK_q */
+    0x066,    /* GDK_f */
+    0x03b,    /* GDK_semicolon */
+    0x03f,    /* GDK_question */
+    0x07c,    /* GDK_bar */
+    0x02b,    /* GDK_plus */
+    0x07e,    /* GDK_asciitilde */
+};
+
+LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
+{
+    BYTE pbKeyState [256];
+    LPMSG lpmsg;
+    UINT vKey;
+    SHORT ALT;
+
+    BOOL dvorak = FALSE;
+
+    if (code < 0)
+        return CallNextHookEx(hHookWnd, code, wParam, lParam);
+
+    if (dwOptionFlag & DVORAK_SUPPORT) {
+	HIMC hIMC = NULL;
+	HWND hwnd = GetFocus ();
+	LPINPUTCONTEXT lpIMC;
+
+	if (hwnd != NULL) {
+	    hIMC = ImmGetContext (hwnd);
+	    lpIMC = ImmLockIMC(hIMC);
+            if (lpIMC) {
+	        dvorak = !(lpIMC->fdwConversion & IME_CMODE_NATIVE);
+	    }
+	    ImmUnlockIMC(hIMC);
+	}
+    }
+
+    lpmsg = (LPMSG)lParam;
+    vKey = lpmsg->wParam;
+
+    switch (lpmsg->message)
+    {
+        case WM_KEYUP:
+            break;
+        case WM_KEYDOWN:
+#if 0
+            if ((dwImeFlag & SAENARU_DVORAK ) &&
+                (vKey >= '!' && vKey <= '~'))
+            {
+                 WORD dv;
+                 SHORT sc;
+                 dv = qwerty2dvorak_table[vKey - '!'];
+                 sc = VkKeyScan(dv);
+                 // lpmsg->wParam = sc; XXX
+            }
+            else
+#endif
+            if ( vKey == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
+            {
+               // SHORT ShiftState = (GetAsyncKeyState(VK_LSHIFT) >> 31) & 1;
+                TCHAR szDev[80];
+		SHORT ShiftState;
+                GetKeyboardState((LPBYTE)&pbKeyState);
+		ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
+
+                wsprintf((LPTSTR)szDev,TEXT("ShiftState is %x\r\n"),ShiftState);
+                OutputDebugString((LPTSTR)szDev);
+                wsprintf((LPTSTR)szDev,TEXT(" * VKey %x\r\n"),lpmsg->wParam);
+                OutputDebugString((LPTSTR)szDev);
+                MyDebugPrint((TEXT("\t** ShiftState is 0x%x\r\n"),ShiftState));
+                if (ShiftState)
+                {
+                     lpmsg->message=WM_KEYDOWN;
+                     lpmsg->wParam=VK_HANGUL; // XXX
+                     lpmsg->lParam=(0xF2<<16) | 0x41000001;
+                }
+            }
+            break;
+        case WM_CHAR:
+#ifndef NO_DVORAK
+            if (dvorak &&
+                (vKey >= '!' && vKey <= '~'))
+            {
+                WORD dv;
+                SHORT sc;
+		UINT caps = 0;
+
+                GetKeyboardState((LPBYTE)&pbKeyState);
+
+		caps = pbKeyState[VK_CAPITAL];
+		if (caps) {
+		    if (vKey >= 'A' && vKey <= 'Z')
+			vKey += 'a' - 'A';
+		    else if (vKey >= 'a' && vKey <= 'z')
+			vKey -= 'a' - 'A';
+		    dv = qwerty2dvorak_table[vKey - '!'];
+		    if (dv >= 'A' && dv <= 'Z')
+			dv += 'a' - 'A';
+		    else if (dv >= 'a' && dv <= 'z')
+			dv -= 'a' - 'A';
+		} else
+		    dv = qwerty2dvorak_table[vKey - '!'];
+		 
+                lpmsg->wParam = dv;
+                sc = VkKeyScan(dv);
+                lpmsg->lParam &= ~0x00ff0000;
+                lpmsg->lParam |= (sc <<16);
+                pbKeyState[dv]=1;
+                pbKeyState[vKey]=0;
+                SetKeyboardState((LPBYTE)&pbKeyState);
+            }
+#endif
+            break;
+        case WM_SYSKEYDOWN:
+        case WM_SYSKEYUP:
+            // hack to use RALT(VK_RMENU) as a Mode_Switch
+            GetKeyboardState((LPBYTE)&pbKeyState);
+            if ( pbKeyState[VK_RMENU] & 0x80 && !(lpmsg->lParam & 0x01000000))
+            {
+		WORD ch;
+
+                ToAscii(vKey,(lpmsg->lParam | 0xff0000)>>16,pbKeyState,&ch,0);
+		ch = 0xff & ch;
+                if (ch < '!' || ch > '~')
+                     break;
+                MyDebugPrint((TEXT("RALT + %x\n"), ch));
+#if 1
+                lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4 See WINUSER.H
+                MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
+
+                if (dvorak)
+	 	{
+		    WORD dv;
+                    SHORT sc;
+
+                    dv = qwerty2dvorak_table[ch - '!'];
+                    sc = VkKeyScan(dv);
+                    lpmsg->wParam = sc;
+		}
+#endif
+            }
+            break;
+        default:
+            break;
+    }
+
+    return CallNextHookEx(hHookWnd, code, wParam, lParam);
+}
+
 #ifdef DEBUG
 void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra)
 {
@@ -933,4 +1349,3 @@ void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra)
     }
 }
 #endif
-

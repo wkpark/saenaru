@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/uiguide.c,v 1.3 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -77,8 +77,10 @@ LPARAM lParam;
 
         case WM_MOUSEMOVE:
         case WM_SETCURSOR:
+	    MyDebugPrint((TEXT("UIGuide\n")));
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
+	    MyDebugPrint((TEXT("UIGuide BUTTON\n")));
             ButtonGuide(hWnd,message,wParam,lParam);
             if ((message == WM_SETCURSOR) &&
                 (HIWORD(lParam) != WM_LBUTTONDOWN) &&

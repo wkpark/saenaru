@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/vksub.h,v 1.2 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -79,4 +79,5 @@ Module Name:
 #define VK_OEM_0        0x0B9           //
 #define VK_OEM_9        0x0E0           // next available
 #define VK_OEM_BSLASH   0x0E2           // additional Back Slash key for AX.
+
 

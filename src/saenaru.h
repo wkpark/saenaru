@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/saenaru.h,v 1.5 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -49,6 +49,29 @@ Module Name:
 #define LOGF_API             0x00000002
 #define LOGF_APIOUT          0x00000004
 #define LOGF_KEY             0x00000008
+
+#define LAYOUT_OLD2BUL	     0x00000001
+#define LAYOUT_3FIN          0x00000002
+#define LAYOUT_390	     0x00000003
+#define LAYOUT_NEW2BUL	     0x00000004
+#define LAYOUT_NEW3BUL	     0x00000005
+#define LAYOUT_AHNMATAE	     0x00000006
+#define LAYOUT_3SUN	     0x00000007
+#define LAYOUT_USER	     0x00000008
+
+
+#define SAENARU_ONTHESPOT      0x00020000
+#define SAENARU_MODE_CANDIDATE 0x00040000
+
+#define COMPOSITE_TYPING       0x00000001
+#define CONCURRENT_TYPING      0x00000002
+#define PSEUDO_COMPOSITE       0x00000004
+#define BACKSPACE_BY_JAMO      0x00000008
+#define KSX1001_SUPPORT        0x00000010
+#define KSX1002_SUPPORT        0x00000020
+#define FULL_MULTIJOMO         0x00000040
+#define USE_SHIFT_SPACE        0x00000080
+#define DVORAK_SUPPORT         0x00000100
 
 
 /**********************************************************************/
@@ -85,7 +108,8 @@ typedef TCHAR             MYCHAR;
 #define MAXCANDPAGESIZE         9
 #define MAXCANDSTRSIZE          16
 #define MAXGLCHAR               32
-#define MAXCANDSTRNUM           32
+//#define MAXCANDSTRNUM           32
+#define MAXCANDSTRNUM           128
 
 
 /* for GlobalAlloc */
@@ -136,11 +160,11 @@ typedef TCHAR             MYCHAR;
 
 /* Change Mode index */
 #define TO_CMODE_ALPHANUMERIC  0x0001
-#define TO_CMODE_KATAKANA      0x0002
+#define TO_CMODE_HANGUL        0x0002
 #define TO_CMODE_HIRAGANA      0x0003
 #define TO_CMODE_FULLSHAPE     0x0008
 #define TO_CMODE_ROMAN         0x0010
-#define TO_CMODE_CHARCODE     0x0020
+#define TO_CMODE_CHARCODE      0x0020
 #define TO_CMODE_TOOLBAR       0x0100
 
 /* WndExtra of child UI windows */
@@ -153,6 +177,10 @@ typedef TCHAR             MYCHAR;
 #define FIGWL_CLOSEBMP     (FIGWL_STATUSBMP+sizeof(LONG_PTR))
 #define FIGWL_PUSHSTATUS   (FIGWL_CLOSEBMP+sizeof(LONG_PTR))
 #define FIGWL_CHILDWND     (FIGWL_PUSHSTATUS+sizeof(LONG))
+
+#define FIGWL_PREVCURSOR   (FIGWL_COMPSTARTNUM+sizeof(LONG))
+
+
 #define UIEXTRASIZE        (FIGWL_CHILDWND+sizeof(LONG_PTR))
 
 /* The flags of FIGWL_MOUSE */
@@ -228,7 +256,7 @@ typedef TCHAR             MYCHAR;
 #define IDIM_SUB_MR_1        0x40
 #define IDIM_SUB_MR_2        0x41
 
-#define NATIVE_CHARSET SHIFTJIS_CHARSET
+#define NATIVE_CHARSET HANGUL_CHARSET
 
 /**********************************************************************/
 /*                                                                    */
@@ -274,6 +302,10 @@ typedef struct _tagUIEXTRA{
     HIMC     hIMC;
     UICHILD  uiStatus;
     UICHILD  uiCand;
+#if 1
+    UICHILD  uiSoftKbd;
+    DWORD    nShowSoftKbdCmd;
+#endif
     DWORD    dwCompStyle;
     HFONT    hFont;
     BOOL     bVertical;
@@ -288,6 +320,22 @@ typedef struct _tagMYGUIDELINE{
     DWORD dwStrID;
     DWORD dwPrivateID;
 } MYGUIDELINE, NEAR *PMYGUIDELINE, FAR *LPMYGUIDELINE;
+
+#define MAXICREADSIZE	10+2
+#define MAXICCOMPSIZE	2
+typedef struct _tagHangulIC {
+    //WCHAR 	read[10]; // L{1,3}V{1,3}T{0,3}
+    WCHAR read[MAXICREADSIZE];
+    WCHAR comp[MAXICCOMPSIZE];
+    WCHAR cho;
+    WCHAR jung;
+    WCHAR jong;
+    WCHAR last;
+    UINT  len;
+    UINT  lastvkey;
+    int   laststate;
+    BOOL  syllable;
+} HangulIC;
 
 /**********************************************************************/
 /*                                                                    */
@@ -315,8 +363,17 @@ extern BYTE bNoComp[];
 extern BYTE bNoCompCtl[];
 extern BYTE bNoCompSht[];
 extern BYTE bNoCompAlt[];
+#if DEBUG
 extern DWORD dwLogFlag;
 extern DWORD dwDebugFlag;
+#endif
+
+extern DWORD dwLayoutFlag;
+extern DWORD dwOptionFlag;
+
+extern DWORD dwImeFlag;
+
+extern HangulIC ic;
 #endif //_NO_EXTERN_
 
 /**********************************************************************/
@@ -333,6 +390,7 @@ void PASCAL ClearCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag);
 void PASCAL ClearCandidate(LPCANDIDATEINFO lpCandInfo);
 void PASCAL ChangeMode(HIMC hIMC,DWORD dwToMode);
 void PASCAL ChangeCompStr(HIMC hIMC,DWORD dwToMode);
+HKL  PASCAL GetMyHKL (void) ;
 BOOL PASCAL IsCompStr(HIMC hIMC);
 BOOL PASCAL IsConvertedCompStr(HIMC hIMC);
 BOOL PASCAL IsCandidate(LPINPUTCONTEXT lpIMC);
@@ -390,6 +448,12 @@ void PASCAL MoveCompWindow(LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC);
 void PASCAL HideCompWindow(LPUIEXTRA lpUIExtra);
 void PASCAL SetFontCompWindow(LPUIEXTRA lpUIExtra);
 
+/* uisoft.c      */
+void PASCAL ShowSoftKbd(HWND, int);
+void PASCAL SetSoftKbdData(HWND);
+void PASCAL UpdateSoftKbd(HWND);
+void PASCAL SoftKbdDestroyed(HWND);
+
 /*   uiguide.c   */
 LRESULT CALLBACK GuideWndProc(HWND,UINT,WPARAM,LPARAM);
 void PASCAL PaintGuide(HWND hGuideWnd , HDC hDC, LPPOINT lppt,DWORD dwPushedGuide);
@@ -401,6 +465,7 @@ LRESULT CALLBACK LineWndProc(HWND,UINT,WPARAM,LPARAM);
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
+UINT load_keyboard_map_from_reg(LPCTSTR, UINT, WCHAR *);
 
 /* DIC.C         */
 BOOL PASCAL IsEat(WORD);
@@ -408,14 +473,23 @@ BOOL PASCAL DicKeydownHandler(HIMC,UINT,LPARAM,LPBYTE);
 void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey);
 void PASCAL FlushText();
 void PASCAL RevertText(HIMC hIMC);
+
 void PASCAL AddChar(HIMC,WORD);
-BOOL PASCAL ConvKanji(HIMC);
+WCHAR PASCAL hangul_ic_get(HangulIC*, UINT);
+void PASCAL  hangul_ic_init(HangulIC*);
+
+BOOL PASCAL ConvHanja(HIMC, int, UINT);
 BOOL WINAPI MakeResultString(HIMC,BOOL);
 BOOL PASCAL MakeGuideLine(HIMC, DWORD);
 BOOL PASCAL GenerateMessage(HIMC,LPINPUTCONTEXT,LPTRANSMSGLIST,LPTRANSMSG);
 BOOL PASCAL CheckAttr( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL MakeAttrClause( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
+
+/* hangul.c       */
+void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
+int PASCAL set_keyboard(UINT);
+int PASCAL set_automata(UINT);
 
 /* DIC2.C        */
 BOOL OneCharZenToHan(WCHAR ,WCHAR* ,WCHAR* );
@@ -440,19 +514,44 @@ WORD PASCAL GetWordCount(LPSTR);
 WORD PASCAL GetWordNum(LPSTR);
 WORD PASCAL DeleteWord(LPSTR,LPSTR);
 
-/* FDEBUG.C      */
+/* reg.C      */
+void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
+long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+void SetRegMultiString(LPCTSTR lpszFlag, DWORD dwFlag);
+void PASCAL SetGlobalFlags();
+void GetRegKeyList(LPCTSTR lpszSubDir);
+BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey);
+void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr);
 #ifdef DEBUG
+
+//#include "debug.h"
+#define	DEBUGPRINTF(arg)	DebugPrint##arg
+#define	DEBUGPRINTFW(arg)	DebugPrintW##arg
+
+#if !defined (DEBUG_LV)
+#define	DEBUG_LV	1
+#endif
+#define	DEBUGPRINTFEX(level,arg)	if((level) >= DEBUG_LV) DebugPrint##arg
+
 #define MyDebugPrint(x) DebugPrint x
 int DebugPrint(LPCTSTR lpszFormat, ...);
-void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
-void PASCAL SetGlobalFlags();
-void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr);
 #else
 #define MyDebugPrint(x)
-#define SetDwordToSetting() FALSE
-//#define SetDwordToSetting(lpszFlag, dwFlag) FALSE
-#define SetGlobalFlags() FALSE
-//#define ImeLog() FALSE
 #define ImeLog(dwFlag, lpStr) FALSE
+
+#define	DEBUGPRINTF(arg)	/*arg*/
+#define	DEBUGPRINTFW(arg)	/*arg*/
+
+#define	DEBUGPRINTFEX(level,arg)	/*if((level) >= DEBUG_LV) DebugPrintfToFile##arg*/
+
 #endif
 
+/* tsf.cpp */
+#if !defined (NO_TSF)
+BOOL	PASCAL	InitLanguageBar (void) ;
+void	PASCAL	UninitLanguageBar (void) ;
+BOOL	PASCAL	UpdateLanguageBarIfSelected (void) ;
+BOOL	PASCAL	UpdateLanguageBar (void) ;
+void	PASCAL	ActivateLanguageBar (BOOL) ;
+BOOL	PASCAL	IsTSFEnabled (void) ;
+#endif

@@ -32,6 +32,15 @@ SAENARUICON             ICON    DISCARDABLE     "..\\resource\\saenaru.ico"
 INDICOPENICON           ICON    DISCARDABLE     "..\\resource\\penindic.ico"
 IDI_ABOUT               ICON    DISCARDABLE     "..\\resource\\about.ico"
 
+IMEICON 	ICON    DISCARDABLE		"..\\resource\\penindic.ico"
+INDIC_PEN	ICON    DISCARDABLE		"..\\resource\\penindic.ico"
+INDIC_HAN	ICON    DISCARDABLE		"..\\resource\\text\\hankey.ico"
+INDIC_ENG	ICON	DISCARDABLE		"..\\resource\\text\\engkey.ico"
+INDIC_HANJA	ICON	DISCARDABLE		"..\\resource\\text\\hanjakey.ico"
+INDIC_KEY	ICON    DISCARDABLE		"..\\resource\\keyboard.ico"
+INDIC_HALF	ICON    DISCARDABLE		"..\\resource\\half.ico"
+INDIC_FULL	ICON    DISCARDABLE		"..\\resource\\full.ico"
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
@@ -43,47 +52,62 @@ CHECKBMP                BITMAP  DISCARDABLE     "..\\resource\\check.bmp"
 UNCHECKBMP              BITMAP  DISCARDABLE     "..\\resource\\uncheck.bmp"
 FACEBMP                 BITMAP  DISCARDABLE     "..\\resource\\face.bmp"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-DLG_GENERAL DIALOG DISCARDABLE  30, 65, 215, 135
+//DLG_GENERAL DIALOG DISCARDABLE  30, 65, 215, 135
+DLG_GENERAL DIALOG DISCARDABLE  30, 65, 212, 158
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "자판 일반 설정"
 FONT 9, "굴림"
+LANGUAGE 0x12, 0x1
 BEGIN
-    ICON            IDI_GENERAL,IDC_STATIC,2,5,20,20
-    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,59
-    CONTROL         "새두벌 자판 (&2)",IDC_LAYOUT_NEW2BUL,"Button",
+    ICON            IDI_GENERAL,IDC_STATIC,4,5,18,21
+    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,72
+    CONTROL         "두벌식 자판 (&2)",IDC_LAYOUT_OLD2BUL,"Button",
                     BS_AUTORADIOBUTTON,33,15,70,11
-    CONTROL         "새세벌 자판 (&3)",IDC_LAYOUT_NEW3BUL,"Button",
+    CONTROL         "세벌식 자판 (&3)",IDC_LAYOUT_3FIN,"Button",
                     BS_AUTORADIOBUTTON,33,29,70,11
-    CONTROL         "안마태 자판 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
+    CONTROL         "세벌식 390 (&9)",IDC_LAYOUT_390,"Button",
                     BS_AUTORADIOBUTTON,33,43,70,11
-    CONTROL         "표준 두벌식 자판 (&D)",IDC_LAYOUT_OLD2BUL,"Button",
+    CONTROL         "세벌식 순아래 (&N)",IDC_LAYOUT_3SUN,"Button",
+                    BS_AUTORADIOBUTTON,33,57,70,11
+    CONTROL         "새두벌 자판 (&D)",IDC_LAYOUT_NEW2BUL,"Button",
                     BS_AUTORADIOBUTTON,115,15,77,11
-    CONTROL         "세벌식 390 자판 (&9)",IDC_LAYOUT_390,"Button",
+    CONTROL         "새세벌 자판 (&S)",IDC_LAYOUT_NEW3BUL,"Button",
                     BS_AUTORADIOBUTTON,115,29,77,11
-    CONTROL         "세벌식 최종 자판 (&F)",IDC_LAYOUT_3BULFINAL,"Button",
+    CONTROL         "안마태 자판 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
                     BS_AUTORADIOBUTTON,115,43,77,11
-    CONTROL         "모아치기 지원 (&C)",IDC_CONCURRENT_TYPING,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,26,70,156,10
+    CONTROL         "사용자 정의 자판 (&U)",IDC_LAYOUT_USER,"Button",
+                    BS_AUTORADIOBUTTON,115,57,77,11
+
+    CONTROL         "모아치기 (&M)",IDC_COMPOSITE_TYPING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26,79,53,10
+    CONTROL         "동시치기 (&C)",IDC_CONCURRENT_TYPING,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,79,53,10
+    CONTROL         "드보락 지원 (&V)",IDC_DVORAK_SUPPORT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,79,60,10
     CONTROL         "자소 단위로 지우기 (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,26,82,156,10
-    CONTROL         "KS X 1002 확장한자 지원 (&X)",IDC_KSX1002_SUPPORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,94,156,10
-    CONTROL         "KS X 1001으로 한글 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,106,156,10
-    CONTROL         "고어 자모를 포함한 전체 단자모 조합 사용 (&O)",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26, 91,90,10
+    CONTROL         "<Shift>-<SPACE> 한/영 전환 (&H)",IDC_USE_SHIFT_SPACE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,26,103,124,10
+    CONTROL         "확장한자(KS X 1002) 지원 (&X)",IDC_KSX1002_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,115,156,10
+    CONTROL         "완성형(KS X 1001) 한글 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,127,156,10
+    CONTROL         "첫가끝 자모를 포함한 전체 단자모 조합 (&O)",
                     IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    26,118,156,10
+                    26,139,156,10
 END
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "새나루에 대해..."
 FONT 9, "굴림"
+LANGUAGE 0x12, 0x1
 BEGIN
     LTEXT           "새나루 한글 입력기 버전 1.0",IDC_STATIC,63,36,88,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
@@ -100,6 +124,7 @@ DLG_DEBUG DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "DebugOptions"
 FONT 9, "굴림"
+LANGUAGE 0x12, 0x1
 BEGIN
     CONTROL         "LOGF_ENTRY",IDC_LOGF_ENTRY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,5,9,98,14
@@ -137,18 +162,18 @@ BEGIN
     BEGIN
         BLOCK "041203b5"
         BEGIN
-            VALUE "Comments", "\0"
+            VALUE "Comments", "새나루 한글 입력기\0"
             VALUE "CompanyName", "OpenLook Initiatives\0"
             VALUE "FileDescription", "새나루 1.0\0"
             VALUE "FileVersion", "1.0\0"
-            VALUE "InternalName", "새나루 한글 입력기\0"
+            VALUE "InternalName", "SAENARU\0"
             VALUE "LegalCopyright", "Copyright (C) 2003 장혜식.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "SAENARU.IME\0"
-            VALUE "PrivateBuild", "\0"
+//            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "새나루\0"
             VALUE "ProductVersion", "1.00\0"
-            VALUE "SpecialBuild", "\0"
+//            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -196,6 +221,7 @@ END
 //
 
 RIGHTCLKMENU MENU DISCARDABLE 
+LANGUAGE 0x12, 0x1
 BEGIN
     POPUP ""
     BEGIN
@@ -228,12 +254,14 @@ END
 //
 
 STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
 BEGIN
     IDS_DICFILENAME         "SAENARU.DIC"
     IDS_CONFIGNAME          "새나루 한글 입력기"
 END
 
 STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
 BEGIN
     IDS_GL_NODICTIONARY     "Can not find dictionary"
     IDS_GL_TYPINGERROR      "Typing Error No Roman"

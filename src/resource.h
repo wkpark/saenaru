@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/resource.h,v 1.5 2003/10/24 16:26:57 perky Exp $
+ * $Perky: saenaru/src/resource.h,v 1.4 2003/10/23 20:00:34 perky Exp $
  */
 /*++
 
@@ -43,9 +43,9 @@ Module Name:
 #define VER_DEBUG                       0
 
 /* Property Sheet DLG ID */
-#define DLG_GENERAL             100
-#define DLG_ABOUT               103
-#define DLG_DEBUG               104
+#define DLG_GENERAL             125
+#define DLG_ABOUT               126
+#define DLG_DEBUG               127
 
 /* for dialog box */
 #define ID_WR_READING           200
@@ -63,17 +63,24 @@ Module Name:
 
 #define IDI_GENERAL             102
 #define IDI_ABOUT               103
-#define IDC_LAYOUT_NEW2BUL      1000
-#define IDC_LAYOUT_NEW3BUL      1001
-#define IDC_LAYOUT_AHNMATAE     1002
-#define IDC_LAYOUT_OLD2BUL      1003
-#define IDC_LAYOUT_390          1004
-#define IDC_LAYOUT_3BULFINAL    1005
-#define IDC_CONCURRENT_TYPING   1006
-#define IDC_KSX1001_SUPPORT     1007
-#define IDC_BACKSPACE_BY_JAMO   1008
-#define IDC_KSX1002_SUPPORT     1009
-#define IDC_FULL_MULTIJOMO      1010
+
+#define IDC_LAYOUT_OLD2BUL      1001
+#define IDC_LAYOUT_3FIN         1002
+#define IDC_LAYOUT_390          1003
+#define IDC_LAYOUT_NEW2BUL      1004
+#define IDC_LAYOUT_NEW3BUL      1005
+#define IDC_LAYOUT_AHNMATAE     1006
+#define IDC_LAYOUT_3SUN         1007
+#define IDC_LAYOUT_USER         1008
+
+#define IDC_CONCURRENT_TYPING   2000
+#define IDC_COMPOSITE_TYPING    2001
+#define IDC_KSX1001_SUPPORT     2002
+#define IDC_KSX1002_SUPPORT     2003
+#define IDC_DVORAK_SUPPORT      2004
+#define IDC_BACKSPACE_BY_JAMO   2005
+#define IDC_FULL_MULTIJOMO      2006
+#define IDC_USE_SHIFT_SPACE     2007
 
 /* string tables */
 #define IDS_DICFILENAME             1000
@@ -91,6 +98,21 @@ Module Name:
 
 #define IDM_RECONVERT                   40001
 #define IDM_ABOUT                       40002
+
+
+#define IDM_SKL1                0x0500
+#define IDM_SKL2                0x0501
+#define IDM_SKL3                0x0502
+#define IDM_SKL4                0x0503
+#define IDM_SKL5                0x0504
+#define IDM_SKL6                0x0505
+#define IDM_SKL7                0x0506
+#define IDM_SKL8                0x0507
+#define IDM_SKL9                0x0508
+#define IDM_SKL10               0x0509
+#define IDM_SKL11               0x050a
+#define IDM_SKL12               0x050b
+#define IDM_SKL13               0x050c
 
 // Next default values for new objects
 // 

@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/subs.c,v 1.4 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -178,6 +178,7 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
     LPINPUTCONTEXT lpIMC;
     DWORD fdwConversion;
     TRANSMSG GnMsg;
+    BOOL fOpen;
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return;
@@ -190,10 +191,25 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
             fdwConversion = (fdwConversion & ~IME_CMODE_LANGUAGE);
             break;
 
-        case TO_CMODE_KATAKANA:
-            fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_KATAKANA);
+        case TO_CMODE_HANGUL:
+        // XXX turn off FULLSHAPE
+            if (fdwConversion & IME_CMODE_FULLSHAPE)
+                fdwConversion &= ~IME_CMODE_FULLSHAPE;
+
+        // Toggle CHAR MODE to the HANGUL composition mode
+            if (fdwConversion & IME_CMODE_HANGUL) {
+                ImmSetOpenStatus(hIMC,FALSE);
+                fdwConversion &= ~IME_CMODE_HANGUL;
+                fdwConversion = (fdwConversion & ~IME_CMODE_LANGUAGE);
+        } else {
+                ImmSetOpenStatus(hIMC,TRUE);
+                fdwConversion &= ~IME_CMODE_LANGUAGE;
+                fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_HANGUL);
+        }
+
             break;
 
+/*
         case TO_CMODE_HIRAGANA:
             fdwConversion = 
                 ((fdwConversion & ~IME_CMODE_LANGUAGE) | IME_CMODE_NATIVE);
@@ -208,7 +224,7 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
  
                 // If hiragana mode, make it katakana mode.
                 if ((fdwConversion & IME_CMODE_LANGUAGE) == IME_CMODE_NATIVE)
-                    fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_KATAKANA);
+                    fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_HANGUL);
                 
             }
             else
@@ -218,6 +234,7 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
 
             }
             break;
+*/
 
         case TO_CMODE_ROMAN:
             if (fdwConversion & IME_CMODE_ROMAN)
@@ -286,7 +303,20 @@ void PASCAL ChangeCompStr(HIMC hIMC, DWORD dwToMode)
         case TO_CMODE_ALPHANUMERIC:
             break;
 
-        case TO_CMODE_KATAKANA:
+        case TO_CMODE_HANGUL:
+            lpSrc = ((LPMYCOMPSTR)lpCompStr)->szCompStr;
+            lpSrc0 = lpSrc;
+            lpDst0 = lpDst;
+            while (*lpSrc)
+            {
+                *lpDst++ = *lpSrc; // XXX
+                lpSrc++;
+            }
+            Mylstrcpy (lpSrc0,lpDst0);
+            lpCompStr->dwCompStrLen = Mylstrlen(lpSrc0);
+            fChange = TRUE;
+            break;
+        /*
             lpSrc = ((LPMYCOMPSTR)lpCompStr)->szCompStr;
             lpSrc0 = lpSrc;
             lpDst0 = lpDst;
@@ -313,6 +343,7 @@ void PASCAL ChangeCompStr(HIMC hIMC, DWORD dwToMode)
             lpCompStr->dwCompStrLen = Mylstrlen(lpSrc0);
             fChange = TRUE;
             break;
+        */
 
         case TO_CMODE_FULLSHAPE:
             break;
@@ -391,7 +422,9 @@ BOOL PASCAL IsConvertedCompStr(HIMC hIMC)
     lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
 
     if (lpCompStr->dwCompStrLen > 0)
-        fRet = (((LPMYCOMPSTR)lpCompStr)->bCompAttr[0] > 0);
+        fRet = (((LPMYCOMPSTR)lpCompStr)->bCompAttr[0] > ATTR_INPUT);
+
+    MyDebugPrint((TEXT("CompAttr: %d\n"),((LPMYCOMPSTR)lpCompStr)->bCompAttr[0]));
 
     ImmUnlockIMCC(lpIMC->hCompStr);
     ImmUnlockIMC(hIMC);
@@ -457,8 +490,6 @@ exit:
 
     GlobalFree((HANDLE)lphkl);
     return hKL;
-
-
 }
 /*****************************************************************************
 *                                                                            *
@@ -478,17 +509,11 @@ void PASCAL UpdateIndicIcon(HIMC hIMC)
            return;
     }
 
-    hwndIndicate = FindWindow(INDICATOR_CLASS, NULL);
+#if !defined (NO_TSF)
+    UpdateLanguageBar ();
+#endif
 
-    if (hIMC)
-    {
-        lpIMC = ImmLockIMC(hIMC);
-        if (lpIMC)
-        {
-            fOpen = lpIMC->fOpen;
-            ImmUnlockIMC(hIMC);
-        }
-    }
+    hwndIndicate = FindWindow(INDICATOR_CLASS, NULL);
 
     if (IsWindow(hwndIndicate))
     {
@@ -581,7 +606,7 @@ LPWSTR PASCAL MylstrcpynW(LPWSTR lp0, LPWSTR lp1, int nCount)
 {
     int n;
     for (n = 0; *lp1 && n < nCount - 1; *lp0++ = *lp1++, n++)
-                ;
+               ;
     *lp0 = L'\0';
     return lp0;
 }
@@ -595,6 +620,7 @@ HFONT CheckNativeCharset(HDC hDC)
     hOldFont = GetCurrentObject(hDC, OBJ_FONT);
     GetObject(hOldFont, sizeof(LOGFONT), &lfFont);
 
+    /* 글꼴이 없으면 기본 값을 가져온다 */
     if (lfFont.lfCharSet != NATIVE_CHARSET) {
         bDiffCharSet = TRUE;
         lfFont.lfWeight = FW_NORMAL;

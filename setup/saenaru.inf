@@ -18,21 +18,21 @@ saenaru.dic
 
 
 [DestinationDirs]
-SaeNaru.sys.install=11 ; to System (Memphis) or System32 (NT)
+SaeNaru.sys.install=11 ; to System (Windows 98) or System32 (NT)
 SaeNaru.win.install=25 ; to Windows
 
 [SaeNaru_Reg]
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout file",,kbdkr.kbd
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout text",,"새나루 한글 입력기"
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout display name",,"한글 입력기 (새나루)"
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME file",,"SAENARU.IME"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",,kbdus.kbd
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout text",,"새나루 한글 입력기"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout display name",,"한글 입력기 (새나루)"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME File",,"SAENARU.IME"
 HKLM,"software\OpenLook\Saenaru"
 
 [SaeNaru_Reg_NT]
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout file",,kbdkor.dll
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout text",,"새나루 한글 입력기"
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","layout display name",,"한글 입력기 (새나루)"
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME file",,"SAENARU.IME"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",,kbdkor.dll
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout text",,"새나루 한글 입력기"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout display name",,"한글 입력기 (새나루)"
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME File",,"SAENARU.IME"
 HKLM,"software\OpenLook\Saenaru"
 
 [SourceDisksNames]

@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/data.c,v 1.4 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -58,7 +58,6 @@ TCHAR    szCandClassName[]    = TEXT("SAENARUCand");
 TCHAR    szStatusClassName[]  = TEXT("SAENARUStatus");
 TCHAR    szGuideClassName[]   = TEXT("SAENARUGuide");
 
-
 MYGUIDELINE glTable[] = {
         {GL_LEVEL_ERROR,   GL_ID_NODICTIONARY, IDS_GL_NODICTIONARY, 0},
         {GL_LEVEL_WARNING, GL_ID_TYPINGERROR,  IDS_GL_TYPINGERROR, 0},
@@ -70,15 +69,14 @@ TCHAR    szDicFileName[256];         /* Dictionary file name stored buffer */
 
 
 
+#pragma data_seg("SHAREDDATA")
 #ifdef DEBUG
 /* for DebugOptions */
-#pragma data_seg("SHAREDDATA")
 DWORD dwLogFlag = 0L;
 DWORD dwDebugFlag = 0L;
-#pragma data_seg()
 #endif
-
-
-
-
-
+DWORD dwLayoutFlag = 0L;
+DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
+/* local flags */
+DWORD dwImeFlag = SAENARU_ONTHESPOT;
+#pragma data_seg()

@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/input.c,v 1.4 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -62,11 +62,22 @@ LPBYTE lpbKeyState;
         case VK_CONTROL:
             //goto not_proccessed;
             break;
+	    /*
+	case VK_ESCAPE:
+	case VK_LEFT:
+	case VK_RIGHT:
+	    break;
+	    */
 
         default:
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
+                TCHAR szDev[80];
+
+                wsprintf(szDev, TEXT("Vkey: %x\r\n"), wVKey);
+                OutputDebugString(szDev);
                 // This WM_IMEKEYDOWN has actual character code in itself.
-                AddChar( hIMC,  HIWORD(wParam));
+                hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState );
+                //AddChar( hIMC,  HIWORD(wParam));
                 //CharHandler( hIMC,  (WORD)((BYTE)HIBYTE(wParam)), lParam );
             }
             break;
@@ -89,5 +100,3 @@ LPBYTE lpbKeyState;
 {
     return FALSE;
 }
-
-
