@@ -1,0 +1,230 @@
+===
+Some parts of SAENARU are based on sample codes from Microsoft Windows
+DDK XP's. As long as you use or distribute SAENARU as SOURCE FORM, you
+must agree the following Microsoft End User License Agreement.
+===
+$Perky: saenaru/LICENSE.MICROSOFT,v 1.1 2003/10/23 19:25:26 perky Exp $
+
+
+-- Beginning of EULA --
+
+
+END-USER LICENSE AGREEMENT
+FOR MICROSOFT SOFTWARE MICROSOFT WINDOWS XP DRIVER DEVELOPMENT KIT
+
+
+IMPORTANT-READ CAREFULLY: This Microsoft End-User License Agreement
+("EULA") is a legal agreement between you (either an individual or a
+single entity) and Microsoft Corporation for the Microsoft software
+product identified above, which includes computer software and may
+include associated media, printed materials, additional computer software
+applications, and "online" or electronic documentation ("SOFTWARE
+PRODUCT").  By downloading, installing, copying, or otherwise using
+the SOFTWARE PRODUCT, you agree to be bound by the terms of this EULA.
+If you do not agree to the terms of this EULA, do not install or use the
+SOFTWARE PRODUCT; you may however, return it to your place of purchase
+for a full refund.
+
+
+
+SOFTWARE PRODUCT LICENSE
+
+
+The SOFTWARE PRODUCT is protected by copyright laws and international
+copyright treaties, as well as other intellectual property laws and
+treaties. The SOFTWARE PRODUCT is licensed, not sold.
+
+1.	GRANT OF LICENSE.  This EULA grants you the following rights:
+
+	a. SOFTWARE PRODUCT. You may install and use an unlimited number
+of copies of the SOFTWARE PRODUCT on computers, including workstations,
+terminals or other digital electronic devices ("COMPUTERS") to design,
+develop and test drivers for use with Microsoft Windows 2000, Windows
+98, Windows 98, Second Edition, and Windows Millennium Edition operating
+systems ("Drivers").
+
+	b. Sample Code. You may modify the sample source code ("Sample
+Code") to design, develop and test your Drivers.  You may also reproduce
+and distribute the Sample Code in object code form along with any
+modifications you make to the Sample Code, provided you comply with the
+Distribution Requirements described below.  For purposes of this section,
+"modifications" shall mean enhancements to the functionality of the
+Sample Code.
+
+	c. Redistribution Requirements. You may reproduce and distribute
+an unlimited number of copies of the Sample Code as described above,
+provided that: (i)  you distribute the Sample Code only in conjunction
+with and as a part of your Drivers; (ii) the Sample Code only operates
+in conjunction with Microsoft Windows 2000, Windows 98, Windows 98
+Second Edition, and/or Windows Millennium Edition operating systems;
+(iii) you do not use Microsoft's name, logo, or trademarks to advertise,
+market or promote your Drivers without the express written permission
+of Microsoft; (iv) you include a valid copyright notice on your Drivers;
+(v) you agree to indemnify, hold harmless, and defend Microsoft from and
+against any claims or lawsuits, including attorney's fees, that arise or
+result from the use or distribution of your Drivers.  Contact Microsoft
+for the applicable royalties due and other licensing terms for all other
+uses and/or distribution of the Sample Code.
+
+
+2. PRE-RELEASE CODE.  The SOFTWARE PRODUCT contains pre-release code
+that is not at the level of performance and compatibility of the final,
+generally available, product offering.	   These portions of the SOFTWARE
+PRODUCT may not operate correctly and may be substantially modified prior
+to first commercial shipment.  Microsoft is not obligated to make this
+or any later version of the SOFTWARE PRODUCT commercially available.
+Microsoft grants you the right to distribute test versions of your
+Drivers created using the pre-release code provided you comply with
+the Distribution Requirements described in Section 1 and the following
+additional provisions:	    (a) you must mark the test version of your
+drivers "BETA" and (b) you are solely responsible for updating your
+customers with versions of your Drivers that operate satisfactorily with
+the final commercial release of such pre-release code.
+
+
+
+3.	DESCRIPTION OF OTHER RIGHTS AND LIMITATIONS.
+
+	a. Limitations on Reverse Engineering, Decompilation, and
+Disassembly. You may not reverse engineer, decompile, or disassemble
+the SOFTWARE PRODUCT, except and only to the extent that such activity
+is expressly permitted by applicable law notwithstanding this limitation.
+
+	b. Rental. You may not rent, lease, or lend the SOFTWARE PRODUCT.
+
+	c. Support Services. Microsoft may provide you with support
+services related to the SOFTWARE PRODUCT ("Support Services"). Use of
+Support Services is governed by the Microsoft policies and programs
+described in the user manual, in "online" documentation, and/or in
+other Microsoft-provided materials. Any supplemental software code
+provided to you as part of the Support Services shall be considered
+part of the SOFTWARE PRODUCT and subject to the terms and conditions
+of this EULA. With respect to technical information you provide to
+Microsoft as part of the Support Services, Microsoft may use such
+information for its business purposes, including for product support
+and development. Microsoft will not utilize such technical information
+in a form that personally identifies you.
+
+	d. Software Transfer. You may permanently transfer of all of
+your rights under this EULA, provided you retain no copies, you transfer
+all of the SOFTWARE PRODUCT (including all component parts, the media
+and printed materials, any upgrades, this EULA, and, if applicable,
+the Certificate of Authenticity), and the recipient agrees to the terms
+of this EULA.  If the SOFTWARE PRODUCT is an upgrade, any transfer must
+include all prior versions of the SOFTWARE PRODUCT.
+
+	e. Termination. Without prejudice to any other rights,
+Microsoft may terminate this EULA if you fail to comply with the terms
+and conditions of this EULA. In such event, you must destroy all copies
+of the SOFTWARE PRODUCT and all of its component parts.
+
+
+4. INTELLECTUAL PROPERTY RIGHTS. All title and intellectual property
+rights in and to the SOFTWARE PRODUCT (including but not limited to
+any images, photographs, animations, video, audio, music, text and
+"applets" incorporated into the SOFTWARE PRODUCT), and any copies you
+are permitted to make herein are owned by Microsoft or its suppliers.
+All title and intellectual property rights in and to the content which may
+be accessed through use of the SOFTWARE PRODUCT is the property of the
+respective content owner and may be protected by applicable copyright
+or other intellectual property laws and treaties.  This EULA grants
+you no rights to use such content. If this SOFTWARE PRODUCT contains
+documentation which is provided only in electronic form, you may print
+one copy of such electronic documentation.  You may not copy the printed
+materials accompanying the SOFTWARE PRODUCT.
+
+
+5. U.S. GOVERNMENT LICENSE RIGHTS. SOFTWARE PRODUCT provided to
+the U.S. Government pursuant to solicitations issued on or after
+December 1, 1995 is provided with the commercial license rights and
+restrictions described elsewhere herein.  SOFTWARE PRODUCT provided to
+the U.S. Government pursuant to solicitations issued prior to December
+1, 1995 is provided with "Restricted Rights" as provided for in FAR,
+48 CFR 52.227-14 (JUNE 1987) or DFAR, 48 CFR 252.227-7013 (OCT 1988),
+as applicable.
+
+
+6. EXPORT RESTRICTIONS. You agree that you will not export or re-export
+the SOFTWARE PRODUCT (or portions thereof) to any country, person or
+entity subject to U.S. export restrictions.  You specifically agree
+not to export or re-export the SOFTWARE PRODUCT (or portions thereof):
+(i) to any country subject to a U.S. embargo or trade restriction;
+(ii) to any person or entity who you know or have reason to know will
+utilize the SOFTWARE PRODUCT (or portion thereof) in the production
+of nuclear, chemical or biological weapons; or (iii) to any person or
+entity who has been denied export privileges by the U.S. government.
+For additional information see http://www.microsoft.com/exporting/.
+
+
+7. DISCLAIMER OF  WARRANTIES. To the maximum extent permitted by
+applicable law, Microsoft and its suppliers provide the SOFTWARE
+PRODUCT and any (if any) Support Services AS IS AND WITH ALL FAULTS,
+and hereby disclaim all warranties and conditions, either express,
+implied or statutory, including, but not limited to, any (if any) implied
+warranties or conditions of merchantability, of fitness for a particular
+purpose, of lack of viruses, of accuracy or completeness of responses,
+of results, and of lack of negligence or lack of workmanlike effort,
+all with regard to the SOFTWARE PRODUCT, and the provision of or failure
+to provide Support Services.  ALSO, THERE IS NO WARRANTY OR CONDITION OF
+TITLE, QUIET ENJOYMENT, QUIET POSSESSION, CORRESPONDENCE TO DESCRIPTION
+OR NON-INFRINGEMENT, WITH REGARD TO THE SOFTWARE PRODUCT.  THE ENTIRE
+RISK AS TO THE QUALITY OF OR ARISING OUT OF USE OR PERFORMANCE OF THE
+SOFTWARE PRODUCT AND SUPPORT SERVICES, IF ANY, REMAINS WITH YOU.
+
+
+8. EXCLUSION OF INCIDENTAL, CONSEQUENTIAL AND CERTAIN OTHER DAMAGES. TO
+THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
+MICROSOFT OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
+INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, BUT NOT LIMITED
+TO, DAMAGES FOR LOSS OF PROFITS OR CONFIDENTIAL OR OTHER INFORMATION,
+FOR BUSINESS INTERRUPTION, FOR PERSONAL INJURY, FOR LOSS OF PRIVACY, FOR
+FAILURE TO MEET ANY DUTY INCLUDING OF GOOD FAITH OR OF REASONABLE CARE,
+FOR NEGLIGENCE, AND FOR ANY OTHER PECUNIARY OR OTHER LOSS WHATSOEVER)
+ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF OR INABILITY TO USE
+THE SOFTWARE PRODUCT, THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT
+SERVICES, OR OTHERWISE UNDER OR IN CONNECTION WITH ANY PROVISION OF
+THIS EULA, EVEN IN THE EVENT OF THE FAULT, TORT (INCLUDING NEGLIGENCE),
+STRICT LIABILITY, BREACH OF CONTRACT OR BREACH OF WARRANTY OF MICROSOFT
+OR ANY SUPPLIER, AND EVEN IF MICROSOFT OR ANY SUPPLIER HAS BEEN ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+9. LIMITATION OF LIABILITY AND REMEDIES. Notwithstanding any damages
+that you might incur for any reason whatsoever (including, without
+limitation, all damages referenced above and all direct or general
+damages), the entire liability of Microsoft and any of its suppliers
+under any provision of this EULA and your exclusive remedy for all of the
+foregoing shall be limited to the greater of the amount actually paid by
+you for the SOFTWARE PRODUCT or U.S.$5.00.  The foregoing limitations,
+exclusions and disclaimers shall apply to the maximum extent permitted
+by applicable law, even if any remedy fails its essential purpose.
+
+
+10. APPLICABLE LAW.  If you acquired this SOFTWARE PRODUCT in the United
+States, this EULA is governed by the laws of the State of Washington.
+If you acquired this SOFTWARE PRODUCT in Canada, unless expressly
+prohibited by local law, this EULA is governed by the laws in force in
+the Province of Ontario, Canada; and, in respect of any dispute which
+may arise hereunder, you consent to the jurisdiction of the federal and
+provincial courts sitting in Toronto, Ontario. If this SOFTWARE PRODUCT
+was acquired outside the United States, then local law may apply.
+
+
+11. ENTIRE AGREEMENT.  This EULA (including any addendum or amendment
+to this EULA which is included with the SOFTWARE PRODUCT) is the
+entire agreement between you and Microsoft relating to the SOFTWARE
+PRODUCT and the Support Services (if any) and it supersedes all
+prior or contemporaneous oral or written communications,  proposals
+and representations with respect to the SOFTWARE PRODUCT or any other
+subject matter covered by this EULA.  To the extent the terms of any
+Microsoft policies or programs for Support Services conflict with the
+terms of this EULA, the terms of this EULA shall control.
+
+
+12. QUESTIONS? Should you have any questions concerning this EULA, or
+if you desire to contact Microsoft for any reason, please contact the
+Microsoft subsidiary serving your country, or write: Microsoft Sales
+Information Center/One Microsoft Way/Redmond, WA 98052-6399.
+
+
+-- End of EULA --
