@@ -1,13 +1,13 @@
 #
 # Maintainer Buildtool for nmake
 #
-# $Saenaru$
+# $Saenaru: saenaru/Makefile,v 1.1 2003/12/26 22:03:07 perky Exp $
 #
 
 RELVERSION=	031226
-SETUPEXE=	Saenaru-$(RELVERSION).exe
+SETUPEXE=	setup\Saenaru-$(RELVERSION).exe
 IMEBUILDDIR=	src\objfre\i386
-NSISDIR=	"C:\Program Files\NSIS"
+NSISDIR=	C:\Program Files\NSIS
 
 all: $(SETUPEXE)
 
@@ -16,7 +16,8 @@ clean:
 	cd $(IMEBUILDDIR) && del /F /Q *.*
 
 $(SETUPEXE): $(IMEBUILDDIR)\saenaru.ime
-	echo "MERONG"
+	cd setup
+	"$(NSISDIR)\makensis.exe" saenaru.nsi
 
 $(IMEBUILDDIR)\saenaru.ime:
 	cd src && build -c

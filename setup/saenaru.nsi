@@ -1,6 +1,6 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.1 2003/12/26 22:03:08 perky Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.2 2003/12/27 14:02:57 perky Exp $
 
 !define RELVERSION      "031226"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
@@ -56,10 +56,8 @@ Section "새나루 입력기" SecBody
 
   SetOutPath "$SYSDIR"
   File "${DDKBUILDDIR}\saenaru.ime"
-  SetOutPath "$WINDIR"
-  File "${RESOURCEDIR}\saenaru.dic"
-  ; XXX 나중에 saenaru.dic은 WINDIR\ime\Saenaru로 옮겨야함.
   SetOutPath "$INSTDIR"
+  File "${RESOURCEDIR}\saenaru.dic"
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
   
   ;Store install folder
@@ -153,7 +151,7 @@ SectionEnd
 Section "Uninstall"
 
   Delete "$SYSDIR\saenaru.ime"
-  Delete "$WINDIR\saenaru.dic"
+  Delete "$INSTDIR\saenaru.dic"
 
   Delete "$INSTDIR\Source\DIRS"
   Delete "$INSTDIR\Source\LICENSE"

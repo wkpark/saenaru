@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include <windows.h>
@@ -37,6 +37,20 @@
 #include "immsec.h"
 
 extern HANDLE hMutex;
+
+static int
+GetSaenaruDirectory(LPTSTR lpDest, int max)
+{
+    static const TCHAR szIMEDir[] = TEXT("\\IME\\Saenaru");
+    LPTSTR lpDestOrig = lpDest;
+
+    lpDest += GetWindowsDirectory(lpDest, 256);
+    memcpy(lpDest, szIMEDir, sizeof(szIMEDir) - sizeof(TCHAR));
+    lpDest += sizeof(szIMEDir) / sizeof(TCHAR) - 1;
+
+    return lpDest - lpDestOrig;
+}
+
 /**********************************************************************/
 /*    DLLEntry()                                                      */
 /**********************************************************************/
@@ -81,7 +95,7 @@ BOOL WINAPI DLLEntry (
 
             // Initialize for SAENARU.
             lpDicFileName = (LPTSTR)&szDicFileName;
-            lpDicFileName += GetWindowsDirectory(lpDicFileName,256);
+            lpDicFileName += GetSaenaruDirectory(lpDicFileName,256);
             if (*(lpDicFileName-1) != TEXT('\\'))
                 *lpDicFileName++ = TEXT('\\');
             LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
