@@ -1,8 +1,8 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.2 2003/12/27 14:02:57 perky Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.3 2003/12/27 15:20:43 perky Exp $
 
-!define RELVERSION      "031226"
+!define RELVERSION      "041202"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre\i386"
 !define RESOURCEDIR     "..\resource"
@@ -13,6 +13,7 @@
 ;Include Modern UI
 
   !include "MUI.nsh"
+BrandingText "새나루 인스톨러" 
 
 ;--------------------------------
 ;Configuration
@@ -55,9 +56,22 @@ Section "새나루 입력기" SecBody
   SectionIn RO
 
   SetOutPath "$SYSDIR"
+  SetOverwrite try
   File "${DDKBUILDDIR}\saenaru.ime"
+  IfErrors 0 SaenaruDone
+
+  # Can't copy saenaru.ime, create it under another name and rename it on
+  # next reboot.
+  GetTempFileName $3
+  File /oname=$3 "${DDKBUILDDIR}\saenaru.ime"
+  Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
+
+  SaenaruDone:
+  SetOverwrite lastused
   SetOutPath "$INSTDIR"
   File "${RESOURCEDIR}\saenaru.dic"
+  File "${RESOURCEDIR}\2set3set.reg"
+  File "${RESOURCEDIR}\ahnmatae.reg"
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
   
   ;Store install folder
@@ -89,6 +103,9 @@ Section "새나루 입력기" SecBody
   File "/oname=열린 한글 프로젝트.url" "httplink-hangul.url"
   CreateShortCut "${SMPATH}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 
+  IfRebootFlag 0 noreboot
+    MessageBox MB_OK|MB_ICONINFORMATION "새나루가 사용중이기 때문에 설치/업데이트가 완료되지 못했습니다. 재부팅을 해야 설치가 완료됩니다."
+  noreboot:
 SectionEnd
 
 
@@ -136,14 +153,41 @@ Section /o "새나루 소스 코드" SecSource
 
 SectionEnd
 
+Section "기본 입력기로 지정" SecDefault
+  ; save current IME
+  ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
+  StrCmp $0 "e0120412" exit
+  ; set as default IME
+  WriteRegStr HKCU "Keyboard Layout\Preload" "1" "e0120412"
+
+  ; get last IME
+  StrCpy $1 1
+  StrCpy $3 2
+  loop:
+    IntOp $1 $1 + 1
+    ReadRegStr $2 HKCU "Keyboard Layout\Preload" "$1"
+    StrCmp $2 "e0120412" loop
+    WriteRegStr HKCU "Keyboard Layout\Preload" "$3" "$0"
+    StrCmp $2 "" exit
+    IntOp $3 $3 + 1
+    StrCpy $0 $2
+    Goto loop
+  exit:
+SectionEnd
+
 ;--------------------------------
 ;Descriptions
 
   LangString DESC_SecBody ${LANG_KOREAN} "새나루 입력기를 위한 기본적인 파일을 설치합니다."
+  LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다."
+  LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.로그오프후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecBody} $(DESC_SecBody)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDefault} $(DESC_SecDefault)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
 
 ;--------------------------------
 ;Uninstaller Section
@@ -159,6 +203,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\Makefile"
   Delete "$INSTDIR\Source\doc\saenaru.htm"
   Delete "$INSTDIR\Source\resource\2set3set.reg"
+  Delete "$INSTDIR\Source\resource\ahnmatae.reg"
   Delete "$INSTDIR\Source\resource\ARWDWN.ico"
   Delete "$INSTDIR\Source\resource\ARWUP.ico"
   Delete "$INSTDIR\Source\resource\about.ico"
