@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/immsec.c,v 1.2 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 

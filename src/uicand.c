@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/uicand.c,v 1.3 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -56,6 +56,17 @@ WPARAM wParam;
 LPARAM lParam;
 {
     HWND hUIWnd;
+#if 1
+    HWND hSvrWnd;
+    HIMC hIMC;
+    LPINPUTCONTEXT lpIMC;
+    static INT dy=0;
+#endif
+    DWORD dwPushedCand;
+    POINT pt;
+    RECT rc;
+    INT select;
+    INT offset;
 
     switch (message)
     {
@@ -64,20 +75,75 @@ LPARAM lParam;
             break;
 
         case WM_SETCURSOR:
+#if (WINVER >= 0x0500)
+            SetCursor(LoadCursor(NULL,IDC_HAND));
+#endif
+            if (dy == 0)
+            {
+                TEXTMETRIC tm;
+                HDC hDC;
+
+                hDC = CreateIC(TEXT("DISPLAY"),NULL,NULL,NULL);
+                GetTextMetrics(hDC,&tm);
+                dy = tm.tmHeight + tm.tmExternalLeading;
+                DeleteDC(hDC);
+            }
+
+            select = 0;
+            offset = 0;
+            {
+                GetCursorPos(&pt);
+                ScreenToClient(hWnd,&pt);
+                GetClientRect(hWnd,&rc);
+                if (!PtInRect(&rc,pt))
+                    return 0;
+
+                pt.y -= GetSystemMetrics(SM_CYEDGE);
+                if (pt.y > 0)
+                    select = pt.y / dy + ((pt.y % dy) ? 1:0);
+                if (select == 0)
+                    offset = -2;
+            }
+            if ((HIWORD(lParam) != WM_LBUTTONDOWN) &&
+                (HIWORD(lParam) != WM_RBUTTONDOWN)) 
+                 return DefWindowProc(hWnd,message,wParam,lParam);
+            if ((HIWORD(lParam) == WM_LBUTTONDOWN))
+            {
+#if 0
+                else if (select > 9)
+                {
+                    if (pt.x < 14)
+                        offset = -2;
+                    else
+                        offset = 2;
+                    select = 0;
+                }
+#endif
+                MyDebugPrint((TEXT("Cand offset %d\n"),offset));
+                hSvrWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
+                if (select > 0 &&
+                    (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) )
+                {
+                    lpIMC = ImmLockIMC(hIMC);
+                    ConvHanja(hIMC,offset,select);
+	            ImmUnlockIMC(hIMC);
+                    break;
+                }
+            }
         case WM_MOUSEMOVE:
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
             DragUI(hWnd,message,wParam,lParam);
-            if ((message == WM_SETCURSOR) &&
-                (HIWORD(lParam) != WM_LBUTTONDOWN) &&
-                (HIWORD(lParam) != WM_RBUTTONDOWN)) 
-                    return DefWindowProc(hWnd,message,wParam,lParam);
-            if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP))
+            if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP)) {
+	        MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
                 SetWindowLong(hWnd,FIGWL_MOUSE,0L);
+	    }
             break;
 
         case WM_MOVE:
             hUIWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
+
+	    MyDebugPrint((TEXT(" x CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
             if (IsWindow(hUIWnd))
                 SendMessage(hUIWnd,WM_UI_CANDMOVE,wParam,lParam);
             break;
@@ -135,9 +201,26 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
         {
             if (!lpUIExtra->bVertical)
             {
+		UINT dy = GetCompFontHeight(lpUIExtra);
+		UINT hy = GetSystemMetrics(SM_CYFULLSCREEN);
+		POINT pt;
+
                 lppt->x = lpIMC->cfCompForm.ptCurrentPos.x;
-                lppt->y = lpIMC->cfCompForm.ptCurrentPos.y +
-                                     GetCompFontHeight(lpUIExtra);
+                lppt->y = lpIMC->cfCompForm.ptCurrentPos.y + dy;
+                                     //GetCompFontHeight(lpUIExtra);
+				     //
+		pt.x = lppt->x;
+		pt.y = lppt->y;
+		
+		ClientToScreen(lpIMC->hWnd,&pt);
+		if ((pt.y + 9 * dy) > hy) {
+		    pt.x += dy + 2;
+		    pt.y = hy - 10 * dy;
+		    ScreenToClient(lpIMC->hWnd,&pt);
+		    lppt->x = pt.x;
+		    lppt->y = pt.y;
+		}
+		MyDebugPrint((TEXT("XXX #1\n")));
             }
             else
             {
@@ -179,7 +262,8 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
         lpUIExtra->uiCand.hWnd = 
                 CreateWindowEx(WS_EX_WINDOWEDGE,
                              (LPTSTR)szCandClassName,NULL,
-                             WS_COMPDEFAULT | WS_DLGFRAME,
+                             WS_COMPNODEFAULT,
+                             //WS_COMPDEFAULT | WS_DLGFRAME,
                              lpUIExtra->uiCand.pt.x,
                              lpUIExtra->uiCand.pt.y,
                              1,1,
@@ -214,12 +298,26 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     SIZE sz;
     HWND hSvrWnd;
     HBRUSH hbrHightLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
+#if 0
     HBRUSH hbrLGR = GetStockObject(LTGRAY_BRUSH);
-    HFONT hOldFont;
+#else
+    HBRUSH hbrLGR = (HBRUSH)(COLOR_BTNFACE + 1);
+#endif
+    HFONT hOldFont = NULL;
 
     GetClientRect(hCandWnd,&rc);
     hDC = BeginPaint(hCandWnd,&ps);
+    FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
     SetBkMode(hDC,TRANSPARENT);
+
+#if 0
+    MoveToEx(hDC, rc.left+1,rc.top+1,NULL);
+    LineTo(hDC, rc.left+1,rc.bottom-1);
+    LineTo(hDC, rc.right-1,rc.bottom-1);
+    LineTo(hDC, rc.right-1,rc.top+1);
+    LineTo(hDC, rc.left+1,rc.top+1);
+#endif
+
     hSvrWnd = (HWND)GetWindowLongPtr(hCandWnd,FIGWL_SVRWND);
 
     if (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC))
@@ -233,7 +331,14 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
             for (i = lpCandList->dwPageStart; 
                  i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
             {
-                lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[i]);
+		TCHAR num[3];
+                wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
+
+		if (i >= lpCandList->dwCount) 
+		    lpstr=(LPMYSTR)(LPSTR)" ";
+		else
+                    lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[i]);
+
                 MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz);
                 if (((LPMYCAND)lpCandInfo)->cl.dwSelection == (DWORD)i)
                 {
@@ -245,11 +350,13 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                 else
                 {
                     hbr = SelectObject(hDC,hbrLGR);
-                    PatBlt(hDC,0,height,rc.right,sz.cy,PATCOPY);
+                    //PatBlt(hDC,0,height,rc.right,sz.cy,PATCOPY);
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,RGB(0,0,0));
                 }
-                MyTextOut(hDC,GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
+		if (i < lpCandList->dwCount)
+                    MyTextOut(hDC,GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
+                MyTextOut(hDC,10 + GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
                 height += sz.cy;
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);
@@ -313,12 +420,11 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
         MoveWindow(lpUIExtra->uiCand.hWnd,
                        rc.left,
                        rc.top,
-                       width+ 4 * GetSystemMetrics(SM_CXEDGE),
+                       width+ 10 + 4 * GetSystemMetrics(SM_CXEDGE),
+		       /* 10 is a left margin */
                        height+ 4 * GetSystemMetrics(SM_CYEDGE),
                        TRUE);
-
     }
-
 }
 
 /**********************************************************************/
@@ -360,6 +466,20 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             caf.dwStyle        = CFS_CANDIDATEPOS;
             caf.ptCurrentPos.x = pt.x;
             caf.ptCurrentPos.y = pt.y;
+#if 0
+            GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
+	    if ((int)rc.left != -1 && (int)rc.left < 4096 ) {
+		POINT spt;
+		spt.x = (int)rc.left;
+		spt.y = (int)rc.top;
+		MyDebugPrint((TEXT("S X,Y:%d,%d\n"),spt.x,spt.y));
+		ScreenToClient(lpIMC->hWnd, &spt);
+		MyDebugPrint((TEXT("C X,Y:%d,%d\n"),spt.x,spt.y));
+
+		caf.ptCurrentPos.x = spt.x;
+		caf.ptCurrentPos.y = spt.y;
+	    }
+#endif
             ImmSetCandidateWindow(lpUIExtra->hIMC,&caf);
         }
         return;
@@ -377,6 +497,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             ShowWindow(lpUIExtra->uiCand.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiCand.bShow = TRUE;
             InvalidateRect(lpUIExtra->uiCand.hWnd,NULL,FALSE);
+
             SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y));
         }
         return;

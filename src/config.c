@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/config.c,v 1.4 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -40,8 +40,11 @@ Module Name:
 #include "saenaru.h"
 #include "prsht.h"
 #include "resource.h"
+#include "malloc.h"
 
 #define MAX_PAGES 3
+
+
 
 /**********************************************************************/
 /*                                                                    */
@@ -175,7 +178,9 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lP
 /**********************************************************************/
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam)
 {
+    DWORD dwTemp;
     NMHDR FAR *lpnm;
+    HWND  hwndRadio;
     LPPROPSHEETPAGE lpPropSheet = (LPPROPSHEETPAGE)(GetWindowLongPtr(hDlg, DWLP_USER));
 
     switch(message)
@@ -191,6 +196,52 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                     break;
         
                 case PSN_APPLY:
+                    dwTemp = 0;
+                    if (IsDlgButtonChecked(hDlg, IDC_COMPOSITE_TYPING))
+                        dwTemp |= COMPOSITE_TYPING;
+                    if (IsDlgButtonChecked(hDlg, IDC_CONCURRENT_TYPING))
+                        dwTemp |= CONCURRENT_TYPING;
+                    if (IsDlgButtonChecked(hDlg, IDC_BACKSPACE_BY_JAMO))
+                        dwTemp |= BACKSPACE_BY_JAMO;
+                    if (IsDlgButtonChecked(hDlg, IDC_KSX1002_SUPPORT))
+                        dwTemp |= KSX1002_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_KSX1001_SUPPORT))
+                        dwTemp |= KSX1001_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_FULL_MULTIJOMO))
+                        dwTemp |= FULL_MULTIJOMO;
+                    if (IsDlgButtonChecked(hDlg, IDC_USE_SHIFT_SPACE))
+                        dwTemp |= USE_SHIFT_SPACE;
+                    if (IsDlgButtonChecked(hDlg, IDC_DVORAK_SUPPORT))
+                        dwTemp |= DVORAK_SUPPORT;
+                    dwOptionFlag = dwTemp;
+
+                    SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
+
+		    dwTemp = 0;
+		    if (dwLayoutFlag == 0)
+			dwLayoutFlag = LAYOUT_OLD2BUL;
+		    if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_OLD2BUL))
+                        dwTemp = LAYOUT_OLD2BUL;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_3FIN))
+                        dwTemp = LAYOUT_3FIN;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_390))
+                        dwTemp = LAYOUT_390;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_NEW2BUL))
+                        dwTemp = LAYOUT_NEW2BUL;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_NEW3BUL))
+                        dwTemp = LAYOUT_NEW3BUL;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_AHNMATAE))
+                        dwTemp = LAYOUT_AHNMATAE;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_3SUN))
+                        dwTemp = LAYOUT_3SUN;
+		    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_USER))
+                        dwTemp = LAYOUT_USER;
+                    dwLayoutFlag = dwTemp;
+
+                    SetDwordToSetting(TEXT("LayoutFlag"), dwLayoutFlag);
+
+		    set_keyboard(dwLayoutFlag);
+		    
                     break;
 
                 case PSN_RESET:
@@ -207,6 +258,58 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
         case WM_INITDIALOG:
             SetWindowLongPtr(hDlg, DWLP_USER, (LONG_PTR)lParam);
             lpPropSheet = (LPPROPSHEETPAGE)lParam;
+
+#if 0
+	    if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_NEW2BUL) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+	    else if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_NEW3BUL) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+	    else if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_OLD2BUL) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+	    else if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_3BULFINAL) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+	    else if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_390) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+	    else if (hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_AHNMATAE) )
+	        SendMessage (hwndRadio, BM_SETCHECK, BST_CHECKED, 0) ;
+#endif
+            /* Global options */
+            CheckDlgButton(hDlg, IDC_CONCURRENT_TYPING, 
+                                (dwOptionFlag & CONCURRENT_TYPING) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_COMPOSITE_TYPING, 
+                                (dwOptionFlag & COMPOSITE_TYPING) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_KSX1001_SUPPORT, 
+                                (dwOptionFlag & KSX1001_SUPPORT) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_KSX1002_SUPPORT, 
+                                (dwOptionFlag & KSX1002_SUPPORT) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_BACKSPACE_BY_JAMO, 
+                                (dwOptionFlag & BACKSPACE_BY_JAMO) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_FULL_MULTIJOMO, 
+                                (dwOptionFlag & FULL_MULTIJOMO) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_DVORAK_SUPPORT, 
+                                (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
+                                (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0);
+
+            /* Layout */
+	    if (dwLayoutFlag == 0)
+		dwLayoutFlag = LAYOUT_OLD2BUL;
+            CheckDlgButton(hDlg, IDC_LAYOUT_OLD2BUL, 
+                                (dwLayoutFlag == LAYOUT_OLD2BUL) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_3FIN, 
+                                (dwLayoutFlag == LAYOUT_3FIN) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_390, 
+                                (dwLayoutFlag == LAYOUT_390) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_NEW2BUL, 
+                                (dwLayoutFlag == LAYOUT_NEW2BUL) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_NEW3BUL, 
+                                (dwLayoutFlag == LAYOUT_NEW3BUL) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_AHNMATAE, 
+                                (dwLayoutFlag == LAYOUT_AHNMATAE) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_3SUN, 
+                                (dwLayoutFlag == LAYOUT_3SUN) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_USER, 
+                                (dwLayoutFlag >= LAYOUT_USER) ? 1 : 0);
             break;
 
         case WM_DESTROY:
@@ -219,6 +322,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
             break;
 
         case WM_COMMAND:
+            dwTemp = LAYOUT_NEW2BUL;
+            //SetDwordToSetting(TEXT("Layout"), dwLayoutFlag);
             break;
 
         default:
@@ -303,7 +408,6 @@ INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPA
                                 (dwDebugFlag & DEBF_THREADID) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_DEBF_GUIDELINE, 
                                 (dwDebugFlag & DEBF_GUIDELINE) ? 1 : 0);
-            
 #endif
             break;
 
@@ -325,4 +429,159 @@ INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPA
     }
     return TRUE;
 } 
+
+#if 1
+#define SAENARU_KEYBOARD_2SET 2
+#define SAENARU_KEYBOARD_3SET 3
+static
+DWORD string_to_hex(TCHAR* p)
+{
+    DWORD ret = 0;
+    UINT remain = 0;
+
+    if (*p == 'U')
+	p++;
+
+    while (*p != '\0') {
+	if (*p >= '0' && *p <= '9')
+	    remain = *p - '0';
+	else if (*p >= 'a' && *p <= 'f')
+	    remain = *p - 'a' + 10;
+	else if (*p >= 'A' && *p <= 'F')
+	    remain = *p - 'A' + 10;
+	else
+	    return 0;
+
+	ret = ret * 16 + remain;
+	p++;
+    }
+    return ret;
+}
+
+UINT
+load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard_map)
+{
+    int i;
+    WCHAR *line, *p, *saved_position;
+    TCHAR buf[256];
+    //FILE* file;
+    DWORD key, value;
+    UINT type;
+    INT sz, len;
+    WCHAR name[256];
+    //LPTSTR kbuf=NULL;
+    LPTSTR kbuf=NULL;
+    WCHAR _map[94];
+
+    WCHAR achValue[256]; 
+
+    //NabiKeyboardMap *keyboard_map;
+    //
+    if (lpszKeyboard == NULL && nKeyboard <10)
+    {
+        DWORD cchValue = 256;
+        DWORD retCode;
+	HKEY hKey;
+
+        if (!GetRegKeyHandle(TEXT("\\Keyboard"), &hKey))
+            return 0;
+
+        achValue[0] = '\0'; 
+        retCode = RegEnumValue(hKey, nKeyboard, 
+            achValue, 
+            &cchValue, 
+            NULL, 
+            NULL,
+            NULL,
+            NULL);
+
+        if (retCode != ERROR_SUCCESS ) 
+        { 
+            MyDebugPrint((TEXT("(%d) %s\n"), nKeyboard, achValue));
+            return 0;
+        }
+	lpszKeyboard = (LPCTSTR) &achValue;
+    }
+
+    sz= GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,NULL);
+    if (sz <= 0) {
+    	MyDebugPrint((TEXT("Saenaru: Keyboard not found\n")));
+    	return 0;
+    }
+
+    MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
+    kbuf=(LPTSTR) malloc(sz);
+    //
+    if (kbuf == (LPTSTR)NULL) {
+    	MyDebugPrint((TEXT("Saenaru: Can't read keyboard registry\n")));
+    	return 0;
+    }
+
+    GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,kbuf);
+    //keyboard_map = g_malloc(sizeof(NabiKeyboardMap));
+
+    /* init */
+    type = SAENARU_KEYBOARD_3SET;
+    //keyboard_map->filename = g_strdup(filename);
+    //name = NULL;
+    //MyDebugPrint((TEXT("Saenaru: %s\n"),kbuf));
+
+    for (i = 0; i < 94; i++)
+    	_map[i] = i + '!';
+    	//_map[i] = 0;
+
+    for (line = Mystrtok(kbuf, TEXT("\0"));
+	 ;
+	 line = Mystrtok(saved_position, TEXT("\0"))) {
+	len=Mylstrlen(line);
+        saved_position=line+len+1;
+
+        //MyDebugPrint((TEXT("Saenaru: %s:%d\n"),line,len));
+	if (len==0) break;
+
+	p = Mystrtok(line, TEXT(" \t\0"));
+        MyDebugPrint((TEXT("tok: %s\n"),p));
+	/* comment */
+	if (p == NULL || p[0] == '#')
+	    continue;
+
+	if (Mylstrcmp(p, TEXT("Name:")) == 0) {
+	    p = Mystrtok(NULL, TEXT("\0"));
+	    if (p == NULL)
+		continue;
+	    //name = g_strdup(p);
+	    continue;
+	} else if (Mylstrcmp(p, TEXT("Type2")) == 0) {
+	    type = SAENARU_KEYBOARD_2SET;
+	} else {
+	    key = string_to_hex(p);
+	    if (key == 0)
+		continue;
+
+	    p = Mystrtok(NULL, TEXT(" \t"));
+	    if (p == NULL)
+		continue;
+	    value = string_to_hex(p);
+	    if (value == 0)
+		continue;
+
+	    if (key < '!' || key > '~')
+		continue;
+
+	    MyDebugPrint((TEXT("REG %x=%x\n"),(DWORD)key,(DWORD)value));
+
+	    _map[key - '!'] = (WCHAR)value;
+	}
+    }
+    free(kbuf);
+
+    if (keyboard_map != NULL)
+	for (i=0;i<94;i++) keyboard_map[i]=_map[i];	
+
+    //if (name == NULL)
+    //	name = g_path_get_basename(keyboard_map->filename);
+
+    return type;
+}
+#endif
 

@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/toascii.c,v 1.3 2003/10/23 20:00:34 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -79,7 +79,6 @@ UINT WINAPI ImeToAsciiEx (UINT uVKey,UINT uScanCode,CONST LPBYTE lpbKeyState,LPT
         IMEKeyupHandler( hIMC, uVKey, lParam, lpbKeyState);
     else
         IMEKeydownHandler( hIMC, uVKey, lParam, lpbKeyState);
-
 
     // Clear static value, no more generated message!
     lpCurTransKey = NULL;

@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/dic2.c,v 1.4 2003/10/23 20:00:33 perky Exp $
+ * $Perky$
  */
 /*++
 
@@ -415,7 +415,7 @@ void PASCAL lZenToHan(LPMYSTR lpDst,LPMYSTR lpSrc)
             }
             else {
                 //
-                // this case means it is not Japanese char
+                // this case means it is not Korean char
                 //
                 *lpDst++ = *lpSrc;
             }
