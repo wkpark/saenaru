@@ -1,6 +1,6 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru$
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.1 2003/12/26 22:03:08 perky Exp $
 
 !define RELVERSION      "031226"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
@@ -66,7 +66,7 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "${REGISTRY_PATH}" "" $INSTDIR
 
   ;IME keys
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout file" "kbdkor.kbd"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout file" "kbdkor.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout text" "새나루 한글 입력기"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "한글 입력기 (새나루)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
