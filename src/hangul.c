@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.3 2004/10/06 18:18:52 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1011,7 +1011,7 @@ static const HangulCompose compose_table_ahnmatae[] = {
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
-  { 0x11a811bc, 0x11aa }, /* jongseong kiyeok + sios	= ssangekiyeok	*/
+  { 0x11a811bc, 0x11a9 }, /* jongseong kiyeok + ieung	= ssangekiyeok	*/
 
   { 0x11ab11bd, 0x11ac }, /* jongseong nieun  + cieuc	= nieun-cieuc	*/
   { 0x11ab11c2, 0x11ad }, /* jongseong nieun  + hieuh	= nieun-hieuh	*/
