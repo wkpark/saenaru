@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.4 2004/10/10 10:58:44 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1031,6 +1031,9 @@ LPBYTE lpbKeyState;
             case VK_8:
             case VK_9:
                 select= wParam - VK_1 + 1;
+                break;
+            case VK_ESCAPE:
+                select= 1;
                 break;
             default:
                 break;
