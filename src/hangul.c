@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.3 2004/10/06 18:18:52 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.4 2004/10/07 15:40:34 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1787,7 +1787,7 @@ BOOL hangul_ic_insert( HangulIC *ic, WCHAR ch, UINT idx)
 int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 {
     int kind;
-    WCHAR comb=0, cho=0, jong=0;
+    WCHAR comb=0, cho=0, jong=0, last=0;
     BOOL ctyping=0;
 
     *cs = 0;
@@ -1810,13 +1810,17 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 // 초성+초성은 두벌식의 오토마타에서 원래 지원하지 않는다.
                 // 그러나, 나비가 지원하므로 지원한다 :)
                 comb = hangul_compose(ic->cho, jamo);
+		// 동시치기일 경우는 순서를 바꿔서 초+초 조합
+		if ( !hangul_is_choseong(comb) && ctyping)
+		    comb = hangul_compose(jamo,ic->cho);
+
                 if ( hangul_is_choseong(comb) ) {
                     ic->cho=comb;
                     hangul_ic_pop(ic);
                     hangul_ic_push(ic,comb);
                     ic->last=jamo;
                     return 0;
-                } else {
+		} else {
                     *cs = hangul_ic_commit(ic);
                     // 초성을 compose할 수 없다.
                     ic->cho=jamo;
@@ -1938,8 +1942,10 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 }
                 break;
             case 2: // 종성 + 중성
-                if (ic->jong != ic->last)
+                if (ic->jong != ic->last) {
                     hangul_jongseong_dicompose(ic->jong, &jong, &cho);
+		}
+		last = hangul_jongseong_to_choseong(ic->last);
 
                 if (jong && cho)
                     ic->jong = jong;
@@ -1951,7 +1957,10 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 
                 *cs = hangul_ic_commit(ic);
                 // XXX
-                ic->cho = cho;
+		if (last != cho)
+		    ic->cho = last;
+		else
+		    ic->cho = cho;
                 ic->jung = jamo;
                 hangul_ic_push(ic,cho);
                 hangul_ic_push(ic,jamo);
