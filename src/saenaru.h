@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include <indicml.h>
@@ -103,7 +103,7 @@ typedef TCHAR             MYCHAR;
 #define MAXCANDSTRSIZE          16
 #define MAXGLCHAR               32
 //#define MAXCANDSTRNUM           32
-#define MAXCANDSTRNUM           128
+#define MAXCANDSTRNUM           256
 
 
 /* for GlobalAlloc */
@@ -512,6 +512,7 @@ WORD PASCAL DeleteWord(LPSTR,LPSTR);
 void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
 long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR);
 void SetRegMultiString(LPCTSTR lpszFlag, DWORD dwFlag);
+long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
 void PASCAL SetGlobalFlags();
 void GetRegKeyList(LPCTSTR lpszSubDir);
 BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey);
