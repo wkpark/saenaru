@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.4 2003/12/27 15:20:44 perky Exp $
  */
 
 #include <windows.h>
@@ -98,7 +98,19 @@ BOOL WINAPI DLLEntry (
             lpDicFileName += GetSaenaruDirectory(lpDicFileName,256);
             if (*(lpDicFileName-1) != TEXT('\\'))
                 *lpDicFileName++ = TEXT('\\');
-            LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
+            {
+#if 1
+                INT sz;
+                sz= GetRegStringValue(TEXT("\\Dictionary"),TEXT("default"),NULL);
+                if (sz <= 0) {
+                    LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
+                } else
+                    GetRegStringValue(TEXT("\\Dictionary"),TEXT("default"),lpDicFileName);
+                MyDebugPrint((TEXT("Saenaru: dicfile %s:%d\n"), lpDicFileName,sz));
+#else
+                LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
+#endif
+            }
 
             // read registry
             SetGlobalFlags();
