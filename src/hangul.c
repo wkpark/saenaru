@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.9 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.10 2004/12/03 15:48:02 wkpark Exp $
  */
 
 #include <windows.h>
@@ -953,17 +953,21 @@ static const HangulCompose compose_table_default[] = {
   { 0x11071107, 0x1108 }, /* choseong  pieup  + pieup	= ssangpieup	*/
   { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
   { 0x110c110c, 0x110d }, /* choseong  cieuc  + cieuc	= ssangcieuc	*/
+  { 0x11621162, 0x1164 }, /* jungseong ae      + ae	= yae		*/
   { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
+  { 0x11661166, 0x1168 }, /* jungseong e      + e	= ye		*/
   { 0x11671175, 0x1168 }, /* jungseong yeo    + i	= ye		*/
   { 0x11691161, 0x116a }, /* jungseong o      + a	= wa		*/
   { 0x11691162, 0x116b }, /* jungseong o      + ae	= wae		*/
   { 0x11691175, 0x116c }, /* jungseong o      + i	= oe		*/
   { 0x116e1165, 0x116f }, /* jungseong u      + eo	= weo		*/
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
+  { 0x116e116e, 0x1172 }, /* jungseong u      + u	= yu		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
   { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
   { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
+  { 0x11751175, 0x1174 }, /* jungseong i      + i	= yi		*/
 
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
@@ -997,17 +1001,21 @@ static const HangulCompose compose_table_2set[] = {
   { 0x11071109, 0x11b9 }, /* choseong  pieup  + sios	= pieup-sios	*/
   { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
   { 0x110c110c, 0x110d }, /* choseong  cieuc  + cieuc	= ssangcieuc	*/
+  { 0x11621162, 0x1164 }, /* jungseong ae      + ae	= yae		*/
   { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
+  { 0x11661166, 0x1168 }, /* jungseong e      + e	= ye		*/
   { 0x11671175, 0x1168 }, /* jungseong yeo    + i	= ye		*/
   { 0x11691161, 0x116a }, /* jungseong o      + a	= wa		*/
   { 0x11691162, 0x116b }, /* jungseong o      + ae	= wae		*/
   { 0x11691175, 0x116c }, /* jungseong o      + i	= oe		*/
   { 0x116e1165, 0x116f }, /* jungseong u      + eo	= weo		*/
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
+  { 0x116e116e, 0x1172 }, /* jungseong u      + u	= yu		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
   { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
   { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
+  { 0x11751175, 0x1174 }, /* jungseong i      + i	= yi		*/
 
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
