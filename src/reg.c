@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/reg.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/reg.c,v 1.4 2003/12/26 09:32:51 perky Exp $
  */
 
 #include <windows.h>
@@ -228,7 +228,10 @@ GetRegStringValue (
     lstrcpy (szRegInfoPath, g_szRegInfoPath) ;
     if (lpszSubKey)
         lstrcat (szRegInfoPath, lpszSubKey) ;
-    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+
+    MyDebugPrint((TEXT("GetRegString: %s: path=%s\n"), lpszKey, szRegInfoPath));
+
+    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
