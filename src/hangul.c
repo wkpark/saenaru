@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.5 2004/10/09 06:52:12 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.6 2004/10/09 07:10:32 wkpark Exp $
  */
 
 #include <windows.h>
@@ -946,6 +946,7 @@ typedef struct _HangulCompose	HangulCompose;
 
 static const HangulCompose compose_table_default[] = {
   { 0x11001100, 0x1101 }, /* choseong  kiyeok + kiyeok	= ssangkiyeok	*/
+  { 0x11001109, 0x11a9 }, /* choseong  kiyeok + sios	= kiyeok-sios	*/
   { 0x11031103, 0x1104 }, /* choseong  tikeut + tikeut	= ssangtikeut	*/
   { 0x11071107, 0x1108 }, /* choseong  pieup  + pieup	= ssangpieup	*/
   { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
@@ -959,8 +960,48 @@ static const HangulCompose compose_table_default[] = {
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
-/*  { 0x11751163, 0x1164 }, /* jungseong i      + ya	= yae		*/
-/*  { 0x11751167, 0x1168 }, /* jungseong i      + yeo	= ye		*/
+  { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
+  { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
+  { 0x11ab11bd, 0x11ac }, /* jongseong nieun  + cieuc	= nieun-cieuc	*/
+  { 0x11ab11c2, 0x11ad }, /* jongseong nieun  + hieuh	= nieun-hieuh	*/
+  { 0x11af11a8, 0x11b0 }, /* jongseong rieul  + kiyeok	= rieul-kiyeok	*/
+  { 0x11af11b7, 0x11b1 }, /* jongseong rieul  + mieum	= rieul-mieum	*/
+  { 0x11af11b8, 0x11b2 }, /* jongseong rieul  + pieup	= rieul-pieup	*/
+  { 0x11af11ba, 0x11b3 }, /* jongseong rieul  + sios	= rieul-sios	*/
+  { 0x11af11c0, 0x11b4 }, /* jongseong rieul  + thieuth = rieul-thieuth	*/
+  { 0x11af11c1, 0x11b5 }, /* jongseong rieul  + phieuph = rieul-phieuph	*/
+  { 0x11af11c2, 0x11b6 }, /* jongseong rieul  + hieuh	= rieul-hieuh	*/
+  { 0x11b811ba, 0x11b9 }, /* jongseong pieup  + sios	= pieup-sios	*/
+  { 0x11ba11ba, 0x11bb }, /* jongseong sios   + sios	= ssangsios	*/
+};
+
+static const HangulCompose compose_table_2set[] = {
+  { 0x11001100, 0x1101 }, /* choseong  kiyeok + kiyeok	= ssangkiyeok	*/
+  { 0x11001109, 0x11aa }, /* choseong  kiyeok + sios	= kiyeok-sios	*/
+  { 0x1102110c, 0x11ac }, /* choseong  nieun  + cieuc	= nieun-cieuc	*/
+  { 0x11021112, 0x11ad }, /* choseong  nieun  + hieuh	= nieun-hieuh	*/
+  { 0x11031103, 0x1104 }, /* choseong  tikeut + tikeut	= ssangtikeut	*/
+  { 0x11051100, 0x11b0 }, /* choseong  rieul  + kiyeok	= rieul-kiyeok	*/
+  { 0x11051106, 0x11b1 }, /* choseong  rieul  + mieum	= rieul-mieum	*/
+  { 0x11051107, 0x11b2 }, /* choseong  rieul  + pieup	= rieul-pieup	*/
+  { 0x11051109, 0x11b3 }, /* choseong  rieul  + sios	= rieul-sios	*/
+  { 0x11051110, 0x11b4 }, /* choseong  rieul  + thieuth = rieul-thieuth	*/
+  { 0x11051111, 0x11b5 }, /* choseong  rieul  + phieuph = rieul-phieuph	*/
+  { 0x11051112, 0x11b6 }, /* choseong  rieul  + hieuh	= rieul-hieuh	*/
+  { 0x11071107, 0x1108 }, /* choseong  pieup  + pieup	= ssangpieup	*/
+  { 0x11071109, 0x11b9 }, /* choseong  pieup  + sios	= pieup-sios	*/
+  { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
+  { 0x110c110c, 0x110d }, /* choseong  cieuc  + cieuc	= ssangcieuc	*/
+  { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
+  { 0x11671175, 0x1168 }, /* jungseong yeo    + i	= ye		*/
+  { 0x11691161, 0x116a }, /* jungseong o      + a	= wa		*/
+  { 0x11691162, 0x116b }, /* jungseong o      + ae	= wae		*/
+  { 0x11691175, 0x116c }, /* jungseong o      + i	= oe		*/
+  { 0x116e1165, 0x116f }, /* jungseong u      + eo	= weo		*/
+  { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
+  { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
+  { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
+
   { 0x11a811a8, 0x11a9 }, /* jongseong kiyeok + kiyeok	= ssangekiyeok	*/
   { 0x11a811ba, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sois	*/
   { 0x11ab11bd, 0x11ac }, /* jongseong nieun  + cieuc	= nieun-cieuc	*/
@@ -1218,13 +1259,18 @@ static const HangulCompose compose_table_yet[] = {
 };
 
 //#define compose_table compose_table_default
-static HangulCompose *compose_table = (HangulCompose *) compose_table_default;
-static int compose_table_size = sizeof(compose_table_default) / sizeof(HangulCompose);
+static HangulCompose *compose_table = (HangulCompose *) compose_table_2set;
+static int compose_table_size = sizeof(compose_table_2set) / sizeof(HangulCompose);
 
 int PASCAL set_compose(UINT type)
 {
     switch (type)
     {
+	case 1:
+           compose_table = (HangulCompose *) compose_table_2set;
+           compose_table_size =
+		   sizeof(compose_table_2set) / sizeof(HangulCompose);
+           break;
         case 3:
            compose_table = (HangulCompose *) compose_table_ahnmatae;
            compose_table_size =
@@ -1276,7 +1322,7 @@ int PASCAL set_keyboard(UINT type)
         case LAYOUT_OLD2BUL:
             keyboard_table=(WCHAR *)keyboard_table_2;
 	    atype=2;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_3FIN:
             keyboard_table=(WCHAR *)keyboard_table_3final;
@@ -1298,7 +1344,7 @@ int PASCAL set_keyboard(UINT type)
 	     load_keyboard_map_from_reg(TEXT("새두벌"),0,keyboard_table_user);
 	    if (atype)
 	        keyboard_table=keyboard_table_user;
-	    ctype=0;
+	    ctype=1;
 	    break;
 	case LAYOUT_NEW3BUL:
             atype=
@@ -1811,7 +1857,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 // 그러나, 나비가 지원하므로 지원한다 :)
                 comb = hangul_compose(ic->cho, jamo);
 		// 동시치기일 경우는 순서를 바꿔서 초+초 조합
-		if ( ctyping && !hangul_is_choseong(comb))
+		if ( ctyping && !comb)
 		    comb = hangul_compose(jamo,ic->cho);
 
                 if ( hangul_is_choseong(comb) ) {
@@ -1820,14 +1866,23 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                     hangul_ic_push(ic,comb);
                     ic->last=jamo;
                     return 0;
-		} else {
-                    *cs = hangul_ic_commit(ic);
-                    // 초성을 compose할 수 없다.
-                    ic->cho=jamo;
-                    hangul_ic_push(ic,jamo);
-                    ic->laststate=1;
+		} else if ( hangul_is_jongseong(comb) ) {
+		    // 초+초 -> 종성이 되는 경우
+		    // IME 2002에서 지원하므로
+                    ic->jong=comb;
+                    ic->cho=0;
+                    hangul_ic_pop(ic);
+                    hangul_ic_push(ic,comb);
+                    ic->last=jamo;
+                    ic->laststate=3;
                     return -1;
                 }
+                // 초성을 compose할 수 없다.
+                *cs = hangul_ic_commit(ic);
+                ic->cho=jamo;
+                hangul_ic_push(ic,jamo);
+                ic->laststate=1;
+                return -1;
                 break;
             case 2: // 초성+중성
                 ic->jung=jamo;
@@ -1874,7 +1929,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 break;
             case 2: // 중성 + 중성
                 comb = hangul_compose(ic->jung, jamo);
-		// 동시치기일 경우는 순서를 바꿔서 초+초 조합
+		// 동시치기일 경우는 순서를 바꿔서 중+중 조합
 		if ( ctyping && !hangul_is_jungseong(comb))
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( hangul_is_jungseong(comb) ) {
@@ -1923,6 +1978,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
             case 1: // 초성을 종성으로 바꿔서
                 jong = hangul_choseong_to_jongseong(jamo);
                 comb = hangul_compose(ic->jong, jong);
+		// 동시치기일 경우는 순서를 바꿔서 종+종 조합
+		if ( ctyping && !hangul_is_jongseong(comb))
+		    comb = hangul_compose(jong,ic->jong);
                 if ( hangul_is_jongseong(comb) )
                 {
                     if (hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
@@ -1948,14 +2006,18 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 if (ic->jong != ic->last) {
                     hangul_jongseong_dicompose(ic->jong, &jong, &cho);
 		}
-		last = hangul_jongseong_to_choseong(ic->last);
+		last=ic->last;
+		if ( hangul_is_jongseong(ic->last) )
+		    last = hangul_jongseong_to_choseong(ic->last);
 
                 if (jong && cho)
                     ic->jong = jong;
                 else {
+		    // 분해되지 않으면 단종성의 경우
                     // 종성 + 중성: 마지막 종성을 초성으로 바꾸고 잠시 저장
                     cho = hangul_jongseong_to_choseong(ic->jong);
-		    ic->jong = 0; //종성을 지운다.
+		    if (cho)
+			ic->jong = 0; //종성을 지운다.
                 }
 
                 *cs = hangul_ic_commit(ic);
@@ -1975,6 +2037,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 // 그러나, 세벌식에서 두벌식 오토마타를 쓰기
                 // 위해서 종성 처리를 넣는다.
                 comb = hangul_compose(ic->jong, jamo);
+		// 동시치기일 경우는 순서를 바꿔서 종+종 조합
+		if ( ctyping && !comb)
+		    comb = hangul_compose(jamo,ic->jong);
                 if ( comb )
                 {
                     if (hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
@@ -1986,7 +2051,15 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                         ic->laststate=3;
                         return 0;
                     }
-                } else {
+		    // 종+종
+                    ic->jong=comb;
+                    hangul_ic_pop(ic);
+                    hangul_ic_push(ic,comb);
+                    ic->last=jamo;
+                    ic->laststate=3;
+                    return 0;
+                }
+		{
                     *cs = hangul_ic_commit(ic);
                     ic->jong=jamo;
                     hangul_ic_push(ic,jamo);
@@ -2360,6 +2433,13 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                         ic->laststate=3;
                         return 0;
                     }
+		    // XXX 종+종
+                    ic->jong=comb;
+                    hangul_ic_pop(ic);
+                    hangul_ic_push(ic,comb);
+                    ic->last=jamo;
+                    ic->laststate=3;
+                    return 0;
 		}
 		{
                     *cs = hangul_ic_commit(ic);
