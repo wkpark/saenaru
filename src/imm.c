@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.4 2004/10/06 18:18:52 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.5 2004/10/08 14:48:18 wkpark Exp $
  */
 
 #include "windows.h"
@@ -188,7 +188,12 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if ( (LOWORD(vKey) & 0x00FF) == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
     {
         //SHORT ShiftState = (GetKeyState(VK_SHIFT) >> 31) & 1;
-        SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
+        //SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
+        BYTE pbKeyState [256];
+        SHORT ShiftState;
+
+        GetKeyboardState((LPBYTE)&pbKeyState);
+        ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
         if (ShiftState)
             vKey = VK_HANGUL;
     }
