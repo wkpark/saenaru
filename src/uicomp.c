@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.4 2004/10/09 02:43:56 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -135,7 +135,8 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpUIExtra->uiDefComp.hWnd = 
             CreateWindowEx( WS_EX_WINDOWEDGE,
                          (LPTSTR)szCompStrClassName,NULL,
-                         WS_COMPDEFAULT | WS_DLGFRAME,
+                         //WS_COMPDEFAULT | WS_DLGFRAME,
+                         WS_COMPNODEFAULT,
                          lpUIExtra->uiDefComp.pt.x,
                          lpUIExtra->uiDefComp.pt.y,
                          1,1,
@@ -536,7 +537,7 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
         switch (bAttr)
         {
             case ATTR_INPUT:
-                SetTextColor(hDC,RGB(0,0,0));
+                // XXX SetTextColor(hDC,RGB(0,0,0));
                 //SetBkMode(hDC,TRANSPARENT);
                 MoveToEx(hDC, rc.right, rc.top, NULL);
                 LineTo  (hDC, rc.right, rc.bottom);
@@ -600,7 +601,9 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
     HFONT hOldFont = (HFONT)NULL;
     HWND hSvrWnd;
 
+    GetClientRect(hCompWnd,&rc);
     hDC = BeginPaint(hCompWnd,&ps);
+    //FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
 
     if (hFont = (HFONT)GetWindowLongPtr(hCompWnd,FIGWL_FONT))
         hOldFont = SelectObject(hDC,hFont);
@@ -626,19 +629,25 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
 
                 lpstr = GETLPCOMPSTR(lpCompStr);
                 lpattr = GETLPCOMPATTR(lpCompStr);
-                //SetBkMode(hDC,TRANSPARENT);
+                SetBkMode(hDC,TRANSPARENT);
                 if (lpIMC->cfCompForm.dwStyle)
                 {
                     // 이곳의 색을 조절하면
                     // 한글을 제대로 지원하지 않는 어플에서
                     // 좀 더 깔끔한 한글 출력을 지원할 수 있을 것이다.
                     HDC hPDC;
+                    //HBRUSH hBrush;
+                    //hBrush=CreateSolidBrush(GetBkColor(hDC));
+                    //FillRect(hDC,&rc,hBrush);
 
                     hPDC = GetDC(GetParent(hCompWnd));
                     GetClientRect (hCompWnd,&rc);
-                    SetBkColor(hDC,GetBkColor(hPDC));
+                    //SetBkColor(hDC,GetBkColor(hPDC));
+                    SetBkColor(hDC,GetBkColor(hDC));
+                    SetTextColor(hDC,GetTextColor(hDC));
                     //SetTextColor(hDC,RGB(127,127,127));
-                    SetBkMode(hDC,OPAQUE);
+                    //SetBkMode(hDC,OPAQUE);
+                    FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
 
                     lstart = GetWindowLong(hCompWnd,FIGWL_COMPSTARTSTR);
                     num = GetWindowLong(hCompWnd,FIGWL_COMPSTARTNUM);
@@ -653,6 +662,7 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
                 }
                 else
                 {
+                    FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
                     num = Mylstrlen(lpstr);
                     DrawTextOneLine(hCompWnd, hDC, lpstr, lpattr, num, fVert);
                 }

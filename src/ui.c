@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.4 2003/12/30 01:43:57 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.5 2004/10/09 02:43:56 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -503,7 +503,7 @@ LPARAM lParam;
             // Set the position of the candidate window to UIExtra.
             // This message is sent by the candidate window.
             //
-            lpIMC = ImmLockIMC(hUICurIMC);
+            //lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             lpUIExtra->uiCand.pt.x = (long)LOWORD(lParam);
@@ -511,8 +511,7 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT(" * CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra,FALSE);
-
-            ImmUnlockIMC(hUICurIMC);
+            //ImmUnlockIMC(hUICurIMC);
             GlobalUnlock(hUIExtra);
             break;
 #if 1
