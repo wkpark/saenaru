@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.6 2004/10/13 11:23:33 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.7 2004/11/29 17:06:14 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -1297,6 +1297,15 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 if (ch < '!' || ch > '~')
                      break;
                 MyDebugPrint((TEXT("RALT + %x\n"), ch));
+                {
+                    HWND hwnd = GetFocus ();
+                    if (hwnd != NULL) {
+                        HIMC hIMC = NULL;
+                        hIMC = ImmGetContext (hwnd);
+                        if (hIMC && IsCompStr(hIMC))
+                            MakeResultString(hIMC,TRUE);
+                    }
+                }
 #if 1
                 lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4 See WINUSER.H
                 MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
