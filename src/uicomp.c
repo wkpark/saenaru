@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/uicomp.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    UICOMP.C
-    
-++*/
 
 /**********************************************************************/
 #include "windows.h"
@@ -67,7 +61,7 @@ LPARAM lParam;
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
 #if 1
-//	Comp창은 움직일 필요가 없는 창이다. 
+//        Comp창은 움직일 필요가 없는 창이다. 
             DragUI(hWnd,message,wParam,lParam);
             if ((message == WM_SETCURSOR) &&
                 (HIWORD(lParam) != WM_LBUTTONDOWN) &&
@@ -535,8 +529,8 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
             case ATTR_INPUT:
                 SetTextColor(hDC,RGB(0,0,0));
                 //SetBkMode(hDC,TRANSPARENT);
-		MoveToEx(hDC, rc.right, rc.top, NULL);
-		LineTo  (hDC, rc.right, rc.bottom);
+                MoveToEx(hDC, rc.right, rc.top, NULL);
+                LineTo  (hDC, rc.right, rc.bottom);
                 break;
 
             case ATTR_TARGET_CONVERTED:
@@ -566,11 +560,11 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
         TextOut(hDC,x,y,lpstr,cnt);
         GetTextExtentPoint(hDC,lpstr,cnt,&sz);
         lpstr += cnt;
-	if (bAttr == ATTR_INPUT)
-	{
-		MoveToEx(hDC, rc.right, rc.top, NULL);
-		LineTo  (hDC, rc.right, rc.bottom);
-	}
+        if (bAttr == ATTR_INPUT)
+        {
+                MoveToEx(hDC, rc.right, rc.top, NULL);
+                LineTo  (hDC, rc.right, rc.bottom);
+        }
 
         if (!fVert)
             x += sz.cx;
@@ -703,3 +697,6 @@ void PASCAL SetFontCompWindow(LPUIEXTRA lpUIExtra)
 
 }
 
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

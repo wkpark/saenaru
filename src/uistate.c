@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/uistate.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    UISTATE.C
-    
-++*/
 
 /**********************************************************************/
 #include "windows.h"
@@ -283,10 +277,10 @@ DWORD PASCAL GetUINextMode( DWORD fdwConversion, DWORD dwPushed)
         {
             fdwConversion &= ~IME_CMODE_FULLSHAPE;
         }
-	else
-	{
+        else
+        {
             fdwConversion |= IME_CMODE_FULLSHAPE;
-	}
+        }
     }
     return fdwConversion;
 
@@ -458,10 +452,10 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                     }
 
                     case IDM_ABOUT:
-		        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
-		        (void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
+                        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+                        (void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
                         //ImmConfigureIME(GetKeyboardLayout(0), NULL, IME_CONFIG_GENERAL, 0);
-			ImmUnlockIMC(hIMC);
+                        ImmUnlockIMC(hIMC);
                         break;
 
                     default:
@@ -527,3 +521,6 @@ void PASCAL UpdateStatusWindow(LPUIEXTRA lpUIExtra)
         SendMessage(lpUIExtra->uiStatus.hWnd,WM_UI_UPDATE,0,0L);
 }
 
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/dic.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
 
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    DIC.C
-    
-++*/
 #include <windows.h>
 #include <immdev.h>
 #include "saenaru.h"
@@ -152,9 +147,9 @@ void PASCAL RevertText(HIMC hIMC)
     {
         lpstr = GETLPCOMPSTR(lpCompStr);
         lpread = GETLPCOMPREADSTR(lpCompStr);
-	/*
+        /*
         lHanToZen(lpstr,lpread,lpIMC->fdwConversion);
-	*/
+        */
 
         //
         // make attribute
@@ -312,8 +307,8 @@ set_compstr:
                 // Set the composition string to the structure.
                 //
                 Mylstrcpy(GETLPCOMPSTR(lpCompStr),lpstr);
-		if ((dwImeFlag & SAENARU_ONTHESPOT)&& Mylstrlen(lpstr) == 1)
-		   cs = *lpstr;
+                if ((dwImeFlag & SAENARU_ONTHESPOT)&& Mylstrlen(lpstr) == 1)
+                   cs = *lpstr;
 
                 lpstr = GETLPCOMPSTR(lpCompStr);
 
@@ -329,9 +324,9 @@ set_compstr:
                 // make attribute
                 //
                 lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),
-				ATTR_TARGET_CONVERTED, Mylstrlen(lpstr));
+                                ATTR_TARGET_CONVERTED, Mylstrlen(lpstr));
                 lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),
-				ATTR_TARGET_CONVERTED,
+                                ATTR_TARGET_CONVERTED,
                                 Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
 
                 //
@@ -348,8 +343,8 @@ set_compstr:
                 GnMsg.message = WM_IME_COMPOSITION;
                 GnMsg.wParam = cs;
                 GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-		if (dwImeFlag & SAENARU_ONTHESPOT)
-	            GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+                if (dwImeFlag & SAENARU_ONTHESPOT)
+                    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                 GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
                 bRc = TRUE;
@@ -365,7 +360,7 @@ set_compstr:
         // String is converted, so that open candidate.
         //
         int i = 0;
-	int pages = 0;
+        int pages = 0;
         LPDWORD lpdw;
 
         //
@@ -405,51 +400,51 @@ set_compstr:
             lpCandList->dwPageSize  = i;
         else
             lpCandList->dwPageSize  = MAXCANDPAGESIZE;
-	// Total pages
-	pages = i / lpCandList->dwPageSize + i % lpCandList->dwPageSize;
+        // Total pages
+        pages = i / lpCandList->dwPageSize + i % lpCandList->dwPageSize;
 
-	if (select)
-	{
-	    int sel = lpCandList->dwSelection / lpCandList->dwPageSize;
-	    sel *= lpCandList->dwPageSize;
-	    sel +=select - 1;
-	    if (sel >= i)
-	        sel = i - 1;
-	    lpCandList->dwSelection = sel;
-	    offset = 0;
-	}
-	else if (offset > 2)
-	{
-	    // last (END)
+        if (select)
+        {
+            int sel = lpCandList->dwSelection / lpCandList->dwPageSize;
+            sel *= lpCandList->dwPageSize;
+            sel +=select - 1;
+            if (sel >= i)
+                sel = i - 1;
+            lpCandList->dwSelection = sel;
+            offset = 0;
+        }
+        else if (offset > 2)
+        {
+            // last (END)
             lpCandList->dwSelection = i - 1;
-	    offset = 0; // reset
-	} else if (offset < -2)
-	{
-	    // first (HOME)
+            offset = 0; // reset
+        } else if (offset < -2)
+        {
+            // first (HOME)
             lpCandList->dwSelection = 0;
-	    offset = 0; // reset
-	}
+            offset = 0; // reset
+        }
 
-	// PgUp/PgDn
+        // PgUp/PgDn
         if (offset ==2) offset = lpCandList->dwPageSize;
-	else if (offset ==-2) offset = -(int)lpCandList->dwPageSize;
+        else if (offset ==-2) offset = -(int)lpCandList->dwPageSize;
 
-	if (offset < 0 && (int)(lpCandList->dwSelection + offset) < 0)
-	{
-	    int select = lpCandList->dwSelection + offset;
-	    //if (select < 0) select= pages * lpCandList->dwPageSize - offset;
-	    if (select < 0) select= 0;
-	    if (select >= i)
-		select = i - 1;    
+        if (offset < 0 && (int)(lpCandList->dwSelection + offset) < 0)
+        {
+            int select = lpCandList->dwSelection + offset;
+            //if (select < 0) select= pages * lpCandList->dwPageSize - offset;
+            if (select < 0) select= 0;
+            if (select >= i)
+                select = i - 1;    
             lpCandList->dwSelection = (DWORD)select;
-	} else {
+        } else {
             lpCandList->dwSelection += offset;
-	    if (offset > 1 && lpCandList->dwSelection >= (DWORD)i)
-		lpCandList->dwSelection = i - 1;
-	}
+            if (offset > 1 && lpCandList->dwSelection >= (DWORD)i)
+                lpCandList->dwSelection = i - 1;
+        }
 
-	// 맨 끝 + 1이면 맨 처음으로
-	if (lpCandList->dwSelection >= (DWORD)i)
+        // 맨 끝 + 1이면 맨 처음으로
+        if (lpCandList->dwSelection >= (DWORD)i)
         {
             lpCandList->dwPageStart = 0;
             lpCandList->dwSelection = 0;
@@ -536,19 +531,19 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
 
         lpptr = MyCharPrev( lpstr, lpstr+dwCurPos );
 
-	if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
-	    // Delete jamos
+        if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
+            // Delete jamos
             if (--ic.len > 0) {
-		ic.laststate--;    
+                ic.laststate--;    
                 *lpptr = cs = hangul_ic_get(&ic,0);
-	    } else {
-		hangul_ic_init(&ic);
+            } else {
+                hangul_ic_init(&ic);
                 Mylstrcpy( lpptr, lpstr+dwCurPos );
-		if (dwCurPos > 0)
-		    cs = *(lpptr-1);
-		dwCurPos--;
-	    }
-	} else {
+                if (dwCurPos > 0)
+                    cs = *(lpptr-1);
+                dwCurPos--;
+            }
+        } else {
             nChar = 1;
             if( lpstr == lpptr && Mylstrlen(lpstr) == nChar )
             {
@@ -559,9 +554,9 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             {
                 Mylstrcpy( lpptr, lpstr+dwCurPos );
                 dwCurPos -= nChar;
-	        cs = *(lpptr-1);
+                cs = *(lpptr-1);
             }
-	}
+        }
 
         fDone = TRUE;
     }
@@ -582,7 +577,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         lpstr = GETLPCOMPSTR(lpCompStr);
         lpread = GETLPCOMPREADSTR(lpCompStr);
         /*lZenToHan (lpread,lpstr);
-	 */
+         */
 
         lmemset(GETLPCOMPATTR(lpCompStr),ATTR_INPUT,Mylstrlen(lpstr));
         lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,Mylstrlen(lpread));
@@ -612,8 +607,8 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-	    if (dwImeFlag & SAENARU_ONTHESPOT)
-	        GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+            if (dwImeFlag & SAENARU_ONTHESPOT)
+                GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
         else
@@ -634,8 +629,8 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-	    if (dwImeFlag & SAENARU_ONTHESPOT)
-	        GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+            if (dwImeFlag & SAENARU_ONTHESPOT)
+                GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
             GnMsg.message = WM_IME_ENDCOMPOSITION;
@@ -697,7 +692,7 @@ WORD code;
 
     if (!dwStrLen)
     {
-	// 없으면 초기화
+        // 없으면 초기화
         InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
         GnMsg.message = WM_IME_STARTCOMPOSITION;
@@ -914,7 +909,7 @@ SBCS_BETA:
         {
             lHanToZen(lpread,lpstr,fdwConversion);
         }
-	*/
+        */
     }
     else
     {
@@ -995,45 +990,45 @@ LPBYTE lpbKeyState;
     // Candidate문자 선택
     if (IsConvertedCompStr(hIMC))
     {
-	switch( wParam )
-	{
-	    case VK_UP:
-		next=-1;
-		break;
-	    case VK_DOWN:
-		next=1;
-		break;
-	    case VK_NEXT:
-		next=2;
-		break;
-	    case VK_PRIOR:
-		next=-2;
-		break;
-	    case VK_HOME:
-		next=-100;
-	        break;
-	    case VK_END:
-		next=100;
-	        break;
-	    case VK_1:
-	    case VK_2:
-	    case VK_3:
-	    case VK_4:
-	    case VK_5:
-	    case VK_6:
-	    case VK_7:
-	    case VK_8:
-	    case VK_9:
-		select= wParam - VK_1 + 1;
-		break;
-	    default:
-		break;
-	}
-	if (next || select)
-	{
-	    ConvHanja(hIMC,next,select);
+        switch( wParam )
+        {
+            case VK_UP:
+                next=-1;
+                break;
+            case VK_DOWN:
+                next=1;
+                break;
+            case VK_NEXT:
+                next=2;
+                break;
+            case VK_PRIOR:
+                next=-2;
+                break;
+            case VK_HOME:
+                next=-100;
+                break;
+            case VK_END:
+                next=100;
+                break;
+            case VK_1:
+            case VK_2:
+            case VK_3:
+            case VK_4:
+            case VK_5:
+            case VK_6:
+            case VK_7:
+            case VK_8:
+            case VK_9:
+                select= wParam - VK_1 + 1;
+                break;
+            default:
+                break;
+        }
+        if (next || select)
+        {
+            ConvHanja(hIMC,next,select);
             return TRUE;
-	}
+        }
     }
 
     switch( wParam )
@@ -1041,38 +1036,38 @@ LPBYTE lpbKeyState;
         case VK_DELETE:
         case VK_BACK:
             if (IsConvertedCompStr(hIMC))
-	    {
+            {
                 FlushText(hIMC);
-	        return TRUE;
-	    } else if (IsCompStr(hIMC))
-	    {
+                return TRUE;
+            } else if (IsCompStr(hIMC))
+            {
                 DeleteChar(hIMC,wParam);
-	        return TRUE;
-	    }
+                return TRUE;
+            }
             break;
 
         case VK_HANJA:
         case VK_F9:
-	    hangul_ic_init(&ic);
-	    ConvHanja(hIMC,1,0);
-	    return TRUE;
-	    break;
+            hangul_ic_init(&ic);
+            ConvHanja(hIMC,1,0);
+            return TRUE;
+            break;
 
-	case VK_SPACE:
-	    lpIMC = ImmLockIMC(hIMC);
-	    // Get ConvMode from IMC.
-	    fdwConversion = lpIMC->fdwConversion;
+        case VK_SPACE:
+            lpIMC = ImmLockIMC(hIMC);
+            // Get ConvMode from IMC.
+            fdwConversion = lpIMC->fdwConversion;
             ImmUnlockIMC(hIMC);
 
-	    if (IsCompStr(hIMC) &&
-		    (fdwConversion & IME_CMODE_FULLSHAPE) &&
-		    (fdwConversion & IME_CMODE_NATIVE)) {
-		hangul_ic_init(&ic);
-		ConvHanja(hIMC,1,0);
-		return TRUE;
-	    }
+            if (IsCompStr(hIMC) &&
+                    (fdwConversion & IME_CMODE_FULLSHAPE) &&
+                    (fdwConversion & IME_CMODE_NATIVE)) {
+                hangul_ic_init(&ic);
+                ConvHanja(hIMC,1,0);
+                return TRUE;
+            }
 
-	    if (IsCompStr(hIMC))
+            if (IsCompStr(hIMC))
             {
                 MakeResultString(hIMC,TRUE);
 #if 0
@@ -1087,31 +1082,31 @@ LPBYTE lpbKeyState;
 
                 // Simulate a key release
                 //keybd_event( (BYTE)wParam, 0x0, KEYEVENTF_KEYUP, 0);
-		return TRUE;
-	    }
+                return TRUE;
+            }
 #if 0
-	    // 스페이스를 한자 페이지 넘기는 키로 사용한다.
-	    // 옵션으로 켜고 킬 수 있게.
+            // 스페이스를 한자 페이지 넘기는 키로 사용한다.
+            // 옵션으로 켜고 킬 수 있게.
             if (IsConvertedCompStr(hIMC))
-	    {
-	        ConvHanja(hIMC,1);
-	        return TRUE;
-	    }
+            {
+                ConvHanja(hIMC,1);
+                return TRUE;
+            }
 #endif
-	    break;
+            break;
 
-	case VK_LEFT:
-	case VK_RIGHT:
-	case VK_UP:
-	case VK_DOWN:
-	case VK_HOME:
-	case VK_END:
-	case VK_NEXT:
-	case VK_PRIOR:
+        case VK_LEFT:
+        case VK_RIGHT:
+        case VK_UP:
+        case VK_DOWN:
+        case VK_HOME:
+        case VK_END:
+        case VK_NEXT:
+        case VK_PRIOR:
 
-	case VK_TAB:
-	case VK_ESCAPE:
-	    if (IsCompStr(hIMC))
+        case VK_TAB:
+        case VK_ESCAPE:
+            if (IsCompStr(hIMC))
             {
                 MakeResultString(hIMC,TRUE);
                 // Simulate a key press
@@ -1119,24 +1114,24 @@ LPBYTE lpbKeyState;
 
                 // Simulate a key release
                 //keybd_event( (BYTE)wParam, 0x0, KEYEVENTF_KEYUP, 0);
-		return TRUE;
-	    }
-	    break;
+                return TRUE;
+            }
+            break;
 
         case VK_RETURN:
             if (IsConvertedCompStr(hIMC))
-		cf = TRUE;
+                cf = TRUE;
             MakeResultString(hIMC,TRUE);
 
             lpIMC = ImmLockIMC(hIMC);
 
-	    if (!cf)
-	    {
+            if (!cf)
+            {
 #if 0
                 if (IsWindow(lpIMC->hWnd))
                 {
                    //PostMessage(lpIMC->hWnd,WM_IME_KEYDOWN,wParam,lParam);
-		}
+                }
 #endif
                 TRANSMSG GnMsg;
                 GnMsg.message = WM_IME_KEYDOWN;
@@ -1148,39 +1143,39 @@ LPBYTE lpbKeyState;
 
                 // Simulate a key release
                 // keybd_event( VK_RETURN, 0x0d, KEYEVENTF_KEYUP, 0);
-	    }
+            }
             ImmUnlockIMC(hIMC);
-	    // spy++로 한글 IME2002의 행동을 살펴본 결과,
-	    // CompStr이 있을 경우는 RETURN을 치면 처음 이벤트가 생겼을 때 한번
-	    // 그리고, CompStr을 commit한 후에 다시 한번 키이벤트가 생겼다.
-	    // strings로 imekr61.ime를 살펴본 결과 keybd_event()를 쓰고 있었으며
-	    // saenaru는 이 방식을 따랐다.
-	    //
-	    // 고고타자를 통해 분석해보니, WM_IME_KEYDOWN이 먼저 생겼다.
-	    // 그래서 위처럼 GenerateMessage()를 이용해보니 keybd_event를 쓰지
-	    // 않아도 되었다.
-	    //
+            // spy++로 한글 IME2002의 행동을 살펴본 결과,
+            // CompStr이 있을 경우는 RETURN을 치면 처음 이벤트가 생겼을 때 한번
+            // 그리고, CompStr을 commit한 후에 다시 한번 키이벤트가 생겼다.
+            // strings로 imekr61.ime를 살펴본 결과 keybd_event()를 쓰고 있었으며
+            // saenaru는 이 방식을 따랐다.
+            //
+            // 고고타자를 통해 분석해보니, WM_IME_KEYDOWN이 먼저 생겼다.
+            // 그래서 위처럼 GenerateMessage()를 이용해보니 keybd_event를 쓰지
+            // 않아도 되었다.
+            //
             hangul_ic_init(&ic);
-	    return TRUE;
+            return TRUE;
 #if 0
             lpIMC = ImmLockIMC(hIMC);
             if (IsCandidate(lpIMC))
-	    {
+            {
                 MakeResultString(hIMC,TRUE);
-		cf = TRUE;
-	    }
+                cf = TRUE;
+            }
             ImmUnlockIMC(hIMC);
-	    if (cf) return TRUE;
+            if (cf) return TRUE;
 #endif
-	    break;
-
-	    /*
-        case VK_HANGUL:
-	    // Toggle HANGUL
-            ChangeMode(hIMC,TO_CMODE_HANGUL);
-	    return TRUE;
             break;
-	    */
+
+            /*
+        case VK_HANGUL:
+            // Toggle HANGUL
+            ChangeMode(hIMC,TO_CMODE_HANGUL);
+            return TRUE;
+            break;
+            */
 
 #ifdef DEBUG
         case VK_G:
@@ -1206,12 +1201,12 @@ LPBYTE lpbKeyState;
         ( VK_OEM_1 <= wParam && VK_OEM_9 >= wParam ) ||
         ( VK_MULTIPLY <= wParam && VK_DIVIDE >= wParam ))
     {
-	// RETURN은 통과되지 않고, 바로 윗부분에서 처리가 끝난다.
-	// 모질라만 잘 못 동작하지 않는다면 RETURN키도 처리할 수 있다.
+        // RETURN은 통과되지 않고, 바로 윗부분에서 처리가 끝난다.
+        // 모질라만 잘 못 동작하지 않는다면 RETURN키도 처리할 수 있다.
         return( FALSE );
     }
     else {
-	TCHAR szDev[80];
+        TCHAR szDev[80];
 
         wsprintf(szDev, TEXT("code: %x\r\n"), wParam);
         OutputDebugString(szDev);
@@ -1272,9 +1267,9 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
     if (fFlag)
     {
 #if 1
-	// 한글 IME 2002는 이상하게도, 먼저 WM_IME_ENDCOMPOSITION을 뱉고
-	// 그 다음에 WM_IME_COMPOSITION을 뱉는다.
-	// 이렇게 해야만 고고타자에서 정상 작동을 한다.
+        // 한글 IME 2002는 이상하게도, 먼저 WM_IME_ENDCOMPOSITION을 뱉고
+        // 그 다음에 WM_IME_COMPOSITION을 뱉는다.
+        // 이렇게 해야만 고고타자에서 정상 작동을 한다.
         GnMsg.message = WM_IME_ENDCOMPOSITION;
         GnMsg.wParam = 0;
         GnMsg.lParam = 0;
@@ -1284,18 +1279,18 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = 0;
         GnMsg.lParam = GCS_RESULTALL;
-	if (dwImeFlag & SAENARU_ONTHESPOT)
-	{
+        if (dwImeFlag & SAENARU_ONTHESPOT)
+        {
             LPMYSTR lpptr;
             LPMYSTR lpstr;
             DWORD dwCurPos;
-	
+        
             dwCurPos = lpCompStr->dwCursorPos;
             lpstr = GETLPCOMPSTR(lpCompStr);
             lpptr = MyCharPrev( lpstr, lpstr+dwCurPos );
 
-	    GnMsg.wParam = *lpptr;
-	}
+            GnMsg.wParam = *lpptr;
+        }
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 #if 0
         GnMsg.message = WM_IME_ENDCOMPOSITION;
@@ -1601,4 +1596,6 @@ Err0:
     return nSize;
 }
 
-
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

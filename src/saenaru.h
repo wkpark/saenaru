@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/saenaru.h,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    SAENARU.H
-    
-++*/
 
 #include <indicml.h>
 /**********************************************************************/
@@ -42,22 +36,22 @@ Module Name:
 /*      DebugOptions                                                  */
 /*                                                                    */
 /**********************************************************************/
-#define DEBF_THREADID        0x00000001
-#define DEBF_GUIDELINE       0x00000002
+#define DEBF_THREADID       0x00000001
+#define DEBF_GUIDELINE      0x00000002
 
-#define LOGF_ENTRY           0x00000001
-#define LOGF_API             0x00000002
-#define LOGF_APIOUT          0x00000004
-#define LOGF_KEY             0x00000008
+#define LOGF_ENTRY          0x00000001
+#define LOGF_API            0x00000002
+#define LOGF_APIOUT         0x00000004
+#define LOGF_KEY            0x00000008
 
-#define LAYOUT_OLD2BUL	     0x00000001
-#define LAYOUT_3FIN          0x00000002
-#define LAYOUT_390	     0x00000003
-#define LAYOUT_NEW2BUL	     0x00000004
-#define LAYOUT_NEW3BUL	     0x00000005
-#define LAYOUT_AHNMATAE	     0x00000006
-#define LAYOUT_3SUN	     0x00000007
-#define LAYOUT_USER	     0x00000008
+#define LAYOUT_OLD2BUL      0x00000001
+#define LAYOUT_3FIN         0x00000002
+#define LAYOUT_390	    0x00000003
+#define LAYOUT_NEW2BUL	    0x00000004
+#define LAYOUT_NEW3BUL	    0x00000005
+#define LAYOUT_AHNMATAE	    0x00000006
+#define LAYOUT_3SUN	    0x00000007
+#define LAYOUT_USER         0x00000008
 
 
 #define SAENARU_ONTHESPOT      0x00020000
@@ -321,10 +315,10 @@ typedef struct _tagMYGUIDELINE{
     DWORD dwPrivateID;
 } MYGUIDELINE, NEAR *PMYGUIDELINE, FAR *LPMYGUIDELINE;
 
-#define MAXICREADSIZE	10+2
-#define MAXICCOMPSIZE	2
+#define MAXICREADSIZE   10+2
+#define MAXICCOMPSIZE   2
 typedef struct _tagHangulIC {
-    //WCHAR 	read[10]; // L{1,3}V{1,3}T{0,3}
+    //WCHAR read[10]; // L{1,3}V{1,3}T{0,3}
     WCHAR read[MAXICREADSIZE];
     WCHAR comp[MAXICCOMPSIZE];
     WCHAR cho;
@@ -525,13 +519,13 @@ void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr);
 #ifdef DEBUG
 
 //#include "debug.h"
-#define	DEBUGPRINTF(arg)	DebugPrint##arg
-#define	DEBUGPRINTFW(arg)	DebugPrintW##arg
+#define DEBUGPRINTF(arg)	DebugPrint##arg
+#define DEBUGPRINTFW(arg)       DebugPrintW##arg
 
 #if !defined (DEBUG_LV)
-#define	DEBUG_LV	1
+#define DEBUG_LV                1
 #endif
-#define	DEBUGPRINTFEX(level,arg)	if((level) >= DEBUG_LV) DebugPrint##arg
+#define DEBUGPRINTFEX(level,arg)    if((level) >= DEBUG_LV) DebugPrint##arg
 
 #define MyDebugPrint(x) DebugPrint x
 int DebugPrint(LPCTSTR lpszFormat, ...);
@@ -539,19 +533,23 @@ int DebugPrint(LPCTSTR lpszFormat, ...);
 #define MyDebugPrint(x)
 #define ImeLog(dwFlag, lpStr) FALSE
 
-#define	DEBUGPRINTF(arg)	/*arg*/
-#define	DEBUGPRINTFW(arg)	/*arg*/
+#define DEBUGPRINTF(arg)        /*arg*/
+#define DEBUGPRINTFW(arg)       /*arg*/
 
-#define	DEBUGPRINTFEX(level,arg)	/*if((level) >= DEBUG_LV) DebugPrintfToFile##arg*/
+#define DEBUGPRINTFEX(level,arg)    /*if((level) >= DEBUG_LV) DebugPrintfToFile##arg*/
 
 #endif
 
 /* tsf.cpp */
 #if !defined (NO_TSF)
-BOOL	PASCAL	InitLanguageBar (void) ;
-void	PASCAL	UninitLanguageBar (void) ;
-BOOL	PASCAL	UpdateLanguageBarIfSelected (void) ;
-BOOL	PASCAL	UpdateLanguageBar (void) ;
-void	PASCAL	ActivateLanguageBar (BOOL) ;
-BOOL	PASCAL	IsTSFEnabled (void) ;
+BOOL PASCAL InitLanguageBar(void);
+void PASCAL UninitLanguageBar(void);
+BOOL PASCAL UpdateLanguageBarIfSelected(void);
+BOOL PASCAL UpdateLanguageBar(void);
+void PASCAL ActivateLanguageBar(BOOL);
+BOOL PASCAL IsTSFEnabled(void);
 #endif
+
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

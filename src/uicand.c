@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/uicand.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    UICAND.C
-    
-++*/
 
 /**********************************************************************/
 #include "windows.h"
@@ -126,7 +120,7 @@ LPARAM lParam;
                 {
                     lpIMC = ImmLockIMC(hIMC);
                     ConvHanja(hIMC,offset,select);
-	            ImmUnlockIMC(hIMC);
+                    ImmUnlockIMC(hIMC);
                     break;
                 }
             }
@@ -135,15 +129,15 @@ LPARAM lParam;
         case WM_RBUTTONUP:
             DragUI(hWnd,message,wParam,lParam);
             if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP)) {
-	        MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+                MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
                 SetWindowLong(hWnd,FIGWL_MOUSE,0L);
-	    }
+            }
             break;
 
         case WM_MOVE:
             hUIWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
 
-	    MyDebugPrint((TEXT(" x CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+            MyDebugPrint((TEXT(" x CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
             if (IsWindow(hUIWnd))
                 SendMessage(hUIWnd,WM_UI_CANDMOVE,wParam,lParam);
             break;
@@ -201,26 +195,26 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
         {
             if (!lpUIExtra->bVertical)
             {
-		UINT dy = GetCompFontHeight(lpUIExtra);
-		UINT hy = GetSystemMetrics(SM_CYFULLSCREEN);
-		POINT pt;
+                UINT dy = GetCompFontHeight(lpUIExtra);
+                UINT hy = GetSystemMetrics(SM_CYFULLSCREEN);
+                POINT pt;
 
                 lppt->x = lpIMC->cfCompForm.ptCurrentPos.x;
                 lppt->y = lpIMC->cfCompForm.ptCurrentPos.y + dy;
                                      //GetCompFontHeight(lpUIExtra);
-				     //
-		pt.x = lppt->x;
-		pt.y = lppt->y;
-		
-		ClientToScreen(lpIMC->hWnd,&pt);
-		if ((pt.y + 9 * dy) > hy) {
-		    pt.x += dy + 2;
-		    pt.y = hy - 10 * dy;
-		    ScreenToClient(lpIMC->hWnd,&pt);
-		    lppt->x = pt.x;
-		    lppt->y = pt.y;
-		}
-		MyDebugPrint((TEXT("XXX #1\n")));
+                                     //
+                pt.x = lppt->x;
+                pt.y = lppt->y;
+                
+                ClientToScreen(lpIMC->hWnd,&pt);
+                if ((pt.y + 9 * dy) > hy) {
+                    pt.x += dy + 2;
+                    pt.y = hy - 10 * dy;
+                    ScreenToClient(lpIMC->hWnd,&pt);
+                    lppt->x = pt.x;
+                    lppt->y = pt.y;
+                }
+                MyDebugPrint((TEXT("XXX #1\n")));
             }
             else
             {
@@ -331,12 +325,12 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
             for (i = lpCandList->dwPageStart; 
                  i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
             {
-		TCHAR num[3];
+                TCHAR num[3];
                 wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
 
-		if (i >= lpCandList->dwCount) 
-		    lpstr=(LPMYSTR)(LPSTR)" ";
-		else
+                if (i >= lpCandList->dwCount) 
+                    lpstr=(LPMYSTR)(LPSTR)" ";
+                else
                     lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[i]);
 
                 MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz);
@@ -354,7 +348,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,RGB(0,0,0));
                 }
-		if (i < lpCandList->dwCount)
+                if (i < lpCandList->dwCount)
                     MyTextOut(hDC,GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                 MyTextOut(hDC,10 + GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
                 height += sz.cy;
@@ -421,7 +415,7 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                        rc.left,
                        rc.top,
                        width+ 10 + 4 * GetSystemMetrics(SM_CXEDGE),
-		       /* 10 is a left margin */
+                       /* 10 is a left margin */
                        height+ 4 * GetSystemMetrics(SM_CYEDGE),
                        TRUE);
     }
@@ -468,17 +462,17 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             caf.ptCurrentPos.y = pt.y;
 #if 0
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
-	    if ((int)rc.left != -1 && (int)rc.left < 4096 ) {
-		POINT spt;
-		spt.x = (int)rc.left;
-		spt.y = (int)rc.top;
-		MyDebugPrint((TEXT("S X,Y:%d,%d\n"),spt.x,spt.y));
-		ScreenToClient(lpIMC->hWnd, &spt);
-		MyDebugPrint((TEXT("C X,Y:%d,%d\n"),spt.x,spt.y));
+            if ((int)rc.left != -1 && (int)rc.left < 4096 ) {
+                POINT spt;
+                spt.x = (int)rc.left;
+                spt.y = (int)rc.top;
+                MyDebugPrint((TEXT("S X,Y:%d,%d\n"),spt.x,spt.y));
+                ScreenToClient(lpIMC->hWnd, &spt);
+                MyDebugPrint((TEXT("C X,Y:%d,%d\n"),spt.x,spt.y));
 
-		caf.ptCurrentPos.x = spt.x;
-		caf.ptCurrentPos.y = spt.y;
-	    }
+                caf.ptCurrentPos.x = spt.x;
+                caf.ptCurrentPos.y = spt.y;
+            }
 #endif
             ImmSetCandidateWindow(lpUIExtra->hIMC,&caf);
         }
@@ -567,3 +561,6 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
     }
 }
 
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

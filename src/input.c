@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/input.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    INPUT.C
-    
-++*/
 
 /**********************************************************************/
 #include "windows.h"
@@ -62,12 +56,12 @@ LPBYTE lpbKeyState;
         case VK_CONTROL:
             //goto not_proccessed;
             break;
-	    /*
-	case VK_ESCAPE:
-	case VK_LEFT:
-	case VK_RIGHT:
-	    break;
-	    */
+            /*
+        case VK_ESCAPE:
+        case VK_LEFT:
+        case VK_RIGHT:
+            break;
+            */
 
         default:
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
@@ -100,3 +94,7 @@ LPBYTE lpbKeyState;
 {
     return FALSE;
 }
+
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/process.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    PROCESS.C
-    
-++*/
 
 /**********************************************************************/
 /* These tables are for ImeProcessKey(). And IMEProcessKey function   */
@@ -119,7 +113,7 @@ BYTE bNoCompAlt[] = {   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
 
 BYTE bComp[] = {        0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,0,        // 00-0F
                         0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,        // 10-0F
-			// 0x19 == VK_HANJA
+                        // 0x19 == VK_HANJA
                         //0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,        // 10-0F
                         1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,        // 20-0F
                         1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,        // 30-0F
@@ -193,3 +187,7 @@ BYTE bCompAlt[] = {     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};        // 00-0F
+
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/fdebug.c,v 1.5 2003/10/23 20:00:33 perky Exp $
+ * $Saenaru: saenaru/src/fdebug.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    DEBUG.C
-    
-++*/
 
 #include <windows.h>
 #include "immdev.h"
@@ -115,3 +109,6 @@ void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr)
 
 #endif //DEBUG
 
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

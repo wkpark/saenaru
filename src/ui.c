@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/ui.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    UI.C
-    
-++*/
 
 /**********************************************************************/
 #include <windows.h>
@@ -404,7 +398,7 @@ LPARAM lParam;
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
 
-	    //hangul_ic_init(&ic);
+            //hangul_ic_init(&ic);
 
             HideCompWindow(lpUIExtra);
             GlobalUnlock(hUIExtra);
@@ -509,7 +503,7 @@ LPARAM lParam;
             lpUIExtra->uiCand.pt.x = (long)LOWORD(lParam);
             lpUIExtra->uiCand.pt.y = (long)HIWORD(lParam);
 
-	    MyDebugPrint((TEXT(" * CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+            MyDebugPrint((TEXT(" * CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra,FALSE);
 
             ImmUnlockIMC(hUICurIMC);
@@ -921,7 +915,7 @@ void PASCAL DragUI( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SetWindowLong(hWnd,FIGWL_MOUSE,FIM_CAPUTURED);
             }
 #if (WINVER >= 0x0500)
-	      else
+              else
                 SetCursor(LoadCursor(NULL,IDC_HAND));
 #endif
             break;
@@ -1184,18 +1178,18 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
         return CallNextHookEx(hHookWnd, code, wParam, lParam);
 
     if (dwOptionFlag & DVORAK_SUPPORT) {
-	HIMC hIMC = NULL;
-	HWND hwnd = GetFocus ();
-	LPINPUTCONTEXT lpIMC;
+        HIMC hIMC = NULL;
+        HWND hwnd = GetFocus ();
+        LPINPUTCONTEXT lpIMC;
 
-	if (hwnd != NULL) {
-	    hIMC = ImmGetContext (hwnd);
-	    lpIMC = ImmLockIMC(hIMC);
+        if (hwnd != NULL) {
+            hIMC = ImmGetContext (hwnd);
+            lpIMC = ImmLockIMC(hIMC);
             if (lpIMC) {
-	        dvorak = !(lpIMC->fdwConversion & IME_CMODE_NATIVE);
-	    }
-	    ImmUnlockIMC(hIMC);
-	}
+                dvorak = !(lpIMC->fdwConversion & IME_CMODE_NATIVE);
+            }
+            ImmUnlockIMC(hIMC);
+        }
     }
 
     lpmsg = (LPMSG)lParam;
@@ -1222,9 +1216,9 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             {
                // SHORT ShiftState = (GetAsyncKeyState(VK_LSHIFT) >> 31) & 1;
                 TCHAR szDev[80];
-		SHORT ShiftState;
+                SHORT ShiftState;
                 GetKeyboardState((LPBYTE)&pbKeyState);
-		ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
+                ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
 
                 wsprintf((LPTSTR)szDev,TEXT("ShiftState is %x\r\n"),ShiftState);
                 OutputDebugString((LPTSTR)szDev);
@@ -1246,24 +1240,24 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             {
                 WORD dv;
                 SHORT sc;
-		UINT caps = 0;
+                UINT caps = 0;
 
                 GetKeyboardState((LPBYTE)&pbKeyState);
 
-		caps = pbKeyState[VK_CAPITAL];
-		if (caps) {
-		    if (vKey >= 'A' && vKey <= 'Z')
-			vKey += 'a' - 'A';
-		    else if (vKey >= 'a' && vKey <= 'z')
-			vKey -= 'a' - 'A';
-		    dv = qwerty2dvorak_table[vKey - '!'];
-		    if (dv >= 'A' && dv <= 'Z')
-			dv += 'a' - 'A';
-		    else if (dv >= 'a' && dv <= 'z')
-			dv -= 'a' - 'A';
-		} else
-		    dv = qwerty2dvorak_table[vKey - '!'];
-		 
+                caps = pbKeyState[VK_CAPITAL];
+                if (caps) {
+                    if (vKey >= 'A' && vKey <= 'Z')
+                        vKey += 'a' - 'A';
+                    else if (vKey >= 'a' && vKey <= 'z')
+                        vKey -= 'a' - 'A';
+                    dv = qwerty2dvorak_table[vKey - '!'];
+                    if (dv >= 'A' && dv <= 'Z')
+                        dv += 'a' - 'A';
+                    else if (dv >= 'a' && dv <= 'z')
+                        dv -= 'a' - 'A';
+                } else
+                    dv = qwerty2dvorak_table[vKey - '!'];
+                 
                 lpmsg->wParam = dv;
                 sc = VkKeyScan(dv);
                 lpmsg->lParam &= ~0x00ff0000;
@@ -1280,10 +1274,10 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             GetKeyboardState((LPBYTE)&pbKeyState);
             if ( pbKeyState[VK_RMENU] & 0x80 && !(lpmsg->lParam & 0x01000000))
             {
-		WORD ch;
+                WORD ch;
 
                 ToAscii(vKey,(lpmsg->lParam | 0xff0000)>>16,pbKeyState,&ch,0);
-		ch = 0xff & ch;
+                ch = 0xff & ch;
                 if (ch < '!' || ch > '~')
                      break;
                 MyDebugPrint((TEXT("RALT + %x\n"), ch));
@@ -1292,14 +1286,14 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
 
                 if (dvorak)
-	 	{
-		    WORD dv;
+                 {
+                    WORD dv;
                     SHORT sc;
 
                     dv = qwerty2dvorak_table[ch - '!'];
                     sc = VkKeyScan(dv);
                     lpmsg->wParam = sc;
-		}
+                }
 #endif
             }
             break;
@@ -1349,3 +1343,7 @@ void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra)
     }
 }
 #endif
+
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

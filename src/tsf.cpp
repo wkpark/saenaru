@@ -1,4 +1,34 @@
-/* imported from the skkime by wkpark */
+/*
+ * This file is part of Saenaru.
+ *
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ */
+
 #if !defined (NO_TSF)
 #include "windows.h"
 #include "tchar.h"
@@ -42,8 +72,8 @@ LONG DllRelease(void)
 
 // {830DE831-E04D-40bb-8683-1E179A5F1A4F}
 /*
- *    ‚±‚Ì class id ‚Í skimic.dll ‚Ì—˜—p‚µ‚Ä‚¢‚é‚à‚Ì‚¾‚ªA‚±‚ê‚ðŽg‚Á‚Ä‚Í‚¢‚¯‚È‚¢
- *    ‚æ‚¤‚¾BŽÀÛ‚ÉŽg‚¤ class id ‚É‚Â‚¢‚Ä‚Íc
+ *    ª³ªÎ class id ªÏ skimic.dll ªÎ××éÄª·ªÆª¤ªëªâªÎªÀª¬¡¢ª³ªìªòÞÅªÃªÆªÏª¤ª±ªÊª¤
+ *    ªèª¦ªÀ¡£?ð·ªËÞÅª¦ class id ªËªÄª¤ªÆªÏ¡¦
  *
  */
 #if 0
@@ -51,8 +81,8 @@ const CLSID    c_clsidSaenaruTextService    = {
     0x830de831, 0xe04d, 0x40bb, { 0x86, 0x83, 0x1e, 0x17, 0x9a, 0x5f, 0x1a, 0x4f }
 };
 #endif
-/*    ‚±‚Ì IME ‚Æ‚¢‚¤??ƒ“‚Æ“¯‚¶ CLSID ‚ÉÝ’è‚·‚é•K—v‚ª‚ ‚é‚æ‚¤‚¾BMS-IME2002 ‚Ì
- *    ‹““®‚ðŽQÆ‚·‚é‚ÉB
+/*    ª³ªÎ IME ªÈª¤ª¦??«óªÈÔÒª¸ CLSID ªËàâïÒª¹ªëù±é©ª¬ª¢ªëªèª¦ªÀ¡£MS-IME2002 ªÎ
+ *    ?ÔÑªò?ðÎª¹ªëªË¡£
  */
 #if 1
 const CLSID c_clsidSaenaruTextService    = {
@@ -83,8 +113,8 @@ const GUID c_guidItemButtonShape = {
     0xd97b240b, 0x2c61, 0x4b9b, { 0xae, 0xcf, 0xd5, 0xc3, 0xcf, 0xdd, 0xfc, 0xbb }
 };
 
-/*    “¯‚¶ button ‚ÉŒ©‚¦‚é‚ªAskimic.dll ‚Æ“¯‚¶‚à‚Ì‚ðŽg‚¤‚Ì‚Í”ð‚¯‚È‚¯‚ê‚Î‚È‚ç‚È
- *    ‚¢‚æ‚¤‚¾B“¯‚¶‚É‚µ‚Ä‚¢‚é‚Ì‚¾‚Æ‚¢‚¤æ“üŠÏ‚ªŽ¸”s‚¾‚Á‚½cB
+/*    ÔÒª¸ button ªËÌ¸ª¨ªëª¬¡¢skimic.dll ªÈÔÒª¸ªâªÎªòÞÅª¦ªÎªÏù­ª±ªÊª±ªìªÐªÊªéªÊ
+ *    ª¤ªèª¦ªÀ¡£ÔÒª¸ªËª·ªÆª¤ªëªÎªÀªÈª¤ª¦à»ìý?ª¬ã÷ø¨ªÀªÃª¿¡¦¡£
  */
 #if 0
 const GUID    c_guidItemButtonCMode = {
@@ -97,7 +127,7 @@ const GUID    c_guidItemButtonIME    = {
 };
 #endif
 
-/*    ƒL???ƒh??ƒ“‚Ì GUIDB‹°‚ç‚­‚Í‚±‚Ì’l‚ÅˆêˆÓ‚ÉŒˆ’è‚·‚é”¤B
+/*    «­???«É??«óªÎ GUID¡£Íðªéª¯ªÏª³ªÎö·ªÇìéëòªËÌ½ïÒª¹ªë?¡£
  */
 #if 1
 const GUID c_guidKeyboardItemButton    = {
@@ -119,7 +149,7 @@ InitLanguageBar (void)
         
     DEBUGPRINTF ((TEXT ("Enter::InitLanguageBar\n")));
 
-    /* Logon Žž‚É‚Í TSF ‚ÍŒÄ‚Ño‚³‚È‚¢B*/
+    /* Logon ãÁªËªÏ TSF ªÏû¼ªÓõóªµªÊª¤¡£*/
 #if 0
     if (gfSaenaruSecure) {
         DEBUGPRINTF ((TEXT ("Leave::InitLanguageBar - security\n")));
@@ -154,7 +184,7 @@ InitLanguageBar (void)
     {
         DEBUGPRINTFEX (99, (TEXT ("InitLanguageBar failed.\n")));
         if (shMSCTF != NULL)
-	{
+        {
             FreeLibrary (shMSCTF);
             shMSCTF = NULL;
         }
@@ -231,7 +261,7 @@ UpdateLanguageBar (void)
 
     DEBUGPRINTFEX (100, (TEXT ("UpdateLanguageBar ()\n")));
 
-    /*    –ˆ‰ñƒŒƒWƒXƒgƒŠ‚ðŽQÆ‚·‚é‚Ì‚Í³‚µ‚¢‚Ì‚¾‚ë‚¤‚©H */
+    /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
     fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
@@ -297,7 +327,7 @@ UpdateLanguageBar (void)
     return    fRetval;
 }
 
-/*    Œ¾Œêƒo?‚ÉƒAƒCƒe?‚ð’Ç‰Á/íœ‚·‚éB
+/*    åëåÞ«Ð?ªË«¢«¤«Æ?ªòõÚÊ¥/Þûð¶ª¹ªë¡£
  */
 void    PASCAL
 ActivateLanguageBar (
@@ -332,7 +362,7 @@ ActivateLanguageBar (
 
     DEBUGPRINTFEX (100, (TEXT ("ActivateLanguageBar (Select:%d)\n"), fSelect));
 
-    /*    –ˆ‰ñƒŒƒWƒXƒgƒŠ‚ðŽQÆ‚·‚é‚Ì‚Í³‚µ‚¢‚Ì‚¾‚ë‚¤‚©H */
+    /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
     fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
     if (fSelect) {
 #if 0
@@ -489,10 +519,10 @@ _GetCurrentHIMC (void)
     return    hIMC;
 }
 
-/*    ƒL???ƒhƒAƒCƒRƒ“(Œ¾Œêƒo?‚Ì)‚Ì?Ž¦/”ñ?Ž¦‚ðØ‚è‘Ö‚¦‚éŠÖ”B
- *¦
- *    Text Service Framework ‚Æ“‡‚³‚ê‚Ä‚¢‚éê‡‚É‚ÍƒL???ƒh‚ÌƒAƒCƒRƒ“‚ª
- *    ?Ž¦‚³‚ê‚é‚ªA‚»‚¤‚Å‚È‚¢ê‡‚É‚Í IME ICON ‚ª—˜—p‚³‚ê‚é‚æ‚¤‚Å‚ ‚éB
+/*    «­???«É«¢«¤«³«ó(åëåÞ«Ð?ªÎ)ªÎ?ãÆ/Þª?ãÆªòï·ªêôðª¨ªë??¡£
+ *¡Ø
+ *    Text Service Framework ªÈ÷ÖùêªµªìªÆª¤ªëíÞùêªËªÏ«­???«ÉªÎ«¢«¤«³«óª¬
+ *    ?ãÆªµªìªëª¬¡¢ª½ª¦ªÇªÊª¤íÞùêªËªÏ IME ICON ª¬××éÄªµªìªëªèª¦ªÇª¢ªë¡£
  */
 BOOL
 _ShowKeyboardIcon (
@@ -515,9 +545,9 @@ _ShowKeyboardIcon (
                 pSysDevItem->Release ();
             }
 
-            /*    Text Service Framework ‚Æ IME ‚ª“‡‚³‚ê‚Ä‚¢‚È‚¢ê‡‚É‚ÍA
-             *    IME Icon ‚ª?Ž¦‚³‚ê‚Ä‚µ‚Ü‚¢A‚»‚ê‚ª Button ‚Ì1‚Â‚Æd‚È‚é
-             *    ‚½‚ß‚ÉAƒL???ƒhƒAƒCƒRƒ“‚ð•ÏX‚·‚éB
+            /*    Text Service Framework ªÈ IME ª¬÷ÖùêªµªìªÆª¤ªÊª¤íÞùêªËªÏ¡¢
+             *    IME Icon ª¬?ãÆªµªìªÆª·ªÞª¤¡¢ª½ªìª¬ Button ªÎ1ªÄªÈñìªÊªë
+             *    ª¿ªáªË¡¢«­???«É«¢«¤«³«óªò?ÌÚª¹ªë¡£
              */
 #if defined (not_integrate_tsf) || 0
             if (SUCCEEDED (pItem->QueryInterface (IID_ITfSystemLangBarItem, (void**)&pSysItem)) && pSysItem != NULL) {
@@ -539,3 +569,6 @@ _ShowKeyboardIcon (
 
 #endif
 
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

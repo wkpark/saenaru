@@ -1,6 +1,36 @@
-/* imported from the skkime and modified by wkpark */
+/*
+ * This file is part of Saenaru.
+ *
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ */
+
 #if !defined (NO_TSF)
-/*    LanguageBar ‚Ìu“ü—Í•ûŽ®Hv??ƒ“‚ðŽi‚éB
+/*    LanguageBar ªÎ¡¸ìýÕôÛ°ãÒ£¿¡¹??«óªòÞÉªë¡£
  */
 #include "windows.h"
 #include "tchar.h"
@@ -10,9 +40,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-/*    Platform SDK ‚ÉˆË‘¶‚·‚é•”•ªBPlatform SDK ‚É include path
- *    ‚ð’Ê‚·‚Ì‚ª—Ç‚¢‚Ì‚©”Û‚©Bo—ˆ‚ê‚Î DDK ‚É‚±‚ê‚ç‚Ì header ‚ð
- *    “n‚µ‚Ä‚­‚ê‚é‚Æ—Ç‚¢‚Ì‚¾‚ªB
+/*    Platform SDK ªËëîðíª¹ªëÝ»ÝÂ¡£Platform SDK ªË include path
+ *    ªò÷×ª¹ªÎª¬ÕÞª¤ªÎª«Üúª«¡£õó?ªìªÐ DDK ªËª³ªìªéªÎ header ªò
+ *    Ô¤ª·ªÆª¯ªìªëªÈÕÞª¤ªÎªÀª¬¡£
  */
 #include "c:\Program Files\Microsoft SDK\include\msctf.h"
 #include "olectl.h"
@@ -83,8 +113,8 @@ enum {
     MENU_ITEM_INDEX_3FIN,
 };
 
-/*    c??ƒ“‚Ì”‚¾‚¯ class ‚ª•K—v‚¾‚Æl‚¦‚é‚Ì‚ª—Ç‚³‚»‚¤‚¾B
- *    Œã‚©‚ç’Ç‰Á‚µ‚È‚¢‚Æ‚¢‚¯‚È‚¢‚©‚ÈB
+/*    ¡¦??«óªÎ?ªÀª± class ª¬ù±é©ªÀªÈÍÅª¨ªëªÎª¬ÕÞªµª½ª¦ªÀ¡£
+ *    ý­ª«ªéõÚÊ¥ª·ªÊª¤ªÈª¤ª±ªÊª¤ª«ªÊ¡£
  */
 class CLangBarItemImeButton : public ITfLangBarItemButton,
                              public ITfSource
@@ -221,9 +251,9 @@ CLangBarItemImeButton::GetStatus (
     return S_OK;
 }
 
-/*    Button ‚Ì tooltip ‚ð•Ô‚·B•Ô‚·’l‚Í SysAllocString ‚É‚æ‚Á‚Ä
- *    Šm•Û‚µ‚½—Ìˆæ‚É‘‚©‚ê‚é•K—v‚ª‚ ‚éB‚±‚ê‚ð SysFreeString ‚·
- *    ‚é‚Ì‚ÍAŒÄ‚Ño‚µ‚½‘¤‚ÌÓ”C‚Å‚ ‚éB
+/*    Button ªÎ tooltip ªòÚ÷ª¹¡£Ú÷ª¹ö·ªÏ SysAllocString ªËªèªÃªÆ
+ *    ü¬ÜÁª·ª¿ÖÅæ´ªËßöª«ªìªëù±é©ª¬ª¢ªë¡£ª³ªìªò SysFreeString ª¹
+ *    ªëªÎªÏ¡¢û¼ªÓõóª·ª¿ö°ªÎô¡ìòªÇª¢ªë¡£
  */
 STDAPI
 CLangBarItemImeButton::GetTooltipString (
@@ -238,13 +268,13 @@ CLangBarItemImeButton::GetTooltipString (
 
 /*    ITfLangBarItemButton::OnClick
  *
- *    ‚±‚Ì method ‚Íƒ†?ƒU‚ªŒ¾Œêƒo?‚Ì TF_LBI_STYLE_BTN_BUTTON ‚Ü‚½
- *    ‚Í TF_LBI_STYLE_BTN_TOGGLE ƒX?ƒCƒ‹‚ðŽ‚Á‚Ä‚¢‚é??ƒ“‚Ìã‚Å?
- *    ƒEƒX‚ðƒNƒŠƒbƒN‚µ‚½Žž‚ÉŒÄ‚Ño‚³‚ê‚éB
- *    ‚à‚µ??ƒ“ item ‚ª TF_LBI_STYLE_BTN_BUTTON ƒX?ƒCƒ‹‚ðŽ‚½‚È‚¢
- *    ‚Ì‚È‚çA‚±‚Ì method Žg‚í‚ê‚È‚¢B
+ *    ª³ªÎ method ªÏ«æ?«¶ª¬åëåÞ«Ð?ªÎ TF_LBI_STYLE_BTN_BUTTON ªÞª¿
+ *    ªÏ TF_LBI_STYLE_BTN_TOGGLE «¹?«¤«ëªòò¥ªÃªÆª¤ªë??«óªÎß¾ªÇ?
+ *    «¦«¹ªò«¯«ê«Ã«¯ª·ª¿ãÁªËû¼ªÓõóªµªìªë¡£
+ *    ªâª·??«ó item ª¬ TF_LBI_STYLE_BTN_BUTTON «¹?«¤«ëªòò¥ª¿ªÊª¤
+ *    ªÎªÊªé¡¢ª³ªÎ method ÞÅªïªìªÊª¤¡£
  *(*)
- *    ¡‚Ìó‹µ‚Å‚Í“Á‚É‰½‚à‚·‚é•K—v‚Í‚È‚¢‚Ì‚ÅAS_OK ‚ð‘¦•Ô‚·B
+ *    ÐÑªÎ?üÏªÇªÏ÷åªËù¼ªâª¹ªëù±é©ªÏªÊª¤ªÎªÇ¡¢S_OK ªò?Ú÷ª¹¡£
  */
 STDAPI
 CLangBarItemImeButton::OnClick (
@@ -257,9 +287,9 @@ CLangBarItemImeButton::OnClick (
 
 /*    ITfLangBarItemButton::InitMenu
  *
- *    ‚±‚Ì method ‚Í TF_LBI_STYLE_BTN_MENU ƒX?ƒCƒ‹‚ðŽ‚Á‚½Œ¾Œêƒo?‚Ì??ƒ“
- *    ‚ðŒ¾Œêƒo?‚ª??ƒ“‚É‘Î‚µ‚Ä?Ž¦‚·‚é menu item ‚ð’Ç‰Á‚µ‚Ä—LŒø‚É‚·‚é‚½‚ß
- *    ‚ÉŒÄ‚Ño‚³‚ê‚éB
+ *    ª³ªÎ method ªÏ TF_LBI_STYLE_BTN_MENU «¹?«¤«ëªòò¥ªÃª¿åëåÞ«Ð?ªÎ??«ó
+ *    ªòåëåÞ«Ð?ª¬??«óªË?ª·ªÆ?ãÆª¹ªë menu item ªòõÚÊ¥ª·ªÆêó?ªËª¹ªëª¿ªá
+ *    ªËû¼ªÓõóªµªìªë¡£
  */
 STDAPI
 CLangBarItemImeButton::InitMenu (
@@ -482,7 +512,7 @@ CreateItemButtonIME (
 void
 _Menu_Help (UINT wID)
 {
-    /*    ‚¤?‚ñAHELP ‚Íì‚Á‚Ä‚È‚¢cB*/
+    /*    ª¦?ªó¡¢HELP ªÏíÂªÃªÆªÊª¤¡¦¡£*/
     return;
 }
 
@@ -525,7 +555,7 @@ _Menu_Reconversion (UINT wID)
             if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
                 goto    pass_1;
 
-            /*    •ÏŠ·ƒ‚?ƒh‚ð‹­§“I‚É‰¼–¼“ü—Íƒ‚?ƒh‚ÉÝ’è‚·‚éB*/
+            /*    ?üµ«â?«Éªò?ð¤îÜªË?Ù£ìýÕô«â?«ÉªËàâïÒª¹ªë¡£*/
             lpCompStr    = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr);
             if (lpCompStr != NULL) {
                 //SKKSetReconvertStr (hIMC, lpIMC, lpCompStr, lpRS, TRUE); // ?
@@ -665,3 +695,7 @@ _MenuItem_GetToggleKeyboardFlag (UINT wID)
 }
 
 #endif
+
+/*
+ * ex: ts=8 sts=8 sw=8 noet
+ */

@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/uiguide.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    UIGUIDE.C
-    
-++*/
 
 /**********************************************************************/
 #include "windows.h"
@@ -77,10 +71,10 @@ LPARAM lParam;
 
         case WM_MOUSEMOVE:
         case WM_SETCURSOR:
-	    MyDebugPrint((TEXT("UIGuide\n")));
+            MyDebugPrint((TEXT("UIGuide\n")));
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
-	    MyDebugPrint((TEXT("UIGuide BUTTON\n")));
+            MyDebugPrint((TEXT("UIGuide BUTTON\n")));
             ButtonGuide(hWnd,message,wParam,lParam);
             if ((message == WM_SETCURSOR) &&
                 (HIWORD(lParam) != WM_LBUTTONDOWN) &&
@@ -361,4 +355,6 @@ void PASCAL UpdateGuideWindow(LPUIEXTRA lpUIExtra)
         SendMessage(lpUIExtra->uiGuide.hWnd,WM_UI_UPDATE,0,0L);
 }
 
-
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */

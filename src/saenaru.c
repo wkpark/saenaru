@@ -1,7 +1,10 @@
 /*
  * This file is part of Saenaru.
  *
- * Copyright (C) 2003 Hye-Shik Chang. All rights reserved.
+ * Copyright (c) 1990-1998 Microsoft Corporation.
+ * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
+ * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,17 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
  */
-/*++
-
-Copyright (c) 1990-1998 Microsoft Corporation, All Rights Reserved
-
-Module Name:
-
-    SAENARU.C
-    
-++*/
 
 #include <windows.h>
 #include "immdev.h"
@@ -92,10 +86,10 @@ BOOL WINAPI DLLEntry (
                 *lpDicFileName++ = TEXT('\\');
             LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
 
-	    // read registry
+            // read registry
             SetGlobalFlags();
             // set keyboard layout
-	    set_keyboard(dwLayoutFlag);
+            set_keyboard(dwLayoutFlag);
 
 #ifdef DEBUG
             wsprintf(szDev,TEXT("DLLEntry Process Attach hInst is %lx"),hInst);
@@ -132,3 +126,7 @@ BOOL WINAPI DLLEntry (
     }
     return TRUE;
 }
+
+/*
+ * ex: ts=8 sts=4 sw=4 et
+ */
