@@ -1,6 +1,6 @@
 REGEDIT4
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\OpenLook\Saenaru\Keyboard]
+[HKEY_LOCAL_MACHINE\SOFTWARE\OpenHangulProject\Saenaru\Keyboard]
 "»õµÎ¹ú"=hex(7):23,20,74,68,69,73,20,66,69,6c,65,20,69,73,20,74,68,65,20,6e,65,77,\
   2d,32,73,65,74,20,6b,65,79,62,6f,61,72,64,20,6d,61,70,20,66,69,6c,65,20,66,\
   6f,72,20,4e,61,62,69,00,4e,61,6d,65,3a,20,c8,50,8c,dd,00,54,79,70,65,32,00,\

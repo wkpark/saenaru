@@ -26,14 +26,14 @@ HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout text",,"새나루 한글 입력기"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout display name",,"한글 입력기 (새나루)"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME File",,"SAENARU.IME"
-HKLM,"software\OpenLook\Saenaru"
+HKLM,"software\OpenHangulProject\Saenaru"
 
 [SaeNaru_Reg_NT]
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",,kbdkor.dll
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout text",,"새나루 한글 입력기"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout display name",,"한글 입력기 (새나루)"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME File",,"SAENARU.IME"
-HKLM,"software\OpenLook\Saenaru"
+HKLM,"software\OpenHangulProject\Saenaru"
 
 [SourceDisksNames]
 55="SaeNaru Install Disk 1.0.","",1

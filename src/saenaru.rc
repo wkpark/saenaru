@@ -163,7 +163,7 @@ BEGIN
         BLOCK "041203b5"
         BEGIN
             VALUE "Comments", "새나루 한글 입력기\0"
-            VALUE "CompanyName", "OpenLook Initiatives\0"
+            VALUE "CompanyName", "Open Hangul Project\0"
             VALUE "FileDescription", "새나루 1.0\0"
             VALUE "FileVersion", "1.0\0"
             VALUE "InternalName", "SAENARU\0"
