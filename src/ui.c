@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.7 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.8 2004/12/21 22:55:01 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -302,15 +302,15 @@ LPARAM lParam;
                         if (IsWindow(lpUIExtra->uiDefComp.hWnd))
                             HideCompWindow(lpUIExtra);
 
+#if 0
                         if (lParam & ISC_SHOWUICANDIDATEWINDOW)
                         {
-                            if (0 && lpCompStr->dwCompStrLen)
+                            if (lpCompStr->dwCompStrLen)
                             {
                                 CreateCompWindow(hWnd,lpUIExtra,lpIMC );
                                 MoveCompWindow(lpUIExtra,lpIMC);
                             }
                         }
-#if 0
                         if (lParam & ISC_SHOWUIGUIDELINE) {
                             DWORD dwLevel, dwSize = 0;
                             if (ImmGetGuideLine (hUICurIMC, GGL_LEVEL, NULL, 0))
