@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.8 2004/12/03 01:42:17 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.9 2004/12/03 14:24:43 wkpark Exp $
  */
 
 #include "windows.h"
@@ -48,11 +48,11 @@ BOOL WINAPI ImeInquire(LPIMEINFO lpIMEInfo,LPTSTR lpszClassName,DWORD dwSystemIn
     lpIMEInfo->dwPrivateDataSize = sizeof(UIEXTRA);
     lpIMEInfo->fdwProperty = IME_PROP_KBD_CHAR_FIRST |
                              IME_PROP_UNICODE |
-//                             IME_PROP_COMPLETE_ON_UNSELECT |
+                             IME_PROP_COMPLETE_ON_UNSELECT |
                              IME_PROP_AT_CARET;
     lpIMEInfo->fdwConversionCaps = IME_CMODE_LANGUAGE |
                                 IME_CMODE_FULLSHAPE |
-                                IME_CMODE_NOCONVERSION |
+//                                IME_CMODE_NOCONVERSION |
                                 IME_CMODE_ROMAN |
                                 IME_CMODE_SOFTKBD |
                                 IME_CMODE_CHARCODE;
@@ -166,6 +166,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
     DWORD dwConversion, dwSentense ;
     WORD ch;
+    UINT vkey = LOWORD(vKey) & 0x00FF;
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
@@ -181,6 +182,122 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
+
+#ifdef USE_RECONVERSION
+    // regard the VK_F9 key as the ReConversion key
+    if ( (vkey == VK_F9 || vkey == VK_HANJA) && !IsCompStr(hIMC)) {
+        DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
+        if (dwSize) {
+            LPRECONVERTSTRING lpRS;
+
+            lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
+            lpRS->dwSize = dwSize;
+
+            if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
+#if 1
+                TCHAR szDev[80];
+                LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                *(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
+
+                OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
+                wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwVersion    %x\r\n"), lpRS->dwVersion);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwStrLen     %x\r\n"), lpRS->dwStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwStrOffset  %x\r\n"), lpRS->dwStrOffset);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwCompStrOffset %x\r\n"), lpRS->dwCompStrOffset);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwTargetStrLen %x\r\n"), lpRS->dwTargetStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
+                OutputDebugString(szDev);
+                MyOutputDebugString(lpDump);
+                OutputDebugString(TEXT("\r\n"));
+#endif
+		{
+		    LPCOMPOSITIONSTRING	lpCompStr;
+
+		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                    {
+                        DWORD dwSize = sizeof(MYCOMPSTR);
+                        lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
+                        lpCompStr =
+                            (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                        lpCompStr->dwSize = dwSize;
+                    } else
+		        lpCompStr =
+                            (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+                    {
+                        LPMYSTR lpstr,lpread;
+                        TRANSMSG GnMsg;
+
+		        if (lpCompStr != NULL) {
+                            // XXX
+                            InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+                            //InitCompStr(lpCompStr,CLR_UNDET);
+
+                            lpstr = GETLPCOMPSTR(lpCompStr);
+                            lpread = GETLPCOMPREADSTR(lpCompStr);
+                            Mylstrcpy(lpread,lpDump);
+                            Mylstrcpy(lpstr,lpDump);
+
+                            // delta start
+                            //lpCompStr->dwDeltaStart =
+	                    //    (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                            // cursor pos
+                            //lpCompStr->dwCursorPos=lpRS->dwStrLen;
+
+                            //MakeAttrClause(lpCompStr);
+                            lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpstr));
+                            lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpread));
+
+                            // make length
+                            lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                            lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
+                            lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
+                            lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
+
+                            //if (lpCompStr->dwCompReadStrLen > 0)
+                            //    lpCompStr->dwCompReadStrLen--;
+
+                            //
+                            // make clause info
+                            //
+                            SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                            SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
+                            lpCompStr->dwCompClauseLen = 8;
+                            lpCompStr->dwCompReadClauseLen = 8;
+                            //
+                            //
+                            if (lpCompStr->dwCompStrLen)
+                            {
+                                GnMsg.message = WM_IME_SETCONTEXT;
+                                GnMsg.wParam = 0;
+                                GnMsg.lParam = ISC_SHOWUICANDIDATEWINDOW;
+                                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                            }
+                            //OutputDebugString(TEXT("** ReconvertStr\r\n"));
+		    	    ImmUnlockIMCC (lpIMC->hCompStr);
+		        }
+                    }
+		}
+                MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+            }
+#ifdef DEBUG
+            else
+                OutputDebugString(TEXT("ImmRequestMessage returned 0\r\n"));
+#endif
+            GlobalFree((HANDLE)lpRS);
+            ImmUnlockIMC(hIMC);
+            return TRUE;
+        }
+    }
+#endif
 
     // SHIFT-SPACE
     // See ui.c how to hook the shift-space event.
@@ -735,6 +852,31 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
             if (lpRead)
                 DumpRS((LPRECONVERTSTRING)lpRead);
 #endif
+            {
+		LPRECONVERTSTRING	pRStr	= (LPRECONVERTSTRING)lpComp ;
+
+		if (!pRStr)
+		    break ;
+
+		lpIMC	= ImmLockIMC (hIMC) ;
+		if (!lpIMC) {
+		    break ;
+		}
+		if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR)){
+		    ImmUnlockIMC (hIMC) ;
+		    break ;
+		}
+		//SKKChangeConversionMode (hIMC, IDM_CMODE_TO_ROMANHIRA) ;
+		lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+		if (lpCompStr != NULL) {
+		    //SKKSetReconvertStr (hIMC, lpIMC, lpCompStr, pRStr, TRUE) ;
+		    ImmUnlockIMCC (lpIMC->hCompStr) ;
+		}
+		ImmUnlockIMC (hIMC) ;
+		return	TRUE ;
+            }
+            break;
+
             return TRUE;
             break;
         case SCS_CHANGEATTR:
