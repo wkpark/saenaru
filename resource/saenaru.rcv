@@ -47,7 +47,7 @@
 #define VER_PRODUCTNAME_STR             "SAENARU"
 #define VER_INTERNALNAME_STR            "Saenaru Hangul Input Method"
 #define VER_LEGALCOPYRIGHT_YEARS        "2003"
-#define VER_LEGALCOPYRIGHT_STR          "Copyright (C) Hye-Shik Chang. ", VER_LEGALCOPYRIGHT_YEARS, "\0"
+#define VER_LEGALCOPYRIGHT_STR          "Copyright (C) Hye-Shik Chang, Won-Kyu Park. ", VER_LEGALCOPYRIGHT_YEARS, "\0"
 #define VER_ORIGINALFILENAME_STR        "SAENARU.IME"
 
 VS_VERSION_INFO VERSIONINFO
