@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Perky: saenaru/src/resource.h,v 1.4 2003/10/23 20:00:34 perky Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.4 2003/10/23 20:00:34 perky Exp $
  */
 /*++
 
