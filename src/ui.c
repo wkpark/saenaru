@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -1178,16 +1178,18 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
         return CallNextHookEx(hHookWnd, code, wParam, lParam);
 
     if (dwOptionFlag & DVORAK_SUPPORT) {
-        HIMC hIMC = NULL;
         HWND hwnd = GetFocus ();
-        LPINPUTCONTEXT lpIMC;
+        
+        dvorak = TRUE;
 
         if (hwnd != NULL) {
+            HIMC hIMC = NULL;
+            LPINPUTCONTEXT lpIMC;
+
             hIMC = ImmGetContext (hwnd);
             lpIMC = ImmLockIMC(hIMC);
-            if (lpIMC) {
+            if (lpIMC)
                 dvorak = !(lpIMC->fdwConversion & IME_CMODE_NATIVE);
-            }
             ImmUnlockIMC(hIMC);
         }
     }
