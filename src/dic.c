@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include <windows.h>
@@ -201,7 +201,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     LPCOMPOSITIONSTRING lpCompStr;
     LPCANDIDATEINFO lpCandInfo;
     LPCANDIDATELIST lpCandList;
-    MYCHAR szBuf[256+2];
+    MYCHAR szBuf[1024+2];
     int nBufLen;
     LPMYSTR lpstr;
     TRANSMSG GnMsg;
@@ -210,8 +210,11 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     LPMYSTR lpT, lpT2;
     int cnt;
     BOOL bRc = FALSE;
-
     WCHAR cs=0;
+    LPMYSTR lpmystr, lpTemp;
+    MYCHAR myBuf[128];
+
+    lpmystr = (LPMYSTR)myBuf;
 
     if ((GetFileAttributes(szDicFileName) == 0xFFFFFFFF) ||
         (GetFileAttributes(szDicFileName) == FILE_ATTRIBUTE_DIRECTORY)) {
@@ -240,13 +243,13 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     //
     // Get the candidate strings from dic file.
     //
-    szBuf[256] = 0;    // Double NULL-terminate
-    szBuf[257] = 0;    // Double NULL-terminate
+    szBuf[1024] = 0;    // Double NULL-terminate
+    szBuf[1025] = 0;    // Double NULL-terminate
 
     Mylstrcpy(szBuf,lpT2); // add Hangul
     szBuf[Mylstrlen(lpT2)] = 0;
 
-    nBufLen = GetCandidateStringsFromDictionary(lpT2, szBuf+Mylstrlen(lpT2)+1, 256, (LPTSTR)szDicFileName);
+    nBufLen = GetCandidateStringsFromDictionary(lpT2, szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDicFileName);
     //
     // Check the result of dic. Because my candidate list has only MAXCANDSTRNUM
     // candidate strings.
@@ -306,16 +309,21 @@ set_compstr:
                 //
                 // Set the composition string to the structure.
                 //
-                Mylstrcpy(GETLPCOMPSTR(lpCompStr),lpstr);
-                if ((dwImeFlag & SAENARU_ONTHESPOT)&& Mylstrlen(lpstr) == 1)
-                   cs = *lpstr;
+
+                Mylstrcpy(lpmystr,lpstr);
+                if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(' '))))
+                    *lpTemp = MYTEXT('\0');
+
+                Mylstrcpy(GETLPCOMPSTR(lpCompStr),lpmystr);
+                if ((dwImeFlag & SAENARU_ONTHESPOT)&& Mylstrlen(lpmystr) == 1)
+                   cs = *lpmystr;
 
                 lpstr = GETLPCOMPSTR(lpCompStr);
 
                 //
                 // Set the length and cursor position to the structure.
                 //
-                lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                lpCompStr->dwCompStrLen = Mylstrlen(lpmystr);
                 lpCompStr->dwCursorPos = 0;
                 // Because SAENARU does not support clause, DeltaStart is 0 anytime.
                 lpCompStr->dwDeltaStart = 0;
@@ -324,7 +332,7 @@ set_compstr:
                 // make attribute
                 //
                 lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),
-                                ATTR_TARGET_CONVERTED, Mylstrlen(lpstr));
+                                ATTR_TARGET_CONVERTED, Mylstrlen(lpmystr));
                 lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),
                                 ATTR_TARGET_CONVERTED,
                                 Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
@@ -332,7 +340,7 @@ set_compstr:
                 //
                 // make clause info
                 //
-                SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpmystr));
                 SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
                 lpCompStr->dwCompClauseLen = 8;
                 lpCompStr->dwCompReadClauseLen = 8;
@@ -387,7 +395,10 @@ set_compstr:
         {
             lpCandList->dwOffset[i] =
                    (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-            Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpstr);
+            Mylstrcpy(lpmystr,lpstr);
+            if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
+              *lpTemp = MYTEXT('\0');
+            Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
             lpstr += (Mylstrlen(lpstr) + 1);
             i++;
         }
@@ -1027,7 +1038,8 @@ LPBYTE lpbKeyState;
         if (next || select)
         {
             ConvHanja(hIMC,next,select);
-            return TRUE;
+            if (next) return TRUE;
+            wParam=VK_RETURN;
         }
     }
 
@@ -1506,8 +1518,9 @@ hsa_exit:
 int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen)
 {
     DWORD dwWritten = 0;
-    LPMYSTR lpSection, lpTemp;
-    const LPMYSTR szSep = MYTEXT(" \r\n\t");
+    LPMYSTR lpSection, lpTemp, lpTemp2;
+    //const LPMYSTR szSep = MYTEXT(" \r\n\t");
+    const LPMYSTR szSep = MYTEXT("\r\n\t");
 
     LPMYSTR lpToken = Mystrtok(lpDic, szSep);
     while (NULL != lpToken)
@@ -1529,14 +1542,39 @@ int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lp
     {
         LPMYSTR lpWrite = lpBuf;
         DWORD dwW;
+        DWORD len;
         while ((NULL != lpToken) &&
                ((dwBufLen - dwWritten) > 1) &&
                (MYTEXT('[') != *lpToken))
         {
             if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT('='))))
                 *lpTemp = MYTEXT('\0');
+
+            len = Mylstrlen(lpToken);
+            // 한 글자이면서 KSX1002 지원이 아니면 charset 체크
+            if ( len == 1 && !(dwOptionFlag & KSX1002_SUPPORT))
+            {
+                WORD mb;
+                WideCharToMultiByte(949, WC_COMPOSITECHECK,
+                        lpToken, 1, (char *)&mb, 2, NULL, NULL);
+
+                if(LOBYTE(mb) < 0xa1 || LOBYTE(mb) > 0xfe 
+                    || HIBYTE(mb) < 0xa1 || HIBYTE(mb) > 0xfe)
+                {
+                    lpToken = Mystrtok(NULL, szSep);
+                    continue;
+                }
+            }
+            // 뜻이 있으면
+            if ( Mylstrlen(lpTemp+1) > 1) {
+                *lpTemp = MYTEXT(' ');
+                len = Mylstrlen(lpToken);
+            }
+            // XXX 뜻이 길어서 전체 크기가 커지면 입력기가 죽는다
+            if ((dwBufLen - dwWritten -1) < len) break;
+
             Mylstrcpyn(lpWrite, lpToken, dwBufLen - dwWritten - 1);
-            dwW = Mylstrlen(lpToken) + 1;
+            dwW = len + 1;
             lpWrite += dwW;
             dwWritten += dwW;
             lpToken = Mystrtok(NULL, szSep);
