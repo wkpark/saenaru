@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.4 2004/10/10 10:58:44 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.5 2004/10/11 14:37:58 wkpark Exp $
  */
 
 #include <windows.h>
@@ -589,6 +589,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         lpread = GETLPCOMPREADSTR(lpCompStr);
         /*lZenToHan (lpread,lpstr);
          */
+        Mylstrcpy(lpread,lpstr); // !!!
 
         lmemset(GETLPCOMPATTR(lpCompStr),ATTR_INPUT,Mylstrlen(lpstr));
         lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,Mylstrlen(lpread));
@@ -1134,6 +1135,17 @@ LPBYTE lpbKeyState;
             break;
 
         case VK_RETURN:
+            lpIMC = ImmLockIMC(hIMC);
+            // Get ConvMode from IMC.
+            fdwConversion = lpIMC->fdwConversion;
+            ImmUnlockIMC(hIMC);
+            if (IsCompStr(hIMC) &&
+                    (fdwConversion & IME_CMODE_FULLSHAPE) &&
+                    (fdwConversion & IME_CMODE_NATIVE)) {
+                MakeResultString(hIMC,TRUE);
+                hangul_ic_init(&ic);
+                return TRUE;
+            }
             if (IsConvertedCompStr(hIMC))
                 cf = TRUE;
             MakeResultString(hIMC,TRUE);
