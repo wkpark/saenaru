@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.2 2003/12/26 09:26:33 perky Exp $
  */
 
 #include <windows.h>
@@ -1383,7 +1383,7 @@ LPBYTE lpbKeyState;
     TRANSMSG GnMsg;
     DWORD dwGCR = 0L;
 
-    DWORD hkey;
+    DWORD hkey= code;
     WCHAR cs = 0;
     register BOOL fModeInit = FALSE;
     BOOL capital = lpbKeyState[VK_CAPITAL];
@@ -1400,7 +1400,8 @@ LPBYTE lpbKeyState;
 	    code += 'a' - 'A';
     }
 
-    hkey = keyToHangulKey( code );
+    if (fdwConversion & IME_CMODE_NATIVE)
+	hkey = keyToHangulKey( code );
 #if 1
     if ( (!hkey || (hkey >= TEXT('!') && hkey <= TEXT('~')) )
 	    && !IsCompStr(hIMC)) {
@@ -1917,8 +1918,6 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 comb = hangul_compose(ic->jong, jong);
                 if ( hangul_is_jongseong(comb) )
                 {
-                    // CP949인가 ?
-                    // TODO KS X 1001영역만 입력되는 옵션도 넣음
                     if (hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
                     {
                         ic->jong=comb;
@@ -1966,8 +1965,6 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 comb = hangul_compose(ic->jong, jamo);
                 if ( comb )
                 {
-                    // CP949인가 ?
-                    // TODO KS X 1001영역만 입력되는 옵션도 넣음
                     if (hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
                     {
                         ic->jong=comb;
@@ -2169,7 +2166,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 }
                 break;
             default: // 중성 + 종성
-#if 1
+#if 0
                 if (ic->cho && !ic->jong && ctyping) {
 		    // 중성이 계속 눌려진 채로 있고
 		    // 종성이 입력된 것이며, 중성이 나누어질 수 있는 경우

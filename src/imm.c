@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 #include "windows.h"
@@ -206,11 +206,11 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
             if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
             {
-                if (fOpen)
+                if (fOpen && dwConversion & IME_CMODE_NATIVE)
                 {
                     dwConversion &= ~IME_CMODE_NATIVE;
                     dwConversion &= ~IME_CMODE_FULLSHAPE;
-                    MyDebugPrint((TEXT("O Hangul key\n")));
+                    MyDebugPrint((TEXT("x Hangul key\n")));
                     fOpen=FALSE;
                 }
                 else
