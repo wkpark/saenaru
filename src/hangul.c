@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.4 2004/10/07 15:40:34 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.5 2004/10/09 06:52:12 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1811,7 +1811,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 // 그러나, 나비가 지원하므로 지원한다 :)
                 comb = hangul_compose(ic->cho, jamo);
 		// 동시치기일 경우는 순서를 바꿔서 초+초 조합
-		if ( !hangul_is_choseong(comb) && ctyping)
+		if ( ctyping && !hangul_is_choseong(comb))
 		    comb = hangul_compose(jamo,ic->cho);
 
                 if ( hangul_is_choseong(comb) ) {
@@ -1874,6 +1874,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 break;
             case 2: // 중성 + 중성
                 comb = hangul_compose(ic->jung, jamo);
+		// 동시치기일 경우는 순서를 바꿔서 초+초 조합
+		if ( ctyping && !hangul_is_jungseong(comb))
+		    comb = hangul_compose(jamo,ic->jung);
                 if ( hangul_is_jungseong(comb) ) {
                     ic->jung=comb;
                     hangul_ic_pop(ic);
