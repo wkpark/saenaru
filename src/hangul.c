@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.8 2004/10/13 11:10:46 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.9 2004/11/29 17:06:14 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1481,11 +1481,12 @@ LPBYTE lpbKeyState;
 
     if (fdwConversion & IME_CMODE_NATIVE)
 	hkey = keyToHangulKey( code );
-#if 1
+#ifdef USE_WM_CHAR
     if ( (!hkey || (hkey >= TEXT('!') && hkey <= TEXT('~')) )
 	    && !IsCompStr(hIMC)) {
 	// 이 경우 마지막 입력받은 ascii문자를 그대로 내뱉는다.
 	PostMessage(lpIMC->hWnd,WM_CHAR,hkey,lParam);
+
         ImmUnlockIMC(hIMC);
 	return;
     }
