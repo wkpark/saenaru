@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.3 2004/11/29 17:01:50 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -44,10 +44,12 @@ extern "C" {
  *    ªò÷×ª¹ªÎª¬ÕÞª¤ªÎª«Üúª«¡£õó?ªìªÐ DDK ªËª³ªìªéªÎ header ªò
  *    Ô¤ª·ªÆª¯ªìªëªÈÕÞª¤ªÎªÀª¬¡£
  */
-#include "c:\Program Files\Microsoft SDK\include\msctf.h"
+//#include "c:\Program Files\Microsoft SDK\include\msctf.h"
+#include "msctf.h"
 #include "olectl.h"
 #if !defined (TARGET_WIN2K)
-#include "c:\Program Files\Microsoft SDK\include\uxtheme.h"
+//#include "c:\Program Files\Microsoft SDK\include\uxtheme.h"
+#include "uxtheme.h"
 #endif
 #include "tsf.h"
 

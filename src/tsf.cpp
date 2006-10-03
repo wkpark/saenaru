@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
  */
 
 #if !defined (NO_TSF)
@@ -37,8 +37,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-#include "c:\Program Files\Microsoft SDK\include\msctf.h"
-#include "c:\Program Files\Microsoft SDK\include\olectl.h"
+//#include "c:\Program Files\Microsoft SDK\include\msctf.h"
+#include "msctf.h"
+#include "olectl.h"
 #include "tsf.h"
 
 #define    NUM_LANGBAR_ITEM_BUTTON    (2)
