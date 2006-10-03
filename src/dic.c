@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.5 2004/10/11 14:37:58 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.6 2004/10/13 11:20:32 wkpark Exp $
  */
 
 #include <windows.h>
@@ -348,12 +348,22 @@ set_compstr:
                 //
                 // Generate messages.
                 //
-                GnMsg.message = WM_IME_COMPOSITION;
-                GnMsg.wParam = cs;
-                GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                if (dwImeFlag & SAENARU_ONTHESPOT)
-                    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
-                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                if (lpCompStr->dwCompStrLen > 1) {
+                    TCHAR szDev[80];
+                    wsprintf(szDev, TEXT("dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
+                    OutputDebugString(szDev);
+                    GnMsg.message = WM_IME_SETCONTEXT;
+                    GnMsg.wParam = 0;
+                    GnMsg.lParam = ISC_SHOWUICANDIDATEWINDOW;
+                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                } else {
+                    GnMsg.message = WM_IME_COMPOSITION;
+                    GnMsg.wParam = cs;
+                    GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                    if (dwImeFlag & SAENARU_ONTHESPOT)
+                        GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                }
 
                 bRc = TRUE;
                 goto cvk_exit40;

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.9 2004/12/03 14:24:43 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.10 2004/12/22 10:52:34 wkpark Exp $
  */
 
 #include "windows.h"
@@ -183,6 +183,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
 
+#define USE_RECONVERSION
 #ifdef USE_RECONVERSION
     // regard the VK_F9 key as the ReConversion key
     if ( (vkey == VK_F9 || vkey == VK_HANJA) && !IsCompStr(hIMC)) {
@@ -196,9 +197,24 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
 #if 1
                 TCHAR szDev[80];
-                LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
-                *(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
+#endif
+                //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
 
+                LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+#define USE_RECONV_CLAUSE
+#ifdef USE_RECONV_CLAUSE
+                // XXX clause dictionary does not work properly.
+                *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
+#else
+                // only one char can be converted properly
+                *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
+                
+                lpRS->dwCompStrLen=1;
+                lpRS->dwTargetStrLen=1;
+#endif
+
+#ifdef DEBUG
                 OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
                 wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
                 OutputDebugString(szDev);
