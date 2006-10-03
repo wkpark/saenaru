@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/subs.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/subs.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -614,6 +614,11 @@ HFONT CheckNativeCharset(HDC hDC)
     hOldFont = GetCurrentObject(hDC, OBJ_FONT);
     GetObject(hOldFont, sizeof(LOGFONT), &lfFont);
 
+    lfFont.lfWeight = FW_NORMAL;
+    lfFont.lfCharSet = NATIVE_CHARSET;
+    /* 기본값을 새굴림으로 한다 */
+    Mylstrcpy(lfFont.lfFaceName,TEXT("New Gulim"));
+    SelectObject(hDC, CreateFontIndirect(&lfFont));
     /* 글꼴이 없으면 기본 값을 가져온다 */
     if (lfFont.lfCharSet != NATIVE_CHARSET) {
         bDiffCharSet = TRUE;
@@ -624,6 +629,9 @@ HFONT CheckNativeCharset(HDC hDC)
     } else {
         hOldFont = NULL;
     }
+#ifdef DEBUG
+    MyDebugPrint((TEXT("Cand FONT: %s\n"),lfFont.lfFaceName));
+#endif
     return hOldFont;
 }
 
