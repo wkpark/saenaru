@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.10 2004/12/22 10:52:34 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.11 2006/10/03 13:12:25 wkpark Exp $
  */
 
 #include "windows.h"
@@ -171,7 +171,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
     {
-        MyDebugPrint((TEXT("\t** vKey is 0x%x\r\n"),vKey));
+        MyDebugPrint((TEXT("\tImeProcessKey: vKey is 0x%x\r\n"),vKey));
     }
 
     if (lKeyData & 0x80000000)
@@ -183,10 +183,11 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
 
-#define USE_RECONVERSION
+// only supported Win98 or above
+//#define USE_RECONVERSION
 #ifdef USE_RECONVERSION
     // regard the VK_F9 key as the ReConversion key
-    if ( (vkey == VK_F9 || vkey == VK_HANJA) && !IsCompStr(hIMC)) {
+    while ( (vkey == VK_F9 || vkey == VK_HANJA) && !IsCompStr(hIMC)) {
         DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
         if (dwSize) {
             LPRECONVERTSTRING lpRS;
@@ -195,24 +196,15 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             lpRS->dwSize = dwSize;
 
             if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
-#if 1
+                BOOL convOk= FALSE;
+                TRANSMSG GnMsg;
+#ifdef DEBUG
                 TCHAR szDev[80];
 #endif
                 //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
                 //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
 
                 LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
-#define USE_RECONV_CLAUSE
-#ifdef USE_RECONV_CLAUSE
-                // XXX clause dictionary does not work properly.
-                *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
-#else
-                // only one char can be converted properly
-                *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
-                
-                lpRS->dwCompStrLen=1;
-                lpRS->dwTargetStrLen=1;
-#endif
 
 #ifdef DEBUG
                 OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
@@ -232,9 +224,32 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 OutputDebugString(szDev);
                 wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
                 OutputDebugString(szDev);
+#endif
+                if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
+                    if (lpRS->dwCompStrLen >1) {
+                        // clause dictionary.
+                        *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
+                    } else {
+                        // one char reconversion.
+                        *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
+                
+                        lpRS->dwCompStrLen=1;
+                        lpRS->dwTargetStrLen=1;
+                        // XXX 1. manage not convertable ascii chars.
+                        // XXX 2. end of string.
+                    }
+                } else {
+                    // XXX Mozilla bug.
+                    OutputDebugString(TEXT(" Reconversion error\r\n"));
+                    GlobalFree((HANDLE)lpRS);
+                    ImmUnlockIMC(hIMC);
+                    break;
+                }
+#ifdef DEBUG
                 MyOutputDebugString(lpDump);
                 OutputDebugString(TEXT("\r\n"));
 #endif
+
 		{
 		    LPCOMPOSITIONSTRING	lpCompStr;
 
@@ -250,7 +265,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                             (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
                     {
                         LPMYSTR lpstr,lpread;
-                        TRANSMSG GnMsg;
 
 		        if (lpCompStr != NULL) {
                             // XXX
@@ -263,10 +277,11 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                             Mylstrcpy(lpstr,lpDump);
 
                             // delta start
-                            //lpCompStr->dwDeltaStart =
-	                    //    (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                            lpCompStr->dwDeltaStart =
+	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
                             // cursor pos
                             //lpCompStr->dwCursorPos=lpRS->dwStrLen;
+                            lpCompStr->dwCursorPos = Mylstrlen(lpstr);
 
                             //MakeAttrClause(lpCompStr);
                             lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpstr));
@@ -290,19 +305,22 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                             lpCompStr->dwCompReadClauseLen = 8;
                             //
                             //
-                            if (lpCompStr->dwCompStrLen)
-                            {
-                                GnMsg.message = WM_IME_SETCONTEXT;
-                                GnMsg.wParam = 0;
-                                GnMsg.lParam = ISC_SHOWUICANDIDATEWINDOW;
-                                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-                            }
-                            //OutputDebugString(TEXT("** ReconvertStr\r\n"));
-		    	    ImmUnlockIMCC (lpIMC->hCompStr);
 		        }
                     }
+                    convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+#ifdef DEBUG
+                    if (!convOk)
+                    {
+                        OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                    } else {
+                        OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+                        wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                        OutputDebugString(szDev);
+                    }
+#endif
+	            ImmUnlockIMCC (lpIMC->hCompStr);
 		}
-                MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+                break;
             }
 #ifdef DEBUG
             else
@@ -310,8 +328,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 #endif
             GlobalFree((HANDLE)lpRS);
             ImmUnlockIMC(hIMC);
-            return TRUE;
+            break;
         }
+        break;
     }
 #endif
 

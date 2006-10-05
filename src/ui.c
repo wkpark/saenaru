@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.8 2004/12/21 22:55:01 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.9 2004/12/22 10:51:08 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -1208,7 +1208,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     vKey = lpmsg->wParam;
 
     if (vKey == VK_PROCESSKEY) {
-        MyDebugPrint((TEXT("\t** VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
+        MyDebugPrint((TEXT("\tMainProc: VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
     }
 
     switch (lpmsg->message)

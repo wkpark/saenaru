@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.6 2004/10/13 11:20:32 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.7 2006/10/03 13:12:25 wkpark Exp $
  */
 
 #include <windows.h>
@@ -347,16 +347,23 @@ set_compstr:
 
                 //
                 // Generate messages.
-                //
-                if (lpCompStr->dwCompStrLen > 1) {
+                // XXX
+#ifdef DEBUG
+                {
                     TCHAR szDev[80];
-                    wsprintf(szDev, TEXT("dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
+                    wsprintf(szDev, TEXT(" *** HanjaConv: dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
                     OutputDebugString(szDev);
-                    GnMsg.message = WM_IME_SETCONTEXT;
+                }
+#endif
+#if 1
+                if (lpCompStr->dwCompStrLen > 1) {
+                    GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = 0;
-                    GnMsg.lParam = ISC_SHOWUICANDIDATEWINDOW;
+                    GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-                } else {
+                } else
+#endif
+                {
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = cs;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
@@ -1008,6 +1015,7 @@ LPBYTE lpbKeyState;
     BOOL cf=FALSE;
     int next=0;
     UINT select=0;
+    int candOk=FALSE;
 
     // Candidate문자 선택
     if (IsConvertedCompStr(hIMC))
@@ -1075,7 +1083,199 @@ LPBYTE lpbKeyState;
         case VK_HANJA:
         case VK_F9:
             hangul_ic_init(&ic);
-            ConvHanja(hIMC,1,0);
+
+            lpIMC = ImmLockIMC(hIMC);
+
+#define USE_RECONVERSION
+#ifdef USE_RECONVERSION
+        // regard the VK_F9 key as the ReConversion key
+    while (!IsCompStr(hIMC)) {
+        DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
+        if (dwSize) {
+            LPRECONVERTSTRING lpRS;
+
+            lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
+            lpRS->dwSize = dwSize;
+
+            if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
+                BOOL convOk= FALSE;
+                TRANSMSG GnMsg;
+#ifdef DEBUG
+                TCHAR szDev[80];
+#endif
+                //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
+
+                LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+
+#ifdef DEBUG
+                OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
+                wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwVersion    %x\r\n"), lpRS->dwVersion);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwStrLen     %x\r\n"), lpRS->dwStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwStrOffset  %x\r\n"), lpRS->dwStrOffset);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwCompStrOffset %x\r\n"), lpRS->dwCompStrOffset);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwTargetStrLen %x\r\n"), lpRS->dwTargetStrLen);
+                OutputDebugString(szDev);
+                wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
+                OutputDebugString(szDev);
+#endif
+                if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
+                    if (lpRS->dwCompStrLen >1) {
+                        // clause dictionary.
+                        *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
+                    } else {
+                        // one char reconversion.
+                        *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
+                
+                        lpRS->dwCompStrLen=1;
+                        lpRS->dwTargetStrLen=1;
+                        // XXX 1. manage not convertable ascii chars.
+                        // XXX 2. end of string.
+                    }
+                } else {
+                    // XXX Mozilla bug.
+                    OutputDebugString(TEXT(" Reconversion error\r\n"));
+                    GlobalFree((HANDLE)lpRS);
+                    //ImmUnlockIMC(hIMC);
+                    break;
+                }
+#ifdef DEBUG
+                MyOutputDebugString(lpDump);
+                OutputDebugString(TEXT("\r\n"));
+#endif
+
+		{
+		    LPCOMPOSITIONSTRING	lpCompStr;
+
+		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                    {
+                        DWORD dwSize = sizeof(MYCOMPSTR);
+                        lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
+                        lpCompStr =
+                            (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                        lpCompStr->dwSize = dwSize;
+                    } else
+		        lpCompStr =
+                            (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+                    {
+                        LPMYSTR lpstr,lpread;
+
+		        if (lpCompStr != NULL) {
+                            // XXX
+                            InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+                            //InitCompStr(lpCompStr,CLR_UNDET);
+
+                            lpstr = GETLPCOMPSTR(lpCompStr);
+                            lpread = GETLPCOMPREADSTR(lpCompStr);
+                            Mylstrcpy(lpread,lpDump);
+                            Mylstrcpy(lpstr,lpDump);
+
+                            // delta start
+                            lpCompStr->dwDeltaStart =
+	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                            // cursor pos
+                            //lpCompStr->dwCursorPos=lpRS->dwStrLen;
+                            lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+
+                            //MakeAttrClause(lpCompStr);
+                            lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpstr));
+                            lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpread));
+
+                            // make length
+                            lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                            lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
+                            lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
+                            lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
+
+                            //if (lpCompStr->dwCompReadStrLen > 0)
+                            //    lpCompStr->dwCompReadStrLen--;
+
+                            //
+                            // make clause info
+                            //
+                            SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                            SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
+                            lpCompStr->dwCompClauseLen = 8;
+                            lpCompStr->dwCompReadClauseLen = 8;
+                            //
+                            //
+		        }
+                    }
+                    convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+#ifdef DEBUG
+                    if (!convOk)
+                    {
+                        OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                    } else {
+                        OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+                        wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                        OutputDebugString(szDev);
+                    }
+#endif
+	            ImmUnlockIMCC (lpIMC->hCompStr);
+		}
+                break;
+            }
+#ifdef DEBUG
+            else
+                OutputDebugString(TEXT("ImmRequestMessage returned 0\r\n"));
+#endif
+            GlobalFree((HANDLE)lpRS);
+            //ImmUnlockIMC(hIMC);
+            break;
+        }
+        break;
+    }
+#endif
+            // Check Candidate ability of the IME application
+            if (IsCompStr(hIMC)) {
+                CANDIDATEFORM lc;
+
+                // check the candidate list of the application supported
+                // some applications like as M$ Word support its own candidate
+                // suggest systems.
+                candOk =
+                    MyImmRequestMessage(hIMC, IMR_CANDIDATEWINDOW, (LPARAM)&lc);
+#ifdef DEBUG
+                if (candOk) {
+                    TCHAR szDev[80];
+                    wsprintf(szDev, TEXT("IMR_CandidateWindow: success\r\n"));
+                    OutputDebugString(szDev);
+                } else {
+                    TCHAR szDev[80];
+                    wsprintf(szDev, TEXT("IMR_CandidateWindow: fail\r\n"));
+                    OutputDebugString(szDev);
+                }
+#endif
+            }
+
+            // XXX hack hack !! IME 2003 TSF mode compatibility
+            // M$ Word에 새나루가 붙지 않아서 Spy++로 메시지 추적해본
+            // 결과, 한자키가 눌려지면 Comp모드에서는 VK_PROCESSKEY로
+            // 들어오지만, Reconversion모드에서는 VK_PROCESSKEY와 함께
+            // WM_IME_KEYDOWN이벤트도 생김. 그래서 이 이벤트를 집어넣으니
+            // M$ Word에서도 제대로 작동하여 한자 사전이 뜬다.
+            // * InternetExplorer에서도 Reconversion이 됨. IME 2003에서는 안됨
+            //
+
+            if (candOk || !IsCompStr(hIMC)) {
+                // for reconversion mode like as IME 2002
+                TRANSMSG GnMsg;
+                GnMsg.message = WM_IME_KEYDOWN;
+                GnMsg.wParam = wParam;
+                GnMsg.lParam = lParam;
+                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+            }
+            if (!candOk) ConvHanja(hIMC,1,0);
+            ImmUnlockIMC(hIMC);
             return TRUE;
             break;
 
@@ -1243,10 +1443,12 @@ LPBYTE lpbKeyState;
         return( FALSE );
     }
     else {
+#ifdef DEBUG
         TCHAR szDev[80];
 
         wsprintf(szDev, TEXT("code: %x\r\n"), wParam);
         OutputDebugString(szDev);
+#endif
         return( TRUE );
     }
 }

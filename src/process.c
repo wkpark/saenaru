@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/process.c,v 1.4 2004/10/09 06:53:18 wkpark Exp $
+ * $Saenaru: saenaru/src/process.c,v 1.5 2004/12/21 22:54:07 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -78,6 +78,7 @@ BYTE bNoCompCtl[] = {   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
 
 BYTE bNoCompSht[] = {   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 00-0F
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 10-0F
+                        // 0x19 == VK_HANJA
                         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,        // 20-0F
                         1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,        // 30-0F
                         0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,        // 40-0F
