@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.7 2006/10/03 13:12:25 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.8 2006/10/05 04:53:52 wkpark Exp $
  */
 
 #include <windows.h>
@@ -284,10 +284,14 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
             lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
                   Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
 
+            OutputDebugString(TEXT("ConvHanja #1\r\n"));
             GnMsg.message = WM_IME_COMPOSITION;
-            GnMsg.wParam = 0;
-            GnMsg.lParam = GCS_COMPSTR | GCS_CURSORPOS |
-                           GCS_COMPATTR | GCS_COMPREADATTR;
+            GnMsg.wParam = (WCHAR) *lpT2;
+            //GnMsg.lParam = GCS_COMPSTR | GCS_CURSORPOS |
+            //               GCS_COMPATTR | GCS_COMPREADATTR;
+            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            if (dwImeFlag & SAENARU_ONTHESPOT)
+                GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
 
@@ -351,7 +355,7 @@ set_compstr:
 #ifdef DEBUG
                 {
                     TCHAR szDev[80];
-                    wsprintf(szDev, TEXT(" *** HanjaConv: dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
+                    wsprintf(szDev, TEXT(" *** ConvHanja: dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
                     OutputDebugString(szDev);
                 }
 #endif
@@ -361,6 +365,7 @@ set_compstr:
                     GnMsg.wParam = 0;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                    OutputDebugString(TEXT(" *** ConvHanja: GnMsg > 1\r\n"));
                 } else
 #endif
                 {
@@ -370,7 +375,10 @@ set_compstr:
                     if (dwImeFlag & SAENARU_ONTHESPOT)
                         GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                    OutputDebugString(TEXT(" *** ConvHanja: GnMsg == 1\r\n"));
                 }
+                MyOutputDebugString(lpmystr);
+                OutputDebugString(TEXT("\r\n *** ConvHanja: Pre candidate\r\n"));
 
                 bRc = TRUE;
                 goto cvk_exit40;
@@ -397,6 +405,7 @@ set_compstr:
             GnMsg.wParam = IMN_OPENCANDIDATE;
             GnMsg.lParam = 1L;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+            OutputDebugString(TEXT("ConvHanja: OpenCandidate\r\n"));
         }
 
         //
@@ -488,6 +497,7 @@ set_compstr:
         GnMsg.wParam = IMN_CHANGECANDIDATE;
         GnMsg.lParam = 1L;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+        OutputDebugString(TEXT("ConvHanja: ChangeCandidate\r\n"));
 
         //
         // If the selected candidate string is changed, the composition string
@@ -1088,152 +1098,183 @@ LPBYTE lpbKeyState;
 
 #define USE_RECONVERSION
 #ifdef USE_RECONVERSION
-        // regard the VK_F9 key as the ReConversion key
-    while (!IsCompStr(hIMC)) {
-        DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
-        if (dwSize) {
-            LPRECONVERTSTRING lpRS;
-
-            lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
-            lpRS->dwSize = dwSize;
-
-            if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
-                BOOL convOk= FALSE;
-                TRANSMSG GnMsg;
+            // regard the VK_F9 key as the ReConversion key
+            while (!IsCompStr(hIMC)) {
+                DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
+                if (dwSize) {
+                    LPRECONVERTSTRING lpRS;
+        
+                    lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
+                    lpRS->dwSize = dwSize;
+        
+                    if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
+                        BOOL convOk= FALSE;
+                        TRANSMSG GnMsg;
 #ifdef DEBUG
-                TCHAR szDev[80];
+                        TCHAR szDev[80];
 #endif
-                //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
-                //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
-
-                LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
-
+                        //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                        //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
+        
+                        LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+        
 #ifdef DEBUG
-                OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
-                wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwVersion    %x\r\n"), lpRS->dwVersion);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwStrLen     %x\r\n"), lpRS->dwStrLen);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwStrOffset  %x\r\n"), lpRS->dwStrOffset);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwCompStrOffset %x\r\n"), lpRS->dwCompStrOffset);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwTargetStrLen %x\r\n"), lpRS->dwTargetStrLen);
-                OutputDebugString(szDev);
-                wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
-                OutputDebugString(szDev);
+                        OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
+                        wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwVersion    %x\r\n"), lpRS->dwVersion);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwStrLen     %x\r\n"), lpRS->dwStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwStrOffset  %x\r\n"), lpRS->dwStrOffset);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwCompStrOffset %x\r\n"), lpRS->dwCompStrOffset);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwTargetStrLen %x\r\n"), lpRS->dwTargetStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
+                        OutputDebugString(szDev);
 #endif
-                if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
-                    if (lpRS->dwCompStrLen >1) {
-                        // clause dictionary.
-                        *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
-                    } else {
-                        // one char reconversion.
-                        *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
-                
-                        lpRS->dwCompStrLen=1;
-                        lpRS->dwTargetStrLen=1;
-                        // XXX 1. manage not convertable ascii chars.
-                        // XXX 2. end of string.
+                        if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
+                            if (lpRS->dwCompStrLen >1) {
+                                // clause dictionary.
+                                *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
+                            } else {
+                                // one char reconversion.
+                                *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
+                        
+                                lpRS->dwCompStrLen=1;
+                                lpRS->dwTargetStrLen=1;
+                                // XXX 1. manage not convertable ascii chars.
+                                // XXX 2. end of string.
+                            }
+                        } else {
+                            // XXX Mozilla bug.
+                            OutputDebugString(TEXT(" Reconversion error\r\n"));
+                            GlobalFree((HANDLE)lpRS);
+                            //ImmUnlockIMC(hIMC);
+                            break;
+                        }
+#ifdef DEBUG
+                        MyOutputDebugString(lpDump);
+                        OutputDebugString(TEXT("\r\n"));
+#endif
+        
+        		{
+        		    LPCOMPOSITIONSTRING	lpCompStr;
+        
+        		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                            {
+                                DWORD dwSize = sizeof(MYCOMPSTR);
+                                lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
+                                lpCompStr =
+                                    (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                                lpCompStr->dwSize = dwSize;
+                            } else
+        		        lpCompStr =
+                                    (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+                            {
+                                LPMYSTR lpstr,lpread;
+        
+        		        if (lpCompStr != NULL) {
+                                    // XXX
+                                    InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+                                    //InitCompStr(lpCompStr,CLR_UNDET);
+        
+                                    lpstr = GETLPCOMPSTR(lpCompStr);
+                                    lpread = GETLPCOMPREADSTR(lpCompStr);
+                                    Mylstrcpy(lpread,lpDump);
+                                    Mylstrcpy(lpstr,lpDump);
+        
+                                    // delta start
+                                    lpCompStr->dwDeltaStart =
+        	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                                    // cursor pos
+                                    //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
+                                    //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
+                                    lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+        
+                                    //MakeAttrClause(lpCompStr);
+                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
+                                            Mylstrlen(lpstr));
+                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
+                                            Mylstrlen(lpread));
+        
+                                    // make length
+                                    lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                                    lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
+                                    lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
+                                    lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
+        
+                                    //if (lpCompStr->dwCompReadStrLen > 0)
+                                    //    lpCompStr->dwCompReadStrLen--;
+
+                                    //
+                                    // make clause info
+                                    //
+                                    SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                                    SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
+                                    lpCompStr->dwCompClauseLen = 8;
+                                    lpCompStr->dwCompReadClauseLen = 8;
+                                    //
+
+#if 1
+                                    Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
+                                    Mylstrcpy(GETLPRESULTREADSTR(lpCompStr),GETLPCOMPREADSTR(lpCompStr));
+
+                                    lpCompStr->dwResultStrLen = lpCompStr->dwCompStrLen;
+                                    lpCompStr->dwResultReadStrLen = lpCompStr->dwCompReadStrLen;
+                                    //
+                                    // make clause info
+                                    //
+                                    SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
+                                    SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
+                                    lpCompStr->dwResultClauseLen = 8;
+
+#if 0
+                                    // Generate RESULTALL Msg
+                                    GnMsg.message = WM_IME_COMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = GCS_RESULTSTR | GCS_DELTASTART;
+                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+
+                                    // Generate COMPSTR Msg
+                                    GnMsg.message = WM_IME_COMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+#endif
+#endif
+        		        } else {
+                                    OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
+                                }
+                            }
+                            convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+#ifdef DEBUG
+                            if (!convOk) {
+                                OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                            } else {
+                                OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+                                wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                                OutputDebugString(szDev);
+                            }
+#endif
+        	            ImmUnlockIMCC (lpIMC->hCompStr);
+        		}
+                        break;
                     }
-                } else {
-                    // XXX Mozilla bug.
-                    OutputDebugString(TEXT(" Reconversion error\r\n"));
+#ifdef DEBUG
+                    else
+                        OutputDebugString(TEXT("ImmRequestMessage returned 0\r\n"));
+#endif
                     GlobalFree((HANDLE)lpRS);
                     //ImmUnlockIMC(hIMC);
                     break;
                 }
-#ifdef DEBUG
-                MyOutputDebugString(lpDump);
-                OutputDebugString(TEXT("\r\n"));
-#endif
-
-		{
-		    LPCOMPOSITIONSTRING	lpCompStr;
-
-		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
-                    {
-                        DWORD dwSize = sizeof(MYCOMPSTR);
-                        lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
-                        lpCompStr =
-                            (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                        lpCompStr->dwSize = dwSize;
-                    } else
-		        lpCompStr =
-                            (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
-                    {
-                        LPMYSTR lpstr,lpread;
-
-		        if (lpCompStr != NULL) {
-                            // XXX
-                            InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
-                            //InitCompStr(lpCompStr,CLR_UNDET);
-
-                            lpstr = GETLPCOMPSTR(lpCompStr);
-                            lpread = GETLPCOMPREADSTR(lpCompStr);
-                            Mylstrcpy(lpread,lpDump);
-                            Mylstrcpy(lpstr,lpDump);
-
-                            // delta start
-                            lpCompStr->dwDeltaStart =
-	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
-                            // cursor pos
-                            //lpCompStr->dwCursorPos=lpRS->dwStrLen;
-                            lpCompStr->dwCursorPos = Mylstrlen(lpstr);
-
-                            //MakeAttrClause(lpCompStr);
-                            lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpstr));
-                            lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT, Mylstrlen(lpread));
-
-                            // make length
-                            lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
-                            lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
-                            lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
-                            lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
-
-                            //if (lpCompStr->dwCompReadStrLen > 0)
-                            //    lpCompStr->dwCompReadStrLen--;
-
-                            //
-                            // make clause info
-                            //
-                            SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
-                            SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
-                            lpCompStr->dwCompClauseLen = 8;
-                            lpCompStr->dwCompReadClauseLen = 8;
-                            //
-                            //
-		        }
-                    }
-                    convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
-#ifdef DEBUG
-                    if (!convOk)
-                    {
-                        OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
-                    } else {
-                        OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
-                        wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
-                        OutputDebugString(szDev);
-                    }
-#endif
-	            ImmUnlockIMCC (lpIMC->hCompStr);
-		}
                 break;
             }
-#ifdef DEBUG
-            else
-                OutputDebugString(TEXT("ImmRequestMessage returned 0\r\n"));
-#endif
-            GlobalFree((HANDLE)lpRS);
-            //ImmUnlockIMC(hIMC);
-            break;
-        }
-        break;
-    }
 #endif
             // Check Candidate ability of the IME application
             if (IsCompStr(hIMC)) {
@@ -1242,8 +1283,7 @@ LPBYTE lpbKeyState;
                 // check the candidate list of the application supported
                 // some applications like as M$ Word support its own candidate
                 // suggest systems.
-                candOk =
-                    MyImmRequestMessage(hIMC, IMR_CANDIDATEWINDOW, (LPARAM)&lc);
+                candOk = MyImmRequestMessage(hIMC, IMR_CANDIDATEWINDOW, (LPARAM)&lc);
 #ifdef DEBUG
                 if (candOk) {
                     TCHAR szDev[80];
@@ -1273,8 +1313,19 @@ LPBYTE lpbKeyState;
                 GnMsg.wParam = wParam;
                 GnMsg.lParam = lParam;
                 GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN\r\n"));
+            } else {
+                // always generage WM_IME_KEYDOWN for VK_HANJA
+                TRANSMSG GnMsg;
+                GnMsg.message = WM_IME_KEYDOWN;
+                GnMsg.wParam = wParam;
+                GnMsg.lParam = lParam;
+                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN #2\r\n"));
             }
-            if (!candOk) ConvHanja(hIMC,1,0);
+            if (!candOk) {
+                ConvHanja(hIMC,1,0);
+            }
             ImmUnlockIMC(hIMC);
             return TRUE;
             break;
@@ -1455,7 +1506,7 @@ LPBYTE lpbKeyState;
 
 /**********************************************************************/
 /*                                                                    */
-/*  Entry    : MakeResultString( HIMC)                                */
+/*  Entry    : MakeResultString( HIMC, BOOL)                          */
 /*                                                                    */
 /**********************************************************************/
 BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
