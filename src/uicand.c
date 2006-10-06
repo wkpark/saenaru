@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -143,6 +143,7 @@ LPARAM lParam;
             break;
 
         default:
+            MyDebugPrint((TEXT("WM default message: %x\n"),message));
             if (!MyIsIMEMessage(message))
                 return DefWindowProc(hWnd,message,wParam,lParam);
             break;
@@ -163,22 +164,29 @@ BOOL PASCAL GetCandPosFromCompWnd(LPUIEXTRA lpUIExtra,LPPOINT lppt)
     {
         if (lpUIExtra->uiComp[0].bShow)
         {
-            GetWindowRect(lpUIExtra->uiComp[0].hWnd,&rc);
-            lppt->x = rc.left;
-            lppt->y = rc.bottom+1;
-            return TRUE;
+            if (IsWindow(lpUIExtra->uiComp[0].hWnd)) {
+                GetWindowRect(lpUIExtra->uiComp[0].hWnd,&rc);
+                lppt->x = rc.left;
+                lppt->y = rc.bottom+1;
+                return TRUE;
+            }
         }
     }
     else
     {
         if (lpUIExtra->uiDefComp.bShow)
         {
-            GetWindowRect(lpUIExtra->uiDefComp.hWnd,&rc);
-            lppt->x = rc.left;
-            lppt->y = rc.bottom+1;
-            return TRUE;
+            if (IsWindow(lpUIExtra->uiDefComp.hWnd)) {
+                GetWindowRect(lpUIExtra->uiDefComp.hWnd,&rc);
+                lppt->x = rc.left;
+                lppt->y = rc.bottom+1;
+                return TRUE;
+            }
         }
     }
+    lppt->x=-1;
+    lppt->y=-1;
+    MyDebugPrint((TEXT(" *** GetCandPosFromCompWnd FALSE\n")));
     return FALSE;
 }
 
@@ -227,11 +235,15 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
     }
     else
     {
-        if (GetCandPosFromCompWnd(lpUIExtra,lppt))
+        if (!GetCandPosFromCompWnd(lpUIExtra,lppt))
         {
-            ScreenToClient(lpIMC->hWnd,lppt);
-            return TRUE;
+            RECT rc;
+            GetWindowRect(lpIMC->hWnd,&rc);
+            lppt->x = rc.left;
+            lppt->y = rc.bottom + 23;
         }
+        ScreenToClient(lpIMC->hWnd,lppt);
+        return TRUE;
     }
     return FALSE;
 }
@@ -245,11 +257,22 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 {
     POINT pt;
 
-    if (GetCandPosFromCompWnd(lpUIExtra,&pt))
+    MyDebugPrint((TEXT("CreateCandWindow\n")));
+    // CandWindow는 CompWindow의 위치를 기반으로 생성된다.
+    // 그러나, CompWindow가 없는 경우도 있다 (워드패드)
+    // 이 경우, 전체 윈도우 크기를 알아서 왼쪽 하단에 붙여준다.
+    // 마치 리눅스의 입력상태 창같은 위치
+    // skkime에서는 root 윈도라 부름.
+    if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
     {
-        lpUIExtra->uiCand.pt.x = pt.x;
-        lpUIExtra->uiCand.pt.y = pt.y;
+        RECT rc;
+        GetWindowRect(lpIMC->hWnd,&rc);
+        pt.x = rc.left;
+        pt.y = rc.bottom + 1;
     }
+    lpUIExtra->uiCand.pt.x = pt.x;
+    lpUIExtra->uiCand.pt.y = pt.y;
+    MyDebugPrint((TEXT("Cand Pos :%dx%d\n"),pt.x,pt.y));
 
     if (!IsWindow(lpUIExtra->uiCand.hWnd))
     {
@@ -452,14 +475,16 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
     POINT pt;
     CANDIDATEFORM caf;
 
+    MyDebugPrint((TEXT("MoveCandWindow\r\n")));
     if (fForceComp)
     {
-        if (GetCandPosFromCompForm(lpIMC, lpUIExtra, &pt))
-        {
+        if (GetCandPosFromCompForm(lpIMC, lpUIExtra, &pt)) {
             caf.dwIndex        = 0;
             caf.dwStyle        = CFS_CANDIDATEPOS;
             caf.ptCurrentPos.x = pt.x;
             caf.ptCurrentPos.y = pt.y;
+
+            MyDebugPrint((TEXT(" *** MoveCandWindow #1\r\n")));
 #if 0
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
             if ((int)rc.left != -1 && (int)rc.left < 4096 ) {
@@ -482,17 +507,30 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
     // Not initialized !!
     if (lpIMC->cfCandForm[0].dwIndex == -1)
     {
-        if (GetCandPosFromCompWnd(lpUIExtra,&pt))
+        MyDebugPrint((TEXT(" *** MoveCandWindow #2\r\n")));
+        if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
         {
-            lpUIExtra->uiCand.pt.x = pt.x;
-            lpUIExtra->uiCand.pt.y = pt.y;
+            // 어떤 어플리케이션은 CompWindow를 가지고 있지 않다.
+            // 워드패드가 대표적인 케이스
+            GetWindowRect(lpIMC->hWnd,&rc);
+            lpUIExtra->uiCand.pt.x = rc.left;
+            lpUIExtra->uiCand.pt.y = rc.bottom;
+
+            pt.x = rc.left;
+            pt.y = rc.bottom + 24;
+        }
+        lpUIExtra->uiCand.pt.x = pt.x;
+        lpUIExtra->uiCand.pt.y = pt.y;
+
+        {
+            MyDebugPrint((TEXT(" *** pt %dx%d\r\n"),pt.x,pt.y));
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
             MoveWindow(lpUIExtra->uiCand.hWnd,pt.x,pt.y, rc.right - rc.left ,rc.bottom - rc.top ,TRUE);
             ShowWindow(lpUIExtra->uiCand.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiCand.bShow = TRUE;
             InvalidateRect(lpUIExtra->uiCand.hWnd,NULL,FALSE);
 
-            SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y));
+            SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y-20));
         }
         return;
     }
@@ -505,8 +543,14 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         RECT rcWork;
         RECT rcAppWnd;
 
+        MyDebugPrint((TEXT(" *** MoveCandWindow #3\r\n")));
         SystemParametersInfo(SPI_GETWORKAREA,0,&rcWork,FALSE);
-        GetClientRect(lpUIExtra->uiCand.hWnd,&rc);
+        // patch from skkime
+        if (IsWindow(lpUIExtra->uiCand.hWnd)) {
+            GetClientRect(lpUIExtra->uiCand.hWnd,&rc);
+        } else {
+            rc.left = rc.right = rc.top = rc.bottom = 0;
+        }
         GetWindowRect(lpIMC->hWnd,&rcAppWnd);
 
         if (!lpUIExtra->bVertical)
@@ -533,6 +577,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         
         if (IsWindow(lpUIExtra->uiCand.hWnd))
         {
+            MyDebugPrint((TEXT(" *** MoveCandWindow #4\r\n")));
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
             MoveWindow(lpUIExtra->uiCand.hWnd,pt.x,pt.y, rc.right - rc.left ,rc.bottom - rc.top ,TRUE);
             ShowWindow(lpUIExtra->uiCand.hWnd,SW_SHOWNOACTIVATE);
@@ -542,7 +587,8 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         }
         SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y));
     } 
-    else if (lpIMC->cfCandForm[0].dwStyle == CFS_CANDIDATEPOS)
+    else
+    //else if (lpIMC->cfCandForm[0].dwStyle == CFS_CANDIDATEPOS)
     {
         pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
         pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
@@ -551,6 +597,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         if (IsWindow(lpUIExtra->uiCand.hWnd))
         {
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
+            MyDebugPrint((TEXT(" *** MoveCandWindow #5\r\n")));
             MoveWindow(lpUIExtra->uiCand.hWnd,pt.x,pt.y, rc.right - rc.left ,rc.bottom - rc.top ,TRUE);
             ShowWindow(lpUIExtra->uiCand.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiCand.bShow = TRUE;
@@ -558,7 +605,12 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
 
         }
         SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y));
+        MyDebugPrint((TEXT(" *** MoveCandWindow: dwStyle: %x\r\n"),
+                lpIMC->cfCandForm[0].dwStyle));
     }
+    MyDebugPrint((TEXT(" *** MoveCandWindow Fail\r\n")));
+    MyDebugPrint((TEXT(" *** MoveCandWindow: dwStyle: %x\r\n"),
+                lpIMC->cfCandForm[0].dwStyle));
 }
 
 /*
