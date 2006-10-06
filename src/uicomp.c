@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.4 2004/10/09 02:43:56 wkpark Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.5 2004/10/13 11:23:33 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -121,6 +121,7 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpUIExtra->uiComp[i].bShow = FALSE;
     }
 
+    // not created yet ?
     if (lpUIExtra->uiDefComp.pt.x == -1)
     {
         GetWindowRect(lpIMC->hWnd,&rc);
@@ -238,6 +239,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
     //
     // Save the composition form style into lpUIExtra.
     //
+    MyDebugPrint((TEXT("MoveCompWindow\r\n")));
     lpUIExtra->dwCompStyle = lpIMC->cfCompForm.dwStyle;
 
     if (lpIMC->cfCompForm.dwStyle)  // Style is not DEFAULT.
@@ -440,6 +442,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
         // When the style is DEFAULT, show the default composition window.
         //
         // root window style XXX
+        MyDebugPrint((TEXT("MoveCompWindow root window\r\n")));
         if (IsWindow(lpUIExtra->uiDefComp.hWnd))
         {
             for (i = 0; i < MAXCOMPWND; i++)
@@ -636,18 +639,23 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
                     // 한글을 제대로 지원하지 않는 어플에서
                     // 좀 더 깔끔한 한글 출력을 지원할 수 있을 것이다.
                     HDC hPDC;
-                    //HBRUSH hBrush;
-                    //hBrush=CreateSolidBrush(GetBkColor(hDC));
-                    //FillRect(hDC,&rc,hBrush);
-
+#if 0
+                    // normal white background color
+                    HBRUSH hBrush;
+                    hBrush=CreateSolidBrush(GetBkColor(hDC));
+                    FillRect(hDC,&rc,hBrush);
+#else
+                    // BTNFACE background color like as IME 2002/2003.
+                    FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
+#endif
                     hPDC = GetDC(GetParent(hCompWnd));
+
                     GetClientRect (hCompWnd,&rc);
-                    //SetBkColor(hDC,GetBkColor(hPDC));
                     SetBkColor(hDC,GetBkColor(hDC));
                     SetTextColor(hDC,GetTextColor(hDC));
+                    //SetBkColor(hDC,GetBkColor(hPDC));
                     //SetTextColor(hDC,RGB(127,127,127));
                     //SetBkMode(hDC,OPAQUE);
-                    FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
 
                     lstart = GetWindowLong(hCompWnd,FIGWL_COMPSTARTSTR);
                     num = GetWindowLong(hCompWnd,FIGWL_COMPSTARTNUM);
@@ -658,6 +666,7 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
                     lpstr+=lstart;
                     lpattr+=lstart;
                     DrawTextOneLine(hCompWnd, hDC, lpstr, lpattr, num, fVert);
+
                     ReleaseDC(GetParent(hCompWnd),hPDC);
                 }
                 else
@@ -718,6 +727,7 @@ void PASCAL SetFontCompWindow(LPUIEXTRA lpUIExtra)
         if (IsWindow(lpUIExtra->uiComp[i].hWnd))
             SetWindowLongPtr(lpUIExtra->uiComp[i].hWnd,FIGWL_FONT,(LONG_PTR)lpUIExtra->hFont);
 
+    OutputDebugString(TEXT("SetFontCompWindow\r\n"));
 }
 
 /*
