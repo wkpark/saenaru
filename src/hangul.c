@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.10 2004/12/03 15:48:02 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.11 2004/12/21 22:52:45 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1680,7 +1680,7 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.a
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = cs;
         GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002
+        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
         if (dwImeFlag & SAENARU_ONTHESPOT)
             GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1759,7 +1759,7 @@ ac_exit:
 	    // 이 경우 마지막 입력받은 ascii문자를 그대로 내뱉는다.
 	    //PostMessage(lpIMC->hWnd,WM_CHAR,code,lParam);
 	} else {
-#if 0
+#if 1
             // 고고타자, 워드패드에서 제대로 동작하도록 수정
 	    // 이 부분을 꺼야 제대로 작동한다.
             GnMsg.message = WM_IME_STARTCOMPOSITION;
@@ -1770,7 +1770,7 @@ ac_exit:
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
