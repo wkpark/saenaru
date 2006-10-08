@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.12 2006/10/05 04:53:52 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.13 2006/10/08 09:08:51 wkpark Exp $
  */
 
 #include "windows.h"
@@ -115,6 +115,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                 case IME_ESC_QUERY_SUPPORT:
                 case IME_ESC_PRI_GETDWORDTEST:
                 case IME_ESC_GETHELPFILENAME:
+                case IME_ESC_HANJA_MODE:
                     lRet = TRUE;
                     break;
 
@@ -124,12 +125,18 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             }
             break;
 
+        case IME_ESC_HANJA_MODE:
+            MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE:\r\n")));
+            lRet = FALSE;
+            break;
+
         case IME_ESC_PRI_GETDWORDTEST:
             lRet = 0x12345678;
             break;
 
         case IME_ESC_GETHELPFILENAME:
             Mylstrcpy((LPMYSTR)lpData, MYTEXT("saenaru.hlp"));
+            MyDebugPrint((TEXT("\tIME_ESC_GETHELPFILENAME\r\n")));
             lRet = TRUE;
             break;
 
@@ -176,10 +183,12 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         MyDebugPrint((TEXT("\tImeProcessKey: vKey is 0x%x\r\n"),vKey));
     }
 
+#ifdef NO_MOZILLA_HACK
     if (lKeyData & 0x80000000)
     {
         return FALSE;
     }
+#endif
     MyDebugPrint((TEXT("\t** lKeyData is 0x%x\r\n"),lKeyData));
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
@@ -307,9 +316,10 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         }
     }
     
-    if (!fRet && IsCompStr(hIMC))
+    if (!fRet && IsCompStr(hIMC)) {
         MakeResultString(hIMC,TRUE);
-
+        hangul_ic_init(&ic);
+    }
     ImmUnlockIMC(hIMC);
     return fRet;
 }
