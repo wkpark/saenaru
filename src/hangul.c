@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.12 2006/10/06 10:18:19 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.13 2006/10/08 09:10:02 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2068,9 +2068,16 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 		if ( hangul_is_jongseong(ic->last) )
 		    last = hangul_jongseong_to_choseong(ic->last);
 
-                if (jong && cho)
-                    ic->jong = jong;
-                else {
+                if (jong && cho) {
+                    if (last != cho) {
+			WCHAR tmp;
+			tmp = cho;
+			cho = hangul_jongseong_to_choseong(jong);
+			ic->jong = hangul_choseong_to_jongseong(tmp);
+		    } else {
+			ic->jong = jong;
+		    }
+		} else {
 		    // 분해되지 않으면 단종성의 경우
                     // 종성 + 중성: 마지막 종성을 초성으로 바꾸고 잠시 저장
                     cho = hangul_jongseong_to_choseong(ic->jong);
@@ -2080,10 +2087,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 
                 *cs = hangul_ic_commit(ic);
                 // XXX
-		if (last != cho)
-		    ic->cho = last;
-		else
-		    ic->cho = cho;
+		ic->cho = cho;
                 ic->jung = jamo;
                 hangul_ic_push(ic,cho);
                 hangul_ic_push(ic,jamo);
