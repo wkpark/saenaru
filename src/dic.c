@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.8 2006/10/05 04:53:52 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.9 2006/10/06 11:20:51 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1263,7 +1263,6 @@ LPBYTE lpbKeyState;
 #endif
         	            ImmUnlockIMCC (lpIMC->hCompStr);
         		}
-                        break;
                     }
 #ifdef DEBUG
                     else
@@ -1271,7 +1270,6 @@ LPBYTE lpbKeyState;
 #endif
                     GlobalFree((HANDLE)lpRS);
                     //ImmUnlockIMC(hIMC);
-                    break;
                 }
                 break;
             }
