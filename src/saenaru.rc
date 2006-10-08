@@ -40,6 +40,7 @@ INDIC_HANJA	ICON	DISCARDABLE		"..\\resource\\text\\hanjakey.ico"
 INDIC_KEY	ICON    DISCARDABLE		"..\\resource\\keyboard.ico"
 INDIC_HALF	ICON    DISCARDABLE		"..\\resource\\half.ico"
 INDIC_FULL	ICON    DISCARDABLE		"..\\resource\\full.ico"
+INDIC_PAD	ICON    DISCARDABLE		"..\\resource\\imepad.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
