@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.4 2006/10/06 10:20:44 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -184,8 +184,6 @@ BOOL PASCAL GetCandPosFromCompWnd(LPUIEXTRA lpUIExtra,LPPOINT lppt)
             }
         }
     }
-    lppt->x=-1;
-    lppt->y=-1;
     MyDebugPrint((TEXT(" *** GetCandPosFromCompWnd FALSE\n")));
     return FALSE;
 }
@@ -222,7 +220,7 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
                     lppt->x = pt.x;
                     lppt->y = pt.y;
                 }
-                MyDebugPrint((TEXT("XXX #1\n")));
+                MyDebugPrint((TEXT("FromCompForm #1\n")));
             }
             else
             {
@@ -242,6 +240,7 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
             lppt->x = rc.left;
             lppt->y = rc.bottom + 23;
         }
+                MyDebugPrint((TEXT("FromCompForm #2\n")));
         ScreenToClient(lpIMC->hWnd,lppt);
         return TRUE;
     }
@@ -585,19 +584,37 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             InvalidateRect(lpUIExtra->uiCand.hWnd,NULL,FALSE);
 
         }
+        MyDebugPrint((TEXT(" *** MoveCandWindow #5\r\n")));
         SendMessage(hUIWnd,WM_UI_CANDMOVE, 0,MAKELONG((WORD)pt.x,(WORD)pt.y));
+        return;
     } 
-    else
-    //else if (lpIMC->cfCandForm[0].dwStyle == CFS_CANDIDATEPOS)
+    else if (lpIMC->cfCandForm[0].dwStyle == CFS_CANDIDATEPOS)
     {
         pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
         pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
         ClientToScreen(lpIMC->hWnd,&pt);
-        
+        MyDebugPrint((TEXT(" *** MoveCandWindow #6\r\n")));
+    } else {
+        MyDebugPrint((TEXT(" *** MoveCandWindow #7\r\n")));
+        if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
+        {
+            // 어떤 어플리케이션은 CompWindow를 가지고 있지 않다.
+            // 워드패드가 대표적인 케이스
+            GetWindowRect(lpIMC->hWnd,&rc);
+            lpUIExtra->uiCand.pt.x = rc.left;
+            lpUIExtra->uiCand.pt.y = rc.bottom;
+
+            pt.x = rc.left;
+            pt.y = rc.bottom + 24;
+        }
+        //ScreenToClient(lpIMC->hWnd,&pt);
+        //ClientToScreen(lpIMC->hWnd,&pt);
+    }
+
+    {
         if (IsWindow(lpUIExtra->uiCand.hWnd))
         {
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
-            MyDebugPrint((TEXT(" *** MoveCandWindow #5\r\n")));
             MoveWindow(lpUIExtra->uiCand.hWnd,pt.x,pt.y, rc.right - rc.left ,rc.bottom - rc.top ,TRUE);
             ShowWindow(lpUIExtra->uiCand.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiCand.bShow = TRUE;
