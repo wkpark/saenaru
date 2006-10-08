@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.9 2006/10/06 11:20:51 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.10 2006/10/08 09:18:21 wkpark Exp $
  */
 
 #include <windows.h>
@@ -444,9 +444,13 @@ set_compstr:
         {
             int sel = lpCandList->dwSelection / lpCandList->dwPageSize;
             sel *= lpCandList->dwPageSize;
-            sel +=select - 1;
-            if (sel >= i)
-                sel = i - 1;
+            if (select != -1) {
+                sel +=select - 1;
+                if (sel >= i)
+                    sel = i - 1;
+            } else {
+                sel = 0;
+            }
             lpCandList->dwSelection = sel;
             offset = 0;
         }
@@ -1062,7 +1066,7 @@ LPBYTE lpbKeyState;
                 select= wParam - VK_1 + 1;
                 break;
             case VK_ESCAPE:
-                select= 1;
+                select= -1; // XXX
                 break;
             default:
                 break;
@@ -1100,7 +1104,16 @@ LPBYTE lpbKeyState;
 #ifdef USE_RECONVERSION
             // regard the VK_F9 key as the ReConversion key
             while (!IsCompStr(hIMC)) {
+                TCHAR szFname[256];
+                int ns=0;
                 DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
+
+                ns=GetModuleFileName(NULL,(LPTSTR)szFname,sizeof(szFname));
+                if (ns > 0) {
+                    // check application names
+                    OutputDebugString(szFname);
+                }
+
                 if (dwSize) {
                     LPRECONVERTSTRING lpRS;
         
@@ -1181,7 +1194,15 @@ LPBYTE lpbKeyState;
         		        if (lpCompStr != NULL) {
                                     // XXX
                                     InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
-                                    //InitCompStr(lpCompStr,CLR_UNDET);
+
+#if 1
+                                    // 워드패드와 M$ Explorer는 반드시 WM_IME_STARTCOMPOSITION으로 시작해야 한다.
+                                    // 2006/10/09
+                                    GnMsg.message = WM_IME_STARTCOMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = 0;
+                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+#endif
         
                                     lpstr = GETLPCOMPSTR(lpCompStr);
                                     lpread = GETLPCOMPREADSTR(lpCompStr);
@@ -1233,19 +1254,6 @@ LPBYTE lpbKeyState;
                                     SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
                                     lpCompStr->dwResultClauseLen = 8;
 
-#if 0
-                                    // Generate RESULTALL Msg
-                                    GnMsg.message = WM_IME_COMPOSITION;
-                                    GnMsg.wParam = 0;
-                                    GnMsg.lParam = GCS_RESULTSTR | GCS_DELTASTART;
-                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-
-                                    // Generate COMPSTR Msg
-                                    GnMsg.message = WM_IME_COMPOSITION;
-                                    GnMsg.wParam = 0;
-                                    GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-#endif
 #endif
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
@@ -1476,6 +1484,17 @@ LPBYTE lpbKeyState;
             }
             break;
 #endif
+        case VK_LBUTTON:
+        case VK_RBUTTON:
+        case VK_MBUTTON:
+            // for mozilla
+            OutputDebugString(TEXT(" *** VK_LBUTTON\r\n"));
+            if (IsCompStr(hIMC)) {
+                MakeResultString(hIMC,TRUE);
+                hangul_ic_init(&ic);
+                return TRUE;
+            }
+            break;
         default:
             break;
     }
