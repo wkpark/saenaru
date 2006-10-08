@@ -50,6 +50,7 @@ TSFSRCS= \
 	tsf.cpp \
 	btnime.cpp \
 	btncmd.cpp \
+	btnpad.cpp \
 	btnext.cpp
 
 TSFLIBS= \

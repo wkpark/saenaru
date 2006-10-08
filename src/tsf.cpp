@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.3 2006/10/03 13:10:27 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -114,6 +114,11 @@ const GUID c_guidItemButtonShape = {
     0xd97b240b, 0x2c61, 0x4b9b, { 0xae, 0xcf, 0xd5, 0xc3, 0xcf, 0xdd, 0xfc, 0xbb }
 };
 
+// {4d970333-cad0-42d0-ab1f-a9315b6cad38}
+const GUID c_guidItemButtonPad = {
+    0x4d970333, 0xcad0, 0x42d0, { 0xab, 0x1f, 0xa9, 0x31, 0x5b, 0x6c, 0xad, 0x38 }
+};
+
 /*    ÔÒª¸ button ªËÌ¸ª¨ªëª¬¡¢skimic.dll ªÈÔÒª¸ªâªÎªòÞÅª¦ªÎªÏù­ª±ªÊª±ªìªÐªÊªéªÊ
  *    ª¤ªèª¦ªÀ¡£ÔÒª¸ªËª·ªÆª¤ªëªÎªÀªÈª¤ª¦à»ìý?ª¬ã÷ø¨ªÀªÃª¿¡¦¡£
  */
@@ -151,7 +156,7 @@ InitLanguageBar (void)
     DEBUGPRINTF ((TEXT ("Enter::InitLanguageBar\n")));
 
     /* Logon ãÁªËªÏ TSF ªÏû¼ªÓõóªµªÊª¤¡£*/
-#if 0
+#if 1
     if (gfSaenaruSecure) {
         DEBUGPRINTF ((TEXT ("Leave::InitLanguageBar - security\n")));
         return    FALSE;
@@ -241,9 +246,9 @@ UpdateLanguageBar (void)
 #endif
     register DWORD  dwValue;
     register BOOL   fRetval = FALSE;
-    register BOOL   fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon, fShowShapeIcon;
+    register BOOL   fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon, fShowShapeIcon, fShowPadIcon;
 
-#if 0
+#if 1
     if (gfSaenaruSecure)
         return    FALSE;
 #endif
@@ -264,6 +269,7 @@ UpdateLanguageBar (void)
 
     /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
     fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
+    fShowPadIcon = TRUE;
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
     if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWKEYBRDICON), &dwValue))
@@ -292,7 +298,7 @@ UpdateLanguageBar (void)
                 pItem->Release ();
             }
         }
-#if 1
+
         if (fShowShapeIcon) {
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonShape, &pItem)) &&
@@ -303,7 +309,7 @@ UpdateLanguageBar (void)
                 pItem->Release ();
             }
         }
-#endif
+
         if (fShowIMEIcon) {
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonIME, &pItem)) &&
@@ -314,6 +320,18 @@ UpdateLanguageBar (void)
                 pItem->Release ();
             }
         }
+
+        if (fShowPadIcon) {
+            pItem    = NULL;
+            if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonPad, &pItem)) &&
+                pItem != NULL) {
+                pLangBarItemMgr->RemoveItem (pItem);
+                if (fShowPadIcon) 
+                    pLangBarItemMgr->AddItem (pItem);
+                pItem->Release ();
+            }
+        }
+
         pLangBarItemMgr->Release ();
     }
 #if 0
@@ -340,10 +358,10 @@ ActivateLanguageBar (
     register HANDLE                hMutex;
 #endif
     register DWORD                dwValue;
-    register BOOL                fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon ,fShowShapeIcon;
+    register BOOL                fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon ,fShowShapeIcon, fShowPadIcon;
     
     TF_LANGBARITEMINFO MypInfo;
-#if 0
+#if 1
     if (gfSaenaruSecure)
         return;
 #endif
@@ -365,6 +383,7 @@ ActivateLanguageBar (
 
     /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
     fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
+    fShowPadIcon = FALSE;
     if (fSelect) {
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
@@ -386,7 +405,7 @@ ActivateLanguageBar (
 
         pItem    = NULL;
         fRemove    = FALSE;
-#if 1
+
         if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonCMode, &pItem)) &&
             pItem != NULL) {
             fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
@@ -402,9 +421,7 @@ ActivateLanguageBar (
         }
         pItem    = NULL;
         fRemove    = FALSE;
-#endif
 
-#if 1
         if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonShape, &pItem)) &&
             pItem != NULL) {
             fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
@@ -420,9 +437,8 @@ ActivateLanguageBar (
         }
         pItem    = NULL;
         fRemove    = FALSE;
-#endif
 
-#if 1
+
         if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonIME, &pItem)) &&
             pItem != NULL) {
             fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
@@ -435,6 +451,24 @@ ActivateLanguageBar (
                 pNewItem->Release ();
             }
         }
+        pItem    = NULL;
+        fRemove    = FALSE;
+#if 1
+        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonPad, &pItem)) &&
+            pItem != NULL) {
+            fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
+            pItem->Release ();
+        }
+
+        if ((pItem == NULL || fRemove) && fSelect && fShowPadIcon) {
+            pNewItem    = NULL;
+            if (CreateItemButtonPad (&pNewItem) && pNewItem != NULL) {
+                pLangBarItemMgr->AddItem (pNewItem);
+                pNewItem->Release ();
+            }
+        }
+        pItem    = NULL;
+        fRemove    = FALSE;
 #endif
         pLangBarItemMgr->Release ();
     }
@@ -457,7 +491,7 @@ UninitLanguageBar (void)
     register ITfLangBarItemMgr*    pLangBarItemMgr            = NULL;
     register int    i;
 
-#if 0    
+#if 1
     if (gfSaenaruSecure) {
         return;
     }

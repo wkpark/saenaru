@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/tsf.h,v 1.2 2003/12/26 09:26:33 perky Exp $
  */
 
 #if !defined (tsf_h)
@@ -56,12 +56,14 @@ extern const GUID c_guidItemButtonCMode ;
 extern const GUID c_guidItemButtonIME ;
 extern const GUID c_guidItemButtonShape ;
 extern const GUID c_guidKeyboardItemButton ;
+extern const GUID c_guidItemButtonPad ;
 
 /* prototypes */
 HIMC _GetCurrentHIMC(void);
 BOOL CreateItemButtonCMode(ITfLangBarItem** ppLangBarItem);
 BOOL CreateItemButtonIME(ITfLangBarItem** ppLangBarItem);
 BOOL CreateItemButtonShape(ITfLangBarItem** ppLangBarItem);
+BOOL CreateItemButtonPad(ITfLangBarItem** ppLangBarItem);
 BOOL _ShowKeyboardIcon(BOOL fShow) ;
 
 LONG DllAddRef(void);
