@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.5 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.6 2004/12/03 01:42:38 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -366,6 +366,7 @@ extern BYTE bNoComp[];
 extern BYTE bNoCompCtl[];
 extern BYTE bNoCompSht[];
 extern BYTE bNoCompAlt[];
+
 #if DEBUG
 extern DWORD dwLogFlag;
 extern DWORD dwDebugFlag;
@@ -376,6 +377,8 @@ extern DWORD dwComposeFlag;
 extern DWORD dwOptionFlag;
 
 extern DWORD dwImeFlag;
+
+extern BOOL gfSaenaruSecure;
 
 extern HangulIC ic;
 #endif //_NO_EXTERN_

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/config.c,v 1.4 2004/11/29 17:06:14 wkpark Exp $
  */
 
 #include "windows.h"
@@ -73,6 +73,8 @@ BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData)
 {
     HPROPSHEETPAGE rPages[MAX_PAGES];
     PROPSHEETHEADER psh;
+
+    if (gfSaenaruSecure) return FALSE;
 
     ImeLog(LOGF_API, TEXT("ImeConfigure"));
 
