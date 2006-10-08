@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.11 2004/12/21 22:52:45 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.12 2006/10/06 10:18:19 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1759,9 +1759,12 @@ ac_exit:
 	    // 이 경우 마지막 입력받은 ascii문자를 그대로 내뱉는다.
 	    //PostMessage(lpIMC->hWnd,WM_CHAR,code,lParam);
 	} else {
-#if 1
+#if 0
             // 고고타자, 워드패드에서 제대로 동작하도록 수정
-	    // 이 부분을 꺼야 제대로 작동한다.
+	    // 이 부분을 *비활성* 시켜야 제대로 작동한다.
+	    //
+	    // EditPlus 2.21 (330), WordPad
+	    //
             GnMsg.message = WM_IME_STARTCOMPOSITION;
             GnMsg.wParam = 0;
             GnMsg.lParam = 0;
