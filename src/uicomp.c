@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.5 2004/10/13 11:23:33 wkpark Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.6 2006/10/06 11:14:58 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -232,8 +232,8 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
     RECT rc;
     RECT oldrc;
     SIZE sz;
-    int width;
-    int height;
+    int width=0;
+    int height=0;
     int i;
 
     //
@@ -466,31 +466,30 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                     width = sz.cx;
                     height = sz.cy;
                 }
-                ImmUnlockIMCC(lpIMC->hCompStr);
             }
 
             ReleaseDC(lpUIExtra->uiDefComp.hWnd,hDC);
         
-            GetWindowRect(lpUIExtra->uiDefComp.hWnd,&rc);
+            GetWindowRect(lpIMC->hWnd,&rc);
 
             lpUIExtra->uiDefComp.pt.x = rc.left;
-            lpUIExtra->uiDefComp.pt.y = rc.top;
+            lpUIExtra->uiDefComp.pt.y = rc.bottom;
             MoveWindow(lpUIExtra->uiDefComp.hWnd,
                        rc.left,
-                       rc.top,
+                       rc.bottom,
                        width+ 2 * GetSystemMetrics(SM_CXEDGE),
                        height+ 2 * GetSystemMetrics(SM_CYEDGE),
                        TRUE);
             if (lpCompStr->dwCompStrLen > 0) {
-                // comp str이 없을 경우는 감춘다.
-                // 긴 줄의 잔상이 남는 버그 해결 XXX
                 ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_SHOWNOACTIVATE);
                 lpUIExtra->uiDefComp.bShow = TRUE;
-                InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
             } else {
+                // comp str이 없을 경우는 감춘다.
                 ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_HIDE);
                 lpUIExtra->uiDefComp.bShow = FALSE;
+                InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
             }
+            ImmUnlockIMCC(lpIMC->hCompStr);
         }
     }
 
@@ -567,6 +566,11 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
                 break;
 
             case ATTR_TARGET_NOTCONVERTED:
+            default:
+                //SetTextColor(hDC,RGB(127,127,127));
+                //SetBkMode(hDC,TRANSPARENT);
+                //MoveToEx(hDC, rc.right, rc.top, NULL);
+                //LineTo  (hDC, rc.right, rc.bottom);
                 break;
         }
 
