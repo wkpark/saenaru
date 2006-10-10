@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.12 2006/10/10 08:12:59 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.13 2006/10/10 11:08:38 wkpark Exp $
  */
 
 #include <windows.h>
@@ -308,6 +308,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     {
         if (!*lpb)
         {
+            goto cvk_exit40;
             //
             // make attribute
             //
