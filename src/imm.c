@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.13 2006/10/08 09:08:51 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.14 2006/10/08 22:05:34 wkpark Exp $
  */
 
 #include "windows.h"
@@ -203,7 +203,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
     // SHIFT-SPACE
     // See ui.c how to hook the shift-space event.
-    if ( (LOWORD(vKey) & 0x00FF) == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
+    if ( !(lKeyData & 0x80000000) &&
+            (LOWORD(vKey) & 0x00FF) == VK_SPACE &&
+            dwOptionFlag & USE_SHIFT_SPACE)
     {
         //SHORT ShiftState = (GetKeyState(VK_SHIFT) >> 31) & 1;
         //SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
