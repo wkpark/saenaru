@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.5 2004/10/10 10:55:12 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.6 2006/10/10 08:12:59 wkpark Exp $
  */
 
 #include <windows.h>
@@ -99,17 +99,16 @@ BOOL WINAPI DLLEntry (
             if (*(lpDicFileName-1) != TEXT('\\'))
                 *lpDicFileName++ = TEXT('\\');
             {
-#if 1
                 INT sz;
-                sz= GetRegStringValue(TEXT("\\Dictionary"),TEXT(""),NULL);
+                TCHAR lpKey[128];
+                LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
+
+                sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
                 if (sz <= 2) {
                     LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
                 } else
-                    GetRegStringValue(TEXT("\\Dictionary"),TEXT(""),lpDicFileName);
+                    GetRegStringValue(TEXT("\\Dictionary"),lpKey,lpDicFileName);
                 MyDebugPrint((TEXT("Saenaru: dicfile %s:%d\n"), lpDicFileName,sz));
-#else
-                LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
-#endif
             }
 
             // read registry

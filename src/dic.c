@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.11 2006/10/08 22:03:16 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.12 2006/10/10 08:12:59 wkpark Exp $
  */
 
 #include <windows.h>
@@ -272,10 +272,11 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
         sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
         if (sz <= 2) {
-            lpDic = (LPTSTR) szDicFileName; //default
+            lpDic = (LPTSTR)&szDic;
+            lstrcpy (szDic, szDicFileName) ;
         } else
             GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpDic);
-        MyDebugPrint((TEXT("Saenaru: %s Dic %s:%d\n"), lpKey, lpDic,sz));
+        MyDebugPrint((TEXT("Saenaru: %s Dic %s:%d\n"), lpKey, szDic,sz));
 
         nBufLen = GetCandidateStringsFromDictionary(lpT2,
                 szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
