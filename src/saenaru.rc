@@ -86,7 +86,7 @@ BEGIN
     CONTROL         "사용자 정의 자판 (&U)",IDC_LAYOUT_USER,"Button",
                     BS_AUTORADIOBUTTON,115,57,77,11
 
-    CONTROL         "모아치기 (&M)",IDC_COMPOSITE_TYPING,"Button",
+    CONTROL         "모아치기 (&L)",IDC_COMPOSITE_TYPING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,26,79,53,10
     CONTROL         "동시치기 (&C)",IDC_CONCURRENT_TYPING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,83,79,53,10
@@ -115,8 +115,8 @@ LANGUAGE 0x12, 0x1
 BEGIN
     LTEXT           "새나루 한글 입력기 버전 1.0",IDC_STATIC,63,36,88,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
-    LTEXT           "장혜식 <perky@FreeBSD.org> 만듦 2003",IDC_STATIC,41,54,
-                    132,8
+    LTEXT           "장혜식 <perky@FreeBSD.org> 만듦 2003-2006",IDC_STATIC,
+		    33,54,151,8 
     LTEXT           "이 소프트웨어는 올바른 동작이나 특정 목적에의 적합성에 대한 어떠한 보증없이 ""있는 그대로"" 배포됩니다.",
                     IDC_STATIC,8,81,198,18
     LTEXT           "이 소프트웨어는 대한민국 저작권법에 의해 보호됩니다. 자세한 저작권 사항은 같이 배포되는 관련 문서 또는 프로젝트 홈페이지(http://saenaru.i18n.org/)를 참조하십시오.",
@@ -127,7 +127,7 @@ END
 DLG_DEBUG DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "DebugOptions"
-FONT 9, "굴림"
+FONT 9, "MS Shell Dlg"
 LANGUAGE 0x12, 0x1
 BEGIN
     CONTROL         "LOGF_ENTRY",IDC_LOGF_ENTRY,"Button",BS_AUTOCHECKBOX | 
@@ -290,6 +290,107 @@ END
 
 #endif    // Korean resources
 /////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+
+DLG_GENERAL DIALOG DISCARDABLE  30, 65, 212, 158
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Keyboard options"
+LANGUAGE 0x09, 0x1
+FONT 9, "Tahoma"
+{
+   ICON		IDI_GENERAL,IDC_STATIC,4,5,18,21
+   GROUPBOX	"Select keyboard", IDC_STATIC,26,2,181,72 
+   CONTROL	"&2 set", IDC_LAYOUT_OLD2BUL, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,15,70,11 
+   CONTROL	"&3 set Final", IDC_LAYOUT_3FIN, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,29,70,11 
+   CONTROL	"3 set 3&90", IDC_LAYOUT_390, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,43,70,11 
+   CONTROL	"3 set Soo&nare", IDC_LAYOUT_3SUN, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,57,70,11 
+   CONTROL	"new 2 set (&D)", IDC_LAYOUT_NEW2BUL, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,15,77,11 
+   CONTROL	"new 3 set (&S)", IDC_LAYOUT_NEW3BUL, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,29,77,11 
+   CONTROL	"&Ahnmatae", IDC_LAYOUT_AHNMATAE, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,43,77,11 
+   CONTROL	"&User defined", IDC_LAYOUT_USER, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,57,77,11 
+   CONTROL	"Co&llective", IDC_COMPOSITE_TYPING, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,79,53,10 
+   CONTROL	"&Concurrent", IDC_CONCURRENT_TYPING, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,83,79,53,10 
+   CONTROL	"D&Vorak", IDC_DVORAK_SUPPORT, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,138,79,60,10 
+   CONTROL	"Delete by &Jaso unit", IDC_BACKSPACE_BY_JAMO, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,91,71,10 
+   CONTROL	"<&ESC> to Ascii mode", IDC_ESCENG_SUPPORT, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,109,91,88,10 
+   CONTROL	"<Shift>-<SPACE> toggle &Han/Eng mode", IDC_USE_SHIFT_SPACE, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,103,155,10 
+   CONTROL	"Support e&Xtended Hanja (KS X 1002) ", IDC_KSX1002_SUPPORT, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,115,156,10 
+   CONTROL	"Restrict to Wansung (&KS X 1001) syllables", IDC_KSX1001_SUPPORT, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,127,156,10 
+   CONTROL	"Compose with Hangul Jam&O", IDC_FULL_MULTIJOMO, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,139,156,10 
+}
+
+
+DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "About Saenaru..."
+LANGUAGE 0x09, 0x01
+FONT 9, "Tahoma"
+{
+   LTEXT	"Saenaru Hangul Input Method ver 1.0", IDC_STATIC, 43,29,126,8 
+   ICON		IDI_ABOUT, IDC_STATIC, 98,6,18,18 
+   LTEXT	"Hye-Sik Chang  <perky@FreeBSD.org> 2003-2006", IDC_STATIC, 26,42,164,8 
+   LTEXT 	"THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.", IDC_STATIC, 10,59,198,42 
+   LTEXT	"The software product is protected by copyright laws in Korea. See the included license along with this program or visit the homepage(http://saenaru.i18n.org/) of this project.", IDC_STATIC,
+		8,102,198,27 
+   GROUPBOX	"", IDC_STATIC, 3,53,209,77 
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_CONFIGNAME          "Saenaru Hangul Input Method"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_DICFILENAME         "SAENARU.DIC"
+    IDS_DIC_KEY             ""
+    IDS_SYM_KEY             "SymbolEn"
+    IDS_WORD_KEY            "WordEn"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_GL_NODICTIONARY     "Can not find dictionary"
+    IDS_GL_TYPINGERROR      "Typing Error No Roman"
+    IDS_GL_TESTGUIDELINESTR "TestGuideLine String"
+    IDS_GL_TESTGUIDELINEPRIVATE "TestGuideLine Private"
+    IDS_NOREADING           "There is no reading string\r\nPlease enter the reading string"
+    IDS_NOSTRING            "There is no string\r\nPlease enter the string"
+    IDS_NOMEMORY            "No memory."
+    IDS_REGWORDRET          "Fail to register Word"
+END
+
+#endif // English (U.S.) resources
 
 
 
