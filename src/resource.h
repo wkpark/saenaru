@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.4 2004/11/29 17:06:14 wkpark Exp $
  */
 
 //{{NO_DEPENDENCIES}}
@@ -78,8 +78,12 @@
 #define IDC_ESCENG_SUPPORT      2008
 
 /* string tables */
-#define IDS_DICFILENAME             1000
-#define IDS_CONFIGNAME              1001
+#define IDS_CONFIGNAME              1000
+#define IDS_DICFILENAME             1003
+#define IDS_DIC_KEY                 1005
+#define IDS_WORD_KEY                1006
+#define IDS_SYM_KEY                 1007
+
 #define IDS_GL_NODICTIONARY         1010
 #define IDS_GL_TYPINGERROR          1011
 #define IDS_GL_TESTGUIDELINESTR     1012

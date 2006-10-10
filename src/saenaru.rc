@@ -11,6 +11,7 @@
 #include "saenaru.h"
 #include "resource.h"
 #include "winver.h"
+#include "version.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -149,8 +150,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION VER_MAJOR,VER_MINOR,VER_BUILD,VER_PATCHLEVEL
+ PRODUCTVERSION VER_MAJOR,VER_MINOR,VER_BUILD,VER_PATCHLEVEL
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -168,14 +169,16 @@ BEGIN
             VALUE "Comments", "새나루 한글 입력기\0"
             VALUE "CompanyName", "Open Hangul Project\0"
             VALUE "FileDescription", "새나루 1.0\0"
-            VALUE "FileVersion", "1.0\0"
+            VALUE "FileVersion", VER_MAJOR_STR "." VER_MINOR_STR "\0"
             VALUE "InternalName", "SAENARU\0"
             VALUE "LegalCopyright", "Copyright (C) 2003-2006 장혜식.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "SAENARU.IME\0"
-//            VALUE "PrivateBuild", "\0"
+#ifdef VER_SNAPSHOT
+            VALUE "PrivateBuild", VER_SNAPSHOT "\0"
+#endif
             VALUE "ProductName", "새나루\0"
-            VALUE "ProductVersion", "1.00\0"
+            VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR "\0"
 //            VALUE "SpecialBuild", "\0"
         END
     END
@@ -259,8 +262,17 @@ END
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_DICFILENAME         "SAENARU.DIC"
     IDS_CONFIGNAME          "새나루 한글 입력기"
+END
+
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_DICFILENAME         "SAENARU.DIC"
+    IDS_DIC_KEY             ""
+    IDS_SYM_KEY             "Symbol"
+    IDS_WORD_KEY            "Word"
 END
 
 STRINGTABLE DISCARDABLE 

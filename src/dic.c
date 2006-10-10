@@ -27,12 +27,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.10 2006/10/08 09:18:21 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.11 2006/10/08 22:03:16 wkpark Exp $
  */
 
 #include <windows.h>
 #include <immdev.h>
 #include "saenaru.h"
+#include "resource.h"
 #include "vksub.h"
 #include "immsec.h"
 
@@ -249,7 +250,37 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     Mylstrcpy(szBuf,lpT2); // add Hangul
     szBuf[Mylstrlen(lpT2)] = 0;
 
-    nBufLen = GetCandidateStringsFromDictionary(lpT2, szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDicFileName);
+    {
+        LPTSTR  lpKey;
+        TCHAR   szKey[128];
+        LPTSTR  lpDic;
+        TCHAR   szDic[256];
+        INT sz;
+
+        lpKey = (LPTSTR)&szKey;
+        lpDic = (LPTSTR)&szDic;
+        if (Mylstrlen(lpT2) > 1) { // word dic.
+            LoadString( hInst, IDS_WORD_KEY, lpKey, 128);
+        } else if (*lpT2 >= 0x3131 && 0x314e >= *lpT2 ) {
+            LoadString( hInst, IDS_SYM_KEY, lpKey, 128);
+        } else {
+            LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
+        }
+
+        lpDic += GetSaenaruDirectory(lpDic,256);
+        if (*(lpDic-1) != TEXT('\\')) *lpDic++ = TEXT('\\');
+
+        sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
+        if (sz <= 2) {
+            lpDic = (LPTSTR) szDicFileName; //default
+        } else
+            GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpDic);
+        MyDebugPrint((TEXT("Saenaru: %s Dic %s:%d\n"), lpKey, lpDic,sz));
+
+        nBufLen = GetCandidateStringsFromDictionary(lpT2,
+                szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
+    }
+
     //
     // Check the result of dic. Because my candidate list has only MAXCANDSTRNUM
     // candidate strings.

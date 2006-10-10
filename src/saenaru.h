@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.6 2004/12/03 01:42:38 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.7 2006/10/08 09:16:02 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -409,6 +409,8 @@ LPWSTR PASCAL MyCharPrevW(LPWSTR lpStart, LPWSTR lpCur);
 LPWSTR PASCAL MyCharNextW(LPWSTR lp);
 LPWSTR PASCAL MylstrcpynW(LPWSTR lp0, LPWSTR lp1, int nCount);
 HFONT CheckNativeCharset(HDC hDC);
+
+int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
 
 /*   toascii.c   */
 BOOL PASCAL GenerateMessageToTransKey(LPTRANSMSGLIST lpTrabsKey,LPTRANSMSG lpGeneMsg);

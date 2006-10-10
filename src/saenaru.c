@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.4 2003/12/27 15:20:44 perky Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.5 2004/10/10 10:55:12 wkpark Exp $
  */
 
 #include <windows.h>
@@ -38,7 +38,7 @@
 
 extern HANDLE hMutex;
 
-static int
+int
 GetSaenaruDirectory(LPTSTR lpDest, int max)
 {
     static const TCHAR szIMEDir[] = TEXT("\\IME\\Saenaru");
@@ -101,11 +101,11 @@ BOOL WINAPI DLLEntry (
             {
 #if 1
                 INT sz;
-                sz= GetRegStringValue(TEXT("\\Dictionary"),TEXT("default"),NULL);
-                if (sz <= 0) {
+                sz= GetRegStringValue(TEXT("\\Dictionary"),TEXT(""),NULL);
+                if (sz <= 2) {
                     LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
                 } else
-                    GetRegStringValue(TEXT("\\Dictionary"),TEXT("default"),lpDicFileName);
+                    GetRegStringValue(TEXT("\\Dictionary"),TEXT(""),lpDicFileName);
                 MyDebugPrint((TEXT("Saenaru: dicfile %s:%d\n"), lpDicFileName,sz));
 #else
                 LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
