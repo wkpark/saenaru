@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.9 2004/12/22 10:51:08 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.10 2006/10/05 04:53:52 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -224,6 +224,7 @@ LPARAM lParam;
 #endif
                 return 0L;
             default:
+                OutputDebugString((LPTSTR)TEXT("hUICurIMC == NULL\r\n"));
                 break;
         }
     }
@@ -265,7 +266,7 @@ LPARAM lParam;
             break;
 
         case WM_IME_SETCONTEXT:
-            MyDebugPrint((TEXT("WM_IME_SETCONTEXT\n")));
+            MyDebugPrint((TEXT("* WM_IME_SETCONTEXT\r\n")));
             if (wParam)
             {
                 hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
@@ -361,7 +362,10 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
+            // if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
             CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+
+            MyDebugPrint((TEXT("WM_IME_STARTCOMPOSITION\r\n")));
 
             GlobalUnlock(hUIExtra);
             ImmUnlockIMC(hUICurIMC);
@@ -377,7 +381,7 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
-            // STARTCOMPOSITION 메시지가 전달되지 않는 경우
+            // WM_IME_STARTCOMPOSITION 메시지가 전달되지 않는 경우
             if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
             {
                 LPCOMPOSITIONSTRING lpCompStr;
@@ -503,15 +507,12 @@ LPARAM lParam;
             // Set the position of the candidate window to UIExtra.
             // This message is sent by the candidate window.
             //
-            //lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             lpUIExtra->uiCand.pt.x = (long)LOWORD(lParam);
             lpUIExtra->uiCand.pt.y = (long)HIWORD(lParam);
 
             MyDebugPrint((TEXT(" * CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
-            //MoveCandWindow(hWnd,lpIMC,lpUIExtra,FALSE);
-            //ImmUnlockIMC(hUICurIMC);
             GlobalUnlock(hUIExtra);
             break;
 #if 1
@@ -533,6 +534,7 @@ LPARAM lParam;
             {
                  if (hUICurIMC && IsCompStr(hUICurIMC))
                  MakeResultString(hUICurIMC,TRUE);
+                MyDebugPrint((TEXT("WM_LBUTTONDOWN\r\n")));
             }
 
             return DefWindowProc(hWnd,message,wParam,lParam);
@@ -677,6 +679,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             break;
 
         case IMN_SETCOMPOSITIONFONT:
+            MyDebugPrint((TEXT("IMN_SETCOMPOSITIONFONT\r\n")));
             lf = lpIMC->lfFont.W;
             if (lpUIExtra->hFont)
                 DeleteObject(lpUIExtra->hFont);
@@ -701,6 +704,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             lpUIExtra->hFont = CreateFontIndirect((LPLOGFONT)&lf);
             SetFontCompWindow(lpUIExtra);
             MoveCompWindow(lpUIExtra,lpIMC);
+
+            // lRet=1L; for fail
 
             break;
 
@@ -778,6 +783,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
         case IMN_SETCOMPOSITIONWINDOW:
             MoveCompWindow(lpUIExtra,lpIMC);
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
+            MyDebugPrint((TEXT("IMN_SETCOMPOSITIONWINDOW\n")));
+
             break;
 
         case IMN_SETSTATUSWINDOWPOS:
@@ -837,6 +844,9 @@ LONG PASCAL ControlCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wPara
             break;
 
         case IMC_GETCOMPOSITIONWINDOW:
+            wsprintf((LPTSTR)szDev,TEXT("GETCOMPOSITIONWINDOW\r\n"));
+            OutputDebugString((LPTSTR)szDev);
+
             *(LPCOMPOSITIONFORM)lParam  = lpIMC->cfCompForm; 
             lRet = 0;
             break;
@@ -1286,8 +1296,19 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             break;
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:
-            // hack to use RALT(VK_RMENU) as a Mode_Switch
             GetKeyboardState((LPBYTE)&pbKeyState);
+            // commit all CompStr like as IME 2002/2003
+            if ( pbKeyState[VK_MENU] & 0x80)
+            {
+                HWND hwnd = GetFocus ();
+                if (hwnd != NULL) {
+                    HIMC hIMC = NULL;
+                    hIMC = ImmGetContext (hwnd);
+                    if (hIMC && IsCompStr(hIMC))
+                        MakeResultString(hIMC,TRUE);
+                }
+            }
+            // hack to use RALT(VK_RMENU) as a Mode_Switch
             if ( pbKeyState[VK_RMENU] & 0x80 && !(lpmsg->lParam & 0x01000000))
             {
                 WORD ch;
@@ -1297,15 +1318,6 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 if (ch < '!' || ch > '~')
                      break;
                 MyDebugPrint((TEXT("RALT + %x\n"), ch));
-                {
-                    HWND hwnd = GetFocus ();
-                    if (hwnd != NULL) {
-                        HIMC hIMC = NULL;
-                        hIMC = ImmGetContext (hwnd);
-                        if (hIMC && IsCompStr(hIMC))
-                            MakeResultString(hIMC,TRUE);
-                    }
-                }
 #if 1
                 lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4 See WINUSER.H
                 MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
