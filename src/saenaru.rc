@@ -278,6 +278,39 @@ END
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
+    IDS_INPUT_CMODE_DESC        "입력방식"
+    IDS_TOGGLE_HALFFULL_DESC    "전각/반각 전환"
+    IDS_KEYBOARD_OPTION_DESC    "글쇠/입력기 설정"
+    IDS_MENU_HANGUL             "한글"
+    IDS_MENU_ASCII              "영문"
+    IDS_MENU_HANJA              "한자"
+    IDS_MENU_CANCEL             "취소"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_MENU_ENV                "환경설정(&R)"
+    IDS_MENU_DVORAK             "드보락(&V)"
+    IDS_MENU_ESC_ASCII          "ESC 영문전환(&E)"
+    IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
+    IDS_MENU_SHOW_KEYBOARD      "키보드 보기"
+
+    IDS_MENU_OLD2BUL            "두벌식(&2)"
+    IDS_MENU_3FIN               "세벌식(&3)"
+    IDS_MENU_390                "세벌식390(&9)"
+    IDS_MENU_NEW2BUL            "새두벌(&D)"
+    IDS_MENU_NEW3BUL            "새세벌(&S)"
+    IDS_MENU_AHNMATAE           "안마태(&A)"
+    IDS_MENU_3SOON              "세벌식 순아래(&N)"
+    IDS_MENU_USER               "사용자 자판(&U)" 
+    IDS_MENU_USER_COMP          "사용자 조합(&C)"
+END
+
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
+BEGIN
     IDS_GL_NODICTIONARY     "Can not find dictionary"
     IDS_GL_TYPINGERROR      "Typing Error No Roman"
     IDS_GL_TESTGUIDELINESTR "TestGuideLine String"
@@ -388,6 +421,38 @@ BEGIN
     IDS_NOSTRING            "There is no string\r\nPlease enter the string"
     IDS_NOMEMORY            "No memory."
     IDS_REGWORDRET          "Fail to register Word"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_INPUT_CMODE_DESC        "Input Mode"
+    IDS_TOGGLE_HALFFULL_DESC    "Fullwidth/Halfwidth Toggle"
+    IDS_KEYBOARD_OPTION_DESC    "Keyboard/InputMethod Options"
+    IDS_MENU_HANGUL             "Hangul"
+    IDS_MENU_ASCII              "English"
+    IDS_MENU_HANJA              "Ideograh"
+    IDS_MENU_CANCEL             "Cancel"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_MENU_ENV                "Configuration(&C)"
+    IDS_MENU_DVORAK             "D&Vorak"
+    IDS_MENU_ESC_ASCII          "&ESC to Ascii Mode"
+    IDS_MENU_EDIT_WORD_UNIT     "&Word Unit Edit"
+    IDS_MENU_SHOW_KEYBOARD      "Show Keyboard"
+
+    IDS_MENU_OLD2BUL            "&2-Set"
+    IDS_MENU_3FIN               "&3-Set Final"
+    IDS_MENU_390                "3-Set 390"
+    IDS_MENU_NEW2BUL            "New 2-Set (&D)"
+    IDS_MENU_NEW3BUL            "New 2-Set (&S)"
+    IDS_MENU_AHNMATAE           "&Ahnmatae"
+    IDS_MENU_3SOON              "3-set Soo&Nare"
+    IDS_MENU_USER               "&User defined" 
+    IDS_MENU_USER_COMP          "&Compose Map"
 END
 
 #endif // English (U.S.) resources

@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btncmd.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/btncmd.cpp,v 1.3 2006/10/03 13:08:03 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -54,7 +54,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-#define LANGBAR_ITEM_DESC	L"입력방식" // max 32 chars
+//#define LANGBAR_ITEM_DESC	L"입력방식" // max 32 chars
 
 static	void	_Menu_ToHangul (void) ;
 static	void	_Menu_ToHanja  (void) ;
@@ -63,11 +63,18 @@ static	void	_Menu_ToCMode  (DWORD fdwConversion) ;
 static	int	_GetConversionMode (HIMC hIMC) ;
 
 static	const TSFLBMENUINFO	c_rgMenuItems []	= {
+#if 0
 	{ L"한글",	_Menu_ToHangul },
 	{ L"영문",	_Menu_ToAscII },
 	{ L"한자",	_Menu_ToHanja },
 	{ NULL,		NULL },
 	{ L"취소",	NULL }
+#endif
+	{ IDS_MENU_HANGUL,	_Menu_ToHangul },
+	{ IDS_MENU_ASCII,	_Menu_ToAscII },
+	{ IDS_MENU_HANJA,	_Menu_ToHanja },
+	{ NULL,		NULL },
+	{ IDS_MENU_CANCEL,	NULL }
 } ;
 
 #define	SAENARU_LANGBARITEMSINK_COOKIE	0x0fab0faa
@@ -121,6 +128,7 @@ private:
 CLangBarItemCModeButton::CLangBarItemCModeButton ()
 {
 	//DllAddRef () ;
+	LPTSTR lpDesc;
 #if 1
 	_tfLangBarItemInfo.clsidService	= c_clsidSaenaruTextService ;
 	//_tfLangBarItemInfo.clsidService	= CLSID_NULL ;
@@ -133,7 +141,11 @@ CLangBarItemCModeButton::CLangBarItemCModeButton ()
 #endif
 	       ;
 	_tfLangBarItemInfo.ulSort		= 1 ;
-	SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC) ;
+
+	lpDesc=(LPTSTR)&_tfLangBarItemInfo.szDescription;
+	LoadString(hInst,IDS_INPUT_CMODE_DESC, lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
+
+	// SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC) ;
 	_pLangBarItemSink	= NULL ;
 	_cRef				= 1 ;
 #endif
@@ -232,7 +244,7 @@ CLangBarItemCModeButton::GetTooltipString (
 	if (pbstrToolTip == NULL)
 		return	E_INVALIDARG ;
 
-	*pbstrToolTip	= SysAllocString (LANGBAR_ITEM_DESC) ;
+	*pbstrToolTip	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
 	return	(*pbstrToolTip == NULL)? E_OUTOFMEMORY : S_OK ;
 }
 
@@ -283,7 +295,16 @@ CLangBarItemCModeButton::InitMenu (
 		 */
 		nCMode	= _GetConversionMode (hIMC) ;
 		for (i = 0 ; i < ARRAYSIZE (c_rgMenuItems) ; i ++) {
-			wstrDesc		= c_rgMenuItems [i].pchDesc ;
+			LPTSTR lpDesc;
+			TCHAR szDesc[128];
+
+			lpDesc=(LPTSTR)&szDesc;
+			if (c_rgMenuItems [i].chDesc!=NULL)
+				LoadString(hInst,c_rgMenuItems [i].chDesc,lpDesc,128);
+			else
+				lpDesc=NULL;
+			wstrDesc		= (LPCWSTR)lpDesc;
+			//wstrDesc		= c_rgMenuItems [i].pchDesc ;
 			if (wstrDesc != NULL) {
 				nstrDesc	= wcslen (wstrDesc) ;
 				dwFlag		= (i == nCMode)? TF_LBMENUF_CHECKED : 0 ;
@@ -364,7 +385,7 @@ CLangBarItemCModeButton::GetText (
 	if (pbstrText == NULL)
 		return	E_INVALIDARG ;
 
-	*pbstrText	= SysAllocString (LANGBAR_ITEM_DESC) ;
+	*pbstrText	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
 	return	(*pbstrText == NULL)? E_OUTOFMEMORY : S_OK ;
 }
 

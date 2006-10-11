@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnext.cpp,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/btnext.cpp,v 1.3 2006/10/03 13:08:03 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -54,7 +54,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-#define LANGBAR_ITEM_DESC	L"전각/반각 전환" // max 32 chars
+//#define LANGBAR_ITEM_DESC	L"전각/반각 전환" // max 32 chars
 
 #if 0
 static	void	_Menu_ToHangul (void) ;
@@ -122,6 +122,8 @@ private:
 CLangBarItemShapeButton::CLangBarItemShapeButton ()
 {
 	//DllAddRef () ;
+	LPTSTR lpDesc;
+
 #if 1
 	_tfLangBarItemInfo.clsidService	= c_clsidSaenaruTextService ;
 	//_tfLangBarItemInfo.clsidService	= CLSID_NULL ;
@@ -132,7 +134,11 @@ CLangBarItemShapeButton::CLangBarItemShapeButton ()
 	       | TF_LBI_STYLE_TEXTCOLORICON
 	       ;
 	_tfLangBarItemInfo.ulSort		= 1 ;
-	SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC) ;
+
+	lpDesc=(LPTSTR)& _tfLangBarItemInfo.szDescription;
+	LoadString(hInst,IDS_TOGGLE_HALFFULL_DESC,lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
+
+	// SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC) ;
 	_pLangBarItemSink	= NULL ;
 	_cRef				= 1 ;
 #endif
@@ -231,7 +237,8 @@ CLangBarItemShapeButton::GetTooltipString (
 	if (pbstrToolTip == NULL)
 		return	E_INVALIDARG ;
 
-	*pbstrToolTip	= SysAllocString (LANGBAR_ITEM_DESC) ;
+	*pbstrToolTip	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
+	//*pbstrToolTip	= SysAllocString (LANGBAR_ITEM_DESC) ;
 	return	(*pbstrToolTip == NULL)? E_OUTOFMEMORY : S_OK ;
 }
 
@@ -377,7 +384,8 @@ CLangBarItemShapeButton::GetText (
 	if (pbstrText == NULL)
 		return	E_INVALIDARG ;
 
-	*pbstrText	= SysAllocString (LANGBAR_ITEM_DESC) ;
+	//*pbstrText	= SysAllocString (LANGBAR_ITEM_DESC) ;
+	*pbstrText	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
 	return	(*pbstrText == NULL)? E_OUTOFMEMORY : S_OK ;
 }
 

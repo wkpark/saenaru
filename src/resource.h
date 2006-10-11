@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.4 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.5 2006/10/10 08:12:59 wkpark Exp $
  */
 
 //{{NO_DEPENDENCIES}}
@@ -92,6 +92,29 @@
 #define IDS_NOSTRING                1021
 #define IDS_NOMEMORY                1022
 #define IDS_REGWORDRET              1023
+
+#define IDS_INPUT_CMODE_DESC        2000
+#define IDS_TOGGLE_HALFFULL_DESC    2001
+#define IDS_KEYBOARD_OPTION_DESC    2100
+#define IDS_MENU_HANGUL             2002
+#define IDS_MENU_ASCII              2003
+#define IDS_MENU_HANJA              2004
+#define IDS_MENU_CANCEL             2005
+#define IDS_MENU_OLD2BUL            2101
+#define IDS_MENU_3FIN               2102
+#define IDS_MENU_390                2103
+#define IDS_MENU_NEW2BUL            2104
+#define IDS_MENU_NEW3BUL            2105
+#define IDS_MENU_AHNMATAE           2106
+#define IDS_MENU_3SOON              2107
+#define IDS_MENU_USER               2108
+#define IDS_MENU_USER_COMP          2109
+
+#define IDS_MENU_ENV                2111
+#define IDS_MENU_DVORAK             2112
+#define IDS_MENU_ESC_ASCII          2113
+#define IDS_MENU_EDIT_WORD_UNIT     2114
+#define IDS_MENU_SHOW_KEYBOARD      2115
 
 #define IDC_STATIC                      -1
 

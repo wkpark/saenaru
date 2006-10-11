@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.3 2004/11/29 17:01:50 wkpark Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.4 2006/10/03 13:08:03 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -53,7 +53,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-#define LANGBAR_ITEM_DESC    L"글쇠/입력기 설정" // max 32 chars!
+//#define LANGBAR_ITEM_DESC    L"글쇠/입력기 설정" // max 32 chars!
 #define SAENARU_LANGBARITEMSINK_COOKIE    0x0fab0fac
 
 static void  _Menu_Help (UINT);
@@ -76,12 +76,14 @@ static DWORD _MenuItem_GetToggleOnTheSpotFlag (UINT);
 static DWORD _UserKeyboardMenu_GetKeyboardFlag (UINT);
 
 typedef struct {
-    const WCHAR* pchDesc;
+    //const WCHAR* pchDesc;
+    UINT	 chDesc;
     DWORD        (*pfnGetFlag)(UINT);
     void         (*pfnHandler)(UINT);
 } TSFLBMENUINFOEX;
 
 static const TSFLBMENUINFOEX c_rgMenuItems[] = {
+#if 0
 //  { L"도움말(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
     { L"환경설정(&R)", _MenuItem_GetNormalFlag, _Menu_Property },
 //  { L"재설정(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
@@ -93,14 +95,28 @@ static const TSFLBMENUINFOEX c_rgMenuItems[] = {
     { L"키보드 보기",  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
     { NULL, NULL, NULL },
     { L"취소", NULL, NULL }
+#endif
+//  { L"도움말(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
+    { IDS_MENU_ENV, _MenuItem_GetNormalFlag, _Menu_Property },
+//  { L"재설정(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
+    { NULL, NULL, NULL },
+    { IDS_MENU_DVORAK,   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
+    { IDS_MENU_ESC_ASCII, _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
+    { IDS_MENU_EDIT_WORD_UNIT, _MenuItem_GetToggleOnTheSpotFlag,_Menu_ToggleOnTheSpot },
+    { NULL, NULL, NULL },
+    { IDS_MENU_SHOW_KEYBOARD,  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
+    { NULL, NULL, NULL },
+    { IDS_MENU_CANCEL, NULL, NULL }
 };
 
 typedef struct {
-    const WCHAR* pchDesc;
+    //const WCHAR* pchDesc;
+    UINT         chDesc;
     DWORD        dwFlag;
 } TSFLBKEYBOARDINFOEX;
 
 static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
+#if 0
     { L"두벌식(&2)",        NULL },
     { L"세벌식(&3)",        NULL },
     { L"세벌식390(&9)",     NULL },
@@ -110,6 +126,16 @@ static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
     { L"세벌식 순아래(&N)", NULL },
     { L"사용자 자판(&U)",   TF_LBMENUF_SUBMENU },
     { L"사용자 조합(&C)",   TF_LBMENUF_SUBMENU },
+#endif
+    { IDS_MENU_OLD2BUL  ,   NULL },
+    { IDS_MENU_3FIN     ,   NULL },
+    { IDS_MENU_390      ,   NULL },
+    { IDS_MENU_NEW2BUL  ,   NULL },
+    { IDS_MENU_NEW3BUL  ,   NULL },
+    { IDS_MENU_AHNMATAE ,   NULL },
+    { IDS_MENU_3SOON    ,   NULL },
+    { IDS_MENU_USER     ,   TF_LBMENUF_SUBMENU },
+    { IDS_MENU_USER_COMP,   TF_LBMENUF_SUBMENU },
 };
 
 enum {
@@ -163,6 +189,8 @@ private:
 CLangBarItemImeButton::CLangBarItemImeButton ()
 {
     //DllAddRef ();
+    LPTSTR lpDesc;
+
     _tfLangBarItemInfo.clsidService   = c_clsidSaenaruTextService;
     //_tfLangBarItemInfo.clsidService = CLSID_NULL;
     _tfLangBarItemInfo.guidItem       = c_guidItemButtonIME;
@@ -172,8 +200,11 @@ CLangBarItemImeButton::CLangBarItemImeButton ()
         | TF_LBI_STYLE_HIDDENSTATUSCONTROL
 #endif
         ;
+    lpDesc=(LPTSTR)&_tfLangBarItemInfo.szDescription;
     _tfLangBarItemInfo.ulSort = 1;
-    SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC);
+    LoadString(hInst,IDS_KEYBOARD_OPTION_DESC,lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
+
+    //SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC);
     _pLangBarItemSink = NULL;
     _cRef             = 1;
     return;
@@ -271,7 +302,7 @@ CLangBarItemImeButton::GetTooltipString (
     if (pbstrToolTip == NULL)
         return E_INVALIDARG;
 
-    *pbstrToolTip = SysAllocString (LANGBAR_ITEM_DESC);
+    *pbstrToolTip = SysAllocString (_tfLangBarItemInfo.szDescription);
     return (*pbstrToolTip == NULL)? E_OUTOFMEMORY : S_OK;
 }
 
@@ -321,8 +352,14 @@ CLangBarItemImeButton::InitMenu (
 
     id = 0;
     for (i = 0; i < 2; i ++) {
-        wstrDesc = c_rgMenuItems [i].pchDesc;
-        if (wstrDesc != NULL) {
+	LPTSTR lpDesc;
+	TCHAR  szDesc[128];
+	lpDesc=(LPTSTR)&szDesc;
+
+	LoadString(hInst,c_rgMenuItems [i].chDesc,lpDesc,128);
+        wstrDesc = (LPCWSTR)lpDesc;
+        //wstrDesc = c_rgMenuItems [i].pchDesc;
+        if (c_rgMenuItems [i].chDesc != NULL) {
             nstrDesc = wcslen (wstrDesc);
             dwFlag = 0;
             if (c_rgMenuItems [i].pfnGetFlag != NULL)
@@ -340,9 +377,19 @@ CLangBarItemImeButton::InitMenu (
     pUserComposeMenu=NULL;
     for (i = 0; i < ARRAYSIZE (c_rgKeyboardItems); i++)
     {
-        wstrDesc = c_rgKeyboardItems [i].pchDesc;
+	LPTSTR lpDesc;
+	TCHAR  szDesc[128];
+	lpDesc=(LPTSTR)&szDesc;
+
+	//if (c_rgKeyboardItems [i].chDesc == NULL)
+	//	lpDesc=NULL;
+	//else
+	LoadString(hInst,c_rgKeyboardItems [i].chDesc,lpDesc,128);
+        wstrDesc = (LPCWSTR)lpDesc;
+        //wstrDesc = c_rgKeyboardItems [i].pchDesc;
         nstrDesc = wcslen (wstrDesc);
         dwFlag = c_rgKeyboardItems [i].dwFlag;
+
         if (dwFlag == NULL)
         {
             dwFlag = _MenuItem_GetKeyboardFlag(id);
@@ -368,7 +415,16 @@ CLangBarItemImeButton::InitMenu (
     id=30;
     for (i = 2; i < ARRAYSIZE (c_rgMenuItems); i++)
     {
-        wstrDesc = c_rgMenuItems [i].pchDesc;
+	LPTSTR lpDesc;
+	TCHAR  szDesc[128];
+	lpDesc=(LPTSTR)&szDesc;
+
+	if (c_rgMenuItems [i].chDesc == NULL)
+		lpDesc=NULL;
+	else
+		LoadString(hInst,c_rgMenuItems [i].chDesc,lpDesc,128);
+        wstrDesc = (LPCWSTR)lpDesc;
+        //wstrDesc = c_rgMenuItems [i].pchDesc;
         if (wstrDesc != NULL) {
             nstrDesc = wcslen (wstrDesc);
             dwFlag = (c_rgMenuItems [i].pfnGetFlag != NULL)? (c_rgMenuItems [i].pfnGetFlag)(i) : 0;
@@ -500,7 +556,7 @@ CLangBarItemImeButton::GetText (
     if (pbstrText == NULL)
         return    E_INVALIDARG;
 
-    *pbstrText    = SysAllocString (LANGBAR_ITEM_DESC);
+    *pbstrText    = SysAllocString (_tfLangBarItemInfo.szDescription);
     return    (*pbstrText == NULL)? E_OUTOFMEMORY : S_OK;
 }
 

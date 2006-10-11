@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.h,v 1.2 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/tsf.h,v 1.3 2006/10/08 09:12:52 wkpark Exp $
  */
 
 #if !defined (tsf_h)
@@ -46,7 +46,8 @@ inline void SafeStringCopy (WCHAR *pchDst, ULONG cchMax, const WCHAR *pchSrc)
 typedef HRESULT (WINAPI *PTF_CREATETHREADMGR)(ITfThreadMgr**) ;
 typedef HRESULT (WINAPI *PTF_CREATELANGBARITEMMGR)(ITfLangBarItemMgr**);
 typedef struct {
-    const WCHAR*    pchDesc ;
+    //const WCHAR*    pchDesc ;
+    UINT      chDesc ;
     void    (*pfnHandler)(void) ;
 } TSFLBMENUINFO ;
 
