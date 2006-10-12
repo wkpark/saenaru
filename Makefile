@@ -1,12 +1,12 @@
 #
 # Maintainer Buildtool for nmake
 #
-# $Saenaru: saenaru/Makefile,v 1.1 2003/12/26 22:03:07 perky Exp $
+# $Saenaru: saenaru/Makefile,v 1.2 2003/12/27 15:20:42 perky Exp $
 #
 
-RELVERSION=	031226
+RELVERSION=	061013
 SETUPEXE=	setup\Saenaru-$(RELVERSION).exe
-IMEBUILDDIR=	src\objfre\i386
+IMEBUILDDIR=	src\objfre_wxp_x86\i386
 NSISDIR=	C:\Program Files\NSIS
 
 all: $(SETUPEXE)

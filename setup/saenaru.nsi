@@ -1,10 +1,10 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.3 2003/12/27 15:20:43 perky Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.4 2004/12/02 12:18:08 wkpark Exp $
 
-!define RELVERSION      "041202"
+!define RELVERSION      "061013"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
-!define DDKBUILDDIR     "..\src\objfre\i386"
+!define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
 !define RESOURCEDIR     "..\resource"
 !define SRCROOTDIR      ".."
 !define SMPATH          "$SMPROGRAMS\새나루"
@@ -27,6 +27,10 @@ BrandingText "새나루 인스톨러"
   
   ;Get install folder from registry if available
   InstallDirRegKey HKLM "${REGISTRY_PATH}" ""
+  InstallDirRegKey HKLM "${REGISTRY_PATH}\Dictionary" ""
+  InstallDirRegKey HKLM "${REGISTRY_PATH}\Keyboard" ""
+  InstallDirRegKey HKLM "${REGISTRY_PATH}\Compose" ""
+
 
 ;--------------------------------
 ;Pages
@@ -82,6 +86,8 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout text" "새나루 한글 입력기"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "한글 입력기 (새나루)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
+
+  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "default" "SAENARU.DIC"
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -159,6 +165,8 @@ Section "기본 입력기로 지정" SecDefault
   StrCmp $0 "e0120412" exit
   ; set as default IME
   WriteRegStr HKCU "Keyboard Layout\Preload" "1" "e0120412"
+
+  ; set some Saenaru reg entries.
 
   ; get last IME
   StrCpy $1 1
