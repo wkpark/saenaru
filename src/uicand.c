@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.4 2006/10/06 10:20:44 wkpark Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.5 2006/10/08 22:07:19 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -65,13 +65,37 @@ LPARAM lParam;
     switch (message)
     {
         case WM_PAINT:
+            MyDebugPrint((TEXT(" *** WM_PAINT\r\n")));
             PaintCandWindow(hWnd);
             break;
+        case WM_CREATE:
+            MyDebugPrint((TEXT(" * WM_CREATE Cand\r\n")));
+            break;
+        case WM_MOUSEACTIVATE:
+            MyDebugPrint((TEXT(" * WM_MOUSEACTIVATE\r\n")));
 
-        case WM_SETCURSOR:
-#if (WINVER >= 0x0500)
-            SetCursor(LoadCursor(NULL,IDC_HAND));
+            return MA_NOACTIVATE;
+            //return MA_NOACTIVATEANDEAT;
+            break;
+        case WM_DESTROY:
+            MyDebugPrint((TEXT(" * WM_DESTORY Cand\r\n")));
+            break;
+#if 0
+        case SBM_ENABLE_ARROWS:
+            MyDebugPrint((TEXT(" * SBM_ENABLE_ARROWS\r\n")));
+            break;
+
+        case SBM_GETSCROLLBARINFO:
+            MyDebugPrint((TEXT(" * SBM_GETSCROLLBARINFO\r\n")));
+            break;
 #endif
+        case WM_SETCURSOR:
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONUP:
+
+            DragUI(hWnd,message,wParam,lParam);
+
             if (dy == 0)
             {
                 TEXTMETRIC tm;
@@ -79,30 +103,29 @@ LPARAM lParam;
 
                 hDC = CreateIC(TEXT("DISPLAY"),NULL,NULL,NULL);
                 GetTextMetrics(hDC,&tm);
-                dy = tm.tmHeight + tm.tmExternalLeading;
+                dy = tm.tmHeight + tm.tmExternalLeading + 4;
                 DeleteDC(hDC);
             }
 
             select = 0;
             offset = 0;
-            {
+            while (HIWORD(lParam) == WM_LBUTTONDOWN) {
+                HDC hDC;
+                PAINTSTRUCT ps;
                 GetCursorPos(&pt);
                 ScreenToClient(hWnd,&pt);
                 GetClientRect(hWnd,&rc);
-                if (!PtInRect(&rc,pt))
-                    return 0;
+
+                if (!PtInRect(&rc,pt)) {
+                    // not in the candlist wind
+                    break;
+                }
 
                 pt.y -= GetSystemMetrics(SM_CYEDGE);
                 if (pt.y > 0)
                     select = pt.y / dy + ((pt.y % dy) ? 1:0);
                 if (select == 0)
                     offset = -2;
-            }
-            if ((HIWORD(lParam) != WM_LBUTTONDOWN) &&
-                (HIWORD(lParam) != WM_RBUTTONDOWN)) 
-                 return DefWindowProc(hWnd,message,wParam,lParam);
-            if ((HIWORD(lParam) == WM_LBUTTONDOWN))
-            {
 #if 0
                 else if (select > 9)
                 {
@@ -120,18 +143,21 @@ LPARAM lParam;
                 {
                     lpIMC = ImmLockIMC(hIMC);
                     ConvHanja(hIMC,offset,select);
+                    // XXX MakeResultString(hIMC,TRUE);
                     ImmUnlockIMC(hIMC);
-                    break;
                 }
+                break;
             }
-        case WM_MOUSEMOVE:
-        case WM_LBUTTONUP:
-        case WM_RBUTTONUP:
-            DragUI(hWnd,message,wParam,lParam);
-            if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP)) {
-                MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+
+            if ((message == WM_SETCURSOR) &&
+                    (HIWORD(lParam) != WM_LBUTTONDOWN) &&
+                    (HIWORD(lParam) != WM_RBUTTONDOWN)) {
+                return DefWindowProc(hWnd,message,wParam,lParam);
+            }
+
+            // MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
+            if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP))
                 SetWindowLong(hWnd,FIGWL_MOUSE,0L);
-            }
             break;
 
         case WM_MOVE:
@@ -142,10 +168,67 @@ LPARAM lParam;
                 SendMessage(hUIWnd,WM_UI_CANDMOVE,wParam,lParam);
             break;
 
+        case WM_VSCROLL:
+        {
+            LPCANDIDATEINFO lpCandInfo;
+            LPCANDIDATELIST lpCandList;
+            int select=0;
+            int offset=0;
+            int sel=0;
+            int yPos=0;
+            hSvrWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
+
+            if (!(hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) )
+                // XXX not occur
+                break;
+
+            lpIMC = ImmLockIMC(hIMC);
+
+            lpCandInfo= (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+            lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+            sel = lpCandList->dwSelection % lpCandList->dwPageSize;
+            // get the current selected number
+            // dwPageSize <= 9 (default)
+
+            switch (LOWORD(wParam)) 
+            { 
+                case SB_PAGEUP:
+                    offset=-2;
+                    break;
+                case SB_PAGEDOWN:
+                    offset=2;
+                    break;
+                case SB_LINEUP:
+                    offset=-1;
+                    break;
+                case SB_LINEDOWN:
+                    offset=1;
+
+                    break;
+                case SB_THUMBPOSITION:
+                    yPos = HIWORD(wParam);
+                case SB_THUMBTRACK:
+                    yPos = HIWORD(wParam);
+                    MyDebugPrint((TEXT("THUMB Track %d\n"),yPos));
+                    lpCandList->dwSelection=yPos;
+                    SetScrollPos(hWnd,SB_VERT,yPos,TRUE);
+
+                    break;
+                default:
+                    break;
+            }
+
+            MyDebugPrint((TEXT("THUMB %d\n"),yPos));
+
+            ConvHanja(hIMC,offset,select);
+            ImmUnlockIMCC(lpIMC->hCandInfo);
+            ImmUnlockIMC(hIMC);
+        }
+            break;
         default:
-            MyDebugPrint((TEXT("WM default message: %x\n"),message));
             if (!MyIsIMEMessage(message))
                 return DefWindowProc(hWnd,message,wParam,lParam);
+
             break;
     }
     return 0L;
@@ -256,6 +339,9 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 {
     POINT pt;
 
+    LPCANDIDATEINFO lpCandInfo;
+    LPCANDIDATELIST lpCandList;
+
     MyDebugPrint((TEXT("CreateCandWindow\n")));
     // CandWindow는 CompWindow의 위치를 기반으로 생성된다.
     // 그러나, CompWindow가 없는 경우도 있다 (워드패드)
@@ -275,15 +361,51 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 
     if (!IsWindow(lpUIExtra->uiCand.hWnd))
     {
+        SCROLLINFO sScrollInfo;
+
         lpUIExtra->uiCand.hWnd = 
-                CreateWindowEx(WS_EX_WINDOWEDGE,
+                CreateWindowEx(WS_EX_WINDOWEDGE|
+#if (WINVER >= 0x0500)
+                             WS_EX_COMPOSITED|
+#endif
+                             WS_EX_RIGHTSCROLLBAR,
                              (LPTSTR)szCandClassName,NULL,
-                             WS_COMPNODEFAULT,
+                             WS_COMPNODEFAULT|
+                             WS_DISABLED|WS_VSCROLL|
+                             SBS_VERT|SBS_RIGHTALIGN|SBS_SIZEBOX,
                              //WS_COMPDEFAULT | WS_DLGFRAME,
                              lpUIExtra->uiCand.pt.x,
                              lpUIExtra->uiCand.pt.y,
-                             1,1,
+                             CW_USEDEFAULT,100,
                              hUIWnd,NULL,hInst,NULL);
+
+        sScrollInfo.cbSize=sizeof(SCROLLINFO);
+        sScrollInfo.fMask=SIF_POS|SIF_RANGE;
+        sScrollInfo.nMin=0;
+        sScrollInfo.nMax=30; // some arbitary value
+        sScrollInfo.nPage=0;
+        sScrollInfo.nPos=0;
+        sScrollInfo.nTrackPos=0;
+
+        SetScrollInfo((HWND)lpUIExtra->uiCand.hWnd,SB_VERT,
+                (LPSCROLLINFO)&sScrollInfo,FALSE);
+    }
+
+    // get candidate info dwCount (is the number of pages
+    if (lpCandInfo= (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo)) {
+        int count = 0;
+        lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+        count = lpCandList->dwCount - 1;
+
+        MyDebugPrint((TEXT("CandList count = %d\r\n"),count));
+
+        // to make popup with scrollbar using SetCapture();
+        EnableWindow( lpUIExtra->uiCand.hWnd, TRUE);
+        // init scroll pos
+        SetScrollRange( lpUIExtra->uiCand.hWnd, SB_VERT, 0, count, TRUE);
+        SetScrollPos( lpUIExtra->uiCand.hWnd, SB_VERT, 0, TRUE);
+        EnableScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, ESB_ENABLE_BOTH);
+        ShowScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, TRUE);
     }
 
     SetWindowLongPtr(lpUIExtra->uiCand.hWnd,FIGWL_SVRWND,(LONG_PTR)hUIWnd);
@@ -307,23 +429,26 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     LPCANDIDATELIST lpCandList;
     HBRUSH hbr;
     HDC hDC;
-    RECT rc;
+    RECT rc,rc2;
     LPMYSTR lpstr;
     int height;
     DWORD i;
     SIZE sz;
     HWND hSvrWnd;
     HBRUSH hbrHightLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
-#if 0
-    HBRUSH hbrLGR = GetStockObject(LTGRAY_BRUSH);
-#else
     HBRUSH hbrLGR = (HBRUSH)(COLOR_BTNFACE + 1);
-#endif
     HFONT hOldFont = NULL;
+    HBRUSH hBrush;
 
     GetClientRect(hCandWnd,&rc);
+    rc2.left=rc.left+25; // left margin: 25
+    rc2.right=rc.right - 1;
+    rc2.top=rc.top+1;
+    rc2.bottom=rc.bottom- 8 * GetSystemMetrics(SM_CYEDGE); // bottom space: 8
     hDC = BeginPaint(hCandWnd,&ps);
+    hBrush=CreateSolidBrush(GetBkColor(hDC));
     FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
+    FillRect(hDC,&rc2,hBrush); // fill text area
     SetBkMode(hDC,TRANSPARENT);
 
 #if 0
@@ -347,7 +472,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
             for (i = lpCandList->dwPageStart; 
                  i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
             {
-                TCHAR num[3];
+                TCHAR num[4];
                 wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
 
                 if (i >= lpCandList->dwCount) 
@@ -370,10 +495,14 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,RGB(0,0,0));
                 }
-                if (i < lpCandList->dwCount)
-                    MyTextOut(hDC,GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
-                MyTextOut(hDC,10 + GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
-                height += sz.cy;
+                if (i < lpCandList->dwCount) {
+                    MyTextOut(hDC,5 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
+                    //MyTextOut(hDC,6 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
+                }
+                MyTextOut(hDC,25 + GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
+                // 25 is left margin of candwin
+                height += sz.cy + 4;
+                // 4 is linespace
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);
         }
@@ -384,12 +513,23 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     }
     EndPaint(hCandWnd,&ps);
 
+    DeleteDC(hDC);
     DeleteObject(hbrHightLight);
+    DeleteObject(hBrush);
+
+    {
+        int pos= GetScrollPos(hCandWnd,SB_VERT);
+        MyDebugPrint((TEXT(" * Current Scroll Pos: %d\r\n"),pos));
+
+        pos = lpCandList->dwSelection;
+        SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
+        MyDebugPrint((TEXT(" * Cand Scroll Pos: %d\r\n"),pos));
+    }
 }
 
 /**********************************************************************/
 /*                                                                    */
-/* ResizeCandWindow()                                                   */
+/* ResizeCandWindow()                                                 */
 /*                                                                    */
 /**********************************************************************/
 void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
@@ -423,7 +563,7 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz);
                 if (width < sz.cx)
                     width = sz.cx;
-                height += sz.cy;
+                height += sz.cy + 4; // plus linespace 4
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);
         }
@@ -436,9 +576,11 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
         MoveWindow(lpUIExtra->uiCand.hWnd,
                        rc.left,
                        rc.top,
-                       width+ 10 + 4 * GetSystemMetrics(SM_CXEDGE),
-                       /* 10 is a left margin */
-                       height+ 4 * GetSystemMetrics(SM_CYEDGE),
+                       width+ 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE) +
+                       GetSystemMetrics(SM_CXVSCROLL),
+                       /* 25 is a left margin */
+                       height+ 8 * GetSystemMetrics(SM_CYEDGE),
+                       // bottom margin is 8 * SM_CYEDGE
                        TRUE);
     }
 }
