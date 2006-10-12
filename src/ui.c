@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.10 2006/10/05 04:53:52 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.11 2006/10/10 15:28:30 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -94,7 +94,7 @@ HANDLE hInstance;
     wc.cbClsExtra     = 0;
     wc.cbWndExtra     = UIEXTRASIZE;
     wc.hInstance      = hInstance;
-    wc.hCursor        = LoadCursor( NULL, IDC_ARROW );
+    wc.hCursor        = LoadCursor( NULL, IDC_IBEAM );
     wc.hIcon          = NULL;
     wc.lpszMenuName   = (LPTSTR)NULL;
     wc.lpszClassName  = (LPTSTR)szCompStrClassName;
@@ -108,13 +108,18 @@ HANDLE hInstance;
     //
     // register class of candidate window.
     //
+    //
     wc.cbSize         = sizeof(WNDCLASSEX);
-    wc.style          = CS_SAENARU;
+    wc.style          = CS_SAENARU|CS_DROPSHADOW;
     wc.lpfnWndProc    = CandWndProc;
     wc.cbClsExtra     = 0;
     wc.cbWndExtra     = UIEXTRASIZE;
     wc.hInstance      = hInstance;
+#if (WINVER >= 0x0410)
+    wc.hCursor        = LoadCursor( NULL, IDC_HAND );
+#else
     wc.hCursor        = LoadCursor( NULL, IDC_ARROW );
+#endif
     wc.hIcon          = NULL;
     wc.lpszMenuName   = (LPTSTR)NULL;
     wc.lpszClassName  = (LPTSTR)szCandClassName;
@@ -414,6 +419,7 @@ LPARAM lParam;
             break;
 
         case WM_IME_COMPOSITIONFULL:
+            //XXX
             break;
 
         case WM_IME_SELECT:
@@ -534,7 +540,7 @@ LPARAM lParam;
             {
                  if (hUICurIMC && IsCompStr(hUICurIMC))
                  MakeResultString(hUICurIMC,TRUE);
-                MyDebugPrint((TEXT("WM_LBUTTONDOWN\r\n")));
+                 MyDebugPrint((TEXT("WM_LBUTTONDOWN\r\n")));
             }
 
             return DefWindowProc(hWnd,message,wParam,lParam);
@@ -917,8 +923,7 @@ void PASCAL DragUI( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
         case WM_SETCURSOR:
-            if ( HIWORD(lParam) == WM_LBUTTONDOWN
-                || HIWORD(lParam) == WM_RBUTTONDOWN ) 
+            if ( HIWORD(lParam) == WM_RBUTTONDOWN ) 
             {
                 SetCursor(LoadCursor(NULL,IDC_SIZEALL));
 
