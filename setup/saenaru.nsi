@@ -1,6 +1,6 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.4 2004/12/02 12:18:08 wkpark Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.5 2006/10/12 22:14:09 wkpark Exp $
 
 !define RELVERSION      "061013"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
@@ -26,7 +26,7 @@ BrandingText "새나루 인스톨러"
   InstallDir "$WINDIR\IME\Saenaru"
   
   ;Get install folder from registry if available
-  InstallDirRegKey HKLM "${REGISTRY_PATH}" ""
+  ;;InstallDirRegKey HKLM "${REGISTRY_PATH}" ""
   InstallDirRegKey HKLM "${REGISTRY_PATH}\Dictionary" ""
   InstallDirRegKey HKLM "${REGISTRY_PATH}\Keyboard" ""
   InstallDirRegKey HKLM "${REGISTRY_PATH}\Compose" ""
@@ -74,6 +74,9 @@ Section "새나루 입력기" SecBody
   SetOverwrite lastused
   SetOutPath "$INSTDIR"
   File "${RESOURCEDIR}\saenaru.dic"
+;;  File "${RESOURCEDIR}\word.dic"
+  File "${RESOURCEDIR}\symwin.dic"
+  File "${RESOURCEDIR}\nabi.dic"
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
@@ -87,7 +90,9 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "한글 입력기 (새나루)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
 
-  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "default" "SAENARU.DIC"
+  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
+  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Symbol" "symwin.dic"
+  ;;WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -204,6 +209,9 @@ Section "Uninstall"
 
   Delete "$SYSDIR\saenaru.ime"
   Delete "$INSTDIR\saenaru.dic"
+  Delete "$INSTDIR\nabi.dic"
+  Delete "$INSTDIR\winsym.dic"
+  ;;Delete "$INSTDIR\word.dic"
 
   Delete "$INSTDIR\Source\DIRS"
   Delete "$INSTDIR\Source\LICENSE"
@@ -229,6 +237,9 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\keyboard.ico"
   Delete "$INSTDIR\Source\resource\penindic.ico"
   Delete "$INSTDIR\Source\resource\saenaru.dic"
+  Delete "$INSTDIR\Source\resource\winsym.dic"
+  Delete "$INSTDIR\Source\resource\nabi.dic"
+  ;;Delete "$INSTDIR\Source\resource\word.dic"
   Delete "$INSTDIR\Source\resource\saenaru.dlg"
   Delete "$INSTDIR\Source\resource\saenaru.ico"
   Delete "$INSTDIR\Source\resource\saenaru.rcv"
