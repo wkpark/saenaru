@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.14 2006/10/08 22:05:34 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.15 2006/10/10 07:59:34 wkpark Exp $
  */
 
 #include "windows.h"
@@ -277,7 +277,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
         if (lpbKeyState[VK_MENU] & 0x80)
         {
-            MakeResultString(hIMC,TRUE);
+            //MakeResultString(hIMC,TRUE);
             fRet = FALSE;
         }
         else if (lpbKeyState[VK_CONTROL] & 0x80)
