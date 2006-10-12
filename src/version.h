@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Saenaru: saenaru/src/version.h,v 1.1 2006/10/10 08:05:54 wkpark Exp $
  */
 
 #define VER_MAJOR	 1
@@ -35,8 +35,8 @@
 #define VER_MINOR	 0
 #define VER_MINOR_STR	"0"
 
-#define VER_BUILD	 1010
-#define VER_BUILD_STR	"1010"
+#define VER_BUILD	 1013
+#define VER_BUILD_STR	"1013"
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
