@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.13 2006/10/08 09:10:02 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.14 2006/10/08 22:11:00 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1679,8 +1679,8 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.a
     {
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = cs;
-        GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+        //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
         if (dwImeFlag & SAENARU_ONTHESPOT)
             GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1772,8 +1772,8 @@ ac_exit:
 #endif
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
-            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
+            //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
