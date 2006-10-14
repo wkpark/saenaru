@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.15 2006/10/10 07:59:34 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.16 2006/10/12 21:58:26 wkpark Exp $
  */
 
 #include "windows.h"
@@ -126,6 +126,8 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             break;
 
         case IME_ESC_HANJA_MODE:
+            // EditPlus only use it. XXX
+            // EditPlus does not receive IMR_* message
             MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE:\r\n")));
             lRet = FALSE;
             break;
@@ -194,13 +196,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
 
-#if 0
-    // check VK_HANJA and VK_F9 key
-    if ( (vkey == VK_F9 || vkey == VK_HANJA) && !IsCompStr(hIMC)) {
-
-    }
-#endif
-
     // SHIFT-SPACE
     // See ui.c how to hook the shift-space event.
     if ( !(lKeyData & 0x80000000) &&
@@ -250,7 +245,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             if (!fOpen)
                 ImmSetOpenStatus(hIMC,FALSE);
 
-            return FALSE;
+            fRet = FALSE;
+            ImmUnlockIMC(hIMC);
+            return fRet;
             break;
         case VK_ESCAPE:
             if (dwOptionFlag & ESCENG_SUPPORT)
@@ -258,13 +255,34 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             //ChangeMode(hIMC,TO_CMODE_ROMAN);
             break;
         case VK_SHIFT:
-            return FALSE;
+            fRet = FALSE;
+            ImmUnlockIMC(hIMC);
+            return fRet;
             break;
         default:
             break;
     }
 
     fOpen = lpIMC->fOpen;
+
+#if 0
+    // check OpenState.
+    // 어떤 프로그램은 Open상태에서 영문입력을 받지 못한다.
+    // 따라서 영문 입력상태인데 Open state면 무조건 끈다.
+    // 단, CompStr이 비어있는 경우에 한한다.
+    // CompStr이 들어있는 경우는 Open상태로 간주한다. (Reconversion의 경우)
+    if (fOpen && !IsCompStr(hIMC)) {
+        if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense)) {
+            if (! (dwConversion & IME_CMODE_NATIVE)) {
+                dwConversion &= ~IME_CMODE_NATIVE;
+                dwConversion &= ~IME_CMODE_FULLSHAPE;
+                MyDebugPrint((TEXT(" * English and OPEN state\n")));
+                ImmSetOpenStatus(hIMC,FALSE);
+                fOpen=FALSE;
+            }
+        }
+    }
+#endif
 
     if (fOpen)
     {
@@ -304,6 +322,25 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
         if (lpCompStr)
             ImmUnlockIMCC(lpIMC->hCompStr);
+
+    } else {
+        // Open 상태에서도 Reconversion을 지원하기 위한 HACK HACK
+        // 이 부분을 옵션으로 하는가?
+        // 어떤 어플은 Open상태에서 영문 입력을 허용하지 않는다.
+        if ((vKey == VK_HANJA || vKey == VK_F9) && !IsCompStr(hIMC) ) {
+            DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
+            if (dwSize) {
+                ImmSetOpenStatus(hIMC,TRUE);
+                MyDebugPrint((TEXT(" *** IME not open state *** \r\n")));
+                if (DicKeydownHandler( hIMC, vKey, lKeyData, lpbKeyState ) ) {
+                    fRet=TRUE;
+                }
+                if (!IsCompStr(hIMC)) {
+                    ImmSetOpenStatus(hIMC,FALSE);
+                    fRet=FALSE;
+                }
+            }
+        }
     }
     // Some application do not accept WM_CHAR events with VK_PROCESSKEY.
     // For this appls we need a following hack:
