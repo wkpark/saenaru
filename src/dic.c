@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.14 2006/10/10 11:24:59 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.15 2006/10/12 21:57:34 wkpark Exp $
  */
 
 #include <windows.h>
@@ -182,6 +182,7 @@ void PASCAL RevertText(HIMC hIMC)
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = 0;
         GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
         ImmUnlockIMCC(lpIMC->hCompStr);
@@ -320,9 +321,8 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
             OutputDebugString(TEXT("ConvHanja #1\r\n"));
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = (WCHAR) *lpT2;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_CURSORPOS |
-            //               GCS_COMPATTR | GCS_COMPREADATTR;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -397,6 +397,7 @@ set_compstr:
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = 0;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
                     OutputDebugString(TEXT(" *** ConvHanja: GnMsg > 1\r\n"));
                 } else
@@ -405,6 +406,7 @@ set_compstr:
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = cs;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
                     if (dwImeFlag & SAENARU_ONTHESPOT)
                         GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -682,7 +684,8 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         {
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
-            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -705,6 +708,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1026,6 +1030,7 @@ SBCS_BETA:
     GnMsg.message = WM_IME_COMPOSITION;
     GnMsg.wParam = 0;
     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART | dwGCR;
+    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR | dwGCR; // 한글 IME 2002,2003
     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
 ac_exit:
@@ -1144,7 +1149,18 @@ LPBYTE lpbKeyState;
                 ns=GetModuleFileName(NULL,(LPTSTR)szFname,sizeof(szFname));
                 if (ns > 0) {
                     // check application names
-                    OutputDebugString(szFname);
+                    int i;
+                    LPTSTR lpFname;
+
+                    OutputDebugString(szFname); // application path.
+
+                    for (i=ns;i>0;i--) {
+                        if (szFname[i] == TEXT('\\')) break;
+                    }
+                    if (i>0) {
+                        lpFname=szFname + i + 1;
+                        OutputDebugString(lpFname); // application real name
+                    }
                 }
 
                 if (dwSize) {
@@ -1207,8 +1223,18 @@ LPBYTE lpbKeyState;
                         MyOutputDebugString(lpDump);
                         OutputDebugString(TEXT("\r\n"));
 #endif
-        
-        		{
+                        convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+#ifdef DEBUG
+                        if (!convOk) {
+                            // why fail for MS IE ? XXX
+                            OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                        } else {
+                            OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+                            wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                            OutputDebugString(szDev);
+                        }
+#endif
+        		if (convOk) {
         		    LPCOMPOSITIONSTRING	lpCompStr;
         
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
@@ -1292,16 +1318,6 @@ LPBYTE lpbKeyState;
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
                                 }
                             }
-                            convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
-#ifdef DEBUG
-                            if (!convOk) {
-                                OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
-                            } else {
-                                OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
-                                wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
-                                OutputDebugString(szDev);
-                            }
-#endif
         	            ImmUnlockIMCC (lpIMC->hCompStr);
         		}
                     }
@@ -1354,6 +1370,8 @@ LPBYTE lpbKeyState;
                 GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
                 OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN\r\n"));
             } else {
+                // 어떤 어플은 자체 내장된 candidate리스트를 쓰고, 어떤것은 그렇지 않다.
+                // 그런데 이러한 동작이 일관성이 없어서 어떤 어플은 특별처리 해야 한다.
                 // always generage WM_IME_KEYDOWN for VK_HANJA
                 TRANSMSG GnMsg;
                 GnMsg.message = WM_IME_KEYDOWN;
