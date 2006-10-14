@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.11 2006/10/10 15:28:30 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.12 2006/10/12 22:01:01 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -395,6 +395,7 @@ LPARAM lParam;
                 {
                       CreateCompWindow(hWnd,lpUIExtra,lpIMC );
                 }
+                ImmUnlockIMCC(lpIMC->hCompStr); // XXX
             }
             //
             MoveCompWindow(lpUIExtra,lpIMC);

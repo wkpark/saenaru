@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.5 2006/10/08 22:07:19 wkpark Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.6 2006/10/12 22:08:30 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -141,10 +141,7 @@ LPARAM lParam;
                 if (select > 0 &&
                     (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) )
                 {
-                    lpIMC = ImmLockIMC(hIMC);
                     ConvHanja(hIMC,offset,select);
-                    // XXX MakeResultString(hIMC,TRUE);
-                    ImmUnlockIMC(hIMC);
                 }
                 break;
             }
@@ -158,6 +155,12 @@ LPARAM lParam;
             // MyDebugPrint((TEXT(" $ CANDMOVE %dx%d\n"),LOWORD(lParam),HIWORD(lParam)));
             if ((message == WM_LBUTTONUP) || (message == WM_RBUTTONUP))
                 SetWindowLong(hWnd,FIGWL_MOUSE,0L);
+            break;
+
+        case WM_LBUTTONDBLCLK:
+            hSvrWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
+            if (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC) )
+                MakeResultString(hIMC,TRUE);
             break;
 
         case WM_MOVE:
@@ -372,7 +375,8 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
                              (LPTSTR)szCandClassName,NULL,
                              WS_COMPNODEFAULT|
                              WS_DISABLED|WS_VSCROLL|
-                             SBS_VERT|SBS_RIGHTALIGN|SBS_SIZEBOX,
+                             SBS_VERT|SBS_RIGHTALIGN|
+                             SBS_SIZEBOX|SBS_SIZEBOXBOTTOMRIGHTALIGN,
                              //WS_COMPDEFAULT | WS_DLGFRAME,
                              lpUIExtra->uiCand.pt.x,
                              lpUIExtra->uiCand.pt.y,
@@ -406,6 +410,7 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
         SetScrollPos( lpUIExtra->uiCand.hWnd, SB_VERT, 0, TRUE);
         EnableScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, ESB_ENABLE_BOTH);
         ShowScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, TRUE);
+        ImmUnlockIMCC(lpIMC->hCandInfo);
     }
 
     SetWindowLongPtr(lpUIExtra->uiCand.hWnd,FIGWL_SVRWND,(LONG_PTR)hUIWnd);
@@ -440,6 +445,9 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     HFONT hOldFont = NULL;
     HBRUSH hBrush;
 
+    LOGFONT lfFont;
+    HFONT hNumFont;
+
     GetClientRect(hCandWnd,&rc);
     rc2.left=rc.left+25; // left margin: 25
     rc2.right=rc.right - 1;
@@ -450,6 +458,18 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
     FillRect(hDC,&rc2,hBrush); // fill text area
     SetBkMode(hDC,TRANSPARENT);
+
+    // set number font
+    hOldFont = GetCurrentObject(hDC, OBJ_FONT);
+    GetObject(hOldFont, sizeof(LOGFONT), &lfFont);
+
+    lfFont.lfWeight = FW_BOLD;
+    lfFont.lfHeight = 12;
+    lfFont.lfWidth = 0;
+    lfFont.lfCharSet = DEFAULT_CHARSET;
+
+    Mylstrcpy(lfFont.lfFaceName,TEXT("Verdana"));
+    hNumFont = CreateFontIndirect(&lfFont);
 
 #if 0
     MoveToEx(hDC, rc.left+1,rc.top+1,NULL);
@@ -473,6 +493,10 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                  i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
             {
                 TCHAR num[4];
+                INT wtype; // KSX 1002 set or not
+                INT highlighted;
+                wtype=0;
+                highlighted=0;
                 wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
 
                 if (i >= lpCandList->dwCount) 
@@ -487,6 +511,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     PatBlt(hDC,0,height,rc.right,sz.cy,PATCOPY);
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,GetSysColor(COLOR_HIGHLIGHTTEXT));
+                    highlighted=1;
                 }
                 else
                 {
@@ -499,32 +524,81 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     MyTextOut(hDC,5 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                     //MyTextOut(hDC,6 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                 }
-                MyTextOut(hDC,25 + GetSystemMetrics(SM_CXEDGE),height,lpstr,Mylstrlen(lpstr));
+                // 한 글자이면서 KSX1002 지원이 아니면 charset 체크
+                if (wtype != -1 && dwOptionFlag & KSX1002_SUPPORT)
+                {
+                    WORD mb;
+                    WideCharToMultiByte(949, WC_COMPOSITECHECK,
+                        lpstr, 1, (char *)&mb, 2, NULL, NULL);
+
+                    if(LOBYTE(mb) < 0xa1 || LOBYTE(mb) > 0xfe 
+                        || HIBYTE(mb) < 0xa1 || HIBYTE(mb) > 0xfe)
+                        wtype=1;
+                    // XXX 한중일 통합을 동시에 지원할 경우
+                    // KS X 1002를 처리하기 위한 특별 루틴 필요?
+                }
+                if (wtype) {
+                    if (highlighted)
+                        SetTextColor(hDC,RGB(0,0,0)); // shadow
+                    else
+                        SetTextColor(hDC,RGB(220,220,220));
+                    MyTextOut(hDC,25 + 1 + GetSystemMetrics(SM_CXEDGE),
+                            height + 1,lpstr, Mylstrlen(lpstr));
+                }
+                // 완성형 4888자가 아닌 경우 색을 청색조로.
+                if (highlighted)
+                    SetTextColor(hDC,GetSysColor(COLOR_HIGHLIGHTTEXT));
+                else if (wtype==1)
+                    SetTextColor(hDC,RGB(16,83,239));
+
+                MyTextOut(hDC,25 + GetSystemMetrics(SM_CXEDGE),height,lpstr,
+                    Mylstrlen(lpstr));
                 // 25 is left margin of candwin
                 height += sz.cy + 4;
                 // 4 is linespace
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);
         }
-        if (hOldFont) {
+
+        if (hOldFont)
             DeleteObject(SelectObject(hDC, hOldFont));
-        }
+
+        if (hNumFont)
+            DeleteObject(SelectObject(hDC, hNumFont));
+
         ImmUnlockIMC(hIMC);
     }
+
+    {
+        int pages,page;
+        int pos;
+        TCHAR num[10];
+        GetScrollPos(hCandWnd,SB_VERT);
+
+        pos = lpCandList->dwSelection;
+        pages = lpCandList->dwCount / lpCandList->dwPageSize +
+            ((lpCandList->dwCount % lpCandList->dwPageSize) ? 1:0);
+
+        page = (pos + 1) / lpCandList->dwPageSize +
+            (((pos + 1) % lpCandList->dwPageSize) ? 1:0);
+
+        SetTextColor(hDC,RGB(0,0,0));
+
+        wsprintf(num, TEXT("%d/%d"), page, pages);
+
+        SelectObject(hDC, hNumFont);
+        MyTextOut(hDC,rc.left + 10 - Mylstrlen(num),rc.bottom - 15 ,num,Mylstrlen(num));
+
+        //pos= GetScrollPos(hCandWnd,SB_VERT);
+        SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
+    }
+
     EndPaint(hCandWnd,&ps);
 
     DeleteDC(hDC);
     DeleteObject(hbrHightLight);
     DeleteObject(hBrush);
 
-    {
-        int pos= GetScrollPos(hCandWnd,SB_VERT);
-        MyDebugPrint((TEXT(" * Current Scroll Pos: %d\r\n"),pos));
-
-        pos = lpCandList->dwSelection;
-        SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
-        MyDebugPrint((TEXT(" * Cand Scroll Pos: %d\r\n"),pos));
-    }
 }
 
 /**********************************************************************/
