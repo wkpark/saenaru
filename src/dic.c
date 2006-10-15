@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.15 2006/10/12 21:57:34 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.16 2006/10/14 02:23:39 wkpark Exp $
  */
 
 #include <windows.h>
@@ -215,6 +215,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     WCHAR cs=0;
     LPMYSTR lpmystr, lpTemp;
     MYCHAR myBuf[128];
+    BOOL isasc=FALSE;
 
     lpmystr = (LPMYSTR)myBuf;
 
@@ -258,11 +259,14 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
         TCHAR   szDic[256];
         INT sz;
 
+        if (0x7F > *lpT2) isasc=TRUE;
+        MyDebugPrint((TEXT(" * Dic: %x\n"), *lpT2));
+
         lpKey = (LPTSTR)&szKey;
         lpDic = (LPTSTR)&szDic;
         if (Mylstrlen(lpT2) > 1) { // word dic.
             LoadString( hInst, IDS_WORD_KEY, lpKey, 128);
-        } else if (*lpT2 >= 0x3131 && 0x314e >= *lpT2 ) {
+        } else if (isasc || (*lpT2 >= 0x3131 && 0x314e >= *lpT2) ) { // symbol
             LoadString( hInst, IDS_SYM_KEY, lpKey, 128);
         } else {
             LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
@@ -320,11 +324,13 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
             OutputDebugString(TEXT("ConvHanja #1\r\n"));
             GnMsg.message = WM_IME_COMPOSITION;
-            GnMsg.wParam = (WCHAR) *lpT2;
+            if (!isasc) {
+                GnMsg.wParam = (WCHAR) *lpT2;
+                if (!isasc && dwImeFlag & SAENARU_ONTHESPOT)
+                    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+            }
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if (dwImeFlag & SAENARU_ONTHESPOT)
-                GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
 
@@ -393,7 +399,7 @@ set_compstr:
                 }
 #endif
 #if 1
-                if (lpCompStr->dwCompStrLen > 1) {
+                if (lpCompStr->dwCompStrLen > 1 || isasc) {
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = 0;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
@@ -707,8 +713,8 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
 
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
-            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
+            //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1223,18 +1229,7 @@ LPBYTE lpbKeyState;
                         MyOutputDebugString(lpDump);
                         OutputDebugString(TEXT("\r\n"));
 #endif
-                        convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
-#ifdef DEBUG
-                        if (!convOk) {
-                            // why fail for MS IE ? XXX
-                            OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
-                        } else {
-                            OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
-                            wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
-                            OutputDebugString(szDev);
-                        }
-#endif
-        		if (convOk) {
+        		{
         		    LPCOMPOSITIONSTRING	lpCompStr;
         
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
@@ -1317,6 +1312,18 @@ LPBYTE lpbKeyState;
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
                                 }
+                                convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+#ifdef DEBUG
+                                if (!convOk) {
+                                    // MS IE와 모질라는 이 부분이 뒤에 와야 한다. 즉, CompStr으 세팅한 후에
+                                    // 시작해야 한다 ?
+                                    OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                                } else {
+                                    OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+                                    wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                                    OutputDebugString(szDev);
+                                }
+#endif
                             }
         	            ImmUnlockIMCC (lpIMC->hCompStr);
         		}
@@ -1369,6 +1376,7 @@ LPBYTE lpbKeyState;
                 GnMsg.lParam = lParam;
                 GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
                 OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN\r\n"));
+                MyDebugPrint((TEXT("DicKeydown: candOk %d\r\n"),candOk));
             } else {
                 // 어떤 어플은 자체 내장된 candidate리스트를 쓰고, 어떤것은 그렇지 않다.
                 // 그런데 이러한 동작이 일관성이 없어서 어떤 어플은 특별처리 해야 한다.
@@ -1893,12 +1901,16 @@ int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lp
                ((dwBufLen - dwWritten) > 1) &&
                (MYTEXT('[') != *lpToken))
         {
+            INT isasc;
+            isasc=FALSE;
             if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT('='))))
                 *lpTemp = MYTEXT('\0');
 
             len = Mylstrlen(lpToken);
+            if (*lpToken < 0x7f)
+                isasc=TRUE;
             // 한 글자이면서 KSX1002 지원이 아니면 charset 체크
-            if ( len == 1 && !(dwOptionFlag & KSX1002_SUPPORT))
+            if (!isasc && len == 1 && !(dwOptionFlag & KSX1002_SUPPORT))
             {
                 WORD mb;
                 WideCharToMultiByte(949, WC_COMPOSITECHECK,
