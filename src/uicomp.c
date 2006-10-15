@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.6 2006/10/06 11:14:58 wkpark Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.7 2006/10/09 16:08:03 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -133,11 +133,18 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
     // skkime에서 이것이 rootwindow style이라고 나와있다.
     if (!IsWindow(lpUIExtra->uiDefComp.hWnd))
     {
+#if 0
+        UINT myStyle=0;
+        if (lpUIExtra->dwCompStyle == CFS_DEFAULT) {
+            myStyle=WS_BORDER;
+        }
+#endif
+
         lpUIExtra->uiDefComp.hWnd = 
             CreateWindowEx( WS_EX_WINDOWEDGE,
                          (LPTSTR)szCompStrClassName,NULL,
-                         //WS_COMPDEFAULT | WS_DLGFRAME,
-                         WS_COMPNODEFAULT,
+                         WS_COMPDEFAULT,
+                         //WS_COMPDEFAULT | myStyle,
                          lpUIExtra->uiDefComp.pt.x,
                          lpUIExtra->uiDefComp.pt.y,
                          1,1,
@@ -487,8 +494,8 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 // comp str이 없을 경우는 감춘다.
                 ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_HIDE);
                 lpUIExtra->uiDefComp.bShow = FALSE;
-                InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
             }
+            InvalidateRect(lpUIExtra->uiDefComp.hWnd,NULL,FALSE);
             ImmUnlockIMCC(lpIMC->hCompStr);
         }
     }
