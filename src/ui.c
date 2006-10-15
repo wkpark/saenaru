@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.12 2006/10/12 22:01:01 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.13 2006/10/14 02:29:44 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -44,8 +44,16 @@ void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra);
 #endif
 
 LRESULT CALLBACK SAENARUKbdProc(int, WPARAM, LPARAM);
+LRESULT CALLBACK SAENARUConKbdProc(int, WPARAM, LPARAM);
 BOOL WINAPI SetHookFunc(void);
 BOOL WINAPI UnsetHookFunc(void);
+BOOL WINAPI SetConsoleHookFunc(void);
+BOOL WINAPI UnsetConsoleHookFunc(void);
+void PASCAL DvorakKey(UINT,WPARAM, LPARAM);
+
+static HHOOK hHookWnd = 0;
+static HHOOK hConsoleHookID = 0;
+
 #if 0
 void PASCAL HideGuideLine (LPUIEXTRA lpUIExtra);
 void PASCAL CreateGuideLine (HWND, LPUIEXTRA, LPINPUTCONTEXT);
@@ -194,6 +202,7 @@ LPARAM lParam;
     HGLOBAL        hUIExtra;
     LONG           lRet = 0L;
     int            i;
+    static BOOL    iConsoleHookLoaded=0;
 
     hUICurIMC = (HIMC)GetWindowLongPtr(hWnd,IMMGWLP_IMC);
 
@@ -267,6 +276,7 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
+            //SetConsoleHookFunc();
 
             break;
 
@@ -399,7 +409,8 @@ LPARAM lParam;
             }
             //
             MoveCompWindow(lpUIExtra,lpIMC);
-            MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
+            MoveCandWindow(hWnd,lpIMC,lpUIExtra, FALSE);
+            //MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE); // EditPlus problem
             GlobalUnlock(hUIExtra);
             ImmUnlockIMC(hUICurIMC);
 
@@ -479,6 +490,7 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
+            //UnsetConsoleHookFunc();
 
             break;
 
@@ -1078,8 +1090,6 @@ void PASCAL UpdateSoftKeyboard(
     return;
 }
 
-static HHOOK hHookWnd = 0;
-
 BOOL WINAPI SetHookFunc(void)
 {
     if((hHookWnd=SetWindowsHookEx(WH_GETMESSAGE, SAENARUKbdProc, (HINSTANCE) NULL, GetCurrentThreadId())) == NULL)
@@ -1087,9 +1097,25 @@ BOOL WINAPI SetHookFunc(void)
     return TRUE;
 }
 
+BOOL WINAPI SetConsoleHookFunc(void)
+{
+    HMODULE hMod;
+    hMod = GetModuleHandleA("kernel32");
+    if((hConsoleHookID=SetWindowsHookEx(WH_KEYBOARD_LL, SAENARUConKbdProc, (HINSTANCE) hInst,  GetCurrentThreadId() )) == NULL)
+        return FALSE;
+    return TRUE;
+}
+
 BOOL WINAPI UnsetHookFunc(void)
 {
     if(UnhookWindowsHookEx(hHookWnd) == 0)
+        return FALSE;
+    return TRUE;
+}
+
+BOOL WINAPI UnsetConsoleHookFunc(void)
+{
+    if(UnhookWindowsHookEx(hConsoleHookID) == 0)
         return FALSE;
     return TRUE;
 }
@@ -1265,6 +1291,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 }
             }
             break;
+        case WM_SYSCHAR:
         case WM_CHAR:
 #ifndef NO_DVORAK
             if (dvorak &&
@@ -1346,6 +1373,61 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
     return CallNextHookEx(hHookWnd, code, wParam, lParam);
 }
+
+LRESULT CALLBACK SAENARUConKbdProc(int nCode,WPARAM wParam, LPARAM lParam)
+{
+#define CON_WM_KEYDOWN 0x100
+
+    if (nCode >= 0 && wParam == CON_WM_KEYDOWN)
+    {
+#if 0
+        int vkCode = Marshal.ReadInt32(lParam);
+        Console.WriteLine((Keys)vkCode);
+#endif
+        MyDebugPrint((TEXT("Console hook\r\n")));
+    }
+    return CallNextHookEx(hConsoleHookID, nCode, wParam, lParam);
+}
+
+#if 0
+void PASCAL DvorakKey(UINT message,WPARAM wParam, LPARAM lParam)
+{
+    BYTE pbKeyState [256];
+    LPMSG lpmsg;
+    WORD dv;
+    SHORT sc;
+    UINT caps = 0;
+    UINT vKey;
+
+    lpmsg = (LPMSG)lParam;
+    vKey = lpmsg->wParam;
+
+    GetKeyboardState((LPBYTE)&pbKeyState);
+
+    caps = pbKeyState[VK_CAPITAL];
+    if (caps) {
+        if (vKey >= 'A' && vKey <= 'Z')
+            vKey += 'a' - 'A';
+        else if (vKey >= 'a' && vKey <= 'z')
+            vKey -= 'a' - 'A';
+        dv = qwerty2dvorak_table[vKey - '!'];
+        if (dv >= 'A' && dv <= 'Z')
+            dv += 'a' - 'A';
+        else if (dv >= 'a' && dv <= 'z')
+            dv -= 'a' - 'A';
+    } else
+        dv = qwerty2dvorak_table[vKey - '!'];
+     
+    lpmsg->wParam = dv;
+    sc = VkKeyScan(dv);
+    lpmsg->lParam &= ~0x00ff0000;
+    lpmsg->lParam |= (sc <<16);
+    pbKeyState[dv]=1;
+    pbKeyState[vKey]=0;
+    SetKeyboardState((LPBYTE)&pbKeyState);
+}
+
+#endif
 
 #ifdef DEBUG
 void PASCAL DumpUIExtra(LPUIEXTRA lpUIExtra)
