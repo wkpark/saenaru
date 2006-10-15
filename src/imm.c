@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.16 2006/10/12 21:58:26 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.17 2006/10/14 02:25:48 wkpark Exp $
  */
 
 #include "windows.h"
@@ -104,6 +104,7 @@ BOOL WINAPI ImeDestroy(UINT uForce)
 LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 {
     LRESULT lRet = FALSE;
+    LPINPUTCONTEXT lpIMC;
 
     ImeLog(LOGF_API, TEXT("ImeEscape"));
 
@@ -126,9 +127,114 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             break;
 
         case IME_ESC_HANJA_MODE:
-            // EditPlus only use it. XXX
+            hangul_ic_init(&ic);
+
+            lpIMC = ImmLockIMC(hIMC);
+            // EditPlus,AcroEdit only use it. XXX
             // EditPlus does not receive IMR_* message
             MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE:\r\n")));
+#define USE_ESC_HANJA_MODE
+#ifdef USE_ESC_HANJA_MODE
+            if (!IsCompStr(hIMC)) {
+        		    LPCOMPOSITIONSTRING	lpCompStr;
+#if DEBUG
+                TCHAR data[2]; // XXX
+                Mylstrcpyn(data,lpData,1);
+                data[1]='\0';
+                MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE: %s\r\n"),&data));
+#endif
+        
+        		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                            {
+                                DWORD dwSize = sizeof(MYCOMPSTR);
+                                lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
+                                lpCompStr =
+                                    (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                                lpCompStr->dwSize = dwSize;
+                            } else
+        		        lpCompStr =
+                                    (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+                            {
+                                LPMYSTR lpstr,lpread;
+        
+        		        if (lpCompStr != NULL) {
+                                    TRANSMSG GnMsg;
+                                    // XXX
+                                    InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+
+#if 1
+                                    // 워드패드와 M$ Explorer는 반드시 WM_IME_STARTCOMPOSITION으로 시작해야 한다.
+                                    // 2006/10/09
+                                    GnMsg.message = WM_IME_STARTCOMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = 0;
+                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+#endif
+        
+                                    lpstr = GETLPCOMPSTR(lpCompStr);
+                                    lpread = GETLPCOMPREADSTR(lpCompStr);
+                                    Mylstrcpyn(lpread,lpData,1);
+                                    Mylstrcpyn(lpstr,lpData,1);
+        
+                                    // delta start
+                                    lpCompStr->dwDeltaStart =
+        	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                                    // cursor pos
+                                    // 어떤 어플은 CursorPos를 제대로 지정하지 못하는 문제가 있다.
+                                    // EditPlus.
+                                    //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
+                                    //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
+                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+                                    lpCompStr->dwCursorPos = 0;
+        
+                                    //MakeAttrClause(lpCompStr);
+                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
+                                            Mylstrlen(lpstr));
+                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
+                                            Mylstrlen(lpread));
+        
+                                    // make length
+                                    lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                                    lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
+                                    lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
+                                    lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
+        
+                                    //if (lpCompStr->dwCompReadStrLen > 0)
+                                    //    lpCompStr->dwCompReadStrLen--;
+
+                                    //
+                                    // make clause info
+                                    //
+                                    SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                                    SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
+                                    lpCompStr->dwCompClauseLen = 8;
+                                    lpCompStr->dwCompReadClauseLen = 8;
+                                    //
+
+#if 1
+                                    Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
+                                    Mylstrcpy(GETLPRESULTREADSTR(lpCompStr),GETLPCOMPREADSTR(lpCompStr));
+
+                                    lpCompStr->dwResultStrLen = lpCompStr->dwCompStrLen;
+                                    lpCompStr->dwResultReadStrLen = lpCompStr->dwCompReadStrLen;
+                                    //
+                                    // make clause info
+                                    //
+                                    SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
+                                    SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
+                                    lpCompStr->dwResultClauseLen = 8;
+
+#endif
+        		        } else {
+                                    OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
+                                }
+                            }
+                            ConvHanja(hIMC,1,0);
+
+        	            ImmUnlockIMCC (lpIMC->hCompStr);
+            }
+            ImmUnlockIMC (hIMC);
+#endif
             lRet = FALSE;
             break;
 
