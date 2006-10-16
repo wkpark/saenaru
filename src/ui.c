@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.13 2006/10/14 02:29:44 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.14 2006/10/15 11:33:11 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -1223,11 +1223,15 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     LPMSG lpmsg;
     UINT vKey;
     SHORT ALT;
+    BOOL nocheck = FALSE;
 
     BOOL dvorak = FALSE;
 
     if (code < 0)
         return CallNextHookEx(hHookWnd, code, wParam, lParam);
+
+    GetKeyboardState((LPBYTE)&pbKeyState);
+    nocheck = pbKeyState[VK_CONTROL] & 0x80 || pbKeyState[VK_MENU] & 0x80;
 
     if (dwOptionFlag & DVORAK_SUPPORT) {
         HWND hwnd = GetFocus ();
@@ -1245,6 +1249,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             ImmUnlockIMC(hIMC);
         }
     }
+
+    dvorak = nocheck || dvorak;
 
     lpmsg = (LPMSG)lParam;
     vKey = lpmsg->wParam;
@@ -1270,12 +1276,12 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             }
             else
 #endif
+            //GetKeyboardState((LPBYTE)&pbKeyState);
             if ( vKey == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
             {
                // SHORT ShiftState = (GetAsyncKeyState(VK_LSHIFT) >> 31) & 1;
                 TCHAR szDev[80];
                 SHORT ShiftState;
-                GetKeyboardState((LPBYTE)&pbKeyState);
                 ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
 
                 wsprintf((LPTSTR)szDev,TEXT("ShiftState is %x\r\n"),ShiftState);
@@ -1289,6 +1295,11 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                      lpmsg->wParam=VK_HANGUL; // XXX
                      lpmsg->lParam=(0xF2<<16) | 0x41000001;
                 }
+            } else 
+            if ( dvorak && // commit all CompStr like as IME 2002/2003
+                (vKey >= '!' && vKey <= '~') &&
+                pbKeyState[VK_CONTROL] & 0x80) {
+                DvorakKey(lpmsg->message,wParam,lParam);
             }
             break;
         case WM_SYSCHAR:
@@ -1301,7 +1312,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 SHORT sc;
                 UINT caps = 0;
 
-                GetKeyboardState((LPBYTE)&pbKeyState);
+                //GetKeyboardState((LPBYTE)&pbKeyState);
 
                 caps = pbKeyState[VK_CAPITAL];
                 if (caps) {
@@ -1329,7 +1340,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             break;
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:
-            GetKeyboardState((LPBYTE)&pbKeyState);
+            //GetKeyboardState((LPBYTE)&pbKeyState);
             // commit all CompStr like as IME 2002/2003
             if ( pbKeyState[VK_MENU] & 0x80)
             {
@@ -1355,7 +1366,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4 See WINUSER.H
                 MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
 
-                if (dvorak)
+                if (FALSE && dvorak)
                  {
                     WORD dv;
                     SHORT sc;
@@ -1389,7 +1400,7 @@ LRESULT CALLBACK SAENARUConKbdProc(int nCode,WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(hConsoleHookID, nCode, wParam, lParam);
 }
 
-#if 0
+#if 1
 void PASCAL DvorakKey(UINT message,WPARAM wParam, LPARAM lParam)
 {
     BYTE pbKeyState [256];
