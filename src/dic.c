@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.16 2006/10/14 02:23:39 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.17 2006/10/15 11:34:06 wkpark Exp $
  */
 
 #include <windows.h>
@@ -324,13 +324,15 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
             OutputDebugString(TEXT("ConvHanja #1\r\n"));
             GnMsg.message = WM_IME_COMPOSITION;
-            if (!isasc) {
+            GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
+            //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+            if (lpCompStr->dwCompStrLen > 1 || isasc) {
+                GnMsg.wParam = 0;
+            } else {
                 GnMsg.wParam = (WCHAR) *lpT2;
                 if (!isasc && dwImeFlag & SAENARU_ONTHESPOT)
                     GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             }
-            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
 
@@ -1178,12 +1180,12 @@ LPBYTE lpbKeyState;
                     if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
                         BOOL convOk= FALSE;
                         TRANSMSG GnMsg;
+                        MYCHAR myDump[2];
 #ifdef DEBUG
                         TCHAR szDev[80];
 #endif
                         //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
                         //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
-        
                         LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
         
 #ifdef DEBUG
@@ -1205,18 +1207,26 @@ LPBYTE lpbKeyState;
                         wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
                         OutputDebugString(szDev);
 #endif
+                        Mylstrcpyn(myDump,lpDump,1);
                         if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
                             if (lpRS->dwCompStrLen >1) {
                                 // clause dictionary.
                                 *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
-                            } else {
+                            } else  {
+                                const LPMYSTR szSep = MYTEXT("\r\n\t");
+                                LPMYSTR lpToken;
                                 // one char reconversion.
                                 *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
+
+                                lpToken = Mystrtok(lpDump, szSep);
+                                if (lpToken == NULL) {
+                                    GlobalFree((HANDLE)lpRS);
+                                    break;
+                                }
                         
                                 lpRS->dwCompStrLen=1;
                                 lpRS->dwTargetStrLen=1;
                                 // XXX 1. manage not convertable ascii chars.
-                                // XXX 2. end of string.
                             }
                         } else {
                             // XXX Mozilla bug.
@@ -1269,6 +1279,7 @@ LPBYTE lpbKeyState;
                                     // cursor pos
                                     //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
                                     //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
+                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr)-1; // Err
                                     lpCompStr->dwCursorPos = Mylstrlen(lpstr);
         
                                     //MakeAttrClause(lpCompStr);
@@ -1283,9 +1294,6 @@ LPBYTE lpbKeyState;
                                     lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
                                     lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
         
-                                    //if (lpCompStr->dwCompReadStrLen > 0)
-                                    //    lpCompStr->dwCompReadStrLen--;
-
                                     //
                                     // make clause info
                                     //
@@ -1307,7 +1315,20 @@ LPBYTE lpbKeyState;
                                     SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
                                     SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
                                     lpCompStr->dwResultClauseLen = 8;
+#endif
+                                    //
+                                    //
+                                    //if (lpCompStr->dwCompReadStrLen > 0)
+                                    //    lpCompStr->dwCompReadStrLen--;
 
+#if 0
+                                    GnMsg.message = WM_IME_COMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+                                    //if (dwImeFlag & SAENARU_ONTHESPOT)
+                                    //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 #endif
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
@@ -1368,7 +1389,7 @@ LPBYTE lpbKeyState;
             // * InternetExplorer에서도 Reconversion이 됨. IME 2003에서는 안됨
             //
 
-            if (candOk || !IsCompStr(hIMC)) {
+            if (!IsCompStr(hIMC)) {
                 // for reconversion mode like as IME 2002
                 TRANSMSG GnMsg;
                 GnMsg.message = WM_IME_KEYDOWN;
@@ -1377,10 +1398,10 @@ LPBYTE lpbKeyState;
                 GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
                 OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN\r\n"));
                 MyDebugPrint((TEXT("DicKeydown: candOk %d\r\n"),candOk));
-            } else {
+            } else if (candOk) {
                 // 어떤 어플은 자체 내장된 candidate리스트를 쓰고, 어떤것은 그렇지 않다.
                 // 그런데 이러한 동작이 일관성이 없어서 어떤 어플은 특별처리 해야 한다.
-                // always generage WM_IME_KEYDOWN for VK_HANJA
+                // always generage WM_IME_KEYDOWN for VK_HANJA XXX
                 TRANSMSG GnMsg;
                 GnMsg.message = WM_IME_KEYDOWN;
                 GnMsg.wParam = wParam;
