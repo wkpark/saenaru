@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.15 2006/10/16 11:09:12 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.16 2006/10/18 00:37:16 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -49,7 +49,7 @@ BOOL WINAPI SetHookFunc(void);
 BOOL WINAPI UnsetHookFunc(void);
 BOOL WINAPI SetConsoleHookFunc(void);
 BOOL WINAPI UnsetConsoleHookFunc(void);
-void PASCAL DvorakKey(UINT,WPARAM, LPARAM);
+void PASCAL DvorakKey(BOOL,WPARAM, LPARAM);
 
 static HHOOK hHookWnd = 0;
 static HHOOK hConsoleHookID = 0;
@@ -1295,10 +1295,25 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                      lpmsg->lParam=(0xF2<<16) | 0x41000001;
                 }
             } else 
-            if ( dvorak && // commit all CompStr like as IME 2002/2003
-                (vKey >= '!' && vKey <= '~') &&
+            if ( dvorak && vKey >= '!' &&
                 pbKeyState[VK_CONTROL] & 0x80) {
-                DvorakKey(lpmsg->message,wParam,lParam);
+                // commit all CompStr like as IME 2002/2003
+
+                if (vKey < '!' || vKey > '~') {
+                    WORD ch;
+                    UINT sc;
+                    HKL hcur;
+                    hcur= GetKeyboardLayout(0);
+                    ch = (WORD)MapVirtualKeyEx(vKey,2,hcur);
+
+                    //ToAsciiEx(vKey,sc,pbKeyState,&ch,0,hcur);
+                    ch = 0xff & ch;
+                MyDebugPrint((TEXT("\t** Try to translate 0x%x 0x%x\r\n"),vKey,ch));
+                    if (ch < '!' || ch > '~')
+                        break;
+                    lpmsg->wParam=ch;
+                }
+                DvorakKey(TRUE,wParam,lParam);
             }
             break;
         case WM_SYSCHAR:
@@ -1400,11 +1415,11 @@ LRESULT CALLBACK SAENARUConKbdProc(int nCode,WPARAM wParam, LPARAM lParam)
 }
 
 #if 1
-void PASCAL DvorakKey(UINT message,WPARAM wParam, LPARAM lParam)
+void PASCAL DvorakKey(BOOL mode,WPARAM wParam, LPARAM lParam)
 {
     BYTE pbKeyState [256];
     LPMSG lpmsg;
-    WORD dv;
+    WORD dv,vk;
     SHORT sc;
     UINT caps = 0;
     UINT vKey;
@@ -1427,9 +1442,15 @@ void PASCAL DvorakKey(UINT message,WPARAM wParam, LPARAM lParam)
             dv -= 'a' - 'A';
     } else
         dv = qwerty2dvorak_table[vKey - '!'];
+
+    vk = dv;
+    if (mode) { // for Ctrl-X mode
+        if (vk >='a' && vk <= 'z')
+            vk -= 'a' - 'A';
+    }
      
-    lpmsg->wParam = dv;
-    sc = VkKeyScan(dv);
+    lpmsg->wParam = vk;
+    sc = VkKeyScan(vk);
     lpmsg->lParam &= ~0x00ff0000;
     lpmsg->lParam |= (sc <<16);
     pbKeyState[dv]=1;
