@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.17 2006/10/14 02:25:48 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.18 2006/10/15 11:34:47 wkpark Exp $
  */
 
 #include "windows.h"
@@ -105,6 +105,8 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 {
     LRESULT lRet = FALSE;
     LPINPUTCONTEXT lpIMC;
+    LPTRANSMSG lpTransMsg;
+    BOOL fOpen;
 
     ImeLog(LOGF_API, TEXT("ImeEscape"));
 
@@ -127,23 +129,33 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             break;
 
         case IME_ESC_HANJA_MODE:
-            hangul_ic_init(&ic);
-
-            lpIMC = ImmLockIMC(hIMC);
             // EditPlus,AcroEdit only use it. XXX
             // EditPlus does not receive IMR_* message
             MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE:\r\n")));
-#define USE_ESC_HANJA_MODE
-#ifdef USE_ESC_HANJA_MODE
+            if (lpData == NULL) return FALSE;
+
+            hangul_ic_init(&ic);
+
+            lpIMC = ImmLockIMC(hIMC);
+            if (!lpIMC) return FALSE;
+
+            fOpen = lpIMC->fOpen;
+            if (!fOpen)
+                MyDebugPrint((TEXT("\t === XXX IME NOT OPEN:\r\n")));
+
+#ifndef USE_NO_IME_ESCAPE
             if (!IsCompStr(hIMC)) {
         		    LPCOMPOSITIONSTRING	lpCompStr;
-#if DEBUG
-                TCHAR data[2]; // XXX
-                Mylstrcpyn(data,lpData,1);
-                data[1]='\0';
-                MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE: %s\r\n"),&data));
-#endif
-        
+                            LPMYSTR lpDump;
+                            MYCHAR szBuf[3];
+
+                            lpDump=szBuf;
+
+                            Mylstrcpyn(lpDump,lpData,2); // XXX
+
+                            MyDebugPrint((TEXT("%x %x %x"),szBuf[0],szBuf[1],szBuf[2]));
+                            szBuf[1]=MYTEXT('\0');
+ 
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
                             {
                                 DWORD dwSize = sizeof(MYCOMPSTR);
@@ -163,29 +175,29 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
 #if 1
-                                    // 워드패드와 M$ Explorer는 반드시 WM_IME_STARTCOMPOSITION으로 시작해야 한다.
-                                    // 2006/10/09
+                                    // ImeEscape()를 쓸 때
+                                    // M$ Explorer는 반드시 WM_IME_STARTCOMPOSITION으로 시작해야 한다.
+                                    // 2006/10/18
                                     GnMsg.message = WM_IME_STARTCOMPOSITION;
                                     GnMsg.wParam = 0;
                                     GnMsg.lParam = 0;
-                                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                                    GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
 #endif
-        
+
                                     lpstr = GETLPCOMPSTR(lpCompStr);
                                     lpread = GETLPCOMPREADSTR(lpCompStr);
-                                    Mylstrcpyn(lpread,lpData,1);
-                                    Mylstrcpyn(lpstr,lpData,1);
+                                    Mylstrcpy(lpread,lpDump);
+                                    Mylstrcpy(lpstr,lpDump);
         
                                     // delta start
                                     lpCompStr->dwDeltaStart =
         	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
                                     // cursor pos
-                                    // 어떤 어플은 CursorPos를 제대로 지정하지 못하는 문제가 있다.
-                                    // EditPlus.
                                     //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
                                     //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
-                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr)-1; // Err
                                     lpCompStr->dwCursorPos = 0;
+                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr);
         
                                     //MakeAttrClause(lpCompStr);
                                     lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
@@ -199,9 +211,6 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
                                     lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
         
-                                    //if (lpCompStr->dwCompReadStrLen > 0)
-                                    //    lpCompStr->dwCompReadStrLen--;
-
                                     //
                                     // make clause info
                                     //
@@ -211,7 +220,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     lpCompStr->dwCompReadClauseLen = 8;
                                     //
 
-#if 1
+#if 0
                                     Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
                                     Mylstrcpy(GETLPRESULTREADSTR(lpCompStr),GETLPCOMPREADSTR(lpCompStr));
 
@@ -223,19 +232,31 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
                                     SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
                                     lpCompStr->dwResultClauseLen = 8;
+#endif
+                                    //
+                                    //
+                                    //if (lpCompStr->dwCompReadStrLen > 0)
+                                    //    lpCompStr->dwCompReadStrLen--;
 
+#if 0
+                                    GnMsg.message = WM_IME_COMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+                                    //if (dwImeFlag & SAENARU_ONTHESPOT)
+                                    //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+                                    GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
 #endif
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
                                 }
                             }
-                            ConvHanja(hIMC,1,0);
-
-        	            ImmUnlockIMCC (lpIMC->hCompStr);
             }
-            ImmUnlockIMC (hIMC);
+
 #endif
-            lRet = FALSE;
+
+            ImmUnlockIMC (hIMC);
+
             break;
 
         case IME_ESC_PRI_GETDWORDTEST:
@@ -319,8 +340,26 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             vKey = VK_HANGUL;
     }
 
-    switch ( ( LOWORD(vKey) & 0x00FF ) ){
+    fOpen = lpIMC->fOpen;
+
+    switch ( ( LOWORD(vKey) & 0x00FF ) ) {
+#if 1
+        case VK_HANJA:
+            if (IsCompStr(hIMC)) {
+                ImmUnlockIMC(hIMC);
+                return TRUE;
+                break;
+            }
+            if (fOpen) break;
+
+            ImmSetOpenStatus(hIMC,TRUE);
+            ChangeMode(hIMC,TO_CMODE_ALPHANUMERIC);
+            fOpen = TRUE;
+            break;
+#endif
         case VK_HANGUL:
+            // for 101 Keyboard type 3 (shift-space enabled kbd)
+            if ( lKeyData & 0x80000000 ) break;
             // Toggle Hangul composition state
             //
             if (IsCompStr(hIMC))
@@ -351,9 +390,8 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             if (!fOpen)
                 ImmSetOpenStatus(hIMC,FALSE);
 
-            fRet = FALSE;
             ImmUnlockIMC(hIMC);
-            return fRet;
+            return FALSE;
             break;
         case VK_ESCAPE:
             if (dwOptionFlag & ESCENG_SUPPORT)
@@ -361,34 +399,14 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             //ChangeMode(hIMC,TO_CMODE_ROMAN);
             break;
         case VK_SHIFT:
-            fRet = FALSE;
             ImmUnlockIMC(hIMC);
-            return fRet;
+            return FALSE;
             break;
         default:
             break;
     }
 
     fOpen = lpIMC->fOpen;
-
-#if 0
-    // check OpenState.
-    // 어떤 프로그램은 Open상태에서 영문입력을 받지 못한다.
-    // 따라서 영문 입력상태인데 Open state면 무조건 끈다.
-    // 단, CompStr이 비어있는 경우에 한한다.
-    // CompStr이 들어있는 경우는 Open상태로 간주한다. (Reconversion의 경우)
-    if (fOpen && !IsCompStr(hIMC)) {
-        if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense)) {
-            if (! (dwConversion & IME_CMODE_NATIVE)) {
-                dwConversion &= ~IME_CMODE_NATIVE;
-                dwConversion &= ~IME_CMODE_FULLSHAPE;
-                MyDebugPrint((TEXT(" * English and OPEN state\n")));
-                ImmSetOpenStatus(hIMC,FALSE);
-                fOpen=FALSE;
-            }
-        }
-    }
-#endif
 
     if (fOpen)
     {
@@ -429,24 +447,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         if (lpCompStr)
             ImmUnlockIMCC(lpIMC->hCompStr);
 
-    } else {
-        // Open 상태에서도 Reconversion을 지원하기 위한 HACK HACK
-        // 이 부분을 옵션으로 하는가?
-        // 어떤 어플은 Open상태에서 영문 입력을 허용하지 않는다.
-        if ((vKey == VK_HANJA || vKey == VK_F9) && !IsCompStr(hIMC) ) {
-            DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
-            if (dwSize) {
-                ImmSetOpenStatus(hIMC,TRUE);
-                MyDebugPrint((TEXT(" *** IME not open state *** \r\n")));
-                if (DicKeydownHandler( hIMC, vKey, lKeyData, lpbKeyState ) ) {
-                    fRet=TRUE;
-                }
-                if (!IsCompStr(hIMC)) {
-                    ImmSetOpenStatus(hIMC,FALSE);
-                    fRet=FALSE;
-                }
-            }
-        }
     }
     // Some application do not accept WM_CHAR events with VK_PROCESSKEY.
     // For this appls we need a following hack:
