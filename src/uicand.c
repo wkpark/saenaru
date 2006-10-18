@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.6 2006/10/12 22:08:30 wkpark Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.7 2006/10/14 02:29:44 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -270,6 +270,7 @@ BOOL PASCAL GetCandPosFromCompWnd(LPUIEXTRA lpUIExtra,LPPOINT lppt)
             }
         }
     }
+
     MyDebugPrint((TEXT(" *** GetCandPosFromCompWnd FALSE\n")));
     return FALSE;
 }
@@ -326,7 +327,7 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
             lppt->x = rc.left;
             lppt->y = rc.bottom + 23;
         }
-                MyDebugPrint((TEXT("FromCompForm #2\n")));
+                MyDebugPrint((TEXT("FromCompForm root style #2\n")));
         ScreenToClient(lpIMC->hWnd,lppt);
         return TRUE;
     }
@@ -403,13 +404,15 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 
         MyDebugPrint((TEXT("CandList count = %d\r\n"),count));
 
-        // to make popup with scrollbar using SetCapture();
-        EnableWindow( lpUIExtra->uiCand.hWnd, TRUE);
-        // init scroll pos
-        SetScrollRange( lpUIExtra->uiCand.hWnd, SB_VERT, 0, count, TRUE);
-        SetScrollPos( lpUIExtra->uiCand.hWnd, SB_VERT, 0, TRUE);
-        EnableScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, ESB_ENABLE_BOTH);
-        ShowScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, TRUE);
+        if (lpCandList->dwCount > 1) {
+            // to make popup with scrollbar using SetCapture();
+            EnableWindow( lpUIExtra->uiCand.hWnd, TRUE);
+            // init scroll pos
+            SetScrollRange( lpUIExtra->uiCand.hWnd, SB_VERT, 0, count, TRUE);
+            SetScrollPos( lpUIExtra->uiCand.hWnd, SB_VERT, 0, TRUE);
+            EnableScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, ESB_ENABLE_BOTH);
+            ShowScrollBar( lpUIExtra->uiCand.hWnd, SB_VERT, TRUE);
+        }
         ImmUnlockIMCC(lpIMC->hCandInfo);
     }
 
@@ -569,7 +572,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         ImmUnlockIMC(hIMC);
     }
 
-    {
+    if (lpCandList->dwCount > 1) {
         int pages,page;
         int pos;
         TCHAR num[10];
