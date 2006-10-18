@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.14 2006/10/15 11:33:11 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.15 2006/10/16 11:09:12 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -1248,9 +1248,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 dvorak = !(lpIMC->fdwConversion & IME_CMODE_NATIVE);
             ImmUnlockIMC(hIMC);
         }
+        dvorak = nocheck || dvorak;
     }
-
-    dvorak = nocheck || dvorak;
 
     lpmsg = (LPMSG)lParam;
     vKey = lpmsg->wParam;
