@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.16 2006/10/18 00:37:16 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.17 2006/10/18 14:51:01 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -1295,11 +1295,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                      lpmsg->lParam=(0xF2<<16) | 0x41000001;
                 }
             } else 
-            if ( dvorak && vKey >= '!' &&
-                pbKeyState[VK_CONTROL] & 0x80) {
-                // commit all CompStr like as IME 2002/2003
-
-                if (vKey < '!' || vKey > '~') {
+            if ( dvorak && pbKeyState[VK_CONTROL] & 0x80) {
+                if (vKey >= VK_OEM_1 && vKey <= VK_OEM_102) {
                     WORD ch;
                     UINT sc;
                     HKL hcur;
@@ -1312,7 +1309,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                     if (ch < '!' || ch > '~')
                         break;
                     lpmsg->wParam=ch;
-                }
+                } else if (vKey < VK_1 || vKey > VK_Z)
+                    break;
                 DvorakKey(TRUE,wParam,lParam);
             }
             break;
