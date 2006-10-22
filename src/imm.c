@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.18 2006/10/15 11:34:47 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.19 2006/10/18 00:16:09 wkpark Exp $
  */
 
 #include "windows.h"
@@ -130,7 +130,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 
         case IME_ESC_HANJA_MODE:
             // EditPlus,AcroEdit only use it. XXX
-            // EditPlus does not receive IMR_* message
+            // EditPlus can not receive IMR_* message
             MyDebugPrint((TEXT("\tIME_ESC_HANJA_MODE:\r\n")));
             if (lpData == NULL) return FALSE;
 
@@ -196,13 +196,13 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
                                     //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
                                     //lpCompStr->dwCursorPos = Mylstrlen(lpstr)-1; // Err
-                                    lpCompStr->dwCursorPos = 0;
-                                    //lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+                                    //lpCompStr->dwCursorPos = 0;
+                                    lpCompStr->dwCursorPos = Mylstrlen(lpstr);
         
                                     //MakeAttrClause(lpCompStr);
-                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
+                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_TARGET_CONVERTED,
                                             Mylstrlen(lpstr));
-                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
+                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
                                             Mylstrlen(lpread));
         
                                     // make length
@@ -219,34 +219,19 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     lpCompStr->dwCompClauseLen = 8;
                                     lpCompStr->dwCompReadClauseLen = 8;
                                     //
-
-#if 0
-                                    Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
-                                    Mylstrcpy(GETLPRESULTREADSTR(lpCompStr),GETLPCOMPREADSTR(lpCompStr));
-
-                                    lpCompStr->dwResultStrLen = lpCompStr->dwCompStrLen;
-                                    lpCompStr->dwResultReadStrLen = lpCompStr->dwCompReadStrLen;
-                                    //
-                                    // make clause info
-                                    //
-                                    SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
-                                    SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
-                                    lpCompStr->dwResultClauseLen = 8;
-#endif
-                                    //
-                                    //
-                                    //if (lpCompStr->dwCompReadStrLen > 0)
-                                    //    lpCompStr->dwCompReadStrLen--;
+                                    MyDebugPrint((TEXT(" *** dwCompStrLen= %d\r\n"),lpCompStr->dwCompStrLen));
 
 #if 0
                                     GnMsg.message = WM_IME_COMPOSITION;
                                     GnMsg.wParam = 0;
+                                    //GnMsg.wParam = cs;
                                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
                                     //if (dwImeFlag & SAENARU_ONTHESPOT)
                                     //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                                     GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
 #endif
+                                    lRet=TRUE;
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
                                 }
