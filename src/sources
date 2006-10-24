@@ -35,6 +35,7 @@ SOURCES= \
         data.c \
         dic.c \
         hangul.c \
+        hanja.c \
         saenaru.c \
         reg.c \
         imm.c \

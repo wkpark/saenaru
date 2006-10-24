@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.17 2006/10/15 11:34:06 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.18 2006/10/18 00:15:43 wkpark Exp $
  */
 
 #include <windows.h>
@@ -285,6 +285,22 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
         nBufLen = GetCandidateStringsFromDictionary(lpT2,
                 szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
+
+        if (nBufLen < 1 && Mylstrlen(lpT2)==1 &&
+                (*lpT2 < 0xac00 || *lpT2 >=0xd7a8)) {
+            // check the hanja_to_hangul table
+            UINT han;
+            han = hanja_search(*lpT2);
+            if (han) {
+                //szBuf[0]= (MYCHAR)han; // set hangul
+                //szBuf[1]= MYTEXT(' ');
+                //szBuf[3]= 0;
+                //*lpT2=(MYCHAR)han;
+                // get hanja list for this hangul
+                nBufLen = GetCandidateStringsFromDictionary((LPWSTR)&han,
+                        szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
+            }
+        }
     }
 
     //
