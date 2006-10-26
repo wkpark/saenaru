@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.18 2006/10/18 00:15:43 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.19 2006/10/24 11:27:08 wkpark Exp $
  */
 
 #include <windows.h>
@@ -257,6 +257,8 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
         TCHAR   szKey[128];
         LPTSTR  lpDic;
         TCHAR   szDic[256];
+        LPTSTR  lpIdx;
+        TCHAR   szIdx[256];
         INT sz;
 
         if (0x7F > *lpT2) isasc=TRUE;
@@ -289,15 +291,31 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
         if (nBufLen < 1 && Mylstrlen(lpT2)==1 &&
                 (*lpT2 < 0xac00 || *lpT2 >=0xd7a8)) {
             // check the hanja_to_hangul table
-            UINT han;
-            han = hanja_search(*lpT2);
-            if (han) {
+            MYCHAR han[2];
+
+            lpIdx = (LPTSTR)&szIdx;
+            LoadString( hInst, IDS_HIDX_KEY, lpKey, 128);
+            lpIdx += GetSaenaruDirectory(lpIdx,256);
+            if (*(lpIdx-1) != TEXT('\\')) *lpIdx++ = TEXT('\\');
+
+            sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
+            if (sz > 2) {
+                sz= GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpIdx);
+                nBufLen = GetHangulFromHanjaIndex(lpT2, han, 2, (LPTSTR)szIdx);
+                MyDebugPrint((TEXT("Saenaru: %s Idx %s:%d\n"),lpKey, szIdx,sz));
+            }
+#if 0
+            else 
+                han[0] = (MYCHAR)hanja_search(*lpT2);
+#endif
+            if (han[0]) {
+                han[1]= 0;
                 //szBuf[0]= (MYCHAR)han; // set hangul
                 //szBuf[1]= MYTEXT(' ');
                 //szBuf[3]= 0;
                 //*lpT2=(MYCHAR)han;
                 // get hanja list for this hangul
-                nBufLen = GetCandidateStringsFromDictionary((LPWSTR)&han,
+                nBufLen = GetCandidateStringsFromDictionary(han,
                         szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
             }
         }

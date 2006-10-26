@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.8 2006/10/10 08:12:59 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.9 2006/10/24 11:27:08 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -503,8 +503,8 @@ int PASCAL set_keyboard(UINT);
 int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);
 
-/* hanja.c       */
-UINT PASCAL hanja_search(UINT);
+/* hanjaidx.c       */
+int GetHangulFromHanjaIndex(LPMYSTR, LPMYSTR, DWORD, LPTSTR);
 
 /* DIC2.C        */
 BOOL OneCharZenToHan(WCHAR ,WCHAR* ,WCHAR* );

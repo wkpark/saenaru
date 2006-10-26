@@ -273,6 +273,7 @@ BEGIN
     IDS_DIC_KEY             ""
     IDS_SYM_KEY             "Symbol"
     IDS_WORD_KEY            "Word"
+    IDS_HIDX_KEY            "HanjaIndex"
 END
 
 STRINGTABLE DISCARDABLE 
