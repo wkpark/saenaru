@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hanjaidx.c,v 1.1 2006/10/24 11:32:49 wkpark Exp $
+ * $Saenaru: saenaru/src/hanjaidx.c,v 1.1 2006/10/26 11:24:24 wkpark Exp $
  */
 
 #include <windows.h>
@@ -108,19 +108,16 @@ int GetHangulFromHanjaIndex(LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, LPTST
         if (*lpDic != 0xfeff)
             goto Err1;// bom ?
 
-        if (ReadFile(hTblFile, lpDic, 2, &dwRead, NULL))
-        {
-            if (*lpDic == MYTEXT('#')) { // read some header
+        while (ReadFile(hTblFile, lpDic, 2, &dwRead, NULL)) {
+            if (*lpDic != MYTEXT('#')) break; // read some header
+            hsz+=dwRead;
+            while (ReadFile(hTblFile, lpDic, 2, &dwRead, NULL)) {
                 hsz+=dwRead;
-                while (ReadFile(hTblFile, lpDic, 2, &dwRead, NULL)) {
-                    hsz+=dwRead;
-                    if (dwRead == 2 && *lpDic == MYTEXT('\n'))
-                        break;
-                }
+                if (dwRead == 2 && *lpDic == MYTEXT('\n'))
+                    break;
             }
         }
-        if (!hsz)
-            SetFilePointer(hTblFile, 2, NULL, FILE_BEGIN);
+        SetFilePointer(hTblFile, -2, NULL, FILE_CURRENT);
 
         offset=hanja_idx(*lpRead);
 
