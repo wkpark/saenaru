@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.19 2006/10/24 11:27:08 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.20 2006/10/26 11:24:24 wkpark Exp $
  */
 
 #include <windows.h>
@@ -310,7 +310,8 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 #endif
             if (han[0]) {
                 han[1]= 0;
-                //szBuf[0]= (MYCHAR)han; // set hangul
+                szBuf[0]= (MYCHAR)han[0]; // set hangul
+                szBuf[1]= 0;
                 //szBuf[1]= MYTEXT(' ');
                 //szBuf[3]= 0;
                 //*lpT2=(MYCHAR)han;
@@ -584,8 +585,11 @@ set_compstr:
         // If the selected candidate string is changed, the composition string
         // should be updated.
         //
+        if (select != -1)
         lpstr = (LPMYSTR)((LPSTR)lpCandList +
                    lpCandList->dwOffset[lpCandList->dwSelection]);
+        else
+            lpstr = lpT2;
         goto set_compstr;
 
     }
