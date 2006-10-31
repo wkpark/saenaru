@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.9 2006/10/24 11:27:08 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.10 2006/10/26 11:24:24 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -67,6 +67,7 @@
 #define USE_SHIFT_SPACE        0x00000080
 #define DVORAK_SUPPORT         0x00000100
 #define ESCENG_SUPPORT         0x00000200
+#define QWERTY_HOTKEY_SUPPORT  0x00000400
 
 
 /**********************************************************************/

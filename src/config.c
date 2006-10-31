@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.4 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/config.c,v 1.5 2006/10/08 09:16:02 wkpark Exp $
  */
 
 #include "windows.h"
@@ -210,6 +210,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp |= USE_SHIFT_SPACE;
                     if (IsDlgButtonChecked(hDlg, IDC_DVORAK_SUPPORT))
                         dwTemp |= DVORAK_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_QWERTY_HOTKEY_SUPPORT))
+                        dwTemp |= QWERTY_HOTKEY_SUPPORT;
                     if (IsDlgButtonChecked(hDlg, IDC_ESCENG_SUPPORT))
                         dwTemp |= ESCENG_SUPPORT;
                     dwOptionFlag = dwTemp;
@@ -287,6 +289,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwOptionFlag & FULL_MULTIJOMO) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_DVORAK_SUPPORT, 
                                 (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_QWERTY_HOTKEY_SUPPORT, 
+                                (dwOptionFlag & QWERTY_HOTKEY_SUPPORT) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_ESCENG_SUPPORT, 
                                 (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
