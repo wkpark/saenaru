@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.20 2006/10/26 11:24:24 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.21 2006/10/29 10:50:42 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1461,7 +1461,7 @@ LPBYTE lpbKeyState;
             ImmUnlockIMC(hIMC);
 
             if (IsCompStr(hIMC) &&
-                    (fdwConversion & IME_CMODE_FULLSHAPE) &&
+                    (fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
                 hangul_ic_init(&ic);
                 ConvHanja(hIMC,1,0);

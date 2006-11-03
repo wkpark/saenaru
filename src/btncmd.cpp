@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btncmd.cpp,v 1.3 2006/10/03 13:08:03 wkpark Exp $
+ * $Saenaru: saenaru/src/btncmd.cpp,v 1.4 2006/10/11 03:46:34 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -352,7 +352,7 @@ CLangBarItemCModeButton::GetIcon (
 
 	if (ImmGetOpenStatus (hIMC)) {
 		if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence)) {
-			if (dwConversion & IME_CMODE_FULLSHAPE){
+			if (dwConversion & IME_CMODE_HANJACONVERT){
 				if (dwConversion & IME_CMODE_NATIVE)
 				{
 					str	= TEXT ("INDIC_HANJA") ;
@@ -458,7 +458,7 @@ _Menu_ToHangul (void)
 void
 _Menu_ToHanja    (void)
 {
-	_Menu_ToCMode (IME_CMODE_NATIVE | IME_CMODE_FULLSHAPE) ;
+	_Menu_ToCMode (IME_CMODE_NATIVE | IME_CMODE_HANJACONVERT) ;
 }
 
 void
@@ -501,7 +501,7 @@ _GetConversionMode (
 	if (! ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
 		return	MENU_ITEM_INDEX_CANCEL ;
 
-	if (dwConversion & IME_CMODE_FULLSHAPE){
+	if (dwConversion & IME_CMODE_HANJACONVERT){
 		if (dwConversion & IME_CMODE_NATIVE){
 			return	MENU_ITEM_INDEX_HANJA ;
 		} else {
