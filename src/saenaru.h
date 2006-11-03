@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.10 2006/10/26 11:24:24 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.11 2006/10/31 19:14:32 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -56,6 +56,8 @@
 
 #define SAENARU_ONTHESPOT      0x00020000
 #define SAENARU_MODE_CANDIDATE 0x00040000
+#define AUTOMATA_2SET          0x00100000
+#define AUTOMATA_3SET          0x00200000
 
 #define COMPOSITE_TYPING       0x00000001
 #define CONCURRENT_TYPING      0x00000002

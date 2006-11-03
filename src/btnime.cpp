@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.4 2006/10/03 13:08:03 wkpark Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.5 2006/10/11 03:46:34 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -531,6 +531,8 @@ CLangBarItemImeButton::OnMenuSelect (
     } else {
         _Menu_SelectCompose (wID);
     }
+
+    UpdateLanguageBar();
     return    S_OK;
 }
 
@@ -538,12 +540,24 @@ STDAPI
 CLangBarItemImeButton::GetIcon (
     HICON*                    phIcon)
 {
+    LPCTSTR str = NULL;
+    HIMC hIMC;
     DEBUGPRINTFEX (100, (TEXT ("CLangBarItemImeButton::GetIcon(%p)\n"), phIcon));
 
     if (phIcon == NULL)
         return    E_INVALIDARG;
 
-    *phIcon    = (HICON)LoadImage (hInst, TEXT ("INDIC_KEY"), IMAGE_ICON, 16, 16, 0);
+
+    hIMC= _GetCurrentHIMC();
+    str = TEXT("INDIC_KEY");
+    if (hIMC != NULL) {
+        if (dwImeFlag & AUTOMATA_3SET)
+	    str = TEXT("INDIC_3SET");
+	else
+	    str = TEXT("INDIC_2SET");
+    }
+
+    *phIcon    = (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, 0);
     return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
 

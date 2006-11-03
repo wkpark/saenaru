@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.15 2006/10/14 02:21:59 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.16 2006/10/23 07:41:39 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1429,10 +1429,12 @@ int PASCAL set_keyboard(UINT type)
 int PASCAL set_automata(UINT type)
 {
     if (type == 0 || type == 1)
-        return 0;	
-    if (type == 2)
-        hangul_automata=hangul_automata2;
-    else if (type == 3)
+        return 0;
+
+    dwImeFlag &= ~AUTOMATA_3SET;
+    dwImeFlag &= ~AUTOMATA_2SET;
+    dwImeFlag|= (type==3) ? AUTOMATA_3SET:AUTOMATA_2SET;
+    if (type == 3)
         hangul_automata=hangul_automata3;
     else
         hangul_automata=hangul_automata2;

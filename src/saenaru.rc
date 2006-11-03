@@ -42,6 +42,8 @@ INDIC_KEY	ICON    DISCARDABLE		"..\\resource\\keyboard.ico"
 INDIC_HALF	ICON    DISCARDABLE		"..\\resource\\half.ico"
 INDIC_FULL	ICON    DISCARDABLE		"..\\resource\\full.ico"
 INDIC_PAD	ICON    DISCARDABLE		"..\\resource\\imepad.ico"
+INDIC_2SET	ICON    DISCARDABLE		"..\\resource\\2set.ico"
+INDIC_3SET	ICON    DISCARDABLE		"..\\resource\\3set.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
