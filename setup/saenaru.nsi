@@ -1,8 +1,8 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.5 2006/10/12 22:14:09 wkpark Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.6 2006/10/12 22:40:05 wkpark Exp $
 
-!define RELVERSION      "061013"
+!define RELVERSION      "061104"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
 !define RESOURCEDIR     "..\resource"
@@ -74,9 +74,10 @@ Section "새나루 입력기" SecBody
   SetOverwrite lastused
   SetOutPath "$INSTDIR"
   File "${RESOURCEDIR}\saenaru.dic"
-;;  File "${RESOURCEDIR}\word.dic"
+  File "${RESOURCEDIR}\word.dic"
   File "${RESOURCEDIR}\symwin.dic"
   File "${RESOURCEDIR}\nabi.dic"
+  File "${RESOURCEDIR}\jinsuk.dic"
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
@@ -90,9 +91,16 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "한글 입력기 (새나루)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
 
+  ; dvorak driver support
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbdkor.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "새나루 한글 입력기"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "한글 입력기 (새나루 드보락)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME file" "SAENARU.IME"
+
   WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
   WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Symbol" "symwin.dic"
-  ;;WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
+  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
+  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -211,7 +219,8 @@ Section "Uninstall"
   Delete "$INSTDIR\saenaru.dic"
   Delete "$INSTDIR\nabi.dic"
   Delete "$INSTDIR\winsym.dic"
-  ;;Delete "$INSTDIR\word.dic"
+  Delete "$INSTDIR\word.dic"
+  Delete "$INSTDIR\jinsuk.dic"
 
   Delete "$INSTDIR\Source\DIRS"
   Delete "$INSTDIR\Source\LICENSE"
@@ -239,7 +248,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\saenaru.dic"
   Delete "$INSTDIR\Source\resource\winsym.dic"
   Delete "$INSTDIR\Source\resource\nabi.dic"
-  ;;Delete "$INSTDIR\Source\resource\word.dic"
+  Delete "$INSTDIR\Source\resource\word.dic"
+  Delete "$INSTDIR\Source\resource\jinsuk.dic"
   Delete "$INSTDIR\Source\resource\saenaru.dlg"
   Delete "$INSTDIR\Source\resource\saenaru.ico"
   Delete "$INSTDIR\Source\resource\saenaru.rcv"
@@ -264,6 +274,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\src\dic2.c"
   Delete "$INSTDIR\Source\src\fdebug.c"
   Delete "$INSTDIR\Source\src\hangul.c"
+  Delete "$INSTDIR\Source\src\hanjaidx.c"
   Delete "$INSTDIR\Source\src\imm.c"
   Delete "$INSTDIR\Source\src\immsec.c"
   Delete "$INSTDIR\Source\src\immsec.h"
@@ -305,6 +316,7 @@ Section "Uninstall"
   RMDir "${SMPATH}"
 
   DeleteRegKey HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412"
+  DeleteRegKey HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru"
   DeleteRegKey /ifempty HKLM "${REGISTRY_PATH}"
 
