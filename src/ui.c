@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.17 2006/10/18 14:51:01 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.18 2006/10/22 22:04:28 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -202,7 +202,6 @@ LPARAM lParam;
     HGLOBAL        hUIExtra;
     LONG           lRet = 0L;
     int            i;
-    static BOOL    iConsoleHookLoaded=0;
 
     hUICurIMC = (HIMC)GetWindowLongPtr(hWnd,IMMGWLP_IMC);
 
@@ -1099,9 +1098,8 @@ BOOL WINAPI SetHookFunc(void)
 
 BOOL WINAPI SetConsoleHookFunc(void)
 {
-    HMODULE hMod;
-    hMod = GetModuleHandleA("kernel32");
-    if((hConsoleHookID=SetWindowsHookEx(WH_KEYBOARD_LL, SAENARUConKbdProc, (HINSTANCE) hInst,  GetCurrentThreadId() )) == NULL)
+    if((hConsoleHookID=SetWindowsHookEx(WH_KEYBOARD_LL, SAENARUConKbdProc, (HINSTANCE) hInst, 0 )) == NULL) // all
+    //if((hConsoleHookID=SetWindowsHookEx(WH_KEYBOARD_LL, SAENARUConKbdProc, (HINSTANCE) NULL,  GetCurrentThreadId() )) == NULL)
         return FALSE;
     return TRUE;
 }
@@ -1223,17 +1221,24 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     LPMSG lpmsg;
     UINT vKey;
     SHORT ALT;
+    HKL hcur;
     BOOL nocheck = FALSE;
-
     BOOL dvorak = FALSE;
+    BOOL fDvorak = dwOptionFlag & DVORAK_SUPPORT;
 
     if (code < 0)
         return CallNextHookEx(hHookWnd, code, wParam, lParam);
 
+    /* check dvorak layout */
+    /* XXX */
+    hcur= GetKeyboardLayout(0);
+    if ((DWORD)hcur == 0xE0130412)
+        fDvorak = FALSE; // do not convert. It is already dvorak!!
+
     GetKeyboardState((LPBYTE)&pbKeyState);
     nocheck = pbKeyState[VK_CONTROL] & 0x80 || pbKeyState[VK_MENU] & 0x80;
 
-    if (dwOptionFlag & DVORAK_SUPPORT) {
+    if (fDvorak) {
         HWND hwnd = GetFocus ();
         
         dvorak = TRUE;
@@ -1263,18 +1268,6 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
         case WM_KEYUP:
             break;
         case WM_KEYDOWN:
-#if 0
-            if ((dwImeFlag & SAENARU_DVORAK ) &&
-                (vKey >= '!' && vKey <= '~'))
-            {
-                 WORD dv;
-                 SHORT sc;
-                 dv = qwerty2dvorak_table[vKey - '!'];
-                 sc = VkKeyScan(dv);
-                 // lpmsg->wParam = sc; XXX
-            }
-            else
-#endif
             //GetKeyboardState((LPBYTE)&pbKeyState);
             if ( vKey == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
             {
@@ -1295,7 +1288,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                      lpmsg->lParam=(0xF2<<16) | 0x41000001;
                 }
             } else 
-            if ( dvorak && pbKeyState[VK_CONTROL] & 0x80) {
+            if ( dvorak && pbKeyState[VK_CONTROL] & 0x80 &&
+                    !(dwOptionFlag & QWERTY_HOTKEY_SUPPORT) ) {
                 if (vKey >= VK_OEM_1 && vKey <= VK_OEM_102) {
                     WORD ch;
                     UINT sc;
@@ -1315,6 +1309,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             }
             break;
         case WM_SYSCHAR:
+            if  (dwOptionFlag & QWERTY_HOTKEY_SUPPORT)
+                break;
         case WM_CHAR:
 #ifndef NO_DVORAK
             if (dvorak &&
@@ -1399,9 +1395,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
 LRESULT CALLBACK SAENARUConKbdProc(int nCode,WPARAM wParam, LPARAM lParam)
 {
-#define CON_WM_KEYDOWN 0x100
-
-    if (nCode >= 0 && wParam == CON_WM_KEYDOWN)
+    if (nCode >= 0 && wParam == WM_KEYDOWN)
     {
 #if 0
         int vkCode = Marshal.ReadInt32(lParam);
