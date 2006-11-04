@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.19 2006/10/18 00:16:09 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.20 2006/10/22 22:05:32 wkpark Exp $
  */
 
 #include "windows.h"
@@ -440,7 +440,8 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         ch = 0xff & ch;
         if (ch) {
             WORD nch;
-            nch=keyToHangulKey((WORD)ch);
+            nch=checkDvorak(ch);
+            nch=keyToHangulKey((WORD)nch);
             if ( ch==nch && (ch >= TEXT('!') && ch <= TEXT('~')) )
                 fRet=FALSE;
         }

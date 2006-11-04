@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.11 2006/10/31 19:14:32 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.12 2006/11/03 16:18:07 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -502,6 +502,7 @@ void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 /* hangul.c       */
 void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
 WCHAR PASCAL keyToHangulKey(WCHAR);
+WORD PASCAL checkDvorak(WORD);
 int PASCAL set_keyboard(UINT);
 int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);

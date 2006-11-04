@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.16 2006/10/23 07:41:39 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.17 2006/11/03 16:19:36 wkpark Exp $
  */
 
 #include <windows.h>
@@ -337,6 +337,104 @@ hangul_jamo_to_syllable(WCHAR choseong, WCHAR jungseong, WCHAR jongseong)
     }
     return ch;
 }
+
+// dvorak 2 qwerty mapping for the kbddv.dll driver.
+static const WCHAR dvorak2qwerty_table[] = {
+  0x0021,    /* GDK_exclam */
+  0x0051,    /* GDK_Q */
+  0x0023,    /* GDK_numbersign */
+  0x0024,    /* GDK_dollar */
+  0x0025,    /* GDK_percent */
+  0x0026,    /* GDK_ampersand */
+  0x0071,    /* GDK_q */
+  0x0028,    /* GDK_parenleft */
+  0x0029,    /* GDK_parenright */
+  0x002a,    /* GDK_KP_Multiply */
+  0x007d,    /* GDK_braceright */
+  0x0077,    /* GDK_w */
+  0x0027,    /* GDK_quoteright */
+  0x0065,    /* GDK_e */
+  0x005b,    /* GDK_bracketleft */
+  0x0030,    /* GDK_KP_0 */
+  0x0031,    /* GDK_KP_1 */
+  0x0032,    /* GDK_KP_2 */
+  0x0033,    /* GDK_KP_3 */
+  0x0034,    /* GDK_KP_4 */
+  0x0035,    /* GDK_KP_5 */
+  0x0036,    /* GDK_KP_6 */
+  0x0037,    /* GDK_KP_7 */
+  0x0038,    /* GDK_KP_8 */
+  0x0039,    /* GDK_KP_9 */
+  0x005a,    /* GDK_Z */
+  0x007a,    /* GDK_z */
+  0x0057,    /* GDK_W */
+  0x005d,    /* GDK_bracketright */
+  0x0045,    /* GDK_E */
+  0x007b,    /* GDK_braceleft */
+  0x0040,    /* GDK_at */
+  0x0041,    /* GDK_A */
+  0x004e,    /* GDK_N */
+  0x0049,    /* GDK_I */
+  0x0048,    /* GDK_H */
+  0x0044,    /* GDK_D */
+  0x0059,    /* GDK_Y */
+  0x0055,    /* GDK_U */
+  0x004a,    /* GDK_J */
+  0x0047,    /* GDK_G */
+  0x0043,    /* GDK_C */
+  0x0056,    /* GDK_V */
+  0x0050,    /* GDK_P */
+  0x004d,    /* GDK_M */
+  0x004c,    /* GDK_L */
+  0x0053,    /* GDK_S */
+  0x0052,    /* GDK_R */
+  0x0058,    /* GDK_X */
+  0x004f,    /* GDK_O */
+  0x003a,    /* GDK_colon */
+  0x004b,    /* GDK_K */
+  0x0046,    /* GDK_F */
+  0x003e,    /* GDK_rightcaret */
+  0x003c,    /* GDK_leftcaret */
+  0x0042,    /* GDK_B */
+  0x0054,    /* GDK_T */
+  0x003f,    /* GDK_question */
+  0x002d,    /* GDK_KP_Subtract */
+  0x005c,    /* GDK_backslash */
+  0x003d,    /* GDK_KP_Equal */
+  0x005e,    /* GDK_asciicircum */
+  0x0022,    /* GDK_quotedbl */
+  0x0060,    /* GDK_quoteleft */
+  0x0061,    /* GDK_a */
+  0x006e,    /* GDK_n */
+  0x0069,    /* GDK_i */
+  0x0068,    /* GDK_h */
+  0x0064,    /* GDK_d */
+  0x0079,    /* GDK_y */
+  0x0075,    /* GDK_u */
+  0x006a,    /* GDK_j */
+  0x0067,    /* GDK_g */
+  0x0063,    /* GDK_c */
+  0x0076,    /* GDK_v */
+  0x0070,    /* GDK_p */
+  0x006d,    /* GDK_m */
+  0x006c,    /* GDK_l */
+  0x0073,    /* GDK_s */
+  0x0072,    /* GDK_r */
+  0x0078,    /* GDK_x */
+  0x006f,    /* GDK_o */
+  0x003b,    /* GDK_semicolon */
+  0x006b,    /* GDK_k */
+  0x0066,    /* GDK_f */
+  0x002e,    /* GDK_decimalpoint */
+  0x002c,    /* GDK_KP_Separator */
+  0x0062,    /* GDK_b */
+  0x0074,    /* GDK_t */
+  0x002f,    /* GDK_KP_Divide */
+  0x005f,    /* GDK_underbar */
+  0x007c,    /* GDK_bar */
+  0x002b,    /* GDK_KP_Add */
+  0x007e,    /* GDK_asciitilde */
+};
 
 // imported from the imhangul 0.9.7
 // s/gunichar/WCHAR/g
@@ -1441,6 +1539,18 @@ int PASCAL set_automata(UINT type)
     return 0;
 }
 
+WORD PASCAL checkDvorak(code)
+WORD code;
+{
+    HKL hcur;
+
+    /* check dvorak layout */
+    hcur= GetKeyboardLayout(0);
+    if ((DWORD)hcur == 0xE0130412 && code >= TEXT('!') && code <= TEXT('~'))
+	code = dvorak2qwerty_table[code - '!'];
+    return code;
+}
+
 WCHAR PASCAL keyToHangulKey(code)
 WORD code;
 {
@@ -1472,7 +1582,7 @@ LPBYTE lpbKeyState;
     TRANSMSG GnMsg;
     DWORD dwGCR = 0L;
 
-    DWORD hkey= code;
+    DWORD hkey;
     WCHAR cs = 0;
     register BOOL fModeInit = FALSE;
     BOOL capital = lpbKeyState[VK_CAPITAL];
@@ -1480,6 +1590,9 @@ LPBYTE lpbKeyState;
     lpIMC = ImmLockIMC(hIMC);
     // Get ConvMode from IMC.
     fdwConversion = lpIMC->fdwConversion;
+
+    /* check dvorak layout */
+    hkey= code = checkDvorak(code);
 
     if (fdwConversion & IME_CMODE_NATIVE && capital) {
 	WORD ch = code;
