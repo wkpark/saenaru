@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.21 2006/10/29 10:50:42 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.22 2006/11/03 16:21:22 wkpark Exp $
  */
 
 #include <windows.h>
@@ -319,6 +319,11 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
                 nBufLen = GetCandidateStringsFromDictionary(han,
                         szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
             }
+        } else { // always open a candidate window with hangul chars
+            lmemset(GETLPCOMPATTR(lpCompStr),ATTR_TARGET_CONVERTED ,
+                  Mylstrlen(GETLPCOMPSTR(lpCompStr)));
+            lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
+                  Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
         }
     }
 
