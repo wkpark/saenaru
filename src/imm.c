@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.20 2006/10/22 22:05:32 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.21 2006/11/04 00:32:34 wkpark Exp $
  */
 
 #include "windows.h"
@@ -384,6 +384,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             //ChangeMode(hIMC,TO_CMODE_ROMAN);
             break;
         case VK_SHIFT:
+        case VK_CONTROL:
             ImmUnlockIMC(hIMC);
             return FALSE;
             break;
