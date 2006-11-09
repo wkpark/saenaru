@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.18 2006/11/04 00:32:34 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.19 2006/11/09 11:45:33 wkpark Exp $
  */
 
 #include <windows.h>
@@ -336,6 +336,19 @@ hangul_jamo_to_syllable(WCHAR choseong, WCHAR jungseong, WCHAR jongseong)
             return 0;
     }
     return ch;
+}
+
+WCHAR PASCAL
+hangul_jamo_to_cjamo(WCHAR jamo)
+{
+    if (jamo >= 0x1100 && jamo <= 0x1112)
+        return hangul_choseong_to_cjamo(jamo);
+    if (jamo >= 0x1161 && jamo <= 0x1175)
+        return hangul_jungseong_to_cjamo(jamo);
+    if (jamo >= 0x11a7 && jamo <= 0x11c2)
+        return hangul_jongseong_to_cjamo(jamo);
+    // else
+    return jamo;
 }
 
 // dvorak 2 qwerty mapping for the kbddv.dll driver.
@@ -1699,6 +1712,9 @@ LPBYTE lpbKeyState;
 	    }
 	    if (!comb) {
 		if (dwImeFlag & SAENARU_ONTHESPOT) {
+		    if (lpCompStr->dwCursorPos > 0)
+			// check jamos and convert it to compatible jamos
+			*lpprev = hangul_jamo_to_cjamo((WCHAR) *lpprev);
 		    dwGCR=GCS_RESULTALL;
 
 		    MakeResultString(hIMC,FALSE);
@@ -1711,7 +1727,8 @@ LPBYTE lpbKeyState;
 		    lpstr = lpchText + Mylstrlen(lpchText);
 		    lpprev = MyCharPrev( lpchText, lpstr );
 		}
-		*lpstr = cs = (WCHAR) hkey;
+		*lpstr = (WCHAR) hkey;
+	        cs = hangul_jamo_to_cjamo((WCHAR) hkey);
 		lpstr++;
 		lpCompStr->dwCursorPos++;
 		// emit
