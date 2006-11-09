@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.5 2006/10/08 09:16:02 wkpark Exp $
+ * $Saenaru: saenaru/src/config.c,v 1.6 2006/10/31 19:14:32 wkpark Exp $
  */
 
 #include "windows.h"
@@ -438,6 +438,7 @@ INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPA
 #if 1
 #define SAENARU_KEYBOARD_2SET 2
 #define SAENARU_KEYBOARD_3SET 3
+#define SAENARU_KEYBOARD_RAW  4
 static
 DWORD string_to_hex(TCHAR* p)
 {
@@ -590,6 +591,10 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
 }
 #endif
 
+#define SAENARU_AUTOMATA_NONE 1
+#define SAENARU_AUTOMATA_2SET 2
+#define SAENARU_AUTOMATA_3SET 3
+#define SAENARU_AUTOMATA_RAW  4
 UINT
 load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *compose_map)
 {
@@ -608,6 +613,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
     UINT _key[256];
     WCHAR _code[256];
     UINT id=0,i;
+    UINT type=SAENARU_AUTOMATA_NONE;
 
     WCHAR achValue[256];
 
@@ -677,6 +683,10 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
 		continue;
 	    //compose_map->name = g_strdup(p);
 	    continue;
+        } else if (Mylstrcmp(p, TEXT("Type0")) == 0) {
+            type = SAENARU_AUTOMATA_RAW;
+	    //compose_map->name = g_strdup(p);
+	    continue;
 	} else {
 	    key1 = string_to_hex(p);
 	    if (key1 == 0)
@@ -732,7 +742,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
     /* free the list */
     //g_slist_free(list);
 
-    return TRUE;
+    return type;
 }
 
 

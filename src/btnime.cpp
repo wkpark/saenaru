@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.5 2006/10/11 03:46:34 wkpark Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.6 2006/11/03 16:18:07 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -553,7 +553,7 @@ CLangBarItemImeButton::GetIcon (
     if (hIMC != NULL) {
         if (dwImeFlag & AUTOMATA_3SET)
 	    str = TEXT("INDIC_3SET");
-	else
+	else if (dwImeFlag & AUTOMATA_2SET)
 	    str = TEXT("INDIC_2SET");
     }
 

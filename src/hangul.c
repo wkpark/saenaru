@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.17 2006/11/03 16:19:36 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.18 2006/11/04 00:32:34 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1412,6 +1412,7 @@ int PASCAL set_compose(UINT type)
 		}
 		MyDebugPrint((TEXT("compose map size: %d\r\n"), i));
 		compose_table_size = i;
+		set_automata(atype);
 	    } else {
                 compose_table=(HangulCompose *) compose_table_default;
                 compose_table_size =
@@ -1534,8 +1535,13 @@ int PASCAL set_automata(UINT type)
     dwImeFlag|= (type==3) ? AUTOMATA_3SET:AUTOMATA_2SET;
     if (type == 3)
         hangul_automata=hangul_automata3;
-    else
+    else if (type == 2)
         hangul_automata=hangul_automata2;
+    else { // raw automata
+        hangul_automata=NULL;
+	dwImeFlag &= ~AUTOMATA_3SET;
+	dwImeFlag &= ~AUTOMATA_2SET;
+    }
     return 0;
 }
 
@@ -1681,6 +1687,35 @@ LPBYTE lpbKeyState;
 
             *lpstr++ = (BYTE)code;
             lpCompStr->dwCursorPos++;
+	} else if ( hangul_automata == NULL && fdwConversion & IME_CMODE_NATIVE) {
+	    // RAW automata: composemap only
+	    WCHAR comb=0;
+	    if (lpCompStr->dwCursorPos > 0) {
+                comb = hangul_compose(*(lpstr-1), (WCHAR) hkey);
+		if (comb) { // composable
+		    // replace
+		    cs = *(lpstr-1) = comb;
+		}
+	    }
+	    if (!comb) {
+		if (dwImeFlag & SAENARU_ONTHESPOT) {
+		    dwGCR=GCS_RESULTALL;
+
+		    MakeResultString(hIMC,FALSE);
+		    InitCompStr(lpCompStr,CLR_UNDET);
+
+		    lpchText = GETLPCOMPSTR(lpCompStr);
+		    lpstr = lpchText;
+		    if( lpCompStr->dwCursorPos )
+			lpstr += lpCompStr->dwCursorPos;
+		    lpstr = lpchText + Mylstrlen(lpchText);
+		    lpprev = MyCharPrev( lpchText, lpstr );
+		}
+		*lpstr = cs = (WCHAR) hkey;
+		lpstr++;
+		lpCompStr->dwCursorPos++;
+		// emit
+	    }
 	} else if ( (hkey >= 0x1100 && hkey <= 0x11c2) &&
                    !(dwOptionFlag & FULL_MULTIJOMO) &&
                     (fdwConversion & IME_CMODE_NATIVE) )
@@ -1727,6 +1762,18 @@ LPBYTE lpbKeyState;
 	{
 	    if (!hkey) hkey = code;	
             MyDebugPrint((TEXT("ascii code: %x\r\n"), (WORD)hkey));
+	    /* for Hanme Typing tutor */
+            MakeResultString(hIMC,FALSE);
+            InitCompStr(lpCompStr,CLR_UNDET);
+
+	    dwGCR = GCS_RESULTALL;
+
+	    hangul_ic_init(&ic);
+
+            lpchText = GETLPCOMPSTR(lpCompStr);
+            lpstr = lpchText;
+	    /* */
+	    /* XXX how to fix EditPlus problem ? */
             *lpstr++ = (WORD)hkey;
             lpCompStr->dwCursorPos++;
 	}
