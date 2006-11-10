@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.19 2006/11/09 11:45:33 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.20 2006/11/09 17:13:57 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1075,6 +1075,7 @@ static const HangulCompose compose_table_default[] = {
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
   { 0x116e116e, 0x1172 }, /* jungseong u      + u	= yu		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
+  { 0x11731173, 0x1174 }, /* jungseong eu     + eu	= yi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
   { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
   { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
@@ -1123,6 +1124,7 @@ static const HangulCompose compose_table_2set[] = {
   { 0x116e1166, 0x1170 }, /* jungseong u      + e	= we		*/
   { 0x116e116e, 0x1172 }, /* jungseong u      + u	= yu		*/
   { 0x116e1175, 0x1171 }, /* jungseong u      + i	= wi		*/
+  { 0x11731173, 0x1174 }, /* jungseong eu     + eu	= yi		*/
   { 0x11731175, 0x1174 }, /* jungseong eu     + i	= yi		*/
   { 0x11751162, 0x1164 }, /* jungseong i      + ae	= yae		*/
   { 0x11751166, 0x1168 }, /* jungseong i      + e	= ye		*/
@@ -1777,7 +1779,8 @@ LPBYTE lpbKeyState;
         }
 	else
 	{
-	    if (!hkey) hkey = code;	
+	    if (!hkey) hkey = code;
+	    code = (WORD) hkey;
             MyDebugPrint((TEXT("ascii code: %x\r\n"), (WORD)hkey));
 	    /* for Hanme Typing tutor */
             MakeResultString(hIMC,FALSE);
