@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.20 2006/11/09 17:13:57 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.21 2006/11/10 10:50:56 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2222,6 +2222,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 }
                 hangul_jongseong_dicompose(ic->jong, &jong, &cho);
 		if (jong && cho) {
+		    // 쌍초성에 대한 특별처리
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
 			last = hangul_jongseong_to_choseong(ic->last);
@@ -2231,12 +2232,24 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 		    {
 			ic->jong=jong;
 			jamo= hangul_compose(last,last); // make ssang cho
+			cho= jamo;
 		    }
-		}
+		} else if (ctyping) {
+		    last = hangul_jongseong_to_choseong(ic->jong);
+		    comb = hangul_compose(last,jamo);
+		    if (comb &&
+			    comb == 0x1101 || comb == 0x1104 ||
+			    comb == 0x1108 || comb == 0x110a || comb == 0x110d) // ㄲ ㄸ ㅃ ㅆ ㅉ
+		    {
+			ic->jong = 0; //마지막 종성을 지운다.
+			cho= comb; // 쌍초성으로 대치
+		    }
+		} else
+		    cho= jamo;
                 {
                     // 초성을 compose할 수 없다.
                     *cs = hangul_ic_commit(ic);
-                    ic->cho=jamo;
+                    ic->cho=cho;
                     hangul_ic_push(ic,jamo);
                     ic->laststate=1;
                     return -1;
@@ -2254,7 +2267,8 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                     if (last != cho) {
 			WCHAR tmp;
 			tmp = cho;
-			cho = hangul_jongseong_to_choseong(jong);
+			//cho = hangul_jongseong_to_choseong(jong);
+			cho = last;
 			ic->jong = hangul_choseong_to_jongseong(tmp);
 		    } else {
 			ic->jong = jong;
