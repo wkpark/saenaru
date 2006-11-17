@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.7 2006/10/26 11:25:51 wkpark Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.8 2006/10/31 19:14:32 wkpark Exp $
  */
 
 //{{NO_DEPENDENCIES}}
@@ -120,9 +120,24 @@
 
 #define IDC_STATIC                      -1
 
-#define IDM_RECONVERT                   40001
-#define IDM_ABOUT                       40002
-
+#define IDM_OLD2BUL		40001
+#define IDM_3BUL		40002
+#define IDM_390			40003
+#define IDM_NEW2BUL		40004
+#define IDM_NEW3BUL		40005
+#define IDM_AHNMATAE		40006
+#define IDM_3SOON		40007
+#define IDM_USER		40010
+#define IDM_USER_COMP		40020
+#define IDM_DVORAK		40031
+#define IDM_ESC_ASCII		40032
+#define IDM_WORD_UNIT		40033
+#define IDM_SHOW_KEYBOARD	40041
+#define IDM_HANGUL		40051
+#define IDM_ENG			40052
+#define IDM_HANJA		40053
+#define IDM_RECONVERT		40061
+#define IDM_ABOUT      		40062
 
 #define IDM_SKL1                0x0500
 #define IDM_SKL2                0x0501

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.18 2006/10/22 22:04:28 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.19 2006/11/04 00:30:04 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -354,6 +354,11 @@ LPARAM lParam;
                         HideCandWindow(lpUIExtra);
                         HideCompWindow(lpUIExtra);
                     }
+
+                    if (lpUIExtra->uiStatus.bShow == FALSE) {
+                        ShowWindow(lpUIExtra->uiStatus.hWnd, SW_SHOWNOACTIVATE);
+                        lpUIExtra->uiStatus.bShow = TRUE;
+                    }
                     UpdateStatusWindow(lpUIExtra);
                     ImmUnlockIMC(hUICurIMC);
                 }
@@ -364,8 +369,8 @@ LPARAM lParam;
                 }
                 GlobalUnlock(hUIExtra);
             }
-            //else
-            //    ShowUIWindows(hWnd, FALSE);
+            else 
+               ShowUIWindows(hWnd, FALSE);
             break;
 
 
@@ -618,7 +623,6 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 lpUIExtra->uiSoftKbd.bShow = FALSE;
             }
 #endif
-#ifdef USE_STATUS_WIN98_XXX
             if (IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 GetWindowRect(lpUIExtra->uiStatus.hWnd,(LPRECT)&rc);
@@ -627,7 +631,6 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 ShowWindow(lpUIExtra->uiStatus.hWnd,SW_HIDE);
                 lpUIExtra->uiStatus.bShow = FALSE;
             }
-#endif
         break;
         case IMN_OPENSTATUSWINDOW:
 #ifndef NO_USE_SOFTKBD
@@ -650,13 +653,14 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             //lpUIExtra->uiSoftKbd.bShow = TRUE;
             //SetWindowLongPtr(lpUIExtra->uiSoftKbd.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
 #endif
-#ifdef USE_STATUS_WIN98_XXX
             if (lpUIExtra->uiStatus.pt.x == -1)
             {
                 GetWindowRect(lpIMC->hWnd,&rc);
-                lpUIExtra->uiStatus.pt.x = rc.right + 1;
+                lpUIExtra->uiStatus.pt.x = rc.right - 100; // XXX +1 => -100
                 lpUIExtra->uiStatus.pt.y = rc.top;
             }
+#ifndef USE_STATUS_WIN98_XXX
+            if (!IsTSFEnabled()) {
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 lpUIExtra->uiStatus.hWnd = 
@@ -676,6 +680,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             ShowWindow(lpUIExtra->uiStatus.hWnd,SW_SHOWNOACTIVATE);
             lpUIExtra->uiStatus.bShow = TRUE;
             SetWindowLongPtr(lpUIExtra->uiStatus.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
+            }
 #endif
             break;
 

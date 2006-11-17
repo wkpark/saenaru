@@ -246,8 +246,31 @@ LANGUAGE 0x12, 0x1
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "Reconversion",                IDM_RECONVERT
-        MENUITEM "About",                       IDM_ABOUT
+
+    	MENUITEM "환경설정(&R)",	IDM_ABOUT
+	MENUITEM SEPARATOR
+	MENUITEM "한글(&H)",		IDM_HANGUL
+	MENUITEM "영문(&E)",		IDM_ENG
+	MENUITEM "한자(&I)",		IDM_HANJA
+	MENUITEM SEPARATOR
+	MENUITEM "두벌식(&2)",  	IDM_OLD2BUL
+	MENUITEM "세벌식(&3)",  	IDM_3BUL
+	MENUITEM "세벌식 390(&9)",  	IDM_390
+    	MENUITEM "새두벌(&D)",		IDM_NEW2BUL
+    	MENUITEM "새세벌(&S)",		IDM_NEW3BUL
+     	MENUITEM "안마태(&A)",		IDM_AHNMATAE
+    	MENUITEM "세벌식 순아래(&N)",	IDM_3SOON
+    	MENUITEM "사용자 자판(&U)",	IDM_USER
+    	MENUITEM "사용자 조합(&C)",	IDM_USER_COMP
+	MENUITEM SEPARATOR
+    	MENUITEM "드보락(&V)",		IDM_DVORAK
+    	MENUITEM "ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "단어단위 편집(&W)",	IDM_WORD_UNIT
+	MENUITEM SEPARATOR
+    	MENUITEM "키보드 보기",		IDM_SHOW_KEYBOARD
+	MENUITEM SEPARATOR
+        MENUITEM "변환(&C)",		IDM_RECONVERT
+	MENUITEM "새나루는(&A)...",	IDM_ABOUT          
     END
 END
 

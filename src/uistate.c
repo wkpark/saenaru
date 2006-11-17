@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uistate.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/uistate.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -89,6 +89,11 @@ LPARAM lParam;
 
         case WM_CREATE:
             hbmpStatus = LoadBitmap(hInst,TEXT("STATUSBMP"));
+/*
+            hbmpStatus =(HBITMAP)LoadImage(hInst,TEXT("STATUSBMP"),IMAGE_BITMAP,
+                    0,0,LR_LOADTRANSPARENT);
+                    */
+
             SetWindowLongPtr(hWnd,FIGWL_STATUSBMP,(LONG_PTR)hbmpStatus);
             hbmpStatus = LoadBitmap(hInst,TEXT("CLOSEBMP"));
             SetWindowLongPtr(hWnd,FIGWL_CLOSEBMP,(LONG_PTR)hbmpStatus);
@@ -159,6 +164,111 @@ int PASCAL BTXFromCmode( DWORD dwCmode)
     }
 
 }
+
+void DrawTransBtn(HDC hdc, HDC hdcTemp, int xStart, int yStart,
+        COLORREF cTransparentColor)
+{
+   BITMAP     bm;
+   COLORREF   cColor;
+   HBITMAP    bmAndBack, bmAndObject, bmAndMem, bmSave;
+   HBITMAP    bmBackOld, bmObjectOld, bmMemOld, bmSaveOld;
+   HDC        hdcMem, hdcBack, hdcObject, hdcSave;
+   POINT      ptSize;
+/*
+   hdcTemp = CreateCompatibleDC(hdc);
+   SelectObject(hdcTemp, hBitmap);   // Select the bitmap
+
+   GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm);
+   ptSize.x = bm.bmWidth;            // Get width of bitmap
+   ptSize.y = bm.bmHeight;           // Get height of bitmap
+   */
+   ptSize.x = BTX;            // Get width of bitmap
+   ptSize.y = BTY;            // Get height of bitmap
+   DPtoLP(hdcTemp, &ptSize, 1);      // Convert from device
+                                     // to logical points
+
+   // Create some DCs to hold temporary data.
+   hdcBack   = CreateCompatibleDC(hdc);
+   hdcObject = CreateCompatibleDC(hdc);
+   hdcMem    = CreateCompatibleDC(hdc);
+   hdcSave   = CreateCompatibleDC(hdc);
+
+   // Create a bitmap for each DC. DCs are required for a number of
+   // GDI functions.
+
+   // Monochrome DC
+   bmAndBack   = CreateBitmap(ptSize.x, ptSize.y, 1, 1, NULL);
+
+   // Monochrome DC
+   bmAndObject = CreateBitmap(ptSize.x, ptSize.y, 1, 1, NULL);
+
+   bmAndMem    = CreateCompatibleBitmap(hdc, ptSize.x, ptSize.y);
+   bmSave      = CreateCompatibleBitmap(hdc, ptSize.x, ptSize.y);
+
+   // Each DC must select a bitmap object to store pixel data.
+   bmBackOld   = SelectObject(hdcBack, bmAndBack);
+   bmObjectOld = SelectObject(hdcObject, bmAndObject);
+   bmMemOld    = SelectObject(hdcMem, bmAndMem);
+   bmSaveOld   = SelectObject(hdcSave, bmSave);
+
+   // Set proper mapping mode.
+   SetMapMode(hdcTemp, GetMapMode(hdc));
+
+   // Save the bitmap sent here, because it will be overwritten.
+   BitBlt(hdcSave, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0, SRCCOPY);
+
+   // Set the background color of the source DC to the color.
+   // contained in the parts of the bitmap that should be transparent
+   cColor = SetBkColor(hdcTemp, cTransparentColor);
+
+   // Create the object mask for the bitmap by performing a BitBlt
+   // from the source bitmap to a monochrome bitmap.
+   BitBlt(hdcObject, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0,
+          SRCCOPY);
+
+   // Set the background color of the source DC back to the original
+   // color.
+   SetBkColor(hdcTemp, cColor);
+
+   // Create the inverse of the object mask.
+   BitBlt(hdcBack, 0, 0, ptSize.x, ptSize.y, hdcObject, 0, 0,
+          NOTSRCCOPY);
+
+   // Copy the background of the main DC to the destination.
+   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdc, xStart, yStart,
+          SRCCOPY);
+
+   // Mask out the places where the bitmap will be placed.
+   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdcObject, 0, 0, SRCAND);
+
+   // Mask out the transparent colored pixels on the bitmap.
+   BitBlt(hdcTemp, 0, 0, ptSize.x, ptSize.y, hdcBack, 0, 0, SRCAND);
+
+   // XOR the bitmap with the background on the destination DC.
+   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0, SRCPAINT);
+
+   // Copy the destination to the screen.
+   BitBlt(hdc, xStart, yStart, ptSize.x, ptSize.y, hdcMem, 0, 0,
+          SRCCOPY);
+
+   // Place the original bitmap back into the bitmap sent here.
+   BitBlt(hdcTemp, 0, 0, ptSize.x, ptSize.y, hdcSave, 0, 0, SRCCOPY);
+
+   // Delete the memory bitmaps.
+   DeleteObject(SelectObject(hdcBack, bmBackOld));
+   DeleteObject(SelectObject(hdcObject, bmObjectOld));
+   DeleteObject(SelectObject(hdcMem, bmMemOld));
+   DeleteObject(SelectObject(hdcSave, bmSaveOld));
+
+   // Delete the memory DCs.
+   DeleteDC(hdcMem);
+   DeleteDC(hdcBack);
+   DeleteDC(hdcObject);
+   DeleteDC(hdcSave);
+   //DeleteDC(hdcTemp);
+}
+
+
 /**********************************************************************/
 /*                                                                    */
 /* PaintStatus()                                                      */
@@ -168,11 +278,12 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
 {
     HIMC hIMC;
     LPINPUTCONTEXT lpIMC;
-    HDC hMemDC;
+    HDC hMemDC,hTempDC,hNewDC;
     HBITMAP hbmpOld;
     int x;
     HWND hSvrWnd;
-    return; /* XXX */
+    HBITMAP bmTemp,bmTempOld;
+    if (IsTSFEnabled()) return;
 
     hSvrWnd = (HWND)GetWindowLongPtr(hStatusWnd,FIGWL_SVRWND);
 
@@ -180,12 +291,16 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
     {
         HBITMAP hbmpStatus;
         HBRUSH hOldBrush,hBrush;
+        COLORREF cColor,cTransColor;
 //      int nCyCap = GetSystemMetrics(SM_CYSMCAPTION);
         int nCyCap = 0;
         RECT rc;
 
         lpIMC = ImmLockIMC(hIMC);
         hMemDC = CreateCompatibleDC(hDC);
+
+        hTempDC = CreateCompatibleDC(hDC);
+        hNewDC = CreateCompatibleDC(hDC);
 
 #if 0
         // Paint Caption.
@@ -211,26 +326,53 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
 #endif
 
         hbmpStatus = (HBITMAP)GetWindowLongPtr(hStatusWnd,FIGWL_STATUSBMP);
-        SelectObject(hMemDC,hbmpStatus);
+        hbmpOld = SelectObject(hMemDC,hbmpStatus);
+        cTransColor= RGB(192,192,192); // XXX
+
+        cColor= SetBkColor(hTempDC,cTransColor);
+        SetBkMode(hTempDC,TRANSPARENT);
 
         // Paint HDR.
         x = BTEMPT;
-        if (lpIMC->fOpen)
-            x = 0;
+        if (lpIMC->fOpen) {
+            if (lpIMC->fdwConversion & IME_CMODE_HANJACONVERT)
+                x = 40;
+            else if (lpIMC->fdwConversion & IME_CMODE_NATIVE)
+                x = 0;
+        }
 
-        if (!(dwPushedStatus & PUSHED_STATUS_HDR))
-            BitBlt(hDC,0,nCyCap,BTX,BTY,hMemDC,x,0,SRCCOPY);
-        else
-            BitBlt(hDC,0,nCyCap,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
+        bmTemp = CreateCompatibleBitmap(hDC, BTX, BTY);
+        bmTempOld = SelectObject(hTempDC, bmTemp);
+
+        // clear
+        rc.top = rc.left = 0;
+        rc.right = BTX*2;
+        rc.bottom = BTY;
+        FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
+
+        if (!(dwPushedStatus & PUSHED_STATUS_HDR)) {
+            BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,0,SRCCOPY);
+            DrawTransBtn(hDC,hTempDC,0,0,cTransColor);
+        }
+        else {
+            BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
+            DrawTransBtn(hDC,hTempDC,0,0,cTransColor);
+        }
 
         // Paint MODE.
         x = BTXFromCmode(lpIMC->fdwConversion);
 
-        if (!(dwPushedStatus & PUSHED_STATUS_MODE))
-            BitBlt(hDC,BTX,nCyCap,BTX,BTY,hMemDC,x,0,SRCCOPY);
-        else
-            BitBlt(hDC,BTX,nCyCap,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
+        if (!(dwPushedStatus & PUSHED_STATUS_MODE)) {
+            BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,0,SRCCOPY);
+            DrawTransBtn(hDC,hTempDC,BTX,nCyCap,cTransColor);
+        } else {
+            BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
+            DrawTransBtn(hDC,hTempDC,BTX,nCyCap,cTransColor);
+        }
 
+        DeleteObject(SelectObject(hTempDC, bmTempOld));
+
+        SetBkColor(hDC,cColor);
 #if 0
         // Paint Roman MODE.
         x = BTEMPT;
@@ -242,9 +384,7 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
         else
             BitBlt(hDC,BTX*2,nCyCap,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
 #endif
-#if 0
         SelectObject(hMemDC,hbmpOld);
-#endif
         DeleteDC(hMemDC);
         ImmUnlockIMC(hIMC);
     }
@@ -259,7 +399,7 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
 /**********************************************************************/
 DWORD PASCAL GetUINextMode( DWORD fdwConversion, DWORD dwPushed)
 {
-    DWORD dwTemp;
+    BOOL fTemp;
     BOOL fFullShape = ((fdwConversion & IME_CMODE_FULLSHAPE) != 0);
 
     //
@@ -269,10 +409,17 @@ DWORD PASCAL GetUINextMode( DWORD fdwConversion, DWORD dwPushed)
     //     FULLSHAPE -> HALFSHAPE
     //     NATIVE -> ROMAN
     //
-    if (dwPushed == PUSHED_STATUS_MODE)
+    if (dwPushed == PUSHED_STATUS_HDR)
     {
-        dwTemp = fdwConversion & IME_CMODE_LANGUAGE;
-
+        fTemp = fdwConversion & IME_CMODE_NATIVE;
+        fdwConversion &= ~IME_CMODE_FULLSHAPE;
+        if (fTemp) {
+            fdwConversion &= ~IME_CMODE_NATIVE;
+        } else {
+            fdwConversion |= IME_CMODE_NATIVE;
+        }
+    } else if (dwPushed == PUSHED_STATUS_MODE)
+    {
         if (fFullShape)
         {
             fdwConversion &= ~IME_CMODE_FULLSHAPE;
@@ -296,7 +443,7 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
     HDC hDC;
     DWORD dwMouse;
     DWORD dwPushedStatus;
-    DWORD dwTemp;
+    DWORD dwTemp=0;
     DWORD fdwConversion;
     HIMC hIMC;
     HWND hSvrWnd;
@@ -306,6 +453,10 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
     static    RECT drc;
     static    RECT rc;
     static    DWORD dwCurrentPushedStatus;
+
+    HKEY hKey;
+    INT i;
+    INT idLayout;
 
     hDC = GetDC(hStatusWnd);
     switch (message)
@@ -323,8 +474,10 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                 rc.right -= rc.left;
                 rc.bottom -= rc.top;
                 SetWindowLong(hStatusWnd,FIGWL_MOUSE,FIM_CAPUTURED);
-                SetWindowLong(hStatusWnd, FIGWL_PUSHSTATUS, dwPushedStatus = CheckPushedStatus(hStatusWnd,&pt));
-                PaintStatus(hStatusWnd,hDC,&pt, dwPushedStatus);
+                    SetWindowLong(hStatusWnd, FIGWL_PUSHSTATUS, dwPushedStatus = CheckPushedStatus(hStatusWnd,&pt));
+                if (HIWORD(lParam) == WM_LBUTTONDOWN) {
+                    PaintStatus(hStatusWnd,hDC,&pt, dwPushedStatus);
+                }
                 dwCurrentPushedStatus = dwPushedStatus;
             }
             break;
@@ -379,13 +532,194 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
             hSvrWnd = (HWND)GetWindowLongPtr(hStatusWnd,FIGWL_SVRWND);
 
             hMenu = LoadMenu(hInst, TEXT("RIGHTCLKMENU"));
+            idLayout = dwLayoutFlag - LAYOUT_OLD2BUL;
+            idLayout += IDM_OLD2BUL;
+
             if (hMenu && (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)))
             {
                 int cmd;
                 POINT pt;
                 LPINPUTCONTEXT lpIMC;
-
+                BOOL fOpen;
+                INT idMode,idFlag;
                 HMENU hSubMenu = GetSubMenu(hMenu, 0);
+                MENUITEMINFO mk;
+
+                fOpen = ImmGetOpenStatus(hIMC);
+                ImmGetConversionStatus(hIMC,&fdwConversion,&dwTemp);
+
+                idMode=IDM_ENG;
+                if (fOpen) {
+                    if (fdwConversion & IME_CMODE_HANJACONVERT)
+                        idMode=IDM_HANJA;
+                    else if (fdwConversion & IME_CMODE_NATIVE)
+                        idMode=IDM_HANGUL;
+                }
+
+                mk.cbSize = sizeof(MENUITEMINFO);
+                // check CMODE
+                GetMenuItemInfo(hSubMenu,idMode,FALSE,&mk);
+                mk.fMask=MIIM_STATE | MIIM_FTYPE;
+                mk.fState=MFS_CHECKED;
+                mk.fType=MFT_RADIOCHECK;
+                SetMenuItemInfo(hSubMenu,idMode,FALSE,&mk);
+
+
+                if (fdwConversion & IME_CMODE_SOFTKBD) {
+                    idFlag= IDM_SHOW_KEYBOARD;
+                    GetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                    mk.fMask=MIIM_STATE;
+                    mk.fState=MFS_CHECKED;
+                    SetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                }
+
+                // check Saenaru option flags
+                if (dwOptionFlag & ESCENG_SUPPORT) {
+                    idFlag= IDM_ESC_ASCII;
+                    GetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                    mk.fMask=MIIM_STATE;
+                    mk.fState=MFS_CHECKED;
+                    SetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                }
+                if (dwOptionFlag & DVORAK_SUPPORT) {
+                    idFlag= IDM_DVORAK;
+                    GetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                    mk.fMask=MIIM_STATE;
+                    mk.fState=MFS_CHECKED;
+                    SetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                }
+                if (!(dwImeFlag & SAENARU_ONTHESPOT)) {
+                    idFlag= IDM_WORD_UNIT;
+                    GetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                    mk.fMask=MIIM_STATE;
+                    mk.fState=MFS_CHECKED;
+                    SetMenuItemInfo(hSubMenu,idFlag,FALSE,&mk);
+                }
+
+                // Layout
+                GetMenuItemInfo(hSubMenu,idLayout,FALSE,&mk);
+                mk.fMask=MIIM_STATE;
+                mk.fState=MFS_CHECKED;
+                SetMenuItemInfo(hSubMenu,idLayout,FALSE,&mk);
+
+                if (idLayout > IDM_3SOON) {
+                    idLayout = dwLayoutFlag - LAYOUT_USER;
+                    idLayout += IDM_USER + 1;
+                }
+
+                if (GetRegKeyHandle(TEXT("\\Keyboard"), &hKey)) {
+                    MENUITEMINFO mif;
+                    HMENU hKbdMenu;
+                    INT i;
+                    INT id=IDM_USER;
+                    hKbdMenu=CreateMenu();
+
+                    GetMenuItemInfo(hSubMenu,IDM_USER,FALSE,&mif);
+                    mif.fMask =MIIM_SUBMENU;
+                    mif.hSubMenu =hKbdMenu;
+
+                    mif.cbSize = sizeof(MENUITEMINFO);
+                    for (i=0;i<10;i++) {
+                        WCHAR achValue[256]; 
+                        DWORD cchValue = 256;
+                        DWORD retCode;
+                        LPCWSTR wstrDesc;
+                        ULONG nstrDesc;
+                        ULONG ucheck;
+    
+                        achValue[0] = '\0';
+                        retCode = RegEnumValue(hKey, i, 
+                            achValue, 
+                            &cchValue, 
+                            NULL, 
+                            NULL,
+                            NULL,
+                            NULL);
+     
+                        if (retCode != ERROR_SUCCESS ) 
+                        { 
+                            MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
+                            break;
+                        }
+                        wstrDesc = achValue;
+                        nstrDesc = wcslen (wstrDesc);
+                        achValue[nstrDesc]='\0';
+                        
+                        ucheck = MF_STRING|MF_ENABLED;
+                        if (idLayout == ++id) ucheck |= MF_CHECKED;
+    
+                        retCode= AppendMenu(hKbdMenu,ucheck,
+                                id,
+                                wstrDesc);
+                        MyDebugPrint((TEXT("\t*** Append MENU ret (%d)\n"), retCode));
+                    }
+                    SetMenuItemInfo(hSubMenu,IDM_USER,FALSE,&mif);
+                    DestroyMenu(hKbdMenu);
+                }
+
+                if (hKey)
+                    RegCloseKey (hKey);
+
+                hKey = NULL;
+                if (GetRegKeyHandle(TEXT("\\Compose"), &hKey)) {
+                    MENUITEMINFO mif;
+                    HMENU hCompMenu;
+                    INT i;
+                    INT id=IDM_USER_COMP;
+
+                    INT idCompose;
+
+                    idCompose=dwComposeFlag - 3;
+                    if (idCompose > 0)
+                        idCompose += IDM_USER_COMP;
+
+                    hCompMenu=CreateMenu();
+
+                    GetMenuItemInfo(hSubMenu,IDM_USER_COMP,FALSE,&mif);
+                    mif.fMask =MIIM_SUBMENU;
+                    mif.hSubMenu =hCompMenu;
+
+                    mif.cbSize = sizeof(MENUITEMINFO);
+                    for (i=0;i<10;i++) {
+                        WCHAR achValue[256]; 
+                        DWORD cchValue = 256;
+                        DWORD retCode;
+                        LPCWSTR wstrDesc;
+                        ULONG nstrDesc;
+                        ULONG ucheck;
+    
+                        achValue[0] = '\0';
+                        retCode = RegEnumValue(hKey, i, 
+                            achValue, 
+                            &cchValue, 
+                            NULL, 
+                            NULL,
+                            NULL,
+                            NULL);
+     
+                        if (retCode != ERROR_SUCCESS ) 
+                        { 
+                            MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
+                            break;
+                        }
+                        wstrDesc = achValue;
+                        nstrDesc = wcslen (wstrDesc);
+                        achValue[nstrDesc]='\0';
+    
+                        ucheck = MF_STRING|MF_ENABLED;
+                        if (idCompose == ++id) ucheck |= MF_CHECKED;
+
+                        AppendMenu(hCompMenu,ucheck,
+                                id,
+                                wstrDesc);
+                    }
+                    SetMenuItemInfo(hSubMenu,IDM_USER_COMP,FALSE,&mif);
+
+                    DestroyMenu(hCompMenu);
+                }
+
+                if (hKey)
+                    RegCloseKey (hKey);
 
                 pt.x = (int)LOWORD(lParam), 
                 pt.y = (int)HIWORD(lParam), 
@@ -453,12 +787,104 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
 
                     case IDM_ABOUT:
                         lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
-                        (void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
+                        //(void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
+                        ImmConfigureIME(GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, 0);
                         //ImmConfigureIME(GetKeyboardLayout(0), NULL, IME_CONFIG_GENERAL, 0);
                         ImmUnlockIMC(hIMC);
                         break;
 
+                    case IDM_OLD2BUL:
+                    case IDM_3BUL:
+                    case IDM_390:
+                    case IDM_NEW2BUL:
+                    case IDM_NEW3BUL:
+                    case IDM_AHNMATAE:
+                    case IDM_3SOON:
+                        dwLayoutFlag = cmd - IDM_OLD2BUL + LAYOUT_OLD2BUL;
+                        /*
+                            MENUITEMINFO mk;
+
+                            GetMenuItemInfo(hSubMenu,cmd,FALSE,&mk);
+                            mk.fMask=MIIM_STATE;
+                            mk.fState=MFS_CHECKED;
+                            mk.cbSize = sizeof(MENUITEMINFO);
+                            SetMenuItemInfo(hSubMenu,cmd,FALSE,&mk);
+                        */
+                        set_keyboard(dwLayoutFlag);
+                        break;
+                    case IDM_HANGUL:
+                        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+                        fdwConversion = lpIMC->fdwConversion;
+                        fdwConversion &= ~IME_CMODE_HANJACONVERT;
+                        fdwConversion |= IME_CMODE_NATIVE;
+                        ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
+                        ImmUnlockIMC(hIMC);
+                        break;
+                    case IDM_HANJA:
+                        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+                        fdwConversion = lpIMC->fdwConversion;
+                        if (!(fdwConversion & IME_CMODE_HANJACONVERT)) {
+                            fdwConversion |= IME_CMODE_HANJACONVERT;
+                            fdwConversion |= IME_CMODE_NATIVE;
+                            ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
+                        }
+                        ImmUnlockIMC(hIMC);
+                        break;
+                    case IDM_ENG:
+                        ChangeMode(hIMC,TO_CMODE_ALPHANUMERIC);
+                        break;
+
+                    case IDM_ESC_ASCII:
+                        if (dwOptionFlag & ESCENG_SUPPORT)
+                            dwOptionFlag &= ~ESCENG_SUPPORT;
+                        else
+                            dwOptionFlag |= ESCENG_SUPPORT;
+                        break;
+                    case IDM_DVORAK:
+                        if (dwOptionFlag & DVORAK_SUPPORT)
+                            dwOptionFlag &= ~DVORAK_SUPPORT;
+                        else
+                            dwOptionFlag |= DVORAK_SUPPORT;
+                        break;
+                    case IDM_WORD_UNIT:
+                        if (dwImeFlag & SAENARU_ONTHESPOT)
+                            dwImeFlag &= ~SAENARU_ONTHESPOT;
+                        else
+                            dwImeFlag |= SAENARU_ONTHESPOT;
+                        break;
+                    case IDM_SHOW_KEYBOARD:
+                        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+                        fdwConversion = lpIMC->fdwConversion;
+                        if (fdwConversion & IME_CMODE_SOFTKBD)
+                            fdwConversion &= ~IME_CMODE_SOFTKBD;
+                        else
+                            fdwConversion |= IME_CMODE_SOFTKBD;
+
+                        ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
+                        ImmUnlockIMC(hIMC);
+
+                        break;
                     default:
+                        // check some dynamic menu items
+                        if (cmd > IDM_USER && cmd < IDM_USER_COMP) {
+                            MENUITEMINFO mk;
+                            int myLayout;
+
+                            myLayout = cmd - IDM_USER;
+                            myLayout += LAYOUT_USER - 1; // adjust
+
+                            dwLayoutFlag = myLayout;
+                            set_keyboard(dwLayoutFlag);
+                        } else if (cmd > IDM_USER_COMP && cmd < IDM_DVORAK ) {
+                            MENUITEMINFO mk;
+                            int myCompose;
+
+                            myCompose = cmd - IDM_USER_COMP + 3; // adjust
+                            dwComposeFlag = myCompose;
+                            set_compose(dwComposeFlag);
+                            MyDebugPrint((TEXT("\t*** Compose (%d)\n"), myCompose));
+                        }
+                        MyDebugPrint((TEXT("\t*** RIGHTMENU (%d)\n"), cmd));
                         break;
                 }
 
@@ -495,14 +921,24 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                 } else if (dwPushedStatus == PUSHED_STATUS_HDR)
                 {
                     fOpen = ImmGetOpenStatus(hIMC);
-                    fOpen = !fOpen;
-                    ImmSetOpenStatus(hIMC,fOpen);
+                    ImmGetConversionStatus(hIMC,&fdwConversion,&dwTemp);
+                    if (!fOpen)
+                        ImmSetOpenStatus(hIMC,TRUE);
+                    else if (fdwConversion & IME_CMODE_NATIVE)
+                        ImmSetOpenStatus(hIMC,FALSE);
+
+                    fdwConversion = GetUINextMode(fdwConversion,dwPushedStatus);
+
+                    ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
                 }
                 else
                 {
-                    ImmGetConversionStatus(hIMC,&fdwConversion,&dwTemp);
-                    fdwConversion = GetUINextMode(fdwConversion,dwPushedStatus);
-                    ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
+                    fOpen = ImmGetOpenStatus(hIMC);
+                    if (fOpen) {
+                        ImmGetConversionStatus(hIMC,&fdwConversion,&dwTemp);
+                        fdwConversion = GetUINextMode(fdwConversion,dwPushedStatus);
+                        ImmSetConversionStatus(hIMC,fdwConversion,dwTemp);
+                    }
                 }
             }
             PaintStatus(hStatusWnd,hDC,NULL,0);
