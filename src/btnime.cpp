@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.6 2006/11/03 16:18:07 wkpark Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.7 2006/11/09 11:45:33 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -470,6 +470,7 @@ CLangBarItemImeButton::InitMenu (
             //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,
                             dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
         }
+	RegCloseKey(hKey);
         pUserKeyboardMenu->Release();
     }
     // add User defined Composes (SubMenu)
@@ -507,6 +508,8 @@ CLangBarItemImeButton::InitMenu (
             //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,
                             dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
         }
+	RegCloseKey(hKey);
+
         pUserComposeMenu->Release();
     }
     return S_OK;
@@ -747,12 +750,14 @@ _Menu_ToggleShowKeyboard (UINT wID)
 {
     HIMC    hIMC;
     DWORD    dwConversion, dwSentence;
+    LPINPUTCONTEXT lpIMC;
 
     hIMC    = _GetCurrentHIMC ();
     if (hIMC == NULL)
         return;
 
-    if (ImmGetOpenStatus (hIMC) && ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence))
+    lpIMC = ImmLockIMC (hIMC);
+    if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence))
     {
         if (dwConversion & IME_CMODE_SOFTKBD)
             dwConversion &= ~IME_CMODE_SOFTKBD;
@@ -760,6 +765,7 @@ _Menu_ToggleShowKeyboard (UINT wID)
             dwConversion |= IME_CMODE_SOFTKBD;
     }
     ImmSetConversionStatus (hIMC, dwConversion, 0);
+    ImmUnlockIMC (hIMC);
 #if 0
     register BOOL    fShowKeyboardIcon    = TRUE;
     DWORD            dwValue;
@@ -809,6 +815,11 @@ _MenuItem_GetNormalFlag (UINT wID)
 DWORD
 _MenuItem_GetToggleDvorakFlag (UINT wID)
 {
+    HKL hcur;
+    hcur= GetKeyboardLayout(0);
+    if ((DWORD)hcur == 0xE0130412)
+        return TF_LBI_STATUS_DISABLED;
+
     return (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0;
 }
 
@@ -834,7 +845,7 @@ _MenuItem_GetToggleKeyboardFlag (UINT wID)
     if (hIMC == NULL)
         return TF_LBI_STATUS_DISABLED;
 
-    if (ImmGetOpenStatus (hIMC) && ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence))
+    if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence))
         return (dwConversion & IME_CMODE_SOFTKBD) ? TF_LBMENUF_CHECKED: 0;
     else
         //return TF_LBI_STATUS_DISABLED;
