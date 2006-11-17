@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.21 2006/11/10 10:50:56 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.22 2006/11/17 08:53:03 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1979,7 +1979,7 @@ void PASCAL hangul_ic_init( HangulIC *ic )
 
 WCHAR PASCAL hangul_ic_get( HangulIC *ic, UINT mode)
 {
-    WCHAR code;
+    WCHAR code=0;
 
     if (ic->len > 3 || !ic->syllable) return 0;
 
@@ -2279,6 +2279,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                     cho = hangul_jongseong_to_choseong(ic->jong);
 		    if (cho)
 			ic->jong = 0; //종성을 지운다.
+		    hangul_ic_pop(ic);
                 }
 
                 *cs = hangul_ic_commit(ic);
