@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.22 2006/11/17 08:53:03 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.23 2006/11/17 12:21:54 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2256,6 +2256,16 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 }
                 break;
             case 2: // 종성 + 중성
+		if (!ic->jung && ctyping) {
+		    // XXX
+		    jong = ic->last;
+		    ic->jung = jamo;
+		    hangul_ic_pop(ic);
+		    hangul_ic_push(ic,jong);
+		    hangul_ic_push(ic,jamo);
+		    ic->laststate = 2;
+                    return 0;
+		}
                 if (ic->jong != ic->last) {
                     hangul_jongseong_dicompose(ic->jong, &jong, &cho);
 		}
@@ -2275,21 +2285,21 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 		    }
 		} else {
 		    // 분해되지 않으면 단종성의 경우
-                    // 종성 + 중성: 마지막 종성을 초성으로 바꾸고 잠시 저장
-                    cho = hangul_jongseong_to_choseong(ic->jong);
+		    // 종성 + 중성: 마지막 종성을 초성으로 바꾸고 잠시 저장
+		    cho = hangul_jongseong_to_choseong(ic->jong);
 		    if (cho)
 			ic->jong = 0; //종성을 지운다.
 		    hangul_ic_pop(ic);
                 }
 
-                *cs = hangul_ic_commit(ic);
-                // XXX
+		*cs = hangul_ic_commit(ic);
+		// XXX
 		ic->cho = cho;
-                ic->jung = jamo;
-                hangul_ic_push(ic,cho);
-                hangul_ic_push(ic,jamo);
-                ic->laststate = 2;
-                return -1; // 앞의 초+중 두개를 commit
+		ic->jung = jamo;
+		hangul_ic_push(ic,cho);
+		hangul_ic_push(ic,jamo);
+		ic->laststate = 2;
+		return -1; // 앞의 초+중 두개를 commit
                 break;
             default: // 종성 + 종성
                 // 두벌식 오토마타는 종성처리가 필요 없다.
