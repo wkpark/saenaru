@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.cpp,v 1.3 2006/10/03 13:10:27 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.4 2006/10/08 09:12:52 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -49,10 +49,12 @@ extern "C" {
 static    ITfThreadMgr*        _QueryThreadMgr (void);
 static    ITfLangBarItemMgr*    _QueryLangBarItemMgr (void);
 static    BOOL            InitOtherLangBarItem (void);
+static    void		  _DumpLangBarItem(void);
 
-static    HMODULE            shMSCTF                = NULL;
-static    TfClientId        g_tfClientID;
-static    BOOL            g_fInitTSF            = FALSE;
+static    HMODULE       shMSCTF            = NULL;
+static    TfClientId    g_tfClientID;
+static    BOOL          g_fInitTSF         = FALSE;
+static    DWORD         g_dwHelpButtonCookie = NULL;
 
 LONG DllAddRef(void)
 {
@@ -141,6 +143,12 @@ const GUID c_guidKeyboardItemButton    = {
 };
 #endif
 
+// from _DumpLangBarItem()
+// {50549ded e6eb 5542 82 89 f8 a3 1e 68 72 28}
+const GUID c_guidItemButtonHelp = {
+    0xed9d5450, 0xebe6, 0x4255, { 0x82, 0x89, 0xf8, 0xa3, 0x1e, 0x68, 0x72, 0x28 }
+};
+
 BOOL PASCAL
 InitLanguageBar (void)
 {
@@ -183,6 +191,35 @@ InitLanguageBar (void)
     }
     fRet = TRUE;
     g_fInitTSF = TRUE;
+
+#define USE_HELPSINK
+#ifdef USE_HELPSINK
+    // http://msdn2.microsoft.com/en-us/library/ms628993.aspx
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr != NULL && g_dwHelpButtonCookie == NULL) {
+        ITfLangBarItem* pItem;
+        ITfSource* pSource;
+        
+        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonHelp, &pItem)) &&
+            pItem != NULL) {
+            if (SUCCEEDED (pItem->QueryInterface (IID_ITfSource,
+                        (void**)&pSource)) && pSource != NULL) {
+                ITfSystemLangBarItemSink *pHelpSink;
+                HRESULT hr;
+
+                hr= CreateItemHelp(&pHelpSink);
+                if (SUCCEEDED(hr)) {
+                    hr= pSource->AdviseSink(IID_ITfSystemLangBarItemSink,
+                                        pHelpSink,&g_dwHelpButtonCookie);
+                    pHelpSink->Release();
+                }
+                pSource->Release();
+            }
+            pItem->Release();
+        }
+        pLangBarItemMgr->Release();
+    }
+#endif
 
  Exit_Func:
     DEBUGPRINTFEX (99, (TEXT ("InitLanguageBar () = %d\n"), fRet));
@@ -336,6 +373,9 @@ UpdateLanguageBar (void)
     }
 #if 0
     _ShowKeyboardIcon (fShowKeyboardIcon);
+#endif
+#if DEBUG
+    _DumpLangBarItem();
 #endif
   exit_func:
 #if defined (TSF_NEED_MUTEX)
@@ -496,6 +536,29 @@ UninitLanguageBar (void)
         return;
     }
 #endif
+
+#ifdef USE_HELPSINK
+    DEBUGPRINTF ((TEXT ("Enter::UninitLanguageBar\n")));
+    // http://msdn2.microsoft.com/en-us/library/ms628993.aspx
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr != NULL) {
+        ITfLangBarItem* pItem;
+        ITfSource* pSource;
+        
+        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonHelp, &pItem)) &&
+            pItem != NULL) {
+            if (SUCCEEDED (pItem->QueryInterface (IID_ITfSource,
+                        (void**)&pSource)) && pSource != NULL) {
+                pSource->UnadviseSink(g_dwHelpButtonCookie);
+                pSource->Release();
+                g_dwHelpButtonCookie= NULL;
+                DEBUGPRINTF ((TEXT ("OK ? ::UninitLanguageBar\n")));
+            }
+            pItem->Release();
+        }
+        pLangBarItemMgr->Release();
+    }
+#endif
     if (shMSCTF != NULL) {
         FreeLibrary (shMSCTF);
         shMSCTF    = NULL;
@@ -600,6 +663,46 @@ _ShowKeyboardIcon (
     }
     pLangBarItemMgr->Release ();
     return    TRUE;
+}
+
+void
+_DumpLangBarItem (void)
+{
+    register ITfLangBarItemMgr*	pLangBarItemMgr	= NULL;
+    ITfLangBarItem* pItem;
+    IEnumTfLangBarItems* pEnum;
+
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr == NULL) 
+	return ;
+
+    MyDebugPrint((TEXT("--[Enter: _DumpLangBarItem (%d)]--\n"), (int) GetTickCount())); 
+    if (SUCCEEDED (pLangBarItemMgr->EnumItems(&pEnum))) {
+	ITfLangBarItem*	rpItems[16]= { NULL };
+	ULONG cItems = 0 ;
+	if (SUCCEEDED (pEnum->Next (16, rpItems, &cItems))) {
+	    ULONG i;
+	    for (i = 0; i < cItems; i ++) {
+		TF_LANGBARITEMINFO info;
+		if (SUCCEEDED (rpItems [i]->GetInfo (&info))) {
+		    const BYTE*	pBytes = (const BYTE *) &(info.guidItem);
+		    MyDebugPrint((TEXT("(%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x)\n"),
+			pBytes [0], pBytes [1], pBytes [2], pBytes [3],
+			pBytes [4], pBytes [5], pBytes [6], pBytes [7], 
+			pBytes [8], pBytes [9], pBytes [10], pBytes [11],
+			pBytes [12], pBytes [13], pBytes [14], pBytes [15]));
+                    MyDebugPrint((TEXT("Style: %0x\n"),info.dwStyle));
+                    MyDebugPrint((TEXT("Desc: %s\n"),info.szDescription));
+		}
+	    }
+	    for (i = 0 ; i < cItems ; i ++) {
+		rpItems [i]->Release ();
+		rpItems [i] = NULL;
+	    }
+	}
+	pEnum->Release ();
+    }
+    return;
 }
 
 #endif
