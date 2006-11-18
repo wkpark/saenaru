@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.21 2006/11/04 00:32:34 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.22 2006/11/07 08:24:56 wkpark Exp $
  */
 
 #include "windows.h"
@@ -814,9 +814,8 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
         ImmUnlockIMC(hIMC);
 #if !defined (NO_TSF)
         if (fSelect) {
-            if (InitLanguageBar ()) {
+            if (InitLanguageBar ())
                 ActivateLanguageBar (TRUE) ;
-            }
         } else {
             ActivateLanguageBar (FALSE) ;
         }

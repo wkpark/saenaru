@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.19 2006/11/04 00:30:04 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.20 2006/11/17 08:55:28 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -276,6 +276,7 @@ LPARAM lParam;
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
             //SetConsoleHookFunc();
+            InitLanguageBar();
 
             break;
 
@@ -494,6 +495,8 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
+            ActivateLanguageBar(FALSE);
+            UninitLanguageBar();
             //UnsetConsoleHookFunc();
 
             break;
