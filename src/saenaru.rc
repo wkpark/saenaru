@@ -301,6 +301,7 @@ STRINGTABLE DISCARDABLE
 LANGUAGE 0x12, 0x1
 BEGIN
     IDS_CONFIGNAME          "새나루 한글 입력기"
+    IDS_HELP_DESC           "새나루 한글 입력기 도움말(&H)"
 END
 
 
@@ -320,9 +321,9 @@ BEGIN
     IDS_INPUT_CMODE_DESC        "입력방식"
     IDS_TOGGLE_HALFFULL_DESC    "전각/반각 전환"
     IDS_KEYBOARD_OPTION_DESC    "글쇠/입력기 설정"
-    IDS_MENU_HANGUL             "한글"
-    IDS_MENU_ASCII              "영문"
-    IDS_MENU_HANJA              "한자"
+    IDS_MENU_HANGUL             "한글(&H)"
+    IDS_MENU_ASCII              "영문(&E)"
+    IDS_MENU_HANJA              "한자(&I)"
     IDS_MENU_CANCEL             "취소"
 END
 
@@ -440,6 +441,7 @@ STRINGTABLE DISCARDABLE
 LANGUAGE 0x09, 0x1
 BEGIN
     IDS_CONFIGNAME          "Saenaru Hangul Input Method"
+    IDS_HELP_DESC           "&Help for Saenaru Hangul IME"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -470,9 +472,9 @@ BEGIN
     IDS_INPUT_CMODE_DESC        "Input Mode"
     IDS_TOGGLE_HALFFULL_DESC    "Fullwidth/Halfwidth Toggle"
     IDS_KEYBOARD_OPTION_DESC    "Keyboard/InputMethod Options"
-    IDS_MENU_HANGUL             "Hangul"
-    IDS_MENU_ASCII              "English"
-    IDS_MENU_HANJA              "Ideograh"
+    IDS_MENU_HANGUL             "&Hangul"
+    IDS_MENU_ASCII              "&English"
+    IDS_MENU_HANJA              "&Ideograh"
     IDS_MENU_CANCEL             "Cancel"
 END
 
