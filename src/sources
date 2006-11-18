@@ -57,6 +57,7 @@ TSFSRCS= \
 	btnime.cpp \
 	btncmd.cpp \
 	btnpad.cpp \
+	btnhlp.cpp \
 	btnext.cpp
 
 TSFLIBS= \
@@ -74,6 +75,7 @@ TARGETLIBS= \
         $(DDK_LIB_PATH)\imm32.lib \
         $(DDK_LIB_PATH)\kernel32.lib \
         $(DDK_LIB_PATH)\user32.lib \
+        $(DDK_LIB_PATH)\htmlhelp.lib \
 	$(TSFLIBS)
 
 NTTARGETFILES=copyfile
