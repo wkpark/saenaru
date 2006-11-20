@@ -123,15 +123,15 @@ BEGIN
 END
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "새나루에 대해..."
 FONT 9, "굴림"
 LANGUAGE 0x12, 0x1
 BEGIN
     LTEXT           "새나루 한글 입력기 버전 1.0",IDC_STATIC,63,36,88,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
-    LTEXT           "장혜식 <perky@FreeBSD.org> 만듦 2003-2006",IDC_STATIC,
-		    33,54,151,8 
+    LTEXT           "장혜식, 박원규 만듦 2003-2006",IDC_STATIC,
+		     59,54,98,8
     LTEXT           "이 소프트웨어는 올바른 동작이나 특정 목적에의 적합성에 대한 어떠한 보증없이 ""있는 그대로"" 배포됩니다.",
                     IDC_STATIC,8,81,198,18
     LTEXT           "이 소프트웨어는 대한민국 저작권법에 의해 보호됩니다. 자세한 저작권 사항은 같이 배포되는 관련 문서 또는 프로젝트 홈페이지(http://saenaru.i18n.org/)를 참조하십시오.",
@@ -247,7 +247,7 @@ BEGIN
     POPUP ""
     BEGIN
 
-    	MENUITEM "환경설정(&R)",	IDM_ABOUT
+    	MENUITEM "환경설정(&R)",	IDM_CONFIG
 	MENUITEM SEPARATOR
 	MENUITEM "한글(&H)",		IDM_HANGUL
 	MENUITEM "영문(&E)",		IDM_ENG
@@ -302,6 +302,7 @@ LANGUAGE 0x12, 0x1
 BEGIN
     IDS_CONFIGNAME          "새나루 한글 입력기"
     IDS_HELP_DESC           "새나루 한글 입력기 도움말(&H)"
+    IDS_ABOUT               "새나루에 대해(&A)..."
 END
 
 
@@ -417,20 +418,53 @@ FONT 9, "Tahoma"
 
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
-STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "About Saenaru..."
 LANGUAGE 0x09, 0x01
 FONT 9, "Tahoma"
 {
    LTEXT	"Saenaru Hangul Input Method ver 1.0", IDC_STATIC, 43,29,126,8 
    ICON		IDI_ABOUT, IDC_STATIC, 98,6,18,18 
-   LTEXT	"Hye-Sik Chang  <perky@FreeBSD.org> 2003-2006", IDC_STATIC, 26,42,164,8 
+   LTEXT	"Hye-Sik Chang, Won-Kyu Park 2003-2006", IDC_STATIC, 41,42,136,8 
    LTEXT 	"THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.", IDC_STATIC, 10,59,198,42 
    LTEXT	"The software product is protected by copyright laws in Korea. See the included license along with this program or visit the homepage(http://saenaru.i18n.org/) of this project.", IDC_STATIC,
 		8,102,198,27 
    GROUPBOX	"", IDC_STATIC, 3,53,209,77 
 }
 
+
+RIGHTCLKMENU MENU DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    POPUP ""
+    BEGIN
+
+    	MENUITEM "Configu&re",		IDM_CONFIG
+	MENUITEM SEPARATOR
+	MENUITEM "&Hangul",		IDM_HANGUL
+	MENUITEM "&English",		IDM_ENG
+	MENUITEM "&Ideograph",		IDM_HANJA
+	MENUITEM SEPARATOR
+	MENUITEM "&2-set",  		IDM_OLD2BUL
+	MENUITEM "&3-set",  		IDM_3BUL
+	MENUITEM "3-set 3&90",  	IDM_390
+    	MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
+    	MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
+     	MENUITEM "&Ahnmatae",		IDM_AHNMATAE
+    	MENUITEM "3-set noshift(&N)",	IDM_3SOON
+    	MENUITEM "&User keyboard",	IDM_USER
+    	MENUITEM "&Compose Map",	IDM_USER_COMP
+	MENUITEM SEPARATOR
+    	MENUITEM "D&vorak",		IDM_DVORAK
+    	MENUITEM "&ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
+	MENUITEM SEPARATOR
+    	MENUITEM "&Show keyboard",	IDM_SHOW_KEYBOARD
+	MENUITEM SEPARATOR
+        MENUITEM "Re&Convert",		IDM_RECONVERT
+	MENUITEM "&About saenaru...",	IDM_ABOUT          
+    END
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -442,6 +476,7 @@ LANGUAGE 0x09, 0x1
 BEGIN
     IDS_CONFIGNAME          "Saenaru Hangul Input Method"
     IDS_HELP_DESC           "&Help for Saenaru Hangul IME"
+    IDS_ABOUT               "&About Saenaru..."
 END
 
 STRINGTABLE DISCARDABLE 
