@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.7 2006/10/14 02:29:44 wkpark Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.8 2006/10/18 00:12:47 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -369,8 +369,10 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 
         lpUIExtra->uiCand.hWnd = 
                 CreateWindowEx(WS_EX_WINDOWEDGE|
+#if 0
 #if (WINVER >= 0x0500)
                              WS_EX_COMPOSITED|
+#endif
 #endif
                              WS_EX_RIGHTSCROLLBAR,
                              (LPTSTR)szCandClassName,NULL,
