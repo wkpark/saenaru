@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.20 2006/11/17 08:55:28 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.21 2006/11/18 01:42:47 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -605,6 +605,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
     LPUIEXTRA lpUIExtra;
     RECT rc;
     LOGFONT lf;
+    HWND hwndIndicate;
 
     if (!(lpIMC = ImmLockIMC(hUICurIMC)))
         return 0L;
@@ -650,20 +651,28 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 0, 0);
             }
 
-            //ShowWindow(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
-            ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
+            if (lpIMC->fdwConversion & IME_CMODE_SOFTKBD ) {
+                UpdateSoftKeyboard(lpUIExtra, lpIMC->fdwConversion & IME_CMODE_SOFTKBD);
+                ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
+            } else
+                ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_HIDE);
 
-            //lpUIExtra->uiSoftKbd.bShow = TRUE;
-            //SetWindowLongPtr(lpUIExtra->uiSoftKbd.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
+            /*
+            ShowWindow(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
+            lpUIExtra->uiSoftKbd.bShow = TRUE;
+            SetWindowLongPtr(lpUIExtra->uiSoftKbd.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
+            */
 #endif
             if (lpUIExtra->uiStatus.pt.x == -1)
             {
-                GetWindowRect(lpIMC->hWnd,&rc);
+                //GetWindowRect(lpIMC->hWnd,&rc);
+                GetWindowRect(GetDesktopWindow(),&rc);
                 lpUIExtra->uiStatus.pt.x = rc.right - 100; // XXX +1 => -100
-                lpUIExtra->uiStatus.pt.y = rc.top;
+                lpUIExtra->uiStatus.pt.y = rc.bottom - 100;
             }
 #ifndef USE_STATUS_WIN98_XXX
-            if (!IsTSFEnabled()) {
+            if (!IsLangBarEnabled()) {
+                MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 lpUIExtra->uiStatus.hWnd = 
@@ -1090,7 +1099,18 @@ void PASCAL UpdateSoftKeyboard(
     }
     else
     {
+        DWORD dwbg;
+        HBRUSH hbrbg;
         SetSoftKbdData(lpUIExtra->uiSoftKbd.hWnd);
+        dwbg=GetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND);
+        MyDebugPrint((TEXT("\tBackground color: 0x%x\r\n"),dwbg));
+
+        SetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND,(COLOR_BTNFACE + 1));
+        //hbrbg = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+        //SetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND,(LONG)hbrbg);
+        // XXX
+
+        //DeleteObject(hbrbg);
 
         ImmShowSoftKeyboard(lpUIExtra->uiSoftKbd.hWnd,SW_SHOWNOACTIVATE);
     }
@@ -1267,9 +1287,11 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     lpmsg = (LPMSG)lParam;
     vKey = lpmsg->wParam;
 
+#if DEBUG
     if (vKey == VK_PROCESSKEY) {
         MyDebugPrint((TEXT("\tMainProc: VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
     }
+#endif
 
     switch (lpmsg->message)
     {

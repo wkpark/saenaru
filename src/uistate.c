@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uistate.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/uistate.c,v 1.4 2006/11/17 08:55:28 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -283,7 +283,6 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
     int x;
     HWND hSvrWnd;
     HBITMAP bmTemp,bmTempOld;
-    if (IsTSFEnabled()) return;
 
     hSvrWnd = (HWND)GetWindowLongPtr(hStatusWnd,FIGWL_SVRWND);
 
@@ -544,6 +543,11 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                 INT idMode,idFlag;
                 HMENU hSubMenu = GetSubMenu(hMenu, 0);
                 MENUITEMINFO mk;
+
+                if (gfSaenaruSecure) {
+                    EnableMenuItem(hSubMenu,IDM_CONFIG,MF_GRAYED);
+                    EnableMenuItem(hSubMenu,IDM_RECONVERT,MF_GRAYED);
+                }
 
                 fOpen = ImmGetOpenStatus(hIMC);
                 ImmGetConversionStatus(hIMC,&fdwConversion,&dwTemp);
