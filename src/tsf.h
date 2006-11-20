@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.h,v 1.4 2006/10/11 03:46:34 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.h,v 1.5 2006/11/18 01:45:08 wkpark Exp $
  */
 
 #if !defined (tsf_h)
@@ -67,7 +67,7 @@ BOOL CreateItemButtonIME(ITfLangBarItem** ppLangBarItem);
 BOOL CreateItemButtonShape(ITfLangBarItem** ppLangBarItem);
 BOOL CreateItemButtonPad(ITfLangBarItem** ppLangBarItem);
 BOOL CreateItemHelp(ITfSystemLangBarItemSink** ppLangBarItemSink);
-BOOL _ShowKeyboardIcon(BOOL fShow) ;
+BOOL IsLangBarEnabled(VOID);
 
 LONG DllAddRef(void);
 LONG DllRelease(void);

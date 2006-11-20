@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.13 2006/11/04 00:32:34 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.14 2006/11/09 11:45:33 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -575,6 +575,7 @@ BOOL PASCAL UpdateLanguageBarIfSelected(void);
 BOOL PASCAL UpdateLanguageBar(void);
 void PASCAL ActivateLanguageBar(BOOL);
 BOOL PASCAL IsTSFEnabled(void);
+BOOL PASCAL IsLangBarEnabled(void);
 #endif
 
 /*

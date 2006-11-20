@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.cpp,v 1.4 2006/10/08 09:12:52 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.5 2006/11/18 01:45:08 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -615,6 +615,26 @@ _GetCurrentHIMC (void)
     if (hwnd != NULL)
         hIMC    = ImmGetContext (hwnd);
     return    hIMC;
+}
+
+BOOL PASCAL
+IsLangBarEnabled(void)
+{
+    register ITfLangBarItemMgr* pLangBarItemMgr = NULL;
+    ITfLangBarItem* pItem;
+    register BOOL fRet = FALSE;
+
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr == NULL) 
+        return FALSE;
+
+    if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidKeyboardItemButton, &pItem))) {
+        pItem->Release();
+        fRet = TRUE;
+    }
+    pLangBarItemMgr->Release();
+
+    return fRet;
 }
 
 /*    «­???«Ι«Ά«¤«³«σ(ελεή«Π?ªΞ)ªΞ?γΖ/ήª?γΖªςο·ªκτπª¨ªλ??΅£
