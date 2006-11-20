@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.23 2006/11/17 12:21:54 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.24 2006/11/17 13:18:02 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2060,7 +2060,7 @@ BOOL hangul_ic_insert( HangulIC *ic, WCHAR ch, UINT idx)
 int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 {
     int kind;
-    WCHAR comb=0, cho=0, jong=0, last=0;
+    WCHAR comb=0, cho=0, jong=0, last=0, tmp=0;
     BOOL ctyping=0;
 
     *cs = 0;
@@ -2203,6 +2203,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
             // 종성
             switch(kind) {
             case 1: // 초성을 종성으로 바꿔서
+		cho = jamo;
                 jong = hangul_choseong_to_jongseong(jamo);
                 comb = hangul_compose(ic->jong, jong);
 		// 동시치기일 경우는 순서를 바꿔서 종+종 조합
@@ -2220,8 +2221,8 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                         return 0;
                     }
                 }
-                hangul_jongseong_dicompose(ic->jong, &jong, &cho);
-		if (jong && cho) {
+                hangul_jongseong_dicompose(ic->jong, &jong, &tmp);
+		if (jong && tmp) {
 		    // 쌍초성에 대한 특별처리
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
@@ -2244,8 +2245,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 			ic->jong = 0; //마지막 종성을 지운다.
 			cho= comb; // 쌍초성으로 대치
 		    }
-		} else
-		    cho= jamo;
+		}
                 {
                     // 초성을 compose할 수 없다.
                     *cs = hangul_ic_commit(ic);
