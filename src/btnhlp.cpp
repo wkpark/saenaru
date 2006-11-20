@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnpad.cpp,v 1.1 2006/10/08 09:12:52 wkpark Exp $
+ * $Saenaru: saenaru/src/btnhlp.cpp,v 1.1 2006/11/18 01:45:08 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -56,10 +56,12 @@ extern "C" {
 #define LANGBAR_ITEM_DESC	L"µµ¿ò¸»" // max 32 chars
 
 static	void	_Menu_SaenaruHelp(void);
+static	void	_Menu_About(void);
 
 static	const TSFLBMENUINFO c_rgMenuItems[] = {
 #if 1
-	{ IDS_HELP_DESC, _Menu_SaenaruHelp}
+	{ IDS_ABOUT, _Menu_About},
+	{ IDS_HELP_DESC, _Menu_SaenaruHelp},
 #endif
 };
 
@@ -92,7 +94,8 @@ CLangBarItemHelpMenu::CLangBarItemHelpMenu ()
 {
 	//DllAddRef ();
 	//_tfLangBarItemInfo.clsidService	= c_clsidSaenaruTextService;
-	//_tfLangBarItemInfo.clsidService	= CLSID_NULL;
+	_tfLangBarItemInfo.clsidService	= CLSID_NULL;
+	_tfLangBarItemInfo.guidItem	= GUID_NULL;
 	//_tfLangBarItemInfo.guidItem		= c_guidItemButtonMyHelp;
 	_tfLangBarItemInfo.dwStyle              = TF_LBI_STYLE_BTN_MENU
                 | TF_LBI_STYLE_SHOWNINTRAY
@@ -226,6 +229,14 @@ _Menu_SaenaruHelp (void)
     lstrcpy (lpHelp, TEXT("help\\saenaru.chm"));
 
     HtmlHelp(0, szHelp, HH_DISPLAY_TOPIC, NULL);
+    return;
+}
+
+void
+_Menu_About(void)
+{
+    HWND hWnd= GetFocus();
+    DialogBox(hInst, MAKEINTRESOURCE(DLG_ABOUT), hWnd, AboutDlgProc);
     return;
 }
 

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.6 2006/10/31 19:14:32 wkpark Exp $
+ * $Saenaru: saenaru/src/config.c,v 1.7 2006/11/09 11:45:33 wkpark Exp $
  */
 
 #include "windows.h"
@@ -158,6 +158,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lP
             break;
 
         case WM_COMMAND:
+            EndDialog(hDlg, wParam); 
             break;
 
         default:
