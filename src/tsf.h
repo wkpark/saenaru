@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.h,v 1.5 2006/11/18 01:45:08 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.h,v 1.6 2006/11/20 08:44:02 wkpark Exp $
  */
 
 #if !defined (tsf_h)
@@ -56,9 +56,7 @@ extern const GUID c_guidSaenaruProfile ;
 extern const GUID c_guidItemButtonCMode ;
 extern const GUID c_guidItemButtonIME ;
 extern const GUID c_guidItemButtonShape ;
-extern const GUID c_guidKeyboardItemButton ;
 extern const GUID c_guidItemButtonPad ;
-extern const GUID c_guidItemButtonMyHelp ;
 
 /* prototypes */
 HIMC _GetCurrentHIMC(void);

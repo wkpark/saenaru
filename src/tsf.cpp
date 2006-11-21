@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.cpp,v 1.5 2006/11/18 01:45:08 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.6 2006/11/20 08:44:02 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -171,7 +171,7 @@ InitLanguageBar (void)
     }
 #endif
 #if defined (TSF_NEED_MUTEX)
-    hMutex = saenaruCreateMutex (SKKIME_MUTEX_NAME);
+    hMutex = SaenaruCreateMutex (SAENARU_MUTEX_NAME);
     if (!hMutex) 
         return FALSE;
 
@@ -283,7 +283,7 @@ UpdateLanguageBar (void)
 #endif
     register DWORD  dwValue;
     register BOOL   fRetval = FALSE;
-    register BOOL   fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon, fShowShapeIcon, fShowPadIcon;
+    register BOOL   fShowIMEIcon, fShowInputModeIcon, fShowShapeIcon, fShowPadIcon;
 
 #if 1
     if (gfSaenaruSecure)
@@ -291,7 +291,7 @@ UpdateLanguageBar (void)
 #endif
 
 #if defined (TSF_NEED_MUTEX)
-    hMutex    = saenaruCreateMutex (SKKIME_MUTEX_NAME);
+    hMutex    = SaenaruCreateMutex (SAENARU_MUTEX_NAME);
     if (!hMutex) 
         return    FALSE;
 
@@ -305,12 +305,10 @@ UpdateLanguageBar (void)
     DEBUGPRINTFEX (100, (TEXT ("UpdateLanguageBar ()\n")));
 
     /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
-    fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
+    fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
     fShowPadIcon = TRUE;
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
-    if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWKEYBRDICON), &dwValue))
-        fShowKeyboardIcon    = (BOOL) dwValue;
     if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWIMEICON), &dwValue))
         fShowIMEIcon        = (BOOL) dwValue;
     if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWINPUTMODEICON), &dwValue))
@@ -371,9 +369,6 @@ UpdateLanguageBar (void)
 
         pLangBarItemMgr->Release ();
     }
-#if 0
-    _ShowKeyboardIcon (fShowKeyboardIcon);
-#endif
 #if DEBUG
     _DumpLangBarItem();
 #endif
@@ -398,7 +393,7 @@ ActivateLanguageBar (
     register HANDLE                hMutex;
 #endif
     register DWORD                dwValue;
-    register BOOL                fShowKeyboardIcon, fShowIMEIcon, fShowInputModeIcon ,fShowShapeIcon, fShowPadIcon;
+    register BOOL               fShowIMEIcon, fShowInputModeIcon ,fShowShapeIcon, fShowPadIcon;
     
     TF_LANGBARITEMINFO MypInfo;
 #if 1
@@ -407,7 +402,7 @@ ActivateLanguageBar (
 #endif
 
 #if defined (TSF_NEED_MUTEX)
-    hMutex    = saenaruCreateMutex (SKKIME_MUTEX_NAME);
+    hMutex    = SaenaruCreateMutex (SAENARU_MUTEX_NAME);
     if (!hMutex) 
         return;
 
@@ -422,13 +417,11 @@ ActivateLanguageBar (
     DEBUGPRINTFEX (100, (TEXT ("ActivateLanguageBar (Select:%d)\n"), fSelect));
 
     /*    ?üÞ«ì«¸«¹«È«êªò?ðÎª¹ªëªÎªÏïáª·ª¤ªÎªÀªíª¦ª«£¿ */
-    fShowKeyboardIcon = fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
+    fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
     fShowPadIcon = FALSE;
     if (fSelect) {
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
-        if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWKEYBRDICON), &dwValue))
-            fShowKeyboardIcon    = (BOOL) dwValue;
         if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWIMEICON), &dwValue))
             fShowIMEIcon        = (BOOL) dwValue;
         if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWINPUTMODEICON), &dwValue))
@@ -512,10 +505,6 @@ ActivateLanguageBar (
 #endif
         pLangBarItemMgr->Release ();
     }
-#if 0
-    if (fSelect)
-        _ShowKeyboardIcon (fShowKeyboardIcon);
-#endif
   Exit_Func:
 #if defined (TSF_NEED_MUTEX)
     ReleaseMutex (hMutex);
@@ -637,54 +626,7 @@ IsLangBarEnabled(void)
     return fRet;
 }
 
-/*    «­???«É«¢«¤«³«ó(åëåÞ«Ð?ªÎ)ªÎ?ãÆ/Þª?ãÆªòï·ªêôðª¨ªë??¡£
- *¡Ø
- *    Text Service Framework ªÈ÷ÖùêªµªìªÆª¤ªëíÞùêªËªÏ«­???«ÉªÎ«¢«¤«³«óª¬
- *    ?ãÆªµªìªëª¬¡¢ª½ª¦ªÇªÊª¤íÞùêªËªÏ IME ICON ª¬××éÄªµªìªëªèª¦ªÇª¢ªë¡£
- */
-BOOL
-_ShowKeyboardIcon (
-    register BOOL        fShow)
-{
-    register ITfLangBarItemMgr*    pLangBarItemMgr            = NULL;
-    ITfLangBarItem*                    pItem;
-
-    pLangBarItemMgr    = _QueryLangBarItemMgr ();
-    if (pLangBarItemMgr == NULL) 
-        return    FALSE;
-
-    if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidKeyboardItemButton, &pItem))) {
-        if (fShow) {
-            ITfSystemLangBarItem*            pSysItem;
-            ITfSystemDeviceTypeLangBarItem*    pSysDevItem;
-
-            if (SUCCEEDED (pItem->QueryInterface (IID_ITfSystemDeviceTypeLangBarItem, (void**)&pSysDevItem)) && pSysDevItem != NULL) {
-                pSysDevItem->SetIconMode (0);
-                pSysDevItem->Release ();
-            }
-
-            /*    Text Service Framework ªÈ IME ª¬÷ÖùêªµªìªÆª¤ªÊª¤íÞùêªËªÏ¡¢
-             *    IME Icon ª¬?ãÆªµªìªÆª·ªÞª¤¡¢ª½ªìª¬ Button ªÎ1ªÄªÈñìªÊªë
-             *    ª¿ªáªË¡¢«­???«É«¢«¤«³«óªò?ÌÚª¹ªë¡£
-             */
-#if defined (not_integrate_tsf) || 0
-            if (SUCCEEDED (pItem->QueryInterface (IID_ITfSystemLangBarItem, (void**)&pSysItem)) && pSysItem != NULL) {
-                register HICON    hIcon;
-                hIcon    = (HICON) LoadImage (hInst, TEXT ("INDICOPENICON"), IMAGE_ICON, 16, 16, 0);
-                if (hIcon != NULL) {
-                    pSysItem->SetIcon (hIcon);
-                }
-                pSysItem->Release ();
-            }
-#endif
-        }
-        pItem->Show (fShow);
-        pItem->Release ();
-    }
-    pLangBarItemMgr->Release ();
-    return    TRUE;
-}
-
+#if DEBUG
 void
 _DumpLangBarItem (void)
 {
@@ -724,6 +666,7 @@ _DumpLangBarItem (void)
     }
     return;
 }
+#endif
 
 #endif
 
