@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.24 2006/11/17 13:18:02 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.25 2006/11/20 10:04:49 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2587,7 +2587,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 }
                 // 종성이 계속 눌려진 채로 있고
                 // 초성이 입력된 것이라면 
-                else if (ic->cho && hangul_is_jongseong(ic->last) && ctyping) {
+                else if (!ic->cho && hangul_is_jongseong(ic->last) && ctyping) {
 		    if (ic->jong != ic->last) {
 			WCHAR j1,j2;
 			MyDebugPrint((TEXT("CON cho !!: %x\r\n"), jamo));
