@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.14 2006/11/09 11:45:33 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.15 2006/11/20 08:44:02 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -43,6 +43,14 @@
 #define LOGF_API            0x00000002
 #define LOGF_APIOUT         0x00000004
 #define LOGF_KEY            0x00000008
+
+/**********************************************************************/
+/*                                                                    */
+/*      Define                                                        */
+/*                                                                    */
+/**********************************************************************/
+
+#define SAENARU_MUTEX_NAME  TEXT("SaeNaru_Mutex")
 
 #define LAYOUT_OLD2BUL      0x00000001
 #define LAYOUT_3FIN         0x00000002
@@ -71,13 +79,6 @@
 #define DVORAK_SUPPORT         0x00000100
 #define ESCENG_SUPPORT         0x00000200
 #define QWERTY_HOTKEY_SUPPORT  0x00000400
-
-
-/**********************************************************************/
-/*                                                                    */
-/*      Define                                                        */
-/*                                                                    */
-/**********************************************************************/
 
 /* for Unicode SAENARU */
 typedef LPTSTR            LPMYSTR;

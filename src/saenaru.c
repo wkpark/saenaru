@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.6 2006/10/10 08:12:59 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.7 2006/10/10 11:08:38 wkpark Exp $
  */
 
 #include <windows.h>
@@ -79,7 +79,7 @@ BOOL WINAPI DLLEntry (
 #if 1
             psa = CreateSecurityAttributes();
             if ( psa != NULL ) {
-                 hMutex = CreateMutex( psa, FALSE, TEXT("SaeNaru_Mutex"));
+                 hMutex = CreateMutex( psa, FALSE, SAENARU_MUTEX_NAME);
                  FreeSecurityAttributes( psa );
                  if ( hMutex == NULL ) {
                  // Failed
