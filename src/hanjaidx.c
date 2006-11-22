@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hanjaidx.c,v 1.1 2006/10/26 11:24:24 wkpark Exp $
+ * $Saenaru: saenaru/src/hanjaidx.c,v 1.2 2006/10/26 22:37:24 wkpark Exp $
  */
 
 #include <windows.h>
@@ -56,6 +56,7 @@ hanja_idx(UINT code)
     numExta += tmp ? (IDX_COL - tmp):0;
 
     if (code < 0x3400 || code >=0xfaff) return -1;
+    if (code >=0xa000 && code <=0xf8ff) return -1;
 
     if (code >= 0xf900) {
     	offset= code - 0xf900;
@@ -120,6 +121,7 @@ int GetHangulFromHanjaIndex(LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, LPTST
         SetFilePointer(hTblFile, -2, NULL, FILE_CURRENT);
 
         offset=hanja_idx(*lpRead);
+        if (offset == -1) goto Err1;
 
         SetFilePointer(hTblFile, offset, NULL, FILE_CURRENT);
         if (ReadFile(hTblFile, lpDic, 2, &dwRead, NULL)) {

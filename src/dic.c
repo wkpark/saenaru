@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.23 2006/11/07 08:23:08 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.24 2006/11/21 12:14:52 wkpark Exp $
  */
 
 #include <windows.h>
@@ -288,10 +288,13 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
         nBufLen = GetCandidateStringsFromDictionary(lpT2,
                 szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
 
-        if (nBufLen < 1 && Mylstrlen(lpT2)==1 &&
-                (*lpT2 < 0xac00 || *lpT2 >=0xd7a8)) {
-            // check the hanja_to_hangul table
+        while (nBufLen < 1 && Mylstrlen(lpT2)==1) {
             MYCHAR han[2];
+            han[0]=0;
+
+            if (*lpT2 < 0x3400 || *lpT2 >=0xfaff) break;
+            if (*lpT2 >= 0xa000 && *lpT2 <=0xf8ff) break;
+            // check the hanja_to_hangul table
 
             lpIdx = (LPTSTR)&szIdx;
             LoadString( hInst, IDS_HIDX_KEY, lpKey, 128);
@@ -323,7 +326,11 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
                     szBuf[2]= 0; // double terminate
                 }
             }
-        } else { // always open a candidate window with hangul chars
+            break;
+        }
+        
+        if (nBufLen > 1 && *lpT2 >= 0xac00 && *lpT2 <= 0xd7a8) {
+            // always open a candidate window with hangul chars
             lmemset(GETLPCOMPATTR(lpCompStr),ATTR_TARGET_CONVERTED ,
                   Mylstrlen(GETLPCOMPSTR(lpCompStr)));
             lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
