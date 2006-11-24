@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.27 2006/11/24 11:01:07 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.28 2006/11/24 11:41:37 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2066,7 +2066,7 @@ BOOL hangul_ic_insert( HangulIC *ic, WCHAR ch, UINT idx)
 int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 {
     int kind;
-    WCHAR comb=0, cho=0, jong=0, last=0, tmp=0;
+    WCHAR comb=0, cho=0, jong=0, last=0, tmp=0,tmp2=0;
     BOOL ctyping=0;
 
     *cs = 0;
@@ -2150,7 +2150,6 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 if (jong && hangul_jamo_to_syllable(ic->cho,ic->jung,jong)) {
                     ic->jong=jong;
                     hangul_ic_push(ic,jong);
-		    ic->last=jamo; // XXX
                     ic->laststate=3;
                     return 0;
                 } else {
@@ -2228,8 +2227,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                         return 0;
                     }
                 }
-                hangul_jongseong_dicompose(ic->jong, &jong, &tmp);
-		if (jong && tmp) {
+                hangul_jongseong_dicompose(ic->jong, &tmp, &tmp2);
+		if (tmp && tmp2) {
+		    jong= tmp;
 		    // 쌍초성에 대한 특별처리
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
@@ -2244,7 +2244,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 			jamo= hangul_compose(last,last); // make ssang cho
 			cho= jamo;
 		    }
-		} else if (ctyping) { // for ahnmatae
+		} else if (ctyping && ic->last != jong) { // for ahnmatae
 		    last = hangul_jongseong_to_choseong(ic->jong);
 		    comb = hangul_compose(last,jamo);
 		    MyDebugPrint((TEXT("ssang cho ?: %x\r\n"), comb));
