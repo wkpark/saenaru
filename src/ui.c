@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.23 2006/11/24 11:44:04 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.24 2006/11/24 23:04:02 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -693,8 +693,9 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
                 }
             }
 #ifndef USE_STATUS_WIN98_XXX
-            if (GetDwordFromSetting(TEXT("ShowStatus")) ||!IsLangBarEnabled()) {
-            //    MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
+            if (!GetDwordFromSetting(TEXT("HideStatus"))
+                    && !IsLangBarEnabled()) {
+                MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 lpUIExtra->uiStatus.hWnd = 

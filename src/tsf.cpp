@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/tsf.cpp,v 1.6 2006/11/20 08:44:02 wkpark Exp $
+ * $Saenaru: saenaru/src/tsf.cpp,v 1.7 2006/11/21 15:21:24 wkpark Exp $
  */
 
 #if !defined (NO_TSF)
@@ -609,9 +609,28 @@ _GetCurrentHIMC (void)
 BOOL PASCAL
 IsLangBarEnabled(void)
 {
-    register ITfLangBarItemMgr* pLangBarItemMgr = NULL;
+    HKEY    hKey;
+    DWORD   dwRegType, dwData, dwDataSize, dwRet;
+    BOOL    fRet = TRUE;
+
+    if (gfSaenaruSecure)
+        return FALSE;
+
+    dwData = 0;
+    dwDataSize = sizeof(DWORD);
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\CTF"),
+                0, KEY_READ,&hKey) == ERROR_SUCCESS) {
+        dwRet = RegQueryValueEx(hKey, TEXT("Disable Thread Input Manager"),
+                NULL, &dwRegType, (LPBYTE)&dwData, &dwDataSize);
+        RegCloseKey(hKey);
+        if (dwRet == ERROR_SUCCESS && dwRegType == REG_DWORD)
+             fRet = (dwData == 0);
+    }
+    return  fRet;
+    /*
+    ITfLangBarItemMgr* pLangBarItemMgr = NULL;
     ITfLangBarItem* pItem;
-    register BOOL fRet = FALSE;
+    BOOL fRet = FALSE;
 
     pLangBarItemMgr = _QueryLangBarItemMgr();
     if (pLangBarItemMgr == NULL) 
@@ -622,9 +641,9 @@ IsLangBarEnabled(void)
         fRet = TRUE;
     }
     pLangBarItemMgr->Release();
-
-    return fRet;
+    */
 }
+
 
 #if DEBUG
 void
