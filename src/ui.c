@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.22 2006/11/20 08:49:28 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.23 2006/11/24 11:44:04 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -501,6 +501,15 @@ LPARAM lParam;
 
             break;
 
+        case WM_UI_STATEHIDE:
+            hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
+            lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
+            if (IsWindow (lpUIExtra->uiStatus.hWnd))
+                ShowWindow(lpUIExtra->uiStatus.hWnd, SW_HIDE);
+            lpUIExtra->uiStatus.bShow= FALSE ;
+            GlobalUnlock(hUIExtra);
+            break;
+
         case WM_UI_STATEMOVE:
             //
             // Set the position of the status window to UIExtra.
@@ -510,6 +519,9 @@ LPARAM lParam;
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             lpUIExtra->uiStatus.pt.x = (long)LOWORD(lParam);
             lpUIExtra->uiStatus.pt.y = (long)HIWORD(lParam);
+
+            SetDwordToSetting(TEXT("StatusPos"),lParam);
+
             GlobalUnlock(hUIExtra);
             break;
 
@@ -666,13 +678,23 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             if (lpUIExtra->uiStatus.pt.x == -1)
             {
                 //GetWindowRect(lpIMC->hWnd,&rc);
-                GetWindowRect(GetDesktopWindow(),&rc);
-                lpUIExtra->uiStatus.pt.x = rc.right - 100; // XXX +1 => -100
-                lpUIExtra->uiStatus.pt.y = rc.bottom - 100;
+                DWORD pos;
+                pos=GetDwordFromSetting(TEXT("StatusPos"));
+                if (pos) {
+                    lpUIExtra->uiStatus.pt.x = pos & 0xffff;
+                    lpUIExtra->uiStatus.pt.y = pos >> 16;
+                } else {
+                    GetWindowRect(GetDesktopWindow(),&rc);
+                    lpUIExtra->uiStatus.pt.x = rc.right - 100; // XXX +1 => -100
+                    lpUIExtra->uiStatus.pt.y = rc.bottom - 100;
+                    pos=(lpUIExtra->uiStatus.pt.y << 16)
+                        & lpUIExtra->uiStatus.pt.x;
+                    SetDwordToSetting(TEXT("StatusPos"),pos);
+                }
             }
 #ifndef USE_STATUS_WIN98_XXX
-            if (!IsLangBarEnabled()) {
-                MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
+            if (GetDwordFromSetting(TEXT("ShowStatus")) ||!IsLangBarEnabled()) {
+            //    MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
                 lpUIExtra->uiStatus.hWnd = 
@@ -694,6 +716,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             SetWindowLongPtr(lpUIExtra->uiStatus.hWnd,FIGWL_SVRWND,(LONG_PTR)hWnd);
             }
 #endif
+            MyDebugPrint((TEXT("IMN_OPENSTATUSWINDOW\r\n")));
             break;
 
         case IMN_SETCONVERSIONMODE:
@@ -745,6 +768,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             break;
 
         case IMN_SETOPENSTATUS:
+            MyDebugPrint((TEXT("IMN_SETOPENSTATUS\r\n")));
             UpdateStatusWindow(lpUIExtra);
             UpdateSoftKeyboard(lpUIExtra,
             lpIMC->fdwConversion & IME_CMODE_SOFTKBD);
@@ -885,9 +909,23 @@ LONG PASCAL ControlCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wPara
             break;
 
         case IMC_GETSTATUSWINDOWPOS:
-            lRet = (lpUIExtra->uiStatus.pt.x  << 16) & lpUIExtra->uiStatus.pt.x;
+            lRet = (lpUIExtra->uiStatus.pt.y  << 16) & lpUIExtra->uiStatus.pt.x;
             break;
 
+        case IMC_CLOSESTATUSWINDOW:
+            MyDebugPrint((TEXT("IMC_CLOSESTATUSWINDOW\r\n")));
+            if (IsWindow (lpUIExtra->uiStatus.hWnd))
+                ShowWindow(lpUIExtra->uiStatus.hWnd, SW_HIDE);
+            lpUIExtra->uiStatus.bShow= FALSE ;
+
+            lRet = 0;
+            break;
+        case IMC_OPENSTATUSWINDOW:
+            MyDebugPrint((TEXT("IMC_OPENSTATUSWINDOW\r\n")));
+            if (IsWindow (lpUIExtra->uiStatus.hWnd))
+                ShowWindow(lpUIExtra->uiStatus.hWnd,SW_SHOWNOACTIVATE);
+            lpUIExtra->uiStatus.bShow = TRUE;
+            lRet = 0;
         default:
             break;
     }
