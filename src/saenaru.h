@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.15 2006/11/20 08:44:02 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.16 2006/11/21 15:21:08 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -123,6 +123,7 @@ typedef TCHAR             MYCHAR;
 #define WM_UI_DEFCOMPMOVE (WM_USER+602)
 #define WM_UI_CANDMOVE    (WM_USER+603)
 #define WM_UI_GUIDEMOVE   (WM_USER+604)
+#define WM_UI_STATEHIDE   (WM_USER+605)
 
 /* Escape Functions */
 #define IME_ESC_PRI_GETDWORDTEST (IME_ESC_PRIVATE_FIRST + 0)
@@ -537,6 +538,7 @@ WORD PASCAL DeleteWord(LPSTR,LPSTR);
 
 /* reg.C      */
 void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
+DWORD PASCAL GetDwordFromSetting(LPTSTR lpszFlag);
 long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR);
 void SetRegMultiString(LPCTSTR lpszFlag, DWORD dwFlag);
 long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);

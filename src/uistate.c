@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uistate.c,v 1.5 2006/11/20 08:49:28 wkpark Exp $
+ * $Saenaru: saenaru/src/uistate.c,v 1.6 2006/11/24 11:43:31 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -105,7 +105,10 @@ LPARAM lParam;
             hbmpStatus = (HBITMAP)GetWindowLongPtr(hWnd,FIGWL_CLOSEBMP);
             DeleteObject(hbmpStatus);
             break;
-
+        case WM_UI_HIDE:
+            ShowWindow(hWnd,SW_HIDE);
+            return 0;
+            break;
         default:
             if (!MyIsIMEMessage(message))
                 return DefWindowProc(hWnd,message,wParam,lParam);
