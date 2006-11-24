@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uistate.c,v 1.4 2006/11/17 08:55:28 wkpark Exp $
+ * $Saenaru: saenaru/src/uistate.c,v 1.5 2006/11/20 08:49:28 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -563,9 +563,13 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                 mk.cbSize = sizeof(MENUITEMINFO);
                 // check CMODE
                 GetMenuItemInfo(hSubMenu,idMode,FALSE,&mk);
+#if (WINVER >= 0x0500)
                 mk.fMask=MIIM_STATE | MIIM_FTYPE;
-                mk.fState=MFS_CHECKED;
                 mk.fType=MFT_RADIOCHECK;
+#else
+                mk.fMask=MIIM_STATE;
+#endif
+                mk.fState=MFS_CHECKED;
                 SetMenuItemInfo(hSubMenu,idMode,FALSE,&mk);
 
 
