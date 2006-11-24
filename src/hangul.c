@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.25 2006/11/20 10:04:49 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.26 2006/11/21 08:25:00 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1745,6 +1745,9 @@ LPBYTE lpbKeyState;
 
             ret = hangul_automata(&ic, (WCHAR) hkey, &cs);
             ic.lastvkey = (UINT)VkKeyScan(code);
+            MyDebugPrint((TEXT(" * last vkey: 0x%x\r\n"), ic.lastvkey));
+            MyDebugPrint((TEXT(" * last scancode: 0x%x\r\n"), lParam >> 16));
+
 	    if (cs)
 	    {
 		// not composable. emit hangul syllable
@@ -2070,8 +2073,8 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
     else if (jamo >= 0x11a8 && jamo <= 0x11f9) kind=3;
     else return -1;
 
-    ctyping = (dwOptionFlag & CONCURRENT_TYPING) &&
-              (GetKeyState(ic->lastvkey) & 0x80000000);
+    ctyping = (dwOptionFlag & CONCURRENT_TYPING) && (ic->last != jamo) &&
+              (GetAsyncKeyState(ic->lastvkey) & 0x80000000);
 
     if (ic->laststate)
     {
@@ -2144,6 +2147,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
                 if (jong && hangul_jamo_to_syllable(ic->cho,ic->jung,jong)) {
                     ic->jong=jong;
                     hangul_ic_push(ic,jong);
+		    ic->last=jamo; // XXX
                     ic->laststate=3;
                     return 0;
                 } else {
@@ -2227,17 +2231,20 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, WCHAR *cs )
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
 			last = hangul_jongseong_to_choseong(ic->last);
+		    // ㅆ ㅉ은 쓸 수 없다. ㅆ은 종성으로 많이 쓰이고
+		    // ㅉ은 앉지 ... 등등 때문에 제외
 		    if (jong != 0x11af && last == jamo &&
 			(jamo == 0x1100 || jamo == 0x1103 ||
-			 jamo == 0x1107 || jamo == 0x110c )) // ㄲ ㄸ ㅃ ㅉ
+			 jamo == 0x1107 )) // ㄲ ㄸ ㅃ
 		    {
 			ic->jong=jong;
 			jamo= hangul_compose(last,last); // make ssang cho
 			cho= jamo;
 		    }
-		} else if (ctyping) {
+		} else if (ctyping) { // for ahnmatae
 		    last = hangul_jongseong_to_choseong(ic->jong);
 		    comb = hangul_compose(last,jamo);
+		    MyDebugPrint((TEXT("ssang cho ?: %x\r\n"), comb));
 		    if (comb &&
 			    comb == 0x1101 || comb == 0x1104 ||
 			    comb == 0x1108 || comb == 0x110a || comb == 0x110d) // ㄲ ㄸ ㅃ ㅆ ㅉ
