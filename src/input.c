@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/input.c,v 1.2 2003/12/26 08:28:43 perky Exp $
+ * $Saenaru: saenaru/src/input.c,v 1.3 2003/12/26 09:26:33 perky Exp $
  */
 
 /**********************************************************************/
@@ -65,10 +65,7 @@ LPBYTE lpbKeyState;
 
         default:
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
-                TCHAR szDev[80];
-
-                wsprintf(szDev, TEXT("Vkey: %x\r\n"), wVKey);
-                OutputDebugString(szDev);
+                MyDebugPrint((TEXT("Vkey: %x\r\n"), wVKey));
                 // This WM_IMEKEYDOWN has actual character code in itself.
                 hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState );
                 //AddChar( hIMC,  HIWORD(wParam));

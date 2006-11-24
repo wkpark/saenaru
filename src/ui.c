@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.21 2006/11/18 01:42:47 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.22 2006/11/20 08:49:28 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -237,7 +237,7 @@ LPARAM lParam;
 #endif
                 return 0L;
             default:
-                OutputDebugString((LPTSTR)TEXT("hUICurIMC == NULL\r\n"));
+                MyDebugPrint((TEXT("hUICurIMC == NULL\r\n")));
                 break;
         }
     }
@@ -873,14 +873,12 @@ LONG PASCAL ControlCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wPara
             break;
 
         case IMC_SETCOMPOSITIONFONT:
-            wsprintf((LPTSTR)szDev,TEXT("SETCOMPOSITIONFONT\r\n"));
-            OutputDebugString((LPTSTR)szDev);
+            MyDebugPrint((TEXT("SETCOMPOSITIONFONT\r\n")));
 
             break;
 
         case IMC_GETCOMPOSITIONWINDOW:
-            wsprintf((LPTSTR)szDev,TEXT("GETCOMPOSITIONWINDOW\r\n"));
-            OutputDebugString((LPTSTR)szDev);
+            MyDebugPrint((TEXT("GETCOMPOSITIONWINDOW\r\n")));
 
             *(LPCOMPOSITIONFORM)lParam  = lpIMC->cfCompForm; 
             lRet = 0;
@@ -1302,14 +1300,11 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             if ( vKey == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
             {
                // SHORT ShiftState = (GetAsyncKeyState(VK_LSHIFT) >> 31) & 1;
-                TCHAR szDev[80];
                 SHORT ShiftState;
                 ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
 
-                wsprintf((LPTSTR)szDev,TEXT("ShiftState is %x\r\n"),ShiftState);
-                OutputDebugString((LPTSTR)szDev);
-                wsprintf((LPTSTR)szDev,TEXT(" * VKey %x\r\n"),lpmsg->wParam);
-                OutputDebugString((LPTSTR)szDev);
+                MyDebugPrint((TEXT("ShiftState is %x\r\n"),ShiftState));
+                MyDebugPrint((TEXT(" * VKey %x\r\n"),lpmsg->wParam));
                 MyDebugPrint((TEXT("\t** ShiftState is 0x%x\r\n"),ShiftState));
                 if (ShiftState)
                 {

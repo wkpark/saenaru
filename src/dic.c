@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.24 2006/11/21 12:14:52 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.25 2006/11/22 15:32:34 wkpark Exp $
  */
 
 #include <windows.h>
@@ -373,7 +373,6 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
             lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
                   Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
 
-            OutputDebugString(TEXT("ConvHanja #1\r\n"));
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
@@ -444,13 +443,7 @@ set_compstr:
                 //
                 // Generate messages.
                 // XXX
-#ifdef DEBUG
-                {
-                    TCHAR szDev[80];
-                    wsprintf(szDev, TEXT(" *** ConvHanja: dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen);
-                    OutputDebugString(szDev);
-                }
-#endif
+                MyDebugPrint((TEXT(" *** ConvHanja: dwCompStrLen %d\r\n"), lpCompStr->dwCompStrLen));
 #if 1
                 if (lpCompStr->dwCompStrLen > 1 || isasc) {
                     GnMsg.message = WM_IME_COMPOSITION;
@@ -458,7 +451,7 @@ set_compstr:
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
                     //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-                    OutputDebugString(TEXT(" *** ConvHanja: GnMsg > 1\r\n"));
+                    MyDebugPrint((TEXT(" *** ConvHanja: GnMsg > 1\r\n")));
                 } else
 #endif
                 {
@@ -469,10 +462,12 @@ set_compstr:
                     if (dwImeFlag & SAENARU_ONTHESPOT)
                         GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-                    OutputDebugString(TEXT(" *** ConvHanja: GnMsg == 1\r\n"));
+                    MyDebugPrint((TEXT(" *** ConvHanja: GnMsg == 1\r\n")));
                 }
+#if DEBUG
                 MyOutputDebugString(lpmystr);
-                OutputDebugString(TEXT("\r\n *** ConvHanja: Pre candidate\r\n"));
+                MyDebugPrint((TEXT("\r\n *** ConvHanja: Pre candidate\r\n")));
+#endif
 
                 bRc = TRUE;
                 goto cvk_exit40;
@@ -499,7 +494,7 @@ set_compstr:
             GnMsg.wParam = IMN_OPENCANDIDATE;
             GnMsg.lParam = 1L;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-            OutputDebugString(TEXT("ConvHanja: OpenCandidate\r\n"));
+            MyDebugPrint((TEXT("ConvHanja: OpenCandidate\r\n")));
         }
 
         //
@@ -595,7 +590,7 @@ set_compstr:
         GnMsg.wParam = IMN_CHANGECANDIDATE;
         GnMsg.lParam = 1L;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-        OutputDebugString(TEXT("ConvHanja: ChangeCandidate\r\n"));
+        MyDebugPrint((TEXT("ConvHanja: ChangeCandidate\r\n")));
 
         //
         // If the selected candidate string is changed, the composition string
@@ -1213,15 +1208,18 @@ LPBYTE lpbKeyState;
                     // check application names
                     int i;
                     LPTSTR lpFname;
-
+#if DEBUG
                     OutputDebugString(szFname); // application path.
+#endif
 
                     for (i=ns;i>0;i--) {
                         if (szFname[i] == TEXT('\\')) break;
                     }
                     if (i>0) {
                         lpFname=szFname + i + 1;
+#if DEBUG
                         OutputDebugString(lpFname); // application real name
+#endif
                     }
                 }
 
@@ -1622,7 +1620,7 @@ LPBYTE lpbKeyState;
         case VK_RBUTTON:
         case VK_MBUTTON:
             // for mozilla
-            OutputDebugString(TEXT(" *** VK_LBUTTON\r\n"));
+            MyDebugPrint((TEXT(" *** VK_LBUTTON\r\n")));
             if (IsCompStr(hIMC)) {
                 MakeResultString(hIMC,TRUE);
                 hangul_ic_init(&ic);
@@ -1645,12 +1643,7 @@ LPBYTE lpbKeyState;
         return( FALSE );
     }
     else {
-#ifdef DEBUG
-        TCHAR szDev[80];
-
-        wsprintf(szDev, TEXT("code: %x\r\n"), wParam);
-        OutputDebugString(szDev);
-#endif
+        MyDebugPrint((TEXT("code: %x\r\n"), wParam));
         return( TRUE );
     }
 }

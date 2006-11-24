@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.7 2006/10/09 16:08:03 wkpark Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.8 2006/10/15 11:36:03 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -75,7 +75,6 @@ LPARAM lParam;
             break;
 
         case WM_MOVE:
-            OutputDebugString(TEXT("MOVE\r\n"));
             hUIWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
             if (IsWindow(hUIWnd))
                 SendMessage(hUIWnd,WM_UI_DEFCOMPMOVE,wParam,lParam);
@@ -738,7 +737,7 @@ void PASCAL SetFontCompWindow(LPUIEXTRA lpUIExtra)
         if (IsWindow(lpUIExtra->uiComp[i].hWnd))
             SetWindowLongPtr(lpUIExtra->uiComp[i].hWnd,FIGWL_FONT,(LONG_PTR)lpUIExtra->hFont);
 
-    OutputDebugString(TEXT("SetFontCompWindow\r\n"));
+    MyDebugPrint((TEXT("SetFontCompWindow\r\n")));
 }
 
 /*
