@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.26 2006/11/21 08:25:00 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.27 2006/11/24 11:01:07 wkpark Exp $
  */
 
 #include <windows.h>
@@ -1613,7 +1613,10 @@ LPBYTE lpbKeyState;
     fdwConversion = lpIMC->fdwConversion;
 
     /* check dvorak layout */
-    hkey= code = checkDvorak(code);
+    if (fdwConversion & IME_CMODE_NATIVE)
+	hkey= code = checkDvorak(code);
+    else
+	hkey= code;
 
     if (fdwConversion & IME_CMODE_NATIVE && capital) {
 	WORD ch = code;
