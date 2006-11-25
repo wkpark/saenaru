@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.24 2006/11/21 08:25:34 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.25 2006/11/22 15:32:02 wkpark Exp $
  */
 
 #include "windows.h"
@@ -438,6 +438,15 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 fRet = (BOOL)bNoComp[vKey];
         }
 
+        if (!fRet && IsCompStr(hIMC)) {
+            UINT wParam;
+            wParam=LOWORD(vKey) & 0x00FF;
+            MakeResultString(hIMC,TRUE);
+            hangul_ic_init(&ic);
+            keybd_event( (BYTE)wParam, 0x0, 0, 0 ); // simulate key
+            fRet=TRUE;
+        }
+
         if (lpCompStr)
             ImmUnlockIMCC(lpIMC->hCompStr);
 
@@ -454,11 +463,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             if ( ch==nch && (ch >= TEXT('!') && ch <= TEXT('~')) )
                 fRet=FALSE;
         }
-    }
-    
-    if (!fRet && IsCompStr(hIMC)) {
-        MakeResultString(hIMC,TRUE);
-        hangul_ic_init(&ic);
     }
     ImmUnlockIMC(hIMC);
     return fRet;
