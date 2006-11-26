@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uistate.c,v 1.6 2006/11/24 11:43:31 wkpark Exp $
+ * $Saenaru: saenaru/src/uistate.c,v 1.7 2006/11/24 23:05:05 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -88,22 +88,50 @@ LPARAM lParam;
             break;
 
         case WM_CREATE:
-            hbmpStatus = LoadBitmap(hInst,TEXT("STATUSBMP"));
-/*
+            /*hbmpStatus = LoadBitmap(hInst,TEXT("STATUSBMP")); */
             hbmpStatus =(HBITMAP)LoadImage(hInst,TEXT("STATUSBMP"),IMAGE_BITMAP,
-                    0,0,LR_LOADTRANSPARENT);
-                    */
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+
+            if (hbmpStatus) {
+                HDC hdc = CreateCompatibleDC(NULL);
+                COLORREF cTransColor;
+                DWORD dwColor= GetSysColor(COLOR_BTNFACE);
+                cTransColor= RGB(192,192,192);
+                if (hdc) {
+                    UINT iColor;
+                    HBITMAP hbmPrev = SelectObject(hdc, hbmpStatus);
+                    RGBQUAD rgbColors[256];
+                    UINT cColors = GetDIBColorTable(hdc, 0, 256, rgbColors);
+                    for (iColor = 0; iColor < cColors; iColor++) {
+                        if (rgbColors[iColor].rgbRed == 192 &&
+                            rgbColors[iColor].rgbGreen == 192 &&
+                            rgbColors[iColor].rgbBlue == 192) {
+                            rgbColors[iColor].rgbRed=GetRValue(dwColor);
+                            rgbColors[iColor].rgbGreen=GetGValue(dwColor);
+                            rgbColors[iColor].rgbBlue=GetBValue(dwColor);
+                            break;
+                        }
+                    }
+                    SetDIBColorTable(hdc, 0, cColors, rgbColors);
+                    SelectObject(hdc, hbmPrev);
+                    DeleteDC(hdc);
+                }
+            }
 
             SetWindowLongPtr(hWnd,FIGWL_STATUSBMP,(LONG_PTR)hbmpStatus);
+            /*
             hbmpStatus = LoadBitmap(hInst,TEXT("CLOSEBMP"));
             SetWindowLongPtr(hWnd,FIGWL_CLOSEBMP,(LONG_PTR)hbmpStatus);
+            */
             break;
 
         case WM_DESTROY:
             hbmpStatus = (HBITMAP)GetWindowLongPtr(hWnd,FIGWL_STATUSBMP);
             DeleteObject(hbmpStatus);
+            /*
             hbmpStatus = (HBITMAP)GetWindowLongPtr(hWnd,FIGWL_CLOSEBMP);
             DeleteObject(hbmpStatus);
+            */
             break;
         case WM_UI_HIDE:
             ShowWindow(hWnd,SW_HIDE);
@@ -168,110 +196,6 @@ int PASCAL BTXFromCmode( DWORD dwCmode)
 
 }
 
-void DrawTransBtn(HDC hdc, HDC hdcTemp, int xStart, int yStart,
-        COLORREF cTransparentColor)
-{
-   BITMAP     bm;
-   COLORREF   cColor;
-   HBITMAP    bmAndBack, bmAndObject, bmAndMem, bmSave;
-   HBITMAP    bmBackOld, bmObjectOld, bmMemOld, bmSaveOld;
-   HDC        hdcMem, hdcBack, hdcObject, hdcSave;
-   POINT      ptSize;
-/*
-   hdcTemp = CreateCompatibleDC(hdc);
-   SelectObject(hdcTemp, hBitmap);   // Select the bitmap
-
-   GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm);
-   ptSize.x = bm.bmWidth;            // Get width of bitmap
-   ptSize.y = bm.bmHeight;           // Get height of bitmap
-   */
-   ptSize.x = BTX;            // Get width of bitmap
-   ptSize.y = BTY;            // Get height of bitmap
-   DPtoLP(hdcTemp, &ptSize, 1);      // Convert from device
-                                     // to logical points
-
-   // Create some DCs to hold temporary data.
-   hdcBack   = CreateCompatibleDC(hdc);
-   hdcObject = CreateCompatibleDC(hdc);
-   hdcMem    = CreateCompatibleDC(hdc);
-   hdcSave   = CreateCompatibleDC(hdc);
-
-   // Create a bitmap for each DC. DCs are required for a number of
-   // GDI functions.
-
-   // Monochrome DC
-   bmAndBack   = CreateBitmap(ptSize.x, ptSize.y, 1, 1, NULL);
-
-   // Monochrome DC
-   bmAndObject = CreateBitmap(ptSize.x, ptSize.y, 1, 1, NULL);
-
-   bmAndMem    = CreateCompatibleBitmap(hdc, ptSize.x, ptSize.y);
-   bmSave      = CreateCompatibleBitmap(hdc, ptSize.x, ptSize.y);
-
-   // Each DC must select a bitmap object to store pixel data.
-   bmBackOld   = SelectObject(hdcBack, bmAndBack);
-   bmObjectOld = SelectObject(hdcObject, bmAndObject);
-   bmMemOld    = SelectObject(hdcMem, bmAndMem);
-   bmSaveOld   = SelectObject(hdcSave, bmSave);
-
-   // Set proper mapping mode.
-   SetMapMode(hdcTemp, GetMapMode(hdc));
-
-   // Save the bitmap sent here, because it will be overwritten.
-   BitBlt(hdcSave, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0, SRCCOPY);
-
-   // Set the background color of the source DC to the color.
-   // contained in the parts of the bitmap that should be transparent
-   cColor = SetBkColor(hdcTemp, cTransparentColor);
-
-   // Create the object mask for the bitmap by performing a BitBlt
-   // from the source bitmap to a monochrome bitmap.
-   BitBlt(hdcObject, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0,
-          SRCCOPY);
-
-   // Set the background color of the source DC back to the original
-   // color.
-   SetBkColor(hdcTemp, cColor);
-
-   // Create the inverse of the object mask.
-   BitBlt(hdcBack, 0, 0, ptSize.x, ptSize.y, hdcObject, 0, 0,
-          NOTSRCCOPY);
-
-   // Copy the background of the main DC to the destination.
-   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdc, xStart, yStart,
-          SRCCOPY);
-
-   // Mask out the places where the bitmap will be placed.
-   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdcObject, 0, 0, SRCAND);
-
-   // Mask out the transparent colored pixels on the bitmap.
-   BitBlt(hdcTemp, 0, 0, ptSize.x, ptSize.y, hdcBack, 0, 0, SRCAND);
-
-   // XOR the bitmap with the background on the destination DC.
-   BitBlt(hdcMem, 0, 0, ptSize.x, ptSize.y, hdcTemp, 0, 0, SRCPAINT);
-
-   // Copy the destination to the screen.
-   BitBlt(hdc, xStart, yStart, ptSize.x, ptSize.y, hdcMem, 0, 0,
-          SRCCOPY);
-
-   // Place the original bitmap back into the bitmap sent here.
-   BitBlt(hdcTemp, 0, 0, ptSize.x, ptSize.y, hdcSave, 0, 0, SRCCOPY);
-
-   // Delete the memory bitmaps.
-   DeleteObject(SelectObject(hdcBack, bmBackOld));
-   DeleteObject(SelectObject(hdcObject, bmObjectOld));
-   DeleteObject(SelectObject(hdcMem, bmMemOld));
-   DeleteObject(SelectObject(hdcSave, bmSaveOld));
-
-   // Delete the memory DCs.
-   DeleteDC(hdcMem);
-   DeleteDC(hdcBack);
-   DeleteDC(hdcObject);
-   DeleteDC(hdcSave);
-   //DeleteDC(hdcTemp);
-}
-
-
 /**********************************************************************/
 /*                                                                    */
 /* PaintStatus()                                                      */
@@ -293,7 +217,6 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
     {
         HBITMAP hbmpStatus;
         HBRUSH hOldBrush,hBrush;
-        COLORREF cColor,cTransColor;
 //      int nCyCap = GetSystemMetrics(SM_CYSMCAPTION);
         int nCyCap = 0;
         RECT rc;
@@ -329,10 +252,6 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
 
         hbmpStatus = (HBITMAP)GetWindowLongPtr(hStatusWnd,FIGWL_STATUSBMP);
         hbmpOld = SelectObject(hMemDC,hbmpStatus);
-        cTransColor= RGB(192,192,192); // XXX
-
-        cColor= SetBkColor(hTempDC,cTransColor);
-        SetBkMode(hTempDC,TRANSPARENT);
 
         // Paint HDR.
         x = BTEMPT;
@@ -346,19 +265,13 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
         bmTemp = CreateCompatibleBitmap(hDC, BTX, BTY);
         bmTempOld = SelectObject(hTempDC, bmTemp);
 
-        // clear
-        rc.top = rc.left = 0;
-        rc.right = BTX*2;
-        rc.bottom = BTY;
-        FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
-
         if (!(dwPushedStatus & PUSHED_STATUS_HDR)) {
             BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,0,SRCCOPY);
-            DrawTransBtn(hDC,hTempDC,0,0,cTransColor);
+            BitBlt(hDC,0,0,BTX,BTY,hTempDC,0,0,SRCCOPY);
         }
         else {
             BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
-            DrawTransBtn(hDC,hTempDC,0,0,cTransColor);
+            BitBlt(hDC,0,0,BTX,BTY,hTempDC,0,0,SRCCOPY);
         }
 
         // Paint MODE.
@@ -366,15 +279,14 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
 
         if (!(dwPushedStatus & PUSHED_STATUS_MODE)) {
             BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,0,SRCCOPY);
-            DrawTransBtn(hDC,hTempDC,BTX,nCyCap,cTransColor);
+            BitBlt(hDC,BTX,nCyCap,BTX,BTY,hTempDC,0,0,SRCCOPY);
         } else {
             BitBlt(hTempDC,0,0,BTX,BTY,hMemDC,x,BTY,SRCCOPY);
-            DrawTransBtn(hDC,hTempDC,BTX,nCyCap,cTransColor);
+            BitBlt(hDC,BTX,nCyCap,BTX,BTY,hTempDC,0,0,SRCCOPY);
         }
 
         DeleteObject(SelectObject(hTempDC, bmTempOld));
 
-        SetBkColor(hDC,cColor);
 #if 0
         // Paint Roman MODE.
         x = BTEMPT;
@@ -801,6 +713,11 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                         //(void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
                         ImmConfigureIME(GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, 0);
                         //ImmConfigureIME(GetKeyboardLayout(0), NULL, IME_CONFIG_GENERAL, 0);
+                        ImmUnlockIMC(hIMC);
+                        break;
+                    case IDM_CONFIG:
+                        lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+                        (void) ImeConfigure (GetKeyboardLayout(0), lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
                         ImmUnlockIMC(hIMC);
                         break;
 
