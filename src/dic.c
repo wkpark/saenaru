@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.26 2006/11/24 11:44:04 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.27 2006/11/24 22:58:53 wkpark Exp $
  */
 
 #include <windows.h>
@@ -36,6 +36,10 @@
 #include "resource.h"
 #include "vksub.h"
 #include "immsec.h"
+
+#define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x1159)
+#define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a2)
+#define hangul_is_jongseong(ch)	((ch) >= 0x11a7 && (ch) <= 0x11f9)
 
 int GetCandidateStringsFromDictionary(LPWSTR lpString, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR szDicFileName);
 
@@ -669,8 +673,19 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
 
         if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
             // Delete jamos
-            if (--ic.len > 0) {
-                ic.laststate--;    
+            if (ic.len-1 > 0) {
+                WCHAR last;
+                hangul_ic_pop(&ic); // delete
+                last= hangul_ic_peek(&ic); // delete
+                if (ic.laststate == 1) ic.cho=0;
+                else if (ic.laststate == 2) ic.jung=0;
+                else if (ic.laststate == 3) ic.jong=0;
+
+                if (hangul_is_choseong(last)) ic.laststate=1;
+                else if (hangul_is_jungseong(last)) ic.laststate=2;
+                else if (hangul_is_jongseong(last)) ic.laststate=3;
+
+                //ic.laststate--;
                 *lpptr = cs = hangul_ic_get(&ic,0);
             } else {
                 hangul_ic_init(&ic);

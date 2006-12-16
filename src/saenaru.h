@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.16 2006/11/21 15:21:08 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.17 2006/11/24 23:05:05 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -492,6 +492,8 @@ void PASCAL RevertText(HIMC hIMC);
 
 void PASCAL AddChar(HIMC,WORD);
 WCHAR PASCAL hangul_ic_get(HangulIC*, UINT);
+WCHAR PASCAL hangul_ic_pop(HangulIC*);
+WCHAR PASCAL hangul_ic_peek(HangulIC*);
 void PASCAL  hangul_ic_init(HangulIC*);
 
 BOOL PASCAL ConvHanja(HIMC, int, UINT);

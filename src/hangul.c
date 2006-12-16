@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.28 2006/11/24 11:41:37 wkpark Exp $
+ * $Saenaru: saenaru/src/hangul.c,v 1.29 2006/11/24 23:00:37 wkpark Exp $
  */
 
 #include <windows.h>
@@ -2590,10 +2590,20 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
             case 1: // 종성 + 초성
                 if (!ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
+                    if (hangul_jamo_to_syllable(jamo,ic->jung ? ic->jung:0x1161,ic->jong)){
+			// XXX
+			ic->cho=jamo;
+			hangul_ic_pop(ic);
+			hangul_ic_push(ic,jamo);
+			hangul_ic_push(ic,ic->jong); // fix order
+			ic->laststate=3;
+			return 0;
+		    }
+                    *cs = hangul_ic_commit(ic);
                     ic->cho=jamo;
                     hangul_ic_push(ic,jamo);
-                    ic->laststate=3;
-                    return 0;
+		    ic->laststate=1;
+		    return -1;
                 }
                 // 종성이 계속 눌려진 채로 있고
                 // 초성이 입력된 것이라면 
@@ -2643,10 +2653,19 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, WCHAR *cs )
             case 2: // 종성 + 중성
                 if (!ic->jung &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
+                    if (hangul_jamo_to_syllable(ic->cho ? ic->cho:0x110b,jamo,ic->jong)) {
+			ic->jung=jamo;
+			hangul_ic_pop(ic);
+			hangul_ic_push(ic,jamo);
+			hangul_ic_push(ic,ic->jong); // fix order
+			ic->laststate=3;
+			return 0;
+		    }
+                    *cs = hangul_ic_commit(ic);
                     ic->jung=jamo;
                     hangul_ic_push(ic,jamo);
-                    ic->laststate=3;
-                    return 0;
+		    ic->laststate=2;
+		    return -1;
                 }
                 // 종성이 계속 눌려진 채로 있고
                 // 중성이 입력된 것이라면 
