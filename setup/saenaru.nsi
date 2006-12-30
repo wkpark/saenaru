@@ -1,11 +1,12 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.6 2006/10/12 22:40:05 wkpark Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.7 2006/11/04 01:01:13 wkpark Exp $
 
-!define RELVERSION      "061104"
+!define RELVERSION      "1.0"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
 !define RESOURCEDIR     "..\resource"
+!define HELPDIR         "..\help"
 !define SRCROOTDIR      ".."
 !define SMPATH          "$SMPROGRAMS\새나루"
 
@@ -21,6 +22,8 @@ BrandingText "새나루 인스톨러"
   ;General
   Name "새나루 시험판 ${RELVERSION}"
   OutFile "Saenaru-${RELVERSION}.exe"
+  !define MUI_ICON "install.ico"
+  !define MUI_UNICON "install.ico"
 
   ;Folder selection page
   InstallDir "$WINDIR\IME\Saenaru"
@@ -72,6 +75,8 @@ Section "새나루 입력기" SecBody
 
   SaenaruDone:
   SetOverwrite lastused
+  SetOutPath "$INSTDIR\help"
+  File "${HELPDIR}\saenaru.chm"
   SetOutPath "$INSTDIR"
   File "${RESOURCEDIR}\saenaru.dic"
   File "${RESOURCEDIR}\word.dic"
@@ -92,7 +97,7 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
 
   ; dvorak driver support
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbdkor.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbddv.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "새나루 한글 입력기"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "한글 입력기 (새나루 드보락)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME file" "SAENARU.IME"
@@ -221,6 +226,7 @@ Section "Uninstall"
   Delete "$INSTDIR\winsym.dic"
   Delete "$INSTDIR\word.dic"
   Delete "$INSTDIR\jinsuk.dic"
+  Delete "$INSTDIR\help\saenaru.chm"
 
   Delete "$INSTDIR\Source\DIRS"
   Delete "$INSTDIR\Source\LICENSE"
@@ -242,8 +248,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\full_old.ico"
   Delete "$INSTDIR\Source\resource\general.ico"
   Delete "$INSTDIR\Source\resource\half.ico"
-  Delete "$INSTDIR\Source\resource\half_old.ico"
   Delete "$INSTDIR\Source\resource\keyboard.ico"
+  Delete "$INSTDIR\Source\resource\imepad.ico"
   Delete "$INSTDIR\Source\resource\penindic.ico"
   Delete "$INSTDIR\Source\resource\saenaru.dic"
   Delete "$INSTDIR\Source\resource\winsym.dic"
@@ -253,9 +259,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\saenaru.dlg"
   Delete "$INSTDIR\Source\resource\saenaru.ico"
   Delete "$INSTDIR\Source\resource\saenaru.rcv"
-  Delete "$INSTDIR\Source\resource\saenaru0.dic"
   Delete "$INSTDIR\Source\resource\status.bmp"
-  Delete "$INSTDIR\Source\resource\status_old.bmp"
   Delete "$INSTDIR\Source\resource\text\engkey.ico"
   Delete "$INSTDIR\Source\resource\text\hanjakey.ico"
   Delete "$INSTDIR\Source\resource\text\hankey.ico"
