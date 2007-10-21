@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.24 2006/11/24 23:04:02 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.25 2006/11/24 23:53:52 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -179,6 +179,8 @@ HANDLE hInstance;
     if( !RegisterClassEx( (LPWNDCLASSEX)&wc ) )
         return FALSE;
 #endif
+
+    hangul_ic_init(&ic); // init hangul
 
     return TRUE;
 }
@@ -414,7 +416,8 @@ LPARAM lParam;
             }
             //
             MoveCompWindow(lpUIExtra,lpIMC);
-            MoveCandWindow(hWnd,lpIMC,lpUIExtra, FALSE);
+            MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
+            //MoveCandWindow(hWnd,lpIMC,lpUIExtra, FALSE); // NateOn flicking
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE); // EditPlus problem
             GlobalUnlock(hUIExtra);
             ImmUnlockIMC(hUICurIMC);
