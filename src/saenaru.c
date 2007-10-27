@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.7 2006/10/10 11:08:38 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.8 2006/11/21 15:21:08 wkpark Exp $
  */
 
 #include <windows.h>
@@ -132,6 +132,9 @@ BOOL WINAPI DLLEntry (
 #ifdef DEBUG
             wsprintf(szDev,TEXT("DLLEntry Process Detach hInst is %lx"),hInst);
             ImeLog(LOGF_ENTRY, szDev);
+#endif
+#if !defined (NO_TSF)
+            UninitLanguageBar();
 #endif
             break;
 
