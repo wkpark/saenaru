@@ -1,10 +1,10 @@
 #
 # Maintainer Buildtool for nmake
 #
-# $Saenaru: saenaru/Makefile,v 1.3 2006/10/12 22:13:53 wkpark Exp $
+# $Saenaru: saenaru/Makefile,v 1.4 2006/12/30 01:48:59 wkpark Exp $
 #
 
-RELVERSION=	1.0
+RELVERSION=	1.0.1
 SETUPEXE=	setup\Saenaru-$(RELVERSION).exe
 IMEBUILDDIR=	src\objfre_wxp_x86\i386
 NSISDIR=	C:\Program Files\NSIS

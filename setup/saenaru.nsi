@@ -1,8 +1,8 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.7 2006/11/04 01:01:13 wkpark Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.8 2006/12/30 01:48:44 wkpark Exp $
 
-!define RELVERSION      "1.0"
+!define RELVERSION      "1.0.1"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
 !define RESOURCEDIR     "..\resource"
@@ -20,7 +20,7 @@ BrandingText "새나루 인스톨러"
 ;Configuration
 
   ;General
-  Name "새나루 시험판 ${RELVERSION}"
+  Name "새나루 정식판 ${RELVERSION}"
   OutFile "Saenaru-${RELVERSION}.exe"
   !define MUI_ICON "install.ico"
   !define MUI_UNICON "install.ico"
