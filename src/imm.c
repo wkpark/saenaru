@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.25 2006/11/22 15:32:02 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.26 2006/11/25 09:35:16 wkpark Exp $
  */
 
 #include "windows.h"
@@ -336,7 +336,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 #endif
 
     switch ( ( LOWORD(vKey) & 0x00FF ) ) {
-#if 1
+#if 0
         case VK_HANJA:
             if (IsCompStr(hIMC)) {
                 ImmUnlockIMC(hIMC);
@@ -823,7 +823,6 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }
         }
-        ImmUnlockIMC(hIMC);
 #if !defined (NO_TSF)
         if (fSelect) {
             if (InitLanguageBar ())
@@ -832,6 +831,7 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             ActivateLanguageBar (FALSE) ;
         }
 #endif
+        ImmUnlockIMC(hIMC);
     }
 
     return TRUE;
