@@ -128,7 +128,7 @@ CAPTION "새나루에 대해..."
 FONT 9, "굴림"
 LANGUAGE 0x12, 0x1
 BEGIN
-    LTEXT           "새나루 한글 입력기 버전 1.0.1",IDC_STATIC,63,36,88,8
+    LTEXT           "새나루 한글 입력기 버전 1.0.1",IDC_STATIC,61,36,98,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
     LTEXT           "장혜식, 박원규 만듦 2003-2007",IDC_STATIC,
 		     59,54,98,8
