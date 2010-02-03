@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.7 2006/11/09 11:45:33 wkpark Exp $
+ * $Saenaru: saenaru/src/btnime.cpp,v 1.8 2006/11/17 08:58:32 wkpark Exp $
  */
 
 #if !defined (NO_TSF)

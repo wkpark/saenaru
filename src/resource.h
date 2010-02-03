@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.10 2006/11/18 01:41:51 wkpark Exp $
+ * $Saenaru: saenaru/src/resource.h,v 1.11 2006/11/20 08:42:28 wkpark Exp $
  */
 
 //{{NO_DEPENDENCIES}}
@@ -77,6 +77,7 @@
 #define IDC_USE_SHIFT_SPACE     2007
 #define IDC_ESCENG_SUPPORT      2008
 #define IDC_QWERTY_HOTKEY_SUPPORT 2009
+#define IDC_JAMOS               2010
 
 /* string tables */
 #define IDS_CONFIGNAME              1000

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.27 2006/11/24 22:58:53 wkpark Exp $
+ * $Saenaru: saenaru/src/dic.c,v 1.28 2006/12/16 09:30:24 wkpark Exp $
  */
 
 #include <windows.h>
@@ -674,28 +674,87 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
             // Delete jamos
             if (ic.len-1 > 0) {
+                // 조합중인 글자?
                 WCHAR last;
+                int ncs = 0;
+
                 hangul_ic_pop(&ic); // delete
-                last= hangul_ic_peek(&ic); // delete
+                last= hangul_ic_peek(&ic); // get last
                 if (ic.laststate == 1) ic.cho=0;
                 else if (ic.laststate == 2) ic.jung=0;
                 else if (ic.laststate == 3) ic.jong=0;
 
+                //ic.laststate--;
+                if (ic.syllable) {
+
+                    ncs = hangul_ic_get(&ic,0, lpptr);
+                    if (ncs >= 1)
+                    cs = *(lpptr + ncs - 1);
+                    MyDebugPrint((TEXT(">> Syllable Delete Han Char: %s:%d\r\n"), lpptr, dwCurPos));
+                } else {
+                    LPMYSTR lpprev;
+                    // syllable이 아님.
+                    // 옛한글.
+
+                    MyDebugPrint((TEXT(">> Pre BACKSPACE Delete Han Char: %s:%d\r\n"), lpptr, dwCurPos));
+                    *lpptr = MYTEXT('\0'); // 마지막 문자 지움.
+                    MyDebugPrint((TEXT(">> deleted BACKSPACE Delete Han Char: %s\r\n"), lpptr));
+                    lpprev = lpptr - 1;
+                    dwCurPos--;
+                    cs = *(lpptr-1);
+
+                    if (ic.len > 0) {
+
+                    ncs = hangul_del_prev(lpprev);
+                    dwCurPos-= ncs - 1;
+                    MyDebugPrint((TEXT(">> Post BACKSPACE Delete Han Char: %s %d\r\n"), lpprev, ncs));
+
+                    lpptr -= ncs; // 이전 문자 위치로.
+                    MyDebugPrint((TEXT(">>> Get Delete Han Char: %s\r\n"), lpptr));
+
+                    // 재조합된 문자열을 가져옴.
+                    ncs = hangul_ic_get(&ic,0, lpptr);
+                    if (ncs > 0) {
+                        MyDebugPrint((TEXT(">>> Get result Han Char: %s : %d\r\n"), lpptr, ncs));
+                        lpptr += ncs;
+                        cs = *(lpptr - 1);
+                        *lpptr = MYTEXT('\0');
+                        dwCurPos+= ncs - 1;
+                        MyDebugPrint((TEXT(">>> CompStr result: %s:%d\r\n"), lpstr, dwCurPos));
+                    }
+                    }
+                }
+                // change last state
                 if (hangul_is_choseong(last)) ic.laststate=1;
                 else if (hangul_is_jungseong(last)) ic.laststate=2;
                 else if (hangul_is_jongseong(last)) ic.laststate=3;
 
-                //ic.laststate--;
-                *lpptr = cs = hangul_ic_get(&ic,0);
+                ic.last = last;
+
             } else {
                 hangul_ic_init(&ic);
                 Mylstrcpy( lpptr, lpstr+dwCurPos );
-                if (dwCurPos > 0)
+                if (dwCurPos > 0) {
                     cs = *(lpptr-1);
+                }
                 dwCurPos--;
             }
         } else {
-            nChar = 1;
+            LPMYSTR lpprev;
+            nChar = 0;
+            /*
+             * 첫가끝 조합 완료된 글자가 있는가?
+             * 발견되면 첫가끝 조합 글자를 지워준다.
+             * 이때, L*V*T+를 찾아서 모두 지운다?
+             */
+            // 지울 개수를 얻음.
+            nChar = hangul_del_prev(lpptr);
+
+            if (nChar == 0)
+                nChar = 1;
+
+            MyDebugPrint((TEXT("delete nChar: %x\r\n"), nChar));
+
             if( lpstr == lpptr && Mylstrlen(lpstr) == nChar )
             {
                 dwCurPos = 0;
@@ -703,9 +762,10 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             }
             else
             {
-                Mylstrcpy( lpptr, lpstr+dwCurPos );
+                //Mylstrcpy( lpptr, lpstr+dwCurPos );
                 dwCurPos -= nChar;
-                cs = *(lpptr-1);
+                *(lpptr-nChar+1) = MYTEXT('\0'); // 마지막 문자 지움.
+                cs = *(lpptr-nChar);
             }
         }
 
@@ -1527,8 +1587,13 @@ LPBYTE lpbKeyState;
 #endif
             break;
 
-        case VK_LEFT:
         case VK_RIGHT:
+            if (IsCompStr(hIMC) && ic.len)
+            {
+                hangul_ic_init(&ic);
+                return TRUE;
+            }
+        case VK_LEFT:
         case VK_UP:
         case VK_DOWN:
         case VK_HOME:

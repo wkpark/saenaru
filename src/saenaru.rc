@@ -70,39 +70,41 @@ FONT 9, "굴림"
 LANGUAGE 0x12, 0x1
 BEGIN
     ICON            IDI_GENERAL,IDC_STATIC,4,5,18,21
-    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,72
+    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,64
     CONTROL         "두벌식 자판 (&2)",IDC_LAYOUT_OLD2BUL,"Button",
                     BS_AUTORADIOBUTTON,33,15,70,11
     CONTROL         "세벌식 자판 (&3)",IDC_LAYOUT_3FIN,"Button",
-                    BS_AUTORADIOBUTTON,33,29,70,11
+                    BS_AUTORADIOBUTTON,33,27,70,11
     CONTROL         "세벌식 390 (&9)",IDC_LAYOUT_390,"Button",
-                    BS_AUTORADIOBUTTON,33,43,70,11
+                    BS_AUTORADIOBUTTON,33,39,70,11
     CONTROL         "세벌식 순아래 (&N)",IDC_LAYOUT_3SUN,"Button",
-                    BS_AUTORADIOBUTTON,33,57,70,11
+                    BS_AUTORADIOBUTTON,33,51,70,11
     CONTROL         "새두벌 자판 (&D)",IDC_LAYOUT_NEW2BUL,"Button",
                     BS_AUTORADIOBUTTON,115,15,77,11
     CONTROL         "새세벌 자판 (&S)",IDC_LAYOUT_NEW3BUL,"Button",
-                    BS_AUTORADIOBUTTON,115,29,77,11
+                    BS_AUTORADIOBUTTON,115,27,77,11
     CONTROL         "안마태 자판 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
-                    BS_AUTORADIOBUTTON,115,43,77,11
-    CONTROL         "사용자 정의 자판 (&U)",IDC_LAYOUT_USER,"Button",
-                    BS_AUTORADIOBUTTON,115,57,77,11
+                    BS_AUTORADIOBUTTON,115,39,77,11
+    //CONTROL         "사용자 정의 자판 (&U)",IDC_LAYOUT_USER,"Button",
+    //                BS_AUTORADIOBUTTON,115,57,77,11
+    CONTROL         "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | CBS_SORT | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
+                    ,115,51,77,91
 
     CONTROL         "모아치기 (&L)",IDC_COMPOSITE_TYPING,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,26,79,53,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,76,53,10
     CONTROL         "동시치기 (&C)",IDC_CONCURRENT_TYPING,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,83,79,53,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,74,76,53,10
 
     CONTROL         "자소 단위 지움 (&J)", IDC_BACKSPACE_BY_JAMO, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 138, 79, 71, 10 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 134, 76, 71, 10 
     CONTROL         "<ESC> 영문전환 (&E)", IDC_ESCENG_SUPPORT, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 26, 103,109, 10 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 16, 101,109, 10 
     CONTROL         "<Shift>-<SPACE> 한/영키 (&H)", IDC_USE_SHIFT_SPACE, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 26, 91, 109, 10 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 16, 89, 109, 10 
     CONTROL         "드보락 지원 (&V)", IDC_DVORAK_SUPPORT, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 138, 91, 70, 10 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 134, 89, 70, 10 
     CONTROL         "쿼티 단축키 (&Q)", IDC_QWERTY_HOTKEY_SUPPORT, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 138, 103, 70, 10 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 134, 101, 70, 10 
 /*
     CONTROL         "드보락 지원 (&V)",IDC_DVORAK_SUPPORT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,79,60,10
@@ -114,12 +116,15 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,26,103,124,10
 */
     CONTROL         "확장한자(KS X 1002) 지원 (&X)",IDC_KSX1002_SUPPORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,115,156,10
-    CONTROL         "완성형(KS X 1001) 한글 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,127,156,10
-    CONTROL         "첫가끝 자모를 포함한 전체 단자모 조합 (&O)",
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,127,90 ,10
+    CONTROL         "완성형(KS X 1001) 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,114,156,10
+    CONTROL         "한글 첫가끝 조합 (&O)",
+                    IDC_JAMOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    16,139,82,10
+    CONTROL         "전체 단자모 조합 (&U)",
                     IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    26,139,156,10
+                    116,139,78,10
 END
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
@@ -392,8 +397,10 @@ FONT 9, "Tahoma"
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,29,77,11 
    CONTROL	"&Ahnmatae", IDC_LAYOUT_AHNMATAE, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,43,77,11 
-   CONTROL	"&User defined", IDC_LAYOUT_USER, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,57,77,11 
+   //CONTROL	"&User defined", IDC_LAYOUT_USER, BUTTON,
+   //		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,57,77,11 
+   CONTROL      "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | CBS_SORT | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
+                ,115,57,77,95
    CONTROL	"Co&llective", IDC_COMPOSITE_TYPING, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,79,53,10 
    CONTROL	"&Concurrent", IDC_CONCURRENT_TYPING, BUTTON,
@@ -412,8 +419,11 @@ FONT 9, "Tahoma"
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,115,156,10 
    CONTROL	"Restrict to Wansung (&KS X 1001) syllables", IDC_KSX1001_SUPPORT, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,127,156,10 
-   CONTROL	"Compose with Hangul Jam&O", IDC_FULL_MULTIJOMO, BUTTON,
+   CONTROL	"Compose Hangul Jam&Os", IDC_JAMOS, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,139,156,10 
+   CONTROL      "&Raw Jamo compose",
+                    IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    115,139,78,10
 }
 
 

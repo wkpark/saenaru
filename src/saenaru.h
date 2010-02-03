@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.17 2006/11/24 23:05:05 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.h,v 1.18 2006/12/16 09:30:24 wkpark Exp $
  */
 
 #include <indicml.h>
@@ -79,6 +79,7 @@
 #define DVORAK_SUPPORT         0x00000100
 #define ESCENG_SUPPORT         0x00000200
 #define QWERTY_HOTKEY_SUPPORT  0x00000400
+#define HANGUL_JAMOS           0x00000800
 
 /* for Unicode SAENARU */
 typedef LPTSTR            LPMYSTR;
@@ -89,6 +90,7 @@ typedef TCHAR             MYCHAR;
 #define Mylstrcmp(x, y)   MylstrcmpW((x), (y))
 #define MyCharPrev(x, y)  MyCharPrevW((x), (y))
 #define MyCharPrev(x, y)  MyCharPrevW((x), (y))
+#define MyHanCharPrev(x, y)  MyHanCharPrevW((x), (y))
 #define MyCharNext(x)     MyCharNextW(x)
 #include <string.h>
 #define Mystrtok          wcstok
@@ -491,10 +493,12 @@ void PASCAL FlushText();
 void PASCAL RevertText(HIMC hIMC);
 
 void PASCAL AddChar(HIMC,WORD);
-WCHAR PASCAL hangul_ic_get(HangulIC*, UINT);
+UINT PASCAL hangul_ic_get(HangulIC*, UINT, LPMYSTR);
 WCHAR PASCAL hangul_ic_pop(HangulIC*);
 WCHAR PASCAL hangul_ic_peek(HangulIC*);
 void PASCAL  hangul_ic_init(HangulIC*);
+
+int hangul_del_prev(LPWSTR);
 
 BOOL PASCAL ConvHanja(HIMC, int, UINT);
 BOOL WINAPI MakeResultString(HIMC,BOOL);

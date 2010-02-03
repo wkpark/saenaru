@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/ui.c,v 1.26 2007/10/21 14:11:21 wkpark Exp $
+ * $Saenaru: saenaru/src/ui.c,v 1.27 2007/10/27 11:48:13 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -404,7 +404,9 @@ LPARAM lParam;
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             // WM_IME_STARTCOMPOSITION 메시지가 전달되지 않는 경우
-            if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
+            if (lpIMC &&
+                    (!(dwImeFlag & SAENARU_ONTHESPOT) ||
+                      (dwOptionFlag & HANGUL_JAMOS)))
             {
                 LPCOMPOSITIONSTRING lpCompStr;
                 lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
