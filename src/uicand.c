@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicand.c,v 1.8 2006/10/18 00:12:47 wkpark Exp $
+ * $Saenaru: saenaru/src/uicand.c,v 1.9 2006/11/20 08:53:02 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -349,15 +349,30 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
     MyDebugPrint((TEXT("CreateCandWindow\n")));
     // CandWindow는 CompWindow의 위치를 기반으로 생성된다.
     // 그러나, CompWindow가 없는 경우도 있다 (워드패드)
-    // 이 경우, 전체 윈도우 크기를 알아서 왼쪽 하단에 붙여준다.
-    // 마치 리눅스의 입력상태 창같은 위치
-    // skkime에서는 root 윈도라 부름.
     if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
     {
         RECT rc;
-        GetWindowRect(lpIMC->hWnd,&rc);
-        pt.x = rc.left;
-        pt.y = rc.bottom + 1;
+
+        PIMECHARPOSITION lpCP;
+        DWORD dwSize = sizeof(IMECHARPOSITION);
+        
+        lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
+        lpCP->dwSize = dwSize;
+        MyDebugPrint((TEXT("Cand dwSize :%d\n"),dwSize));
+ 
+        // 워드패드 같은 경우는 IMR_QUERYCHARPOSITION을 지원한다.
+        if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
+            pt.x = lpCP->pt.x;
+            pt.y = lpCP->pt.y + lpCP->cLineHeight + 1; // 24는 입력 글자의 추정 높이 XXX
+            MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
+        } else {
+            // 이 경우, 전체 윈도우 크기를 알아서 왼쪽 하단에 붙여준다.
+            // 마치 리눅스의 입력상태 창같은 위치
+            // skkime에서는 root 윈도라 부름.
+            GetWindowRect(lpIMC->hWnd,&rc);
+            pt.x = rc.left;
+            pt.y = rc.bottom + 1;
+        }
     }
     lpUIExtra->uiCand.pt.x = pt.x;
     lpUIExtra->uiCand.pt.y = pt.y;
@@ -730,14 +745,27 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         MyDebugPrint((TEXT(" *** MoveCandWindow #2\r\n")));
         if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
         {
+            PIMECHARPOSITION lpCP;
+            DWORD dwSize = sizeof(IMECHARPOSITION);
+        
+            lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
+            lpCP->dwSize = dwSize;
+        
             // 어떤 어플리케이션은 CompWindow를 가지고 있지 않다.
             // 워드패드가 대표적인 케이스
-            GetWindowRect(lpIMC->hWnd,&rc);
-            lpUIExtra->uiCand.pt.x = rc.left;
-            lpUIExtra->uiCand.pt.y = rc.bottom;
-
-            pt.x = rc.left;
-            pt.y = rc.bottom + 24;
+            // 이 경우 IMR_QUERYCHARPOSITION을 사용한다.
+            if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
+                pt.x = lpCP->pt.x;
+                pt.y = lpCP->pt.y + lpCP->cLineHeight + 1; // 글자 높이 + 1
+                MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
+            } else {
+                // IMR_QUERYCHARPOSITION도 지원하지 않으면 root window 스타일로.
+                GetWindowRect(lpIMC->hWnd,&rc);
+                lpUIExtra->uiCand.pt.x = rc.left;
+                lpUIExtra->uiCand.pt.y = rc.bottom;
+                pt.x = rc.left;
+                pt.y = rc.bottom + 24; // 추정 높이 24 XXX
+            }
         }
         lpUIExtra->uiCand.pt.x = pt.x;
         lpUIExtra->uiCand.pt.y = pt.y;
