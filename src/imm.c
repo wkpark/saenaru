@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/imm.c,v 1.26 2006/11/25 09:35:16 wkpark Exp $
+ * $Saenaru: saenaru/src/imm.c,v 1.27 2007/12/29 16:50:28 wkpark Exp $
  */
 
 #include "windows.h"
@@ -336,6 +336,37 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 #endif
 
     switch ( ( LOWORD(vKey) & 0x00FF ) ) {
+        case VK_HANJA:
+            if ( lKeyData & 0x80000000 ) break;
+            if (!IsCompStr(hIMC)) {
+                fOpen = ImmGetOpenStatus(hIMC);
+                if (!fOpen)
+                    ImmSetOpenStatus(hIMC,TRUE);
+
+                if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
+                {
+                    if (fOpen && dwConversion & IME_CMODE_HANJACONVERT)
+                    {
+                        dwConversion &= ~IME_CMODE_HANJACONVERT;
+                        dwConversion &= ~IME_CMODE_FULLSHAPE;
+                        MyDebugPrint((TEXT("x Hanja key\n")));
+                    } else {
+                        dwConversion |= IME_CMODE_HANJACONVERT;
+                        dwConversion |= IME_CMODE_NATIVE;
+                        MyDebugPrint((TEXT("o Hanja key\n")));
+                        fOpen = TRUE;
+                    }
+                    ImmSetConversionStatus (hIMC, dwConversion, 0) ;
+                }
+                if (!fOpen)
+                    ImmSetOpenStatus(hIMC,FALSE);
+
+                ImmUnlockIMC(hIMC);
+
+                return FALSE;
+                break;
+            }
+            break;
 #if 0
         case VK_HANJA:
             if (IsCompStr(hIMC)) {

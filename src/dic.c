@@ -37,9 +37,12 @@
 #include "vksub.h"
 #include "immsec.h"
 
-#define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x1159)
-#define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a2)
-#define hangul_is_jongseong(ch)	((ch) >= 0x11a7 && (ch) <= 0x11f9)
+#define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x115e)
+#define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a7)
+#define hangul_is_jongseong(ch)	((ch) >= 0x11a8 && (ch) <= 0x11ff)
+#define hangul_is_bangjum(ch)	((ch) == 0x302e || (ch) == 0x302f)
+#define is_combining_mark(ch)	((ch) >= 0x0300 && (ch) <= 0x036f || \
+	(ch) >= 0x1dc0 && (ch) <= 0x1de6 || (ch) >= 0x20d0 && (ch) <= 0x20f0)
 
 int GetCandidateStringsFromDictionary(LPWSTR lpString, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR szDicFileName);
 
@@ -368,15 +371,27 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
     if (nBufLen < 1)
     {
+        // 사전에 엔트리가 없다.
+        if (IsCandidate(lpIMC))
+        {
+            // 이미 열린 후보창이 있으면 닫는다.
+            lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+            ClearCandidate(lpCandInfo);
+            GnMsg.message = WM_IME_NOTIFY;
+            GnMsg.wParam = IMN_CLOSECANDIDATE;
+            GnMsg.lParam = 1;
+            GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+        }
+
         if (!*lpb)
         {
             //goto cvk_exit40;
             //
             // make attribute
             //
-            lmemset(GETLPCOMPATTR(lpCompStr),ATTR_TARGET_CONVERTED ,
+            lmemset(GETLPCOMPATTR(lpCompStr),ATTR_TARGET_NOTCONVERTED ,
                   Mylstrlen(GETLPCOMPSTR(lpCompStr)));
-            lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
+            lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_NOTCONVERTED,
                   Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
 
             GnMsg.message = WM_IME_COMPOSITION;
@@ -397,7 +412,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
 
 
     lpstr = (LPMYSTR)szBuf;
-    if (!*lpb)
+    if (!*lpb && 0)
     {
         //
         // String is not converted yet.
@@ -523,6 +538,7 @@ set_compstr:
             lpstr += (Mylstrlen(lpstr) + 1);
             i++;
         }
+        MyDebugPrint((TEXT("ConvHanja: OpenCandidate - %d\r\n"), i));
 
         lpCandList->dwSize = sizeof(CANDIDATELIST) +
                           (MAXCANDSTRNUM * (sizeof(DWORD) + MAXCANDSTRSIZE));
@@ -671,7 +687,17 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
 
         lpptr = MyCharPrev( lpstr, lpstr+dwCurPos );
 
-        if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
+        if ( is_combining_mark(*lpptr)) {
+            LPMYSTR lpprev;
+            // combining mark가 발견되면 먼저 지운다.
+            *lpptr = MYTEXT('\0');
+            lpprev = lpptr - 1;
+            dwCurPos--;
+            while(is_combining_mark(*lpprev))
+                lpprev--;
+            cs = *lpprev;
+
+        } else if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
             // Delete jamos
             if (ic.len-1 > 0) {
                 // 조합중인 글자?
@@ -1257,7 +1283,65 @@ LPBYTE lpbKeyState;
         case VK_BACK:
             if (IsConvertedCompStr(hIMC))
             {
-                FlushText(hIMC);
+                if (!(lpIMC = ImmLockIMC(hIMC)))
+                    return FALSE;
+
+                fdwConversion = lpIMC->fdwConversion;
+
+                // 후보창이 열려있는 경우. 아래를 옵션으로 처리해야 한다. XXX
+                if ((fdwConversion & IME_CMODE_HANJACONVERT) &&
+                    (fdwConversion & IME_CMODE_NATIVE))
+                {
+                    TRANSMSG GnMsg;
+
+                    if (ImmGetIMCCSize(lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                    {
+                        ImmUnlockIMC(hIMC);
+                        return FALSE;
+                    }
+
+                    lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+
+                    // 속성을 ATTR_TARGET_CONVERTED에서 ATTR_INPUT으로 원상복귀.
+                    lmemset(GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
+                        Mylstrlen(GETLPCOMPSTR(lpCompStr)));
+                    lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
+                        Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
+
+                    lpCompStr->dwCompAttrLen = 0;
+                    lpCompStr->dwCompReadAttrLen = 0;
+                    // 이상하게도 CursorPos가 0이 되어 있다. 이 값을 기본값으로 원상복귀.
+                    lpCompStr->dwCursorPos = Mylstrlen(GETLPCOMPSTR(lpCompStr));
+
+                    GnMsg.message = WM_IME_COMPOSITION;
+                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR | GCS_CURSORPOS;
+                    GnMsg.wParam = 0;
+                    GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+
+                    ImmUnlockIMCC(lpIMC->hCompStr);
+
+                    DeleteChar(hIMC,wParam);
+
+                    // 후보창이 열려있는데, 조합중인 한글이 초성만 있는 경우
+                    if (ic.len == 1 && IsCandidate(lpIMC)) {
+                        LPCANDIDATEINFO lpCandInfo;
+                        // 열린 창을 닫아준다.
+                        lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+                        ClearCandidate(lpCandInfo);
+                        ImmUnlockIMCC(lpIMC->hCandInfo);
+                        GnMsg.message = WM_IME_NOTIFY;
+                        GnMsg.wParam = IMN_CLOSECANDIDATE;
+                        GnMsg.lParam = 1L;
+                        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                    } else {
+                        ConvHanja(hIMC,0,0);
+                    }
+                } else {
+                    FlushText(hIMC);
+                }
+
+                ImmUnlockIMC(hIMC);
+
                 return TRUE;
             } else if (IsCompStr(hIMC))
             {
@@ -1551,10 +1635,12 @@ LPBYTE lpbKeyState;
             fdwConversion = lpIMC->fdwConversion;
             ImmUnlockIMC(hIMC);
 
-            if (IsCompStr(hIMC) &&
+            // 스페이스를 한자 페이지 넘기는 키로 사용한다.
+            // 옵션으로 켜고 킬 수 있게.
+            if (IsCompStr(hIMC) && IsCandidate(lpIMC) &&
                     (fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
-                hangul_ic_init(&ic);
+                hangul_ic_init(&ic); // 이 경우는 한글을 초기화함.
                 ConvHanja(hIMC,1,0);
                 return TRUE;
             }
@@ -1576,15 +1662,6 @@ LPBYTE lpbKeyState;
                 //keybd_event( (BYTE)wParam, 0x0, KEYEVENTF_KEYUP, 0);
                 return TRUE;
             }
-#if 0
-            // 스페이스를 한자 페이지 넘기는 키로 사용한다.
-            // 옵션으로 켜고 킬 수 있게.
-            if (IsConvertedCompStr(hIMC))
-            {
-                ConvHanja(hIMC,1);
-                return TRUE;
-            }
-#endif
             break;
 
         case VK_RIGHT:

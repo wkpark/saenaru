@@ -329,7 +329,7 @@ typedef struct _tagMYGUIDELINE{
 typedef struct _tagHangulIC {
     //WCHAR read[10]; // L{1,3}V{1,3}T{0,3}
     WCHAR read[MAXICREADSIZE];
-    WCHAR comp[MAXICCOMPSIZE];
+    WCHAR comp[MAXICCOMPSIZE]; // NOT USED
     WCHAR cho;
     WCHAR jung;
     WCHAR jong;

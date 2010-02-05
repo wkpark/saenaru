@@ -82,6 +82,9 @@ hangul_choseong_to_cjamo(WCHAR ch)
 #define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x115e)
 #define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a7)
 #define hangul_is_jongseong(ch)	((ch) >= 0x11a8 && (ch) <= 0x11ff)
+#define hangul_is_bangjum(ch)	((ch) == 0x302e || (ch) == 0x302f)
+#define is_combining_mark(ch)	((ch) >= 0x0300 && (ch) <= 0x036f || \
+	(ch) >= 0x1dc0 && (ch) <= 0x1de6 || (ch) >= 0x20d0 && (ch) <= 0x20f0)
 
 WCHAR PASCAL
 hangul_jungseong_to_cjamo(WCHAR ch)
@@ -479,7 +482,7 @@ hangul_jamo_to_cjamo(WCHAR jamo)
         return hangul_choseong_to_cjamo(jamo);
     if (jamo >= 0x1161 && jamo <= 0x1175)
         return hangul_jungseong_to_cjamo(jamo);
-    if (jamo >= 0x11a7 && jamo <= 0x11c2)
+    if (jamo >= 0x11a8 && jamo <= 0x11c2)
         return hangul_jongseong_to_cjamo(jamo);
     // else
     return jamo;
@@ -1929,7 +1932,7 @@ LPBYTE lpbKeyState;
         hangul_ic_init(&ic);
     }
 
-    if (IsConvertedCompStr(hIMC))
+    if (0 && IsConvertedCompStr(hIMC)) // 후보창을 보여주면서 그와 동시에 글자를 계속 조합할 수 있도록. XXX
     {
         MakeResultString(hIMC,FALSE);
         InitCompStr(lpCompStr,CLR_UNDET);
@@ -1997,13 +2000,34 @@ LPBYTE lpbKeyState;
 		lpCompStr->dwCursorPos++;
 		// emit
 	    }
-	} else if ( (hkey >= 0x1100 && hkey <= 0x11c2) &&
+	} else if ( (hkey >= 0x1100 && hkey <= 0x11ff) &&
                    !(dwOptionFlag & FULL_MULTIJOMO) &&
                     (fdwConversion & IME_CMODE_NATIVE) )
         {
 	    int ret, ncs;
+	    MYCHAR	marks[128];
+	    UINT    nmark = 0;
+	    marks[0] = MYTEXT('\0');
 
             MyDebugPrint((TEXT("input jamo: %x\r\n"), hkey));
+
+	    // Combining Mark가 있는경우 - combining mark를 저장해둔다.
+	    if (IsCompStr(hIMC) && is_combining_mark(*(lpstr - 1))) {
+		UINT i = 0;
+		MYCHAR	m;
+		while (is_combining_mark(*(lpstr - 1 - i))) {
+		    m = *(lpstr - 1 - i);
+		    if (is_combining_mark(m))
+			marks[i] = m;
+		    else
+			break;
+		    i++;
+		}
+		lpstr -= i;
+		lpCompStr->dwCursorPos -= i;
+		// mark counter.
+		nmark = i;
+	    }
 
             ret = hangul_automata(&ic, (WCHAR) hkey, lcs, &ncs);
 	    if (ncs)
@@ -2014,6 +2038,7 @@ LPBYTE lpbKeyState;
             ic.lastvkey = (UINT)VkKeyScan(code);
             MyDebugPrint((TEXT(" * last vkey: 0x%x\r\n"), ic.lastvkey));
             MyDebugPrint((TEXT(" * last scancode: 0x%x\r\n"), lParam >> 16));
+
 
 	    if (ncs)
 	    {
@@ -2060,6 +2085,19 @@ LPBYTE lpbKeyState;
 
 		    MyDebugPrint((TEXT(" * 옛한글: %s\r\n"), lcs));
 		}
+
+		// combining mark를 되돌린다.
+		if (nmark > 0) {
+		    UINT i = 0;
+		    for (i = 0; i < nmark; i++) {
+			*(lpstr + i) = marks[i];
+		    }
+		    lpstr += nmark;
+		    lpCompStr->dwCursorPos += nmark;
+		    nmark = 0;
+		}
+		*lpstr = MYTEXT('\0');
+
 		if (dwImeFlag & SAENARU_ONTHESPOT && !(dwOptionFlag & HANGUL_JAMOS))
 		{
                     dwGCR=GCS_RESULTALL;
@@ -2104,7 +2142,6 @@ LPBYTE lpbKeyState;
 
 			    *lpstr++ = cs;
 			    lpCompStr->dwCursorPos++;
-			    *lpstr = MYTEXT('\0');
 
 			} else {
 			    // 그밖에.
@@ -2159,7 +2196,28 @@ LPBYTE lpbKeyState;
 			}
 		    }
 		}
+		// combining mark를 되돌린다.
+		if (nmark > 0) {
+		    UINT i = 0;
+		    for (i = 0; i < nmark; i++) {
+			*(lpstr + i) = marks[i];
+		    }
+		    lpstr += nmark;
+		    lpCompStr->dwCursorPos += nmark;
+		    nmark = 0;
+		}
 	    } else {
+		// combining mark를 되돌린다.
+		if (nmark > 0) {
+		    UINT i = 0;
+		    for (i = 0; i < nmark; i++) {
+			*(lpstr + i) = marks[i];
+		    }
+		    lpstr += i;
+		    lpCompStr->dwCursorPos += i;
+		    nmark = 0;
+		}
+
 		// 새조합
 		// new hangul composition
 		ncs = hangul_ic_get(&ic,0,lcs);
@@ -2168,22 +2226,28 @@ LPBYTE lpbKeyState;
 		*lpstr++ = cs;
                	lpCompStr->dwCursorPos++;
 	    }
+	    *lpstr = MYTEXT('\0');
         }
 	else
 	{
 	    if (!hkey) hkey = code;
 	    code = (WORD) hkey;
             MyDebugPrint((TEXT("ascii code: %x\r\n"), (WORD)hkey));
-	    /* for Hanme Typing tutor */
-            MakeResultString(hIMC,FALSE);
-            InitCompStr(lpCompStr,CLR_UNDET);
+            if ((fdwConversion & IME_CMODE_NATIVE) && IsCompStr(hIMC) && is_combining_mark(hkey)) {
+		cs = *(lpstr-1);
+		MyDebugPrint((TEXT("CompStr code: %x\r\n"), (WORD)cs));
+	    } else {
+		/* for Hanme Typing tutor */
+		MakeResultString(hIMC,FALSE);
+		InitCompStr(lpCompStr,CLR_UNDET);
 
-	    dwGCR = GCS_RESULTALL;
+		dwGCR = GCS_RESULTALL;
 
-	    hangul_ic_init(&ic);
+		hangul_ic_init(&ic);
+		lpchText = GETLPCOMPSTR(lpCompStr);
+		lpstr = lpchText;
+	    }
 
-            lpchText = GETLPCOMPSTR(lpCompStr);
-            lpstr = lpchText;
 	    /* */
 	    /* XXX how to fix EditPlus problem ? */
             *lpstr++ = (WORD)hkey;
@@ -2283,8 +2347,33 @@ ac_exit:
     // RESULTSTR이 없고, CompStr이 한글 이외의 문자이면 전체를 commit
     //
     if ( dwGCR != GCS_RESULTALL ) {
-	if (!cs)
+	if (!cs) {
             MakeResultString(hIMC,TRUE);
+	} else if (ic.len > 1 && // 초성+중성 두글자 이상일 경우.
+		IsCompStr(hIMC) &&
+		(fdwConversion & IME_CMODE_HANJACONVERT) &&
+                    (fdwConversion & IME_CMODE_NATIVE)) {
+	    // 입력 즉시 후보 창 뜨게 하기.
+	    BOOL candOk = FALSE;
+	    CANDIDATEFORM lc;
+	    /*
+	    candOk = MyImmRequestMessage(hIMC, IMR_CANDIDATEWINDOW, (LPARAM)&lc);   
+	    if (candOk) {
+                // 어떤 어플은 자체 내장된 candidate리스트를 쓰고, 어떤것은 그렇지 않다.
+                // 그런데 이러한 동작이 일관성이 없어서 어떤 어플은 특별처리 해야 한다.
+                // always generage WM_IME_KEYDOWN for VK_HANJA XXX
+                TRANSMSG GnMsg;
+                GnMsg.message = WM_IME_KEYDOWN;
+                GnMsg.wParam = wParam;
+                GnMsg.lParam = lParam;
+                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                OutputDebugString(TEXT("Auto DicKeydown: WM_IME_KEYDOWN\r\n"));
+            }
+	    */
+            if (!candOk) {
+                ConvHanja(hIMC,0,0);
+            }
+	}
     } else {
         WCHAR result = 0;
 	UINT resultlen = 0;
@@ -2352,6 +2441,7 @@ ac_exit:
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 	}
+
     }
     ImmUnlockIMCC(lpIMC->hCompStr);
     ImmUnlockIMC(hIMC);

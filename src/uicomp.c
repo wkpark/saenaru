@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/uicomp.c,v 1.8 2006/10/15 11:36:03 wkpark Exp $
+ * $Saenaru: saenaru/src/uicomp.c,v 1.9 2006/11/24 11:44:04 wkpark Exp $
  */
 
 /**********************************************************************/
@@ -552,7 +552,7 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
                 break;
 
             case ATTR_TARGET_CONVERTED:
-                SetTextColor(hDC,RGB(127,127,127));
+                SetTextColor(hDC,RGB(200,200,200));
                 if (!fVert)
                     TextOut(hDC,x + 1,y + 1,lpstr,cnt);
                 else
