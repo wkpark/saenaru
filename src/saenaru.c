@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.c,v 1.8 2006/11/21 15:21:08 wkpark Exp $
+ * $Saenaru: saenaru/src/saenaru.c,v 1.9 2007/10/27 11:48:12 wkpark Exp $
  */
 
 #include <windows.h>
@@ -37,6 +37,7 @@
 #include "immsec.h"
 
 extern HANDLE hMutex;
+UINT    WM_MSIME_QUERYPOSITION;
 
 int
 GetSaenaruDirectory(LPTSTR lpDest, int max)
@@ -92,6 +93,9 @@ BOOL WINAPI DLLEntry (
 
             hInst= hInstDLL;
             IMERegisterClass( hInst );
+
+            // Register Messages
+            WM_MSIME_QUERYPOSITION = RegisterWindowMessage(TEXT("MSIMEQueryPosition"));
 
             // Initialize for SAENARU.
             lpDicFileName = (LPTSTR)&szDicFileName;

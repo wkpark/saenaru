@@ -389,6 +389,8 @@ extern DWORD dwImeFlag;
 extern BOOL gfSaenaruSecure;
 
 extern HangulIC ic;
+
+extern UINT WM_MSIME_QUERYPOSITION;
 #endif //_NO_EXTERN_
 
 /**********************************************************************/

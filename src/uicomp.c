@@ -35,6 +35,8 @@
 #include "immdev.h"
 #include "saenaru.h"
 
+// static  UINT    WM_MSIME_QUERYPOSITION;
+
 /**********************************************************************/
 /*                                                                    */
 /* CompStrWndProc()                                                   */
@@ -98,6 +100,7 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
     int i;
     RECT rc;
 
+    MyDebugPrint((TEXT("Create Comp Wind\n")));
     lpUIExtra->dwCompStyle = lpIMC->cfCompForm.dwStyle;
     for (i=0; i < MAXCOMPWND ; i++)
     {
@@ -106,7 +109,8 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
             lpUIExtra->uiComp[i].hWnd = 
                 CreateWindowEx(0,
                              (LPTSTR)szCompStrClassName,NULL,
-                             WS_COMPNODEFAULT,
+                             WS_COMPDEFAULT,
+                             // WS_COMPNODEFAULT,
                              0,0,1,1,
                              hUIWnd,NULL,hInst,NULL);
         }
@@ -120,12 +124,86 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpUIExtra->uiComp[i].bShow = FALSE;
     }
 
-    // not created yet ?
-    if (lpUIExtra->uiDefComp.pt.x == -1)
-    {
-        GetWindowRect(lpIMC->hWnd,&rc);
+    // 일부 어플은 CompWindow의 글꼴과 크기 및 위치를 제대로 설정하지 못한다.
+    // EditPlus가 대표적인 예.
+    // 그런데 이 경우에 일본어 입력기에서는 모두 제대로 나온다;;;;
+    // SPY++로 추적해봐도 별로 다른 것은 없는 듯.
+    if (lpIMC && lpIMC->fdwInit & INIT_LOGFONT) {
+        LOGFONT fon;
+        UINT ret = 0;
+
+        MyDebugPrint((TEXT(" **** COMP INIT_LOGFONT %s:%d\n"), lpIMC->lfFont.W.lfFaceName,
+                                                    lpIMC->lfFont.W.lfHeight));
+
+        MyDebugPrint((TEXT("IMR Font Test Create Comp Wind\n")));
+      
+        if (ret = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_COMPOSITIONFONT, (LPARAM)&fon)) {
+            MyDebugPrint((TEXT(" ***** set FONT %s:%d\n"), fon.lfFaceName,
+                                                fon.lfHeight));
+        } else {
+            MyDebugPrint((TEXT("******** FAIL to get IMR Font Test Create Comp Wind\n")));
+        }
+    }
+
+    /*
+     * EditPlus는 이상하게도 CFS_CANDIDATEPOS만 세팅이 되어있다.
+     * 뭐가 잘못이 있는걸까?
+     */
+    if (lpIMC && lpIMC->fdwInit & INIT_COMPFORM) { // XXX
+        POINT pt;
+        pt.x = lpIMC->cfCompForm.ptCurrentPos.x;
+        pt.y = lpIMC->cfCompForm.ptCurrentPos.y;
+
+        MyDebugPrint((TEXT(" ***** C %dx%d\n"), pt.x, pt.y));
+        MyDebugPrint((TEXT(" ***** Cand %dx%d INIT\n"), lpIMC->cfCandForm[0].ptCurrentPos.x, lpIMC->cfCandForm[0].ptCurrentPos.y));
+        ClientToScreen(lpIMC->hWnd, &pt);
+        MyDebugPrint((TEXT(" ***** S %dx%d\n"), pt.x, pt.y));
+        MyDebugPrint((TEXT(" ***** INIT_COMPFORM CreateCompWnd\n")));
+        MyDebugPrint((TEXT(" ***** dwStyle %d\n"), lpIMC->cfCompForm.dwStyle));
+        MyDebugPrint((TEXT(" ***** CAND dwStyle %d\n"), lpIMC->cfCandForm[0].dwStyle));
+        MyDebugPrint((TEXT(" ***** fdwInit %d\n"), lpIMC->fdwInit));
+
+        lpUIExtra->uiDefComp.pt.x = pt.x;
+        lpUIExtra->uiDefComp.pt.y = pt.y;
+    }
+
+    if (lpUIExtra->uiDefComp.pt.x == -1) {
+        // not created yet ?
+        LPIMECHARPOSITION lpCP;
+        DWORD dwSize = sizeof(IMECHARPOSITION);
+        UINT ret = 0;
+        POINT pt;
+
+        MyDebugPrint((TEXT(" ******* IMR Test Create Comp Wind\n")));
+        
+        lpCP = (LPIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
+        lpCP->dwSize = dwSize;
+ 
+        // 워드패드 같은 경우는 IMR_QUERYCHARPOSITION을 지원한다.
+        if (ret = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
+            rc.left = lpCP->pt.x;
+            rc.bottom = lpCP->pt.y;
+            MyDebugPrint((TEXT("IMR Comp pt.x :%d\n"),rc.left));
+
+        } else if (GetCaretPos(&pt)) {
+            // GetCaretPos()로 가져오기 시도.
+            // EditPlus와 같은 경우.
+            MyDebugPrint((TEXT(" ***** GetCaretPos INIT\n")));
+            ClientToScreen(lpIMC->hWnd, &pt);
+            MyDebugPrint((TEXT(" ***** S %dx%d INIT\n"), pt.x, pt.y));
+            rc.left = pt.x;
+            rc.bottom = pt.y;
+        } else {
+            // 없으면 Root window 스타일
+            GetWindowRect(lpIMC->hWnd,&rc);
+            MyDebugPrint((TEXT("*** Fail to IMR QUERYPOS Root Comp pt.x :%d\n"),rc.left));
+        }
+        GlobalFree(lpCP);
+
         lpUIExtra->uiDefComp.pt.x = rc.left;
         lpUIExtra->uiDefComp.pt.y = rc.bottom + 1;
+    } else {
+        MyDebugPrint((TEXT("Initial Comp pt.x :%d\n"),lpUIExtra->uiDefComp.pt.x));
     }
 
     // Root window style XXX
@@ -138,7 +216,6 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
             myStyle=WS_BORDER;
         }
 #endif
-
         lpUIExtra->uiDefComp.hWnd = 
             CreateWindowEx( WS_EX_WINDOWEDGE,
                          (LPTSTR)szCompStrClassName,NULL,
@@ -247,6 +324,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
     //
     MyDebugPrint((TEXT("MoveCompWindow\r\n")));
     lpUIExtra->dwCompStyle = lpIMC->cfCompForm.dwStyle;
+    MyDebugPrint((TEXT("MoveCompWindow dwStyle %x\r\n"), lpIMC->cfCompForm.dwStyle));
 
     if (lpIMC->cfCompForm.dwStyle)  // Style is not DEFAULT.
     {
@@ -475,8 +553,58 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
             }
 
             ReleaseDC(lpUIExtra->uiDefComp.hWnd,hDC);
+            { 
+                PIMECHARPOSITION lpCP;
+                DWORD dwSize = sizeof(IMECHARPOSITION);
         
-            GetWindowRect(lpIMC->hWnd,&rc);
+                lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
+                lpCP->dwSize = dwSize;
+ 
+                // 워드패드 같은 경우는 IMR_QUERYCHARPOSITION을 지원한다.
+                if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
+                    rc.left = lpCP->pt.x;
+                    rc.bottom = lpCP->pt.y;
+                    MyDebugPrint((TEXT("Cand pt.x :%d\n"),lpCP->pt.x));
+                } else {
+                    UINT    ret;
+        
+                    ret = SendMessage( lpIMC->hWnd, WM_MSIME_QUERYPOSITION, 1, (LPARAM)lpCP );
+                    if (ret) {
+                        rc.left = lpCP->pt.x;
+                        rc.bottom = lpCP->pt.y;
+                        MyDebugPrint((TEXT("MSIME Cand pt.x :%d\n"),lpCP->pt.x));
+                    } else {
+                        POINT pt;
+                        // XXX
+                        if (GetCaretPos(&pt)) {
+                            // GetCaretPos()가 작동되면,
+                            MyDebugPrint((TEXT(" ***** GetCaretPos INIT\n")));
+                            ClientToScreen(lpIMC->hWnd, &pt);
+                            MyDebugPrint((TEXT(" ***** S %dx%d INIT\n"), pt.x, pt.y));
+                            rc.left = pt.x;
+                            rc.bottom = pt.y;
+                        } else if (lpUIExtra->uiDefComp.pt.x != -1) {
+                            // 값이 이미 세팅되어 있는 경우.
+                            pt.x = lpIMC->cfCompForm.ptCurrentPos.x;
+                            pt.y = lpIMC->cfCompForm.ptCurrentPos.y;
+                            ClientToScreen(lpIMC->hWnd, &pt);
+                            rc.left = pt.x;
+                            rc.bottom = pt.y;
+
+                            MyDebugPrint((TEXT(" ***** fdwInit %d\n"), lpIMC->fdwInit & INIT_COMPFORM));
+                            MyDebugPrint((TEXT(" ***** dwStyle %d\n"), lpIMC->cfCompForm.dwStyle));
+
+                            rc.left = lpUIExtra->uiDefComp.pt.x;
+                            rc.bottom = lpUIExtra->uiDefComp.pt.y;
+                        } else {
+                            // 이도저도 안되면 root window 스타일.
+                            MyDebugPrint((TEXT("*** Fail to get QUERYCHARPOS\r\n")));
+                            GetWindowRect(lpIMC->hWnd,&rc);
+                        }
+                    }
+                }
+                GlobalFree(lpCP);
+            }
 
             lpUIExtra->uiDefComp.pt.x = rc.left;
             lpUIExtra->uiDefComp.pt.y = rc.bottom;

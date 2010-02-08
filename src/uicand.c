@@ -314,6 +314,7 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
                 lppt->x = lpIMC->cfCompForm.ptCurrentPos.x -
                                      GetCompFontHeight(lpUIExtra);
                 lppt->y = lpIMC->cfCompForm.ptCurrentPos.y;
+                MyDebugPrint((TEXT("FromCompForm #2\n")));
             }
             return TRUE;
         }
@@ -322,12 +323,20 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
     {
         if (!GetCandPosFromCompWnd(lpUIExtra,lppt))
         {
-            RECT rc;
-            GetWindowRect(lpIMC->hWnd,&rc);
-            lppt->x = rc.left;
-            lppt->y = rc.bottom + 23;
-        }
+            if (lpIMC->cfCandForm[0].dwIndex != -1) {
+                lppt->x = lpIMC->cfCandForm[0].ptCurrentPos.x;
+                lppt->y = lpIMC->cfCandForm[0].ptCurrentPos.y;
+                ClientToScreen(lpIMC->hWnd,lppt);
+
+                MyDebugPrint((TEXT("FromCompForm : Already opened cand wnd #2\n")));
+            } else {
+                RECT rc;
                 MyDebugPrint((TEXT("FromCompForm root style #2\n")));
+                GetWindowRect(lpIMC->hWnd,&rc);
+                lppt->x = rc.left;
+                lppt->y = rc.bottom + 23; // 23 적당한 창 테두리 XXX
+            }
+        }
         ScreenToClient(lpIMC->hWnd,lppt);
         return TRUE;
     }
@@ -365,6 +374,12 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
             pt.x = lpCP->pt.x;
             pt.y = lpCP->pt.y + lpCP->cLineHeight + 1;
             MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
+        } else if (lpIMC->cfCandForm[0].dwIndex != -1) {
+            // 이미 만들어 진 것이 있는 경우.
+            pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
+            pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
+            ClientToScreen(lpIMC->hWnd,&pt);
+            MyDebugPrint((TEXT("Already opened cand POS pt %dx%d\n"),pt.x,pt.y));
         } else {
             // 이 경우, 전체 윈도우 크기를 알아서 왼쪽 하단에 붙여준다.
             // 마치 리눅스의 입력상태 창같은 위치
@@ -373,6 +388,7 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
             pt.x = rc.left;
             pt.y = rc.bottom + 1;
         }
+        GlobalFree(lpCP);
     }
     lpUIExtra->uiCand.pt.x = pt.x;
     lpUIExtra->uiCand.pt.y = pt.y;
@@ -720,6 +736,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             caf.ptCurrentPos.y = pt.y;
 
             MyDebugPrint((TEXT(" *** MoveCandWindow #1\r\n")));
+            MyDebugPrint((TEXT(" *** Cand dwStyle: %x\r\n"), lpIMC->cfCandForm[0].dwStyle));
 #if 0
             GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
             if ((int)rc.left != -1 && (int)rc.left < 4096 ) {
@@ -767,6 +784,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
                 pt.x = rc.left;
                 pt.y = rc.bottom + 24; // 추정 높이 24 XXX
             }
+            GlobalFree(lpCP);
         }
         lpUIExtra->uiCand.pt.x = pt.x;
         lpUIExtra->uiCand.pt.y = pt.y;
@@ -841,28 +859,14 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
     else if (lpIMC->cfCandForm[0].dwStyle == CFS_CANDIDATEPOS)
     {
         MyDebugPrint((TEXT(" *** MoveCandWindow #6\r\n")));
-        if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
-        {
-            PIMECHARPOSITION lpCP;
-            DWORD dwSize = sizeof(IMECHARPOSITION);
-        
-            lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
-            lpCP->dwSize = dwSize;
-            MyDebugPrint((TEXT("Cand dwSize :%d\n"),dwSize));
- 
-            // 워드패드 같은 경우는 IMR_QUERYCHARPOSITION을 지원한다.
-            if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
-                pt.x = lpCP->pt.x;
-                pt.y = lpCP->pt.y + lpCP->cLineHeight + 1;
-                MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
-            } else {
-                pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
-                pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
-                ClientToScreen(lpIMC->hWnd,&pt);
-            }
-        }
+        pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
+        pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
+        MyDebugPrint((TEXT("C X,Y:%d,%d\n"),pt.x,pt.y));
+        ClientToScreen(lpIMC->hWnd,&pt);
+        MyDebugPrint((TEXT("S X,Y:%d,%d\n"),pt.x,pt.y));
     } else {
         MyDebugPrint((TEXT(" *** MoveCandWindow #7\r\n")));
+        MyDebugPrint((TEXT(" *** Cand dwStyle %x\r\n"), lpIMC->cfCandForm[0].dwStyle));
         if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
         {
             PIMECHARPOSITION lpCP;
@@ -887,6 +891,7 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
                 pt.x = rc.left;
                 pt.y = rc.bottom + 24; // 24는 추정 높이.
             }
+            GlobalFree(lpCP);
         }
         //ScreenToClient(lpIMC->hWnd,&pt);
         //ClientToScreen(lpIMC->hWnd,&pt);
