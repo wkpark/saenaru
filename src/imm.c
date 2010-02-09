@@ -471,11 +471,16 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
         if (!fRet && IsCompStr(hIMC)) {
             UINT wParam;
-            wParam=LOWORD(vKey) & 0x00FF;
-            MakeResultString(hIMC,TRUE);
-            hangul_ic_init(&ic);
-            keybd_event( (BYTE)wParam, 0x0, 0, 0 ); // simulate key
-            fRet=TRUE;
+            // Simulate KEYDOWN event.
+            if ( lKeyData & 0x80000000 ) {
+                fRet=TRUE;
+            } else {
+                wParam=LOWORD(vKey) & 0x00FF;
+                MakeResultString(hIMC,TRUE);
+                hangul_ic_init(&ic);
+                keybd_event( (BYTE)wParam, 0x0, 0, 0 ); // simulate key
+                fRet=TRUE;
+            }
         }
 
         if (lpCompStr)
