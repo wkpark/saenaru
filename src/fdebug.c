@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/fdebug.c,v 1.3 2003/12/26 09:26:33 perky Exp $
+ * $Saenaru: saenaru/src/fdebug.c,v 1.4 2003/12/26 09:32:51 perky Exp $
  */
 
 #include <windows.h>
@@ -62,7 +62,7 @@ DWORD PASCAL GetDwordFromSetting(LPTSTR lpszFlag)
 
     dwData = 0;
     dwDataSize=sizeof(DWORD);
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_READ, &hkey)) {
+    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, KEY_READ, &hkey)) {
         dwRet = RegQueryValueEx(hkey, lpszFlag, NULL, &dwRegType, (LPBYTE)&dwData, &dwDataSize);
         RegCloseKey(hkey);
     }
@@ -75,7 +75,7 @@ void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag)
     HKEY hkey;
     DWORD dwDataSize, dwRet;
 
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_WRITE, &hkey)) {
+    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, KEY_WRITE, &hkey)) {
         dwRet = RegSetValueEx(hkey, lpszFlag, 0, REG_DWORD, (CONST BYTE *) &dwFlag, sizeof(DWORD));
         RegCloseKey(hkey);
     }
