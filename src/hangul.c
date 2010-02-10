@@ -2513,7 +2513,7 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 
 	for (i = 0; i < ic->len; i++) {
 	    lcs[i] = ic->read[i];
-	    // Normalize가 필요하다.
+	    // Normalize가 필요하다. FIXME
 	}
 	lcs[i] = MYTEXT('\0');
 
@@ -2787,7 +2787,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			ic->syllable = FALSE;
 		    }
 
-                    if (!ic->syllable || dwOptionFlag & HANGUL_JAMOS)
+                    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
                     {
                         ic->jong=comb;
                         hangul_ic_pop(ic);
@@ -2970,7 +2970,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
     else if (jamo >= 0x11a8 && jamo <= 0x11ff) kind=3;
     else return -1;
 
-    ctyping = (dwOptionFlag & CONCURRENT_TYPING) &&
+    // 동시치기이고, 연타가 아니고, key_down 이벤트인 경우
+    ctyping = (dwOptionFlag & CONCURRENT_TYPING) && (ic->last != jamo) &&
               (GetKeyState(ic->lastvkey) & 0x80000000);
 
     if (ic->laststate)
@@ -2982,6 +2983,11 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             case 1:
                 // 초성+초성
                 comb = hangul_compose(ic->cho, jamo);
+
+		// comb가 안되고 동시치기인 경우는 순서를 바꿔서 조합
+		if ( !comb && ctyping )
+		    comb = hangul_compose(jamo, ic->cho);
+
                 if ( hangul_is_choseong(comb) )
                 {
                     ic->cho=comb;
@@ -2989,16 +2995,21 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     hangul_ic_push(ic,comb);
                     ic->last=jamo;
                     ic->laststate=1;
-                    return 0;
-                } else {
-                    *ncs = hangul_ic_commit(ic, lcs);
 
-                    // 초성을 compose할 수 없다.
-                    ic->cho=jamo;
-                    hangul_ic_push(ic,jamo);
-                    ic->laststate=1;
-                    return -1;
+ 		    if (!hangul_jamo_to_syllable(ic->cho,0x1161,0)) {
+			// 옛한글이면 완성형 음절로 만들지 못함.
+			ic->syllable=FALSE;
+		    }
+
+                    return 0;
                 }
+                // 초성을 compose할 수 없다.
+                *ncs = hangul_ic_commit(ic, lcs);
+
+                ic->cho=jamo;
+                hangul_ic_push(ic,jamo);
+                ic->laststate=1;
+                return -1;
                 break;
             case 2: // 초성+중성
                 if (hangul_jamo_to_syllable(ic->cho,jamo,0)) {
@@ -3006,7 +3017,14 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    hangul_ic_push(ic,jamo);
 		    ic->laststate=2;
 		    return 0;
-                } else {
+		} else if (dwOptionFlag & HANGUL_JAMOS) {
+		    // 옛한글 조합.
+		    ic->jung=jamo;
+		    hangul_ic_push(ic,jamo);
+		    ic->laststate=2;
+                    ic->syllable=FALSE;
+		    return -2;
+		} else {
                     // 허락되지 않는 조합.
                     *ncs = hangul_ic_commit(ic, lcs);
 
@@ -3030,6 +3048,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 ic->jong=jamo;
                 hangul_ic_push(ic,jamo);
                 ic->laststate=3;
+		//ic->syllable=FALSE; // XXX 초성+[ ]+종성의 경우. syllable이 가능한지 판별해야 함. FIXME
                 return -1;
                 break;
             }
@@ -3041,8 +3060,14 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 // 초성이 없을 경우 : 나비에서는 중성+초성을 교정한다.
                 if (!ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
+			// 입력순서 교정.
+			// ㅏ + ㄹ 입력 => 라.
+			// 여기서 backspace를 누르면 ㄹ이 지워져야 하는가? ㅏ가 지워져야 하는가?
+			// FIXME
                     ic->cho=jamo;
+                    hangul_ic_pop(ic);
                     hangul_ic_push(ic,jamo);
+                    hangul_ic_push(ic,ic->jung);
 		    ic->last=ic->jung;
 		    ic->laststate=2;
                     return 0;
@@ -3088,14 +3113,24 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 break;
             case 2: // 중성 + 중성
                 comb = hangul_compose(ic->jung, jamo);
+		// 동시치기일 경우 순서를 바꿔서 조합
 		if (ctyping && !comb )
 		    comb = hangul_compose(jamo,ic->jung);
-                if ( comb ) {
+                if ( hangul_is_jungseong(comb) ) {
                     ic->jung=comb;
                     hangul_ic_pop(ic);
                     hangul_ic_push(ic,comb);
                     ic->last=jamo;
                     ic->laststate=2;
+
+		    if (hangul_jamo_to_syllable(ic->cho,comb,0)) {
+			return 0;
+		    } else {
+			// 옛한글이면 완성형 음절 아님.
+			// XXX
+			ic->syllable=FALSE;
+			return -1;
+		    }
                     return 0;
                 } else {
                     // XXX 자음을 연달아 누르는 경우는 많으나,모음을 연달아
@@ -3103,7 +3138,6 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     // 1. 원래 있던 종성을 대치하게 하는가 ?
                     *ncs = hangul_ic_commit(ic, lcs);
 
-                    ic->cho=0;
                     ic->jung=jamo;
                     hangul_ic_push(ic,jamo);
                     ic->laststate=2;
@@ -3146,9 +3180,17 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     hangul_ic_push(ic,jamo);
                     ic->laststate=3;
                     return 0;
+                } else if (dwOptionFlag & HANGUL_JAMOS) {
+		    // 옛한글 조합.
+                    ic->jong=jamo;
+                    hangul_ic_push(ic,jamo);
+                    ic->laststate=3;
+                    ic->syllable=FALSE;
+                    return 0;
                 }
 #if 1
-		// XXX
+		// 초성과 종성이 없는 상태에서,
+		// 중성 + 종성인 경우.
                 else if (!ic->jong && !ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     ic->jong=jamo;
@@ -3175,7 +3217,11 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             case 1: // 종성 + 초성
                 if (!ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
-                    if (hangul_jamo_to_syllable(jamo,ic->jung ? ic->jung:0x1161,ic->jong)){
+                    if (!hangul_jamo_to_syllable(jamo,ic->jung ? ic->jung:0x1161,ic->jong)) {
+			ic->syllable = FALSE;
+		    }
+		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
+		    {
 			// XXX
 			ic->cho=jamo;
 			hangul_ic_pop(ic);
@@ -3242,7 +3288,12 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             case 2: // 종성 + 중성
                 if (!ic->jung &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
-                    if (hangul_jamo_to_syllable(ic->cho ? ic->cho:0x110b,jamo,ic->jong)) {
+                    if (!hangul_jamo_to_syllable(ic->cho ? ic->cho:0x110b,jamo,ic->jong)) {
+			ic->syllable = FALSE;
+		    }
+
+		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
+		    {
 			ic->jung=jamo;
 			hangul_ic_pop(ic);
 			hangul_ic_push(ic,jamo);
@@ -3311,27 +3362,19 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		comb = 0;
 		if (hangul_is_jongseong(ic->last))
 		    comb = hangul_compose(ic->jong, jamo);
-                if ( comb )
+                if ( hangul_is_jongseong(comb) && ic->cho && ic->jung)
                 {
-                    // CP949인가 ?
-                    // TODO KS X 1001영역만 입력되는 옵션도 넣음
-                    if (ic->cho && ic->jung &&
-                        hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
-                    {
-                        ic->jong=comb;
-                        hangul_ic_pop(ic);
-                        hangul_ic_push(ic,comb);
-                        ic->last=jamo;
-                        ic->laststate=3;
-                        return 0;
-                    }
-		    // XXX 종+종
-                    ic->jong=comb;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,comb);
-                    ic->last=jamo;
-                    ic->laststate=3;
-                    return 0;
+		    if (!hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
+			ic->syllable = FALSE;
+
+		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS) {
+			ic->jong=comb;
+			hangul_ic_pop(ic);
+			hangul_ic_push(ic,comb);
+			ic->last=jamo;
+			ic->laststate=3;
+			return 0;
+		    }
 		}
 		{
                     *ncs = hangul_ic_commit(ic, lcs);
