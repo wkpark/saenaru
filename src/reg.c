@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/reg.c,v 1.4 2003/12/26 09:32:51 perky Exp $
+ * $Saenaru: saenaru/src/reg.c,v 1.5 2004/10/10 10:59:18 wkpark Exp $
  */
 
 #include <windows.h>
@@ -62,10 +62,13 @@ DWORD PASCAL GetDwordFromSetting(LPTSTR lpszKey)
 
     dwData = 0;
     dwDataSize=sizeof(DWORD);
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_READ, &hkey)) {
-        dwRet = RegQueryValueEx(hkey, lpszKey, NULL, &dwRegType, (LPBYTE)&dwData, &dwDataSize);
-        RegCloseKey(hkey);
-    }
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, KEY_READ, &hkey) != ERROR_SUCCESS &&
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_READ, &hkey) != ERROR_SUCCESS)
+        return 0;
+
+    dwRet = RegQueryValueEx(hkey, lpszKey, NULL, &dwRegType, (LPBYTE)&dwData, &dwDataSize);
+    RegCloseKey(hkey);
+
     MyDebugPrint((TEXT("Getting: %s=%#8.8x: dwRet=%#8.8x\n"), lpszKey, dwData, dwRet));
     return dwData;
 }
@@ -86,7 +89,8 @@ GetRegMultiStringValue (
         lstrcat (szRegInfoPath, lpszSubKey) ;
 
         MyDebugPrint((TEXT("Getting: %s: path=%s\n"), lpszKey, szRegInfoPath));
-    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
@@ -107,7 +111,8 @@ BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey)
 
     MyDebugPrint((TEXT("Getting: path=%s\n"), szRegInfoPath));
 
-    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS &&
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS)
         return FALSE;
     return TRUE;
 }
@@ -122,7 +127,8 @@ void GetRegKeyList(LPCTSTR lpszSubKey)
         lstrcat (szRegInfoPath, lpszSubKey) ;
 
         MyDebugPrint((TEXT("Getting: path=%s\n"), szRegInfoPath));
-    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return;
     {
 /* from MSDN document */
@@ -231,7 +237,8 @@ GetRegStringValue (
 
     MyDebugPrint((TEXT("GetRegString: %s: path=%s\n"), lpszKey, szRegInfoPath));
 
-    if (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
@@ -269,7 +276,7 @@ void SetDwordToSetting(LPCTSTR lpszKey, DWORD dwFlag)
     HKEY hkey;
     DWORD dwDataSize, dwRet;
 
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, g_szRegInfoPath, 0, KEY_WRITE, &hkey)) {
+    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, KEY_WRITE, &hkey)) {
         dwRet = RegSetValueEx(hkey, lpszKey, 0, REG_DWORD, (CONST BYTE *) &dwFlag, sizeof(DWORD));
         RegCloseKey(hkey);
     }
