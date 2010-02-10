@@ -144,17 +144,35 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                 MyDebugPrint((TEXT("\t === XXX IME NOT OPEN:\r\n")));
 
 #ifndef USE_NO_IME_ESCAPE
-            if (!IsCompStr(hIMC)) {
+            while (!IsCompStr(hIMC)) {
         		    LPCOMPOSITIONSTRING	lpCompStr;
                             LPMYSTR lpDump;
-                            MYCHAR szBuf[3];
+                            MYCHAR szBuf[256];
 
                             lpDump=szBuf;
 
-                            Mylstrcpyn(lpDump,lpData,2); // XXX
+                            // 노트패드에서는 이상하게 lpData가 제대로 세팅이 안된다.
+                            if (Mylstrlen(lpData) < 255) {
+                                int i;
+                                MyDebugPrint((TEXT("ImeEscape %s:%d\n"),lpData, Mylstrlen(lpData)));
 
-                            MyDebugPrint((TEXT("%x %x %x"),szBuf[0],szBuf[1],szBuf[2]));
-                            szBuf[1]=MYTEXT('\0');
+                                for (i = 0; i < Mylstrlen(lpData); i++) {
+                                        if (*((LPMYSTR)lpData + i) == MYTEXT(' ') ||
+                                                *((LPMYSTR)lpData + i) == MYTEXT('\n'))
+                                            break;
+                                }
+                                if (i == 0) {
+                                    lRet = FALSE;
+                                    break;
+                                }
+                                Mylstrcpyn(lpDump,lpData, i * sizeof(MYCHAR));
+                                *(lpDump + i) = MYTEXT('\0');
+                                MyDebugPrint((TEXT("ImeEscape %s:%d\n"),lpDump, i));
+                            } else {
+                                Mylstrcpyn(lpDump,lpData,2); // XXX
+                                szBuf[1]=MYTEXT('\0');
+                                MyDebugPrint((TEXT("ImeEscape #2 %s\n"),lpDump));
+                            }
  
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
                             {
@@ -200,9 +218,9 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     lpCompStr->dwCursorPos = Mylstrlen(lpstr);
         
                                     //MakeAttrClause(lpCompStr);
-                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_TARGET_CONVERTED,
+                                    lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
                                             Mylstrlen(lpstr));
-                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
+                                    lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
                                             Mylstrlen(lpread));
         
                                     // make length
@@ -236,6 +254,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
                                 }
                             }
+                            break;
             }
 
 #endif
@@ -338,6 +357,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     switch ( ( LOWORD(vKey) & 0x00FF ) ) {
         case VK_HANJA:
             if ( lKeyData & 0x80000000 ) break;
+
             if (!IsCompStr(hIMC)) {
                 fOpen = ImmGetOpenStatus(hIMC);
                 if (!fOpen)
@@ -361,9 +381,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 if (!fOpen)
                     ImmSetOpenStatus(hIMC,FALSE);
 
-                ImmUnlockIMC(hIMC);
+                //ImmUnlockIMC(hIMC);
 
-                return FALSE;
+                //return FALSE;
                 break;
             }
             break;
