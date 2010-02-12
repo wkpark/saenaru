@@ -81,7 +81,8 @@ HANDLE hInstance;
     wc.style          = CS_SAENARU;
     wc.lpfnWndProc    = SAENARUWndProc;
     wc.cbClsExtra     = 0;
-    wc.cbWndExtra     = 8;
+    wc.cbWndExtra     = sizeof (LONG_PTR) * 2;
+    //wc.cbWndExtra     = 8;
     wc.hInstance      = hInstance;
     wc.hCursor        = LoadCursor( NULL, IDC_ARROW );
     wc.hIcon          = NULL;
@@ -203,7 +204,6 @@ LPARAM lParam;
     LPUIEXTRA      lpUIExtra;
     HGLOBAL        hUIExtra;
     LONG           lRet = 0L;
-    LONG_PTR       lpRet;
     int            i;
 
     hUICurIMC = (HIMC)GetWindowLongPtr(hWnd,IMMGWLP_IMC);
@@ -253,7 +253,7 @@ LPARAM lParam;
             // Allocate UI's extra memory block.
             //
             hUIExtra = (HGLOBAL)GlobalAlloc(GHND,sizeof(UIEXTRA));
-            MyDebugPrint((TEXT("GlobalAlloc hUIExtra %x\r\n"),hUIExtra));
+
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
 
             //
@@ -277,13 +277,7 @@ LPARAM lParam;
 
             GlobalUnlock(hUIExtra);
 
-            MyDebugPrint((TEXT("Sizeof UIExtra %d\r\n"),sizeof(UIEXTRA)));
-
-            SetLastError(0);
-            lpRet = SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
-            MyDebugPrint((TEXT("SetWindowLongPtr hUIExtra %x: ret:%x,E%d\r\n"),hUIExtra,lpRet, GetLastError()));
-            hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
-            MyDebugPrint((TEXT("GetWindowLongPtr hUIExtra %x\r\n"),hUIExtra));
+            SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
 
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
