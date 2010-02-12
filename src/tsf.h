@@ -32,7 +32,9 @@
 #if !defined (tsf_h)
 #define tsf_h
 
+#ifndef ARRAYSIZE
 #define ARRAYSIZE(array)    (sizeof (array) / sizeof (array[0]))
+#endif
 
 inline void SafeStringCopy (WCHAR *pchDst, ULONG cchMax, const WCHAR *pchSrc)
 {

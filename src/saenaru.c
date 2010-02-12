@@ -49,7 +49,7 @@ GetSaenaruDirectory(LPTSTR lpDest, int max)
     memcpy(lpDest, szIMEDir, sizeof(szIMEDir) - sizeof(TCHAR));
     lpDest += sizeof(szIMEDir) / sizeof(TCHAR) - 1;
 
-    return lpDest - lpDestOrig;
+    return (int) (lpDest - lpDestOrig);
 }
 
 /**********************************************************************/

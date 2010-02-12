@@ -510,7 +510,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     // Some application do not accept WM_CHAR events with VK_PROCESSKEY.
     // For this appls we need a following hack:
     if (fRet && !IsCompStr(hIMC)) {
-        ToAscii(vKey,(lKeyData | 0xff0000)>>16,lpbKeyState,&ch,0);
+        ToAscii(vKey,((UINT)lKeyData | 0xff0000)>>16,lpbKeyState,&ch,0);
         ch = 0xff & ch;
         if (ch) {
             WORD nch;

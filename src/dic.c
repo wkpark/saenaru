@@ -1227,7 +1227,7 @@ LPBYTE lpbKeyState;
     BOOL cf=FALSE;
     int next=0;
     UINT select=0;
-    int candOk=FALSE;
+    LRESULT candOk=FALSE;
 
     // Candidate문자 선택
     if (IsConvertedCompStr(hIMC))

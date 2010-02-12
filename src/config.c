@@ -224,10 +224,10 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
 
-                    // ì‚¬ìš©ìž í‚¤ë³´ë“œ?
+                    // »ç¿ëÀÚ Å°º¸µå?
                     if ((hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER))) {
-                        int ret;
-                        ret = SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
+                        UINT ret;
+                        ret = (UINT) SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
                         if (ret != CB_ERR) {
                             SendMessage(hwndRadio, CB_SETCURSEL, ret, 0);
                             MyDebugPrint((TEXT(" ------- Keyboard dialog : %d\n"), ret));
@@ -402,8 +402,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                 switch(HIWORD(wParam)) {
                 case CBN_CLOSEUP:
                     if ((hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER))) {
-                        int ret;
-                        ret = SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
+                        UINT ret;
+                        ret = (UINT)SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
                         if (ret != CB_ERR) {
                             SendMessage(hwndRadio, CB_SETCURSEL, ret, 0);
                             MyDebugPrint((TEXT(" >>>>>>> Keyboard dialog : %d\n"), ret));

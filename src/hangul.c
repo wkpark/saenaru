@@ -1840,7 +1840,7 @@ int hangul_del_prev(LPMYSTR lptr)
         lptr--;
     }
 
-    return lpSave - lptr;
+    return (int) (lpSave - lptr);
 }
 
 void PASCAL hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState)

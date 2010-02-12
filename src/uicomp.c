@@ -35,8 +35,6 @@
 #include "immdev.h"
 #include "saenaru.h"
 
-// static  UINT    WM_MSIME_QUERYPOSITION;
-
 /**********************************************************************/
 /*                                                                    */
 /* CompStrWndProc()                                                   */
@@ -566,9 +564,9 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                     rc.bottom = lpCP->pt.y;
                     MyDebugPrint((TEXT("Cand pt.x :%d\n"),lpCP->pt.x));
                 } else {
-                    UINT    ret;
+                    UINT    ret = 0;
         
-                    ret = SendMessage( lpIMC->hWnd, WM_MSIME_QUERYPOSITION, 1, (LPARAM)lpCP );
+                    ret = (UINT) SendMessage( lpIMC->hWnd, WM_MSIME_QUERYPOSITION, 1, (LPARAM)lpCP );
                     if (ret) {
                         rc.left = lpCP->pt.x;
                         rc.bottom = lpCP->pt.y;

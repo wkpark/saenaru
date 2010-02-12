@@ -203,6 +203,7 @@ LPARAM lParam;
     LPUIEXTRA      lpUIExtra;
     HGLOBAL        hUIExtra;
     LONG           lRet = 0L;
+    LONG_PTR       lpRet;
     int            i;
 
     hUICurIMC = (HIMC)GetWindowLongPtr(hWnd,IMMGWLP_IMC);
@@ -244,13 +245,15 @@ LPARAM lParam;
         }
     }
 
+    MyDebugPrint((TEXT("* WM_IME_XXX %x : %d\r\n"), message, message));
     switch (message)
     {
         case WM_CREATE:
             //
             // Allocate UI's extra memory block.
             //
-            hUIExtra = GlobalAlloc(GHND,sizeof(UIEXTRA));
+            hUIExtra = (HGLOBAL)GlobalAlloc(GHND,sizeof(UIEXTRA));
+            MyDebugPrint((TEXT("GlobalAlloc hUIExtra %x\r\n"),hUIExtra));
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
 
             //
@@ -273,7 +276,14 @@ LPARAM lParam;
             lpUIExtra->hFont = (HFONT)NULL;
 
             GlobalUnlock(hUIExtra);
-            SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
+
+            MyDebugPrint((TEXT("Sizeof UIExtra %d\r\n"),sizeof(UIEXTRA)));
+
+            SetLastError(0);
+            lpRet = SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
+            MyDebugPrint((TEXT("SetWindowLongPtr hUIExtra %x: ret:%x,E%d\r\n"),hUIExtra,lpRet, GetLastError()));
+            hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
+            MyDebugPrint((TEXT("GetWindowLongPtr hUIExtra %x\r\n"),hUIExtra));
 
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
@@ -525,7 +535,7 @@ LPARAM lParam;
             lpUIExtra->uiStatus.pt.x = (long)LOWORD(lParam);
             lpUIExtra->uiStatus.pt.y = (long)HIWORD(lParam);
 
-            SetDwordToSetting(TEXT("StatusPos"),lParam);
+            SetDwordToSetting(TEXT("StatusPos"),(UINT)lParam);
 
             GlobalUnlock(hUIExtra);
             break;
@@ -1144,10 +1154,10 @@ void PASCAL UpdateSoftKeyboard(
         DWORD dwbg;
         HBRUSH hbrbg;
         SetSoftKbdData(lpUIExtra->uiSoftKbd.hWnd);
-        dwbg=GetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND);
+        dwbg=(DWORD) GetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCLP_HBRBACKGROUND);
         MyDebugPrint((TEXT("\tBackground color: 0x%x\r\n"),dwbg));
 
-        SetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND,(COLOR_BTNFACE + 1));
+        SetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCLP_HBRBACKGROUND,(COLOR_BTNFACE + 1));
         //hbrbg = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
         //SetClassLongPtr(lpUIExtra->uiSoftKbd.hWnd,GCL_HBRBACKGROUND,(LONG)hbrbg);
         // XXX
@@ -1327,7 +1337,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     }
 
     lpmsg = (LPMSG)lParam;
-    vKey = lpmsg->wParam;
+    vKey = (UINT) lpmsg->wParam;
 
 #if DEBUG
     if (vKey == VK_PROCESSKEY) {
@@ -1434,7 +1444,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
             {
                 WORD ch;
 
-                ToAscii(vKey,(lpmsg->lParam | 0xff0000)>>16,pbKeyState,&ch,0);
+                ToAscii(vKey,((UINT)lpmsg->lParam | 0xff0000)>>16,pbKeyState,&ch,0);
                 ch = 0xff & ch;
                 if (ch < '!' || ch > '~')
                      break;
@@ -1486,7 +1496,7 @@ void PASCAL DvorakKey(BOOL mode,WPARAM wParam, LPARAM lParam)
     UINT vKey;
 
     lpmsg = (LPMSG)lParam;
-    vKey = lpmsg->wParam;
+    vKey = (UINT)lpmsg->wParam;
 
     GetKeyboardState((LPBYTE)&pbKeyState);
 
