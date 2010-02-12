@@ -639,7 +639,7 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
     int x,y;
     RECT rc;
 
-    if (num = 0)
+    if (num == 0)
         return;
 
     GetClientRect (hCompWnd,&rc);
