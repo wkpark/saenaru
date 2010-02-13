@@ -309,6 +309,8 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     DWORD dwConversion, dwSentense ;
     WORD ch;
     UINT vkey = LOWORD(vKey) & 0x00FF;
+    static UINT o_timer = 0;
+    UINT timer;
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
@@ -403,7 +405,13 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 #endif
         case VK_HANGUL:
             // for 101 Keyboard type 3 (shift-space enabled kbd)
-            if ( lKeyData & 0x80000000 ) break;
+            // Use timer for Windows 7 64-bit.
+            timer = GetTickCount();
+            if (timer - o_timer > 600) {
+                o_timer = timer;
+                if ( lKeyData & 0x80000000 ) break;
+            }
+            o_timer = timer;
             // Toggle Hangul composition state
             //
             if (IsCompStr(hIMC))
@@ -429,7 +437,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                     MyDebugPrint((TEXT("O Hangul key\n")));
                     fOpen=TRUE;
                 }
-                ImmSetConversionStatus (hIMC, dwConversion, 0) ;
+                ImmSetConversionStatus (hIMC, dwConversion, dwSentense) ;
             }
             if (!fOpen)
                 ImmSetOpenStatus(hIMC,FALSE);
