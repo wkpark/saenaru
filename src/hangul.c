@@ -1769,7 +1769,7 @@ WORD code;
 
     /* check dvorak layout */
     hcur= GetKeyboardLayout(0);
-    if ((DWORD)hcur == 0xE0130412 && code >= TEXT('!') && code <= TEXT('~'))
+    if (hcur == LongToHandle(0xE0130412) && code >= TEXT('!') && code <= TEXT('~'))
 	code = dvorak2qwerty_table[code - '!'];
     return code;
 }

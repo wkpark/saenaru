@@ -1306,7 +1306,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     /* check dvorak layout */
     /* XXX */
     hcur= GetKeyboardLayout(0);
-    if ((DWORD)hcur == 0xE0130412)
+    if (hcur == LongToHandle(0xE0130412))
         fDvorak = FALSE; // do not convert. It is already dvorak!!
 
     GetKeyboardState((LPBYTE)&pbKeyState);

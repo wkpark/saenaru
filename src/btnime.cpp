@@ -817,7 +817,7 @@ _MenuItem_GetToggleDvorakFlag (UINT wID)
 {
     HKL hcur;
     hcur= GetKeyboardLayout(0);
-    if ((DWORD)hcur == 0xE0130412)
+    if (hcur == LongToHandle(0xE0130412))
         return TF_LBI_STATUS_DISABLED;
 
     return (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0;
