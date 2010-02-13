@@ -309,8 +309,6 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     DWORD dwConversion, dwSentense ;
     WORD ch;
     UINT vkey = LOWORD(vKey) & 0x00FF;
-    static UINT o_timer = 0;
-    UINT timer;
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
@@ -328,6 +326,24 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
+
+    if ( !(lKeyData & 0x80000000) && 
+            (LOWORD(vKey) & 0x00FF) == VK_HANGUL) {
+        //
+        // IME 2002/2003 compatible VK_HANGUL event
+        // 
+        TRANSMSG GnMsg;
+        if (IsCompStr(hIMC))
+            MakeResultString(hIMC,TRUE);
+
+        GnMsg.message = WM_IME_KEYDOWN;
+        GnMsg.wParam = VK_PROCESSKEY;
+        GnMsg.lParam = lKeyData;
+        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+        MyDebugPrint((TEXT("Generate VK_PROCESSKEY instead of VK_HANGUL\r\n")));
+        ImmUnlockIMC(hIMC);
+        return FALSE;
+    }
 
     // SHIFT-SPACE
     // See ui.c how to hook the shift-space event.
@@ -405,13 +421,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 #endif
         case VK_HANGUL:
             // for 101 Keyboard type 3 (shift-space enabled kbd)
-            // Use timer for Windows 7 64-bit.
-            timer = GetTickCount();
-            if (timer - o_timer > 600) {
-                o_timer = timer;
-                if ( lKeyData & 0x80000000 ) break;
-            }
-            o_timer = timer;
+            if ( lKeyData & 0x80000000 ) break;
             // Toggle Hangul composition state
             //
             if (IsCompStr(hIMC))
