@@ -329,20 +329,27 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
     if ( !(lKeyData & 0x80000000) && 
             (LOWORD(vKey) & 0x00FF) == VK_HANGUL) {
+        OSVERSIONINFO os;
+        os.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         //
         // IME 2002/2003 compatible VK_HANGUL event
         // 
-        TRANSMSG GnMsg;
         if (IsCompStr(hIMC))
             MakeResultString(hIMC,TRUE);
 
-        GnMsg.message = WM_IME_KEYDOWN;
-        GnMsg.wParam = VK_PROCESSKEY;
-        GnMsg.lParam = lKeyData;
-        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+        SendMessage(lpIMC->hWnd, WM_IME_KEYDOWN, VK_PROCESSKEY, lKeyData);
         MyDebugPrint((TEXT("Generate VK_PROCESSKEY instead of VK_HANGUL\r\n")));
-        ImmUnlockIMC(hIMC);
-        return FALSE;
+
+        // Windows7 amd64 workaround!! :(
+        if (GetVersionEx(&os)) {
+            MyDebugPrint((TEXT("WinVer %x\n"),
+            os.dwMajorVersion));
+
+            if (os.dwMajorVersion == 6) {
+                ImmUnlockIMC(hIMC);
+                return FALSE;
+            }
+        }
     }
 
     // SHIFT-SPACE
