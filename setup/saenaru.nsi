@@ -1,26 +1,34 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.8 2006/12/30 01:48:44 wkpark Exp $
+; $Saenaru: saenaru/setup/saenaru.nsi,v 1.9 2007/12/29 16:52:04 wkpark Exp $
 
-!define RELVERSION      "1.0.1"
+!define RELVERSION      "1.1.0cvs-snapshot"
+;!define RELVERSION      "1.1.0cvs-20100214"
+!define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
+!define DDK64BUILDDIR   "..\src\objfre_wnet_amd64\amd64"
+!define DVBUILDDIR      "..\kbddvk\objfre_wxp_x86\i386"
+!define DV64BUILDDIR    "..\kbddvk\objfre_wnet_amd64\amd64"
 !define RESOURCEDIR     "..\resource"
 !define HELPDIR         "..\help"
 !define SRCROOTDIR      ".."
 !define SMPATH          "$SMPROGRAMS\새나루"
 
+!include "x64.nsh"
 ;---------------------
 ;Include Modern UI
+!include "MUI.nsh"
+;Include Radio buttons
+!include "Sections.nsh"
 
-  !include "MUI.nsh"
 BrandingText "새나루 인스톨러" 
 
 ;--------------------------------
 ;Configuration
 
   ;General
-  Name "새나루 정식판 ${RELVERSION}"
+  Name "새나루 시험판 ${RELVERSION}"
   OutFile "Saenaru-${RELVERSION}.exe"
   !define MUI_ICON "install.ico"
   !define MUI_UNICON "install.ico"
@@ -30,19 +38,22 @@ BrandingText "새나루 인스톨러"
   
   ;Get install folder from registry if available
   ;;InstallDirRegKey HKLM "${REGISTRY_PATH}" ""
-  InstallDirRegKey HKLM "${REGISTRY_PATH}\Dictionary" ""
-  InstallDirRegKey HKLM "${REGISTRY_PATH}\Keyboard" ""
-  InstallDirRegKey HKLM "${REGISTRY_PATH}\Compose" ""
-
+  ;InstallDirRegKey HKCU "${REGISTRY_PATH}" ""
 
 ;--------------------------------
 ;Pages
 
+  !insertmacro MUI_DEFAULT MUI_WELCOMEFINISHPAGE_BITMAP "setup.bmp"
+
+  !insertmacro MUI_PAGE_WELCOME 
   !insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro MUI_PAGE_FINISH 
   
   !insertmacro MUI_UNPAGE_CONFIRM
+  !insertmacro MUI_UNPAGE_INSTFILES
+
   !insertmacro MUI_UNPAGE_INSTFILES
   
 ;--------------------------------
@@ -72,8 +83,42 @@ Section "새나루 입력기" SecBody
   GetTempFileName $3
   File /oname=$3 "${DDKBUILDDIR}\saenaru.ime"
   Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
-
   SaenaruDone:
+
+  File "${DVBUILDDIR}\kbddvk.dll"
+  IfErrors 0 kbddvkDone
+
+  GetTempFileName $3
+  File /oname=$3 "${DVBUILDDIR}\kbddvk.dll"
+  Rename /REBOOTOK $3 $SYSDIR\kbddvk.dll
+  kbddvkDone:
+
+  #
+  # 64bit install
+  #
+  ${If} ${RunningX64}
+    ${DisableX64FSRedirection}
+    File "${DDK64BUILDDIR}\saenaru.ime"
+    IfErrors 0 Saenaru64Done
+
+    # Can't copy saenaru.ime, create it under another name and rename it on
+    # next reboot.
+    GetTempFileName $3
+    File /oname=$3 "${DDK64BUILDDIR}\saenaru.ime"
+    Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
+    Saenaru64Done:
+
+
+    File "${DV64BUILDDIR}\kbddvk.dll"
+    IfErrors 0 kbddvk64Done
+
+    GetTempFileName $3
+    File /oname=$3 "${DV64BUILDDIR}\kbddvk.dll"
+    Rename /REBOOTOK $3 $SYSDIR\kbddvk.dll
+    kbddvk64Done:
+    ${EnableX64FSRedirection}
+  ${EndIf}
+
   SetOverwrite lastused
   SetOutPath "$INSTDIR\help"
   File "${HELPDIR}\saenaru.chm"
@@ -85,6 +130,7 @@ Section "새나루 입력기" SecBody
   File "${RESOURCEDIR}\jinsuk.dic"
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
+  File "${RESOURCEDIR}\comp_default.reg"
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
   
   ;Store install folder
@@ -97,15 +143,18 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
 
   ; dvorak driver support
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbddv.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbddvk.dll"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "새나루 한글 입력기"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "한글 입력기 (새나루 드보락)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME file" "SAENARU.IME"
 
-  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
-  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Symbol" "symwin.dic"
-  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
-  WriteRegStr HKLM "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
+  WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
+  WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Symbol" "symwin.dic"
+  WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
+  WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
+
+  WriteRegStr HKCU "${REGISTRY_PATH}" "OptionFlag" "9"
+  ;WriteRegStr HKCU "${REGISTRY_PATH" "LayoutFlag" "1"
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -177,12 +226,13 @@ Section /o "새나루 소스 코드" SecSource
 
 SectionEnd
 
-Section "기본 입력기로 지정" SecDefault
+Section /o "기본 한글입력기로 지정" SecDefault
   ; save current IME
   ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
   StrCmp $0 "e0120412" exit
   ; set as default IME
   WriteRegStr HKCU "Keyboard Layout\Preload" "1" "e0120412"
+  SetRebootFlag true
 
   ; set some Saenaru reg entries.
 
@@ -192,28 +242,70 @@ Section "기본 입력기로 지정" SecDefault
   loop:
     IntOp $1 $1 + 1
     ReadRegStr $2 HKCU "Keyboard Layout\Preload" "$1"
-    StrCmp $2 "e0120412" loop
-    WriteRegStr HKCU "Keyboard Layout\Preload" "$3" "$0"
-    StrCmp $2 "" exit
+    IfErrors exit
+    StrCmp $2 "e0120412" del loop1
+  del:
+    DeleteRegKey HKCU "Keyboard Layout\Preload\$1"
+  loop1:
     IntOp $3 $3 + 1
     StrCpy $0 $2
     Goto loop
   exit:
 SectionEnd
 
+Section "한글입력기 목록에 추가" SecAdd
+  ; get last IME
+  StrCpy $1 0
+  StrCpy $3 2
+  StrCpy $4 1
+  loop:
+    IntOp $1 $1 + 1
+    ReadRegStr $2 HKCU "Keyboard Layout\Preload" "$1"
+    IfErrors save
+    StrCmp $2 "e0120412" exit
+    IntCmp $2 $4 loop loop inc
+  inc:
+    StrCpy $4 $1
+    Goto loop
+
+  save:
+  ; save current IME
+  ; set as default IME
+  IntCmp $1 $4 save2 save2 save1
+  save1:
+  StrCpy $4 $1
+  save2:
+  WriteRegStr HKCU "Keyboard Layout\Preload" "$4" "e0120412"
+
+  SetRebootFlag true
+  exit:
+
+SectionEnd
+
 ;--------------------------------
 ;Descriptions
 
   LangString DESC_SecBody ${LANG_KOREAN} "새나루 입력기를 위한 기본적인 파일을 설치합니다."
-  LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다."
-  LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.로그오프후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다."
+  LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다.$\r$\n새나루는 모든 소스코드가 공개된 자유 소프트웨어입니다.$\r$\n소스코드는 http://kldp.net/projects/saenaru 사이트에서 직접 받으실 수 있습니다."
+  LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.$\r$\n로그오프 후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다."
+  LangString DESC_SecAdd ${LANG_KOREAN} "새나루를 한글 입력기 목록에 추가합니다.$\r$\n이 경우 입력기 상태바에서 새나루를 선택하실 수 있게 됩니다."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecBody} $(DESC_SecBody)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAdd} $(DESC_SecAdd)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDefault} $(DESC_SecDefault)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
+Function .onInit
+  StrCpy $1 ${SecAdd}
+FunctionEnd
+
+Function .onSelChange
+  !insertmacro StartRadioButtons $1
+  !insertmacro RadioButton "${SecAdd}"
+  !insertmacro RadioButton "${SecDefault}"
+FunctionEnd
 
 ;--------------------------------
 ;Uninstaller Section
