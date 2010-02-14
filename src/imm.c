@@ -523,7 +523,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 wParam=LOWORD(vKey) & 0x00FF;
                 MakeResultString(hIMC,TRUE);
                 hangul_ic_init(&ic);
-                keybd_event( (BYTE)wParam, 0x0, 0, 0 ); // simulate key
+                if (lpbKeyState[VK_CONTROL] & 0x80)
+                    // simulate key for CTRL-X
+                    keybd_event( (BYTE)wParam, 0x0, 0, 0 );
                 fRet=TRUE;
             }
         }
@@ -546,6 +548,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         }
     }
     ImmUnlockIMC(hIMC);
+    MyDebugPrint((TEXT("END of ImeProcessKey:%x, Ret=%x\n"), vKey, fRet));
     return fRet;
 }
 
