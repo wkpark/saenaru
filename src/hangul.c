@@ -1874,12 +1874,6 @@ LPBYTE lpbKeyState;
     // Get ConvMode from IMC.
     fdwConversion = lpIMC->fdwConversion;
 
-    /* check dvorak layout */
-    if (fdwConversion & IME_CMODE_NATIVE)
-	hkey= code = checkDvorak(code);
-    else
-	hkey= code;
-
     if (fdwConversion & IME_CMODE_NATIVE && capital) {
 	WORD ch = code;
 	if (ch >= 'a' && ch <= 'z')
@@ -1887,6 +1881,12 @@ LPBYTE lpbKeyState;
 	if (ch >= 'A' && ch <= 'Z')
 	    code += 'a' - 'A';
     }
+
+    /* check dvorak layout */
+    if (fdwConversion & IME_CMODE_NATIVE)
+	hkey= code = checkDvorak(code);
+    else
+	hkey= code;
 
     if (fdwConversion & IME_CMODE_NATIVE)
 	hkey = keyToHangulKey( code );
