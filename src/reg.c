@@ -109,11 +109,12 @@ BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey)
     if (lpszSubKey)
         lstrcat (szRegInfoPath, lpszSubKey) ;
 
-    MyDebugPrint((TEXT("Getting: path=%s\n"), szRegInfoPath));
-
     if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS &&
-        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS)
+        RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, hKey) != ERROR_SUCCESS) {
+        MyDebugPrint((TEXT(">>FAIL: path=%s\n"), szRegInfoPath));
         return FALSE;
+    }
+    MyDebugPrint((TEXT(">>OK: path=%s\n"), szRegInfoPath));
     return TRUE;
 }
 

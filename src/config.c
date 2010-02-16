@@ -37,7 +37,7 @@
 #include "resource.h"
 #include "malloc.h"
 
-#define MAX_PAGES 3
+#define MAX_PAGES 5
 
 
 
@@ -92,10 +92,24 @@ BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData)
     {
         case IME_CONFIG_GENERAL:
             AddPage(&psh, DLG_GENERAL, GeneralDlgProc);
+            //AddPage(&psh, DLG_REGISTERWORD, RegWordDlgProc);
+            //AddPage(&psh, DLG_SELECTDICTIONARY, SelectDictionaryDlgProc);
             AddPage(&psh, DLG_ABOUT, AboutDlgProc);
 #ifdef DEBUG
             AddPage(&psh, DLG_DEBUG, DebugOptionDlgProc);
 #endif
+            PropertySheet(&psh);
+            break;
+
+        case IME_CONFIG_REGISTERWORD:
+            AddPage(&psh, DLG_REGISTERWORD, RegWordDlgProc);
+            AddPage(&psh, DLG_ABOUT, AboutDlgProc);
+            PropertySheet(&psh);
+            break;
+
+        case IME_CONFIG_SELECTDICTIONARY:
+            AddPage(&psh, DLG_SELECTDICTIONARY, SelectDictionaryDlgProc);
+            AddPage(&psh, DLG_ABOUT, AboutDlgProc);
             PropertySheet(&psh);
             break;
 
@@ -105,6 +119,182 @@ BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData)
 
     return TRUE;
 }
+
+/**********************************************************************/
+/*                                                                    */
+/*      RegWordConfigure()                                            */
+/*                                                                    */
+/**********************************************************************/
+INT_PTR CALLBACK RegWordDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam)
+{
+    NMHDR FAR *lpnm;
+    LPPROPSHEETPAGE lpPropSheet = (LPPROPSHEETPAGE)(GetWindowLongPtr(hDlg, DWLP_USER));
+    UINT nItem;
+    UINT i;
+    LRESULT dwIndex;
+    TCHAR szRead[128];
+    TCHAR szString[128];
+    TCHAR szBuf[128];
+    LRESULT dwStyle;
+
+    switch(message)
+    {
+        case WM_NOTIFY:
+            lpnm = (NMHDR FAR *)lParam;
+            switch(lpnm->code)
+            {
+                case PSN_SETACTIVE:
+                    break;
+        
+                case PSN_KILLACTIVE:
+                    break;
+        
+                case PSN_APPLY:
+
+                    if (!GetDlgItemText(hDlg, ID_WR_READING, szRead, sizeof(szRead)/sizeof(szRead[0])))
+                    {
+                        LoadString(hInst,IDS_NOREADING,szBuf,sizeof(szBuf)/sizeof(szBuf[0]));
+                        MessageBox(hDlg, szBuf, NULL, MB_OK);
+                        return FALSE;
+                    }
+
+
+                    if (!GetDlgItemText(hDlg, ID_WR_STRING, szString, sizeof(szString)/sizeof(szString[0])))
+                    {
+                        LoadString(hInst,IDS_NOSTRING,szBuf,sizeof(szBuf)/sizeof(szBuf[0]));
+                        MessageBox(hDlg, szBuf, NULL, MB_OK);
+                        return FALSE;
+                    }
+
+                    dwIndex = SendDlgItemMessage(hDlg, ID_WR_STYLE,CB_GETCURSEL,0,0);
+                    dwStyle = SendDlgItemMessage(hDlg, ID_WR_STYLE,CB_GETITEMDATA,dwIndex,0);
+
+                    if (!ImeRegisterWord(szRead, (DWORD) dwStyle, szString))
+                    {
+                        LoadString(hInst,IDS_REGWORDRET,szBuf,sizeof(szBuf)/sizeof(szBuf[0]));
+                        MessageBox(hDlg, szBuf, NULL, MB_OK);
+                    }
+                    break;
+
+                case PSN_RESET:
+                    break;
+
+                case PSN_HELP:
+                    break;
+
+                default:
+                    return FALSE;
+            }
+            break;
+
+        case WM_INITDIALOG:
+            SetWindowLongPtr(hDlg, DWLP_USER, (LONG_PTR)lParam);
+            lpPropSheet = (LPPROPSHEETPAGE)lParam;
+
+            if (nItem = ImeGetRegisterWordStyle(0, NULL))
+            {
+                LPSTYLEBUF lpStyleBuf = (LPSTYLEBUF)GlobalAlloc(GPTR,nItem * sizeof(STYLEBUF));
+
+                if (!lpStyleBuf)
+                {
+                    LoadString(hInst,IDS_NOMEMORY,szBuf,sizeof(szBuf)/sizeof(szBuf[0]));
+                    MessageBox(hDlg, szBuf, NULL, MB_OK);
+                    return TRUE;
+                }
+
+                ImeGetRegisterWordStyle(nItem,lpStyleBuf);
+
+                for (i = 0; i < nItem; i++)
+                {
+                    dwIndex = SendDlgItemMessage(hDlg,ID_WR_STYLE,CB_ADDSTRING,0,(LPARAM)lpStyleBuf->szDescription);
+                    SendDlgItemMessage(hDlg,ID_WR_STYLE,CB_SETITEMDATA,dwIndex,lpStyleBuf->dwStyle);
+                    lpStyleBuf++;
+                }
+
+                GlobalFree((HANDLE)lpStyleBuf);
+            }
+            break;
+
+        case WM_DESTROY:
+            break;
+
+        case WM_HELP:
+            break;
+
+        case WM_CONTEXTMENU:   // right mouse click
+            break;
+
+        case WM_COMMAND:
+            break;
+
+        default:
+            return FALSE;
+
+    }
+    return TRUE;
+} 
+
+
+/**********************************************************************/
+/*                                                                    */
+/*      SelectDictionaryConfigure()                                   */
+/*                                                                    */
+/**********************************************************************/
+INT_PTR CALLBACK SelectDictionaryDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam)
+{
+    NMHDR FAR *lpnm;
+    LPPROPSHEETPAGE lpPropSheet = (LPPROPSHEETPAGE)(GetWindowLongPtr(hDlg, DWLP_USER));
+
+    switch(message)
+    {
+        case WM_NOTIFY:
+            lpnm = (NMHDR FAR *)lParam;
+            switch(lpnm->code)
+            {
+                case PSN_SETACTIVE:
+                    break;
+        
+                case PSN_KILLACTIVE:
+                    break;
+        
+                case PSN_APPLY:
+                    break;
+
+                case PSN_RESET:
+                    break;
+
+                case PSN_HELP:
+                    break;
+
+                default:
+                    return FALSE;
+            }
+            break;
+
+        case WM_INITDIALOG:
+            SetWindowLongPtr(hDlg, DWLP_USER, (LONG_PTR)lParam);
+            lpPropSheet = (LPPROPSHEETPAGE)lParam;
+            break;
+
+        case WM_DESTROY:
+            break;
+
+        case WM_HELP:
+            break;
+
+        case WM_CONTEXTMENU:   // right mouse click
+            break;
+
+        case WM_COMMAND:
+            break;
+
+        default:
+            return FALSE;
+
+    }
+    return TRUE;
+} 
+
 
 
 /**********************************************************************/
@@ -179,6 +369,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
     DWORD dwTemp;
     NMHDR FAR *lpnm;
     HWND  hwndRadio;
+    HKL hCur;
 
     HKEY hKey;
 
@@ -244,6 +435,12 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp = LAYOUT_3FIN;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_390))
                         dwTemp = LAYOUT_390;
+                    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_389))
+                        dwTemp = LAYOUT_389;
+                    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_YET2BUL))
+                        dwTemp = LAYOUT_YET2BUL;
+                    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_YET3BUL))
+                        dwTemp = LAYOUT_YET3BUL;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_NEW2BUL))
                         dwTemp = LAYOUT_NEW2BUL;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_NEW3BUL))
@@ -364,6 +561,16 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
             CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
                                 (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0);
 
+            /* check dvorak layout */
+            hCur= GetKeyboardLayout(0);
+            if (hCur == LongToHandle(0xE0130412)) {
+                hwndRadio = GetDlgItem (hDlg, IDC_DVORAK_SUPPORT);
+                EnableWindow (hwndRadio, FALSE);
+            } else if (!(dwOptionFlag & DVORAK_SUPPORT)) {
+                hwndRadio = GetDlgItem (hDlg, IDC_QWERTY_HOTKEY_SUPPORT);
+                EnableWindow (hwndRadio, FALSE);
+            }
+
             /* Layout */
             if (dwLayoutFlag == 0)
                 dwLayoutFlag = LAYOUT_OLD2BUL;
@@ -373,6 +580,12 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwLayoutFlag == LAYOUT_3FIN) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_390, 
                                 (dwLayoutFlag == LAYOUT_390) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_389, 
+                                (dwLayoutFlag == LAYOUT_389) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_YET2BUL, 
+                                (dwLayoutFlag == LAYOUT_YET2BUL) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_YET3BUL, 
+                                (dwLayoutFlag == LAYOUT_YET3BUL) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_NEW2BUL, 
                                 (dwLayoutFlag == LAYOUT_NEW2BUL) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_NEW3BUL, 
@@ -397,18 +610,65 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
         case WM_COMMAND:
             //dwTemp = LAYOUT_NEW2BUL;
             //SetDwordToSetting(TEXT("LayoutFlag"), dwLayoutFlag);
-            switch(LOWORD(wParam)) {
-            case IDC_LAYOUT_USER:
-                switch(HIWORD(wParam)) {
-                case CBN_CLOSEUP:
+            switch(HIWORD(wParam)) {
+            case BN_CLICKED:
+                {
+                    UINT i = LOWORD(wParam);
+                    if ( i >= IDC_LAYOUT_OLD2BUL && i < IDC_LAYOUT_USER) {
+                        hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER);
+                        SendMessage(hwndRadio, CB_SETCURSEL, -1, 0); // clear User defined KBD
+                        break;
+                    }
+                }
+                switch(LOWORD(wParam)) {
+                case IDC_KSX1001_SUPPORT:
+                    hwndRadio = GetDlgItem (hDlg, IDC_JAMOS);
+                    SendMessage(hwndRadio, BM_SETCHECK, BST_UNCHECKED, 0);
+                    break;
+                case IDC_JAMOS:
+                    hwndRadio = GetDlgItem (hDlg, IDC_KSX1001_SUPPORT);
+                    SendMessage(hwndRadio, BM_SETCHECK, BST_UNCHECKED, 0);
+
+                    hwndRadio = GetDlgItem (hDlg, IDC_FULL_MULTIJOMO);
+                    SendMessage(hwndRadio, BM_SETCHECK, BST_UNCHECKED, 0);
+                    break;
+                case IDC_FULL_MULTIJOMO:
+                    hwndRadio = GetDlgItem (hDlg, IDC_JAMOS);
+                    SendMessage(hwndRadio, BM_SETCHECK, BST_UNCHECKED, 0);
+                    break;
+                case IDC_DVORAK_SUPPORT:
+                    hwndRadio = GetDlgItem (hDlg, IDC_QWERTY_HOTKEY_SUPPORT);
+                    if (IsDlgButtonChecked(hDlg, IDC_DVORAK_SUPPORT)) {
+                        EnableWindow (hwndRadio, TRUE);
+                    } else {
+                        EnableWindow (hwndRadio, FALSE);
+                    }
+                    break;
+                default:
+                    break;
+                }
+                break;
+            case CBN_CLOSEUP:
+                switch(LOWORD(wParam)) {
+                case IDC_LAYOUT_USER:
                     if ((hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER))) {
                         UINT ret;
+                        UINT i;
                         ret = (UINT)SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
                         if (ret != CB_ERR) {
                             SendMessage(hwndRadio, CB_SETCURSEL, ret, 0);
                             MyDebugPrint((TEXT(" >>>>>>> Keyboard dialog : %d\n"), ret));
                             //dwLayoutFlag = LAYOUT_USER + ret;
                             //SetDwordToSetting(TEXT("LayoutFlag"), dwLayoutFlag);
+                        }
+
+                        for (i = IDC_LAYOUT_OLD2BUL; i < IDC_LAYOUT_USER; i++) {
+                            if (!(hwndRadio = GetDlgItem (hDlg, i)))
+                                break;
+                            if (IsDlgButtonChecked(hDlg, i)) {
+                                SendMessage(hwndRadio, BM_SETCHECK, BST_UNCHECKED, 0);
+                                break;
+                            }
                         }
                     }
                     break;
@@ -647,13 +907,13 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             continue;
 
         if (Mylstrcmp(p, TEXT("Name:")) == 0) {
-            p = Mystrtok(NULL, TEXT("\0"));
+            p = Mystrtok(NULL, TEXT(" \t\0"));
             if (p == NULL)
                 continue;
             //name = g_strdup(p);
             continue;
         } else if (Mylstrcmp(p, TEXT("Map:")) == 0) { // Set default compose map
-            p = Mystrtok(NULL, TEXT("\0"));
+            p = Mystrtok(NULL, TEXT(" \t\0"));
             if (p == NULL)
                 continue;
             if (Mylstrcmp(p, TEXT("yet")) == 0) {
@@ -791,7 +1051,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
 	    continue;
 
 	if (Mylstrcmp(p, TEXT("Name:")) == 0) {
-	    p = Mystrtok(NULL, TEXT("\0"));
+	    p = Mystrtok(NULL, TEXT(" \t\0"));
 	    if (p == NULL)
 		continue;
 	    //compose_map->name = g_strdup(p);

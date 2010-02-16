@@ -35,4 +35,5 @@ EXPORTS
 
                 GeneralDlgProc
                 AboutDlgProc
-
+                RegWordDlgProc
+                SelectDictionaryDlgProc

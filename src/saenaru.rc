@@ -63,32 +63,39 @@ FACEBMP                 BITMAP  DISCARDABLE     "..\\resource\\face.bmp"
 //
 
 //DLG_GENERAL DIALOG DISCARDABLE  30, 65, 215, 135
-DLG_GENERAL DIALOG DISCARDABLE  30, 65, 212, 158
+DLG_GENERAL DIALOG DISCARDABLE  30, 65, 228, 158
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "자판 일반 설정"
 FONT 9, "굴림"
 LANGUAGE 0x12, 0x1
 BEGIN
     ICON            IDI_GENERAL,IDC_STATIC,4,5,18,21
-    GROUPBOX        "자판 선택",IDC_STATIC,26,2,181,64
-    CONTROL         "두벌식 자판 (&2)",IDC_LAYOUT_OLD2BUL,"Button",
-                    BS_AUTORADIOBUTTON,33,15,70,11
-    CONTROL         "세벌식 자판 (&3)",IDC_LAYOUT_3FIN,"Button",
-                    BS_AUTORADIOBUTTON,33,27,70,11
+    GROUPBOX        "자판 선택",IDC_STATIC,26,2,77,68
+    CONTROL         "두벌식 (&2)",IDC_LAYOUT_OLD2BUL,"Button",
+                    BS_AUTORADIOBUTTON,33,15,56,11
+    CONTROL         "세벌식 (&3)",IDC_LAYOUT_3FIN,"Button",
+                    BS_AUTORADIOBUTTON,33,27,56,11
     CONTROL         "세벌식 390 (&9)",IDC_LAYOUT_390,"Button",
-                    BS_AUTORADIOBUTTON,33,39,70,11
+                    BS_AUTORADIOBUTTON,33,39,56,11
     CONTROL         "세벌식 순아래 (&N)",IDC_LAYOUT_3SUN,"Button",
-                    BS_AUTORADIOBUTTON,33,51,70,11
-    CONTROL         "새두벌 자판 (&D)",IDC_LAYOUT_NEW2BUL,"Button",
-                    BS_AUTORADIOBUTTON,115,15,77,11
-    CONTROL         "새세벌 자판 (&S)",IDC_LAYOUT_NEW3BUL,"Button",
-                    BS_AUTORADIOBUTTON,115,27,77,11
-    CONTROL         "안마태 자판 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
-                    BS_AUTORADIOBUTTON,115,39,77,11
+                    BS_AUTORADIOBUTTON,33,51,68,11
+    GROUPBOX        "사용자 정의 자판",IDC_STATIC,106,2,117,68
+    CONTROL         "옛한글 두벌 (&Y)",IDC_LAYOUT_YET2BUL,"Button",
+                    BS_AUTORADIOBUTTON,111,16,62,11
+    CONTROL         "옛한글 세벌 (&Z)",IDC_LAYOUT_YET3BUL,"Button",
+                    BS_AUTORADIOBUTTON,111,28,62,11
+    CONTROL         "세벌식 389 (&A)",IDC_LAYOUT_389,"Button",
+                    BS_AUTORADIOBUTTON,111,39,62,11
+    CONTROL         "새두벌 (&D)",IDC_LAYOUT_NEW2BUL,"Button",
+                    BS_AUTORADIOBUTTON,174,15,46,11
+    CONTROL         "새세벌 (&S)",IDC_LAYOUT_NEW3BUL,"Button",
+                    BS_AUTORADIOBUTTON,174,27,46,11
+    CONTROL         "안마태 (&A)",IDC_LAYOUT_AHNMATAE,"Button",
+                    BS_AUTORADIOBUTTON,174,39,46,11
     //CONTROL         "사용자 정의 자판 (&U)",IDC_LAYOUT_USER,"Button",
     //                BS_AUTORADIOBUTTON,115,57,77,11
-    CONTROL         "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | CBS_SORT | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
-                    ,115,51,77,91
+    CONTROL         "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
+                    ,117,51,101,87
 
     CONTROL         "모아치기 (&L)",IDC_COMPOSITE_TYPING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,16,76,53,10
@@ -127,6 +134,33 @@ BEGIN
                     116,139,78,10
 END
 
+DLG_REGISTERWORD DIALOG DISCARDABLE  46, 36, 191, 83
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Register Word"
+FONT 9, "굴림"
+LANGUAGE 0x12, 0x1
+BEGIN
+    LTEXT           "&String",-1,15,17,41,8
+    EDITTEXT        ID_WR_STRING,65,16,84,12,ES_AUTOHSCROLL
+    LTEXT           "S&tyle",-1,15,37,41,8
+    LTEXT           "&Reading",-1,15,57,41,8
+    EDITTEXT        ID_WR_READING,65,55,84,12,ES_AUTOHSCROLL
+    COMBOBOX        ID_WR_STYLE,65,33,85,35,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+DLG_SELECTDICTIONARY DIALOG DISCARDABLE  34, 31, 186, 85
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "사전"
+FONT 9, "굴림"
+LANGUAGE 0x12, 0x1
+BEGIN
+    LTEXT           "현재 사전",-1,5,15,84,8
+    LTEXT           "",ID_SD_DICPATH,11,28,162,9
+    PUSHBUTTON      "선택",ID_SD_SELDIC,123,43,40,14
+END
+
+
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "새나루에 대해..."
@@ -139,7 +173,7 @@ BEGIN
 		     59,54,98,8
     LTEXT           "이 소프트웨어는 올바른 동작이나 특정 목적에의 적합성에 대한 어떠한 보증없이 ""있는 그대로"" 배포됩니다.",
                     IDC_STATIC,8,81,198,18
-    LTEXT           "이 소프트웨어는 대한민국 저작권법에 의해 보호됩니다. 자세한 저작권 사항은 같이 배포되는 관련 문서 또는 프로젝트 홈페이지(http://saenaru.i18n.org/)를 참조하십시오.",
+    LTEXT           "이 소프트웨어는 대한민국 저작권법에 의해 보호됩니다. 자세한 저작권 사항은 같이 배포되는 관련 문서 또는 프로젝트 홈페이지(http://kldp.net/projects/saenaru/)를 참조하십시오.",
                     IDC_STATIC,8,101,198,24
     GROUPBOX        "",IDC_STATIC,3,72,209,58
 END
@@ -261,9 +295,9 @@ BEGIN
 	MENUITEM "두벌식(&2)",  	IDM_OLD2BUL
 	MENUITEM "세벌식(&3)",  	IDM_3BUL
 	MENUITEM "세벌식 390(&9)",  	IDM_390
-    	MENUITEM "새두벌(&D)",		IDM_NEW2BUL
-    	MENUITEM "새세벌(&S)",		IDM_NEW3BUL
-     	MENUITEM "안마태(&A)",		IDM_AHNMATAE
+    	MENUITEM "옛한글 두벌(&D)",	IDM_YET2BUL
+    	MENUITEM "옛한글 세벌(&S)",	IDM_YET3BUL
+     	MENUITEM "세벌식 389(&A)",	IDM_389
     	MENUITEM "세벌식 순아래(&N)",	IDM_3SOON
     	MENUITEM "사용자 자판(&U)",	IDM_USER
     	MENUITEM "사용자 조합(&C)",	IDM_USER_COMP
@@ -272,7 +306,7 @@ BEGIN
     	MENUITEM "ESC 영문전환(&E)",	IDM_ESC_ASCII
     	MENUITEM "단어단위 편집(&W)",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
-    	MENUITEM "키보드 보기",		IDM_SHOW_KEYBOARD
+    	MENUITEM "키보드 보기(&K)",	IDM_SHOW_KEYBOARD
 	MENUITEM SEPARATOR
         MENUITEM "변환(&C)",		IDM_RECONVERT
 	MENUITEM "새나루는(&A)...",	IDM_ABOUT          
@@ -338,19 +372,32 @@ LANGUAGE 0x12, 0x1
 BEGIN
     IDS_MENU_ENV                "환경설정(&R)"
     IDS_MENU_DVORAK             "드보락(&V)"
-    IDS_MENU_ESC_ASCII          "ESC 영문전환(&E)"
+    IDS_MENU_ESC_ASCII          "&ESC 영문전환"
     IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
-    IDS_MENU_SHOW_KEYBOARD      "키보드 보기"
+    IDS_MENU_SHOW_KEYBOARD      "키보드 보기(&K)"
 
     IDS_MENU_OLD2BUL            "두벌식(&2)"
     IDS_MENU_3FIN               "세벌식(&3)"
-    IDS_MENU_390                "세벌식390(&9)"
-    IDS_MENU_NEW2BUL            "새두벌(&D)"
-    IDS_MENU_NEW3BUL            "새세벌(&S)"
+    IDS_MENU_390                "세벌식 3&90"
+    IDS_MENU_NEW2BUL            "새두벌(&S)"
+    IDS_MENU_NEW3BUL            "새세벌(&D)"
     IDS_MENU_AHNMATAE           "안마태(&A)"
+    IDS_MENU_389                "세벌식 3&89"
+    IDS_MENU_YET2BUL            "옛한글 두벌(&Y)"
+    IDS_MENU_YET3BUL            "옛한글 세벌(&Z)"
     IDS_MENU_3SOON              "세벌식 순아래(&N)"
     IDS_MENU_USER               "사용자 자판(&U)" 
     IDS_MENU_USER_COMP          "사용자 조합(&C)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_KEY_NEW2BUL            "새두벌"
+    IDS_KEY_NEW3BUL            "새세벌"
+    IDS_KEY_AHNMATAE           "안마태"
+    IDS_KEY_389                "세벌식 389"
+    IDS_KEY_YET2BUL            "옛한글 두벌"
+    IDS_KEY_YET3BUL            "옛한글 세벌"
 END
 
 
@@ -375,57 +422,90 @@ END
 // English (U.S.) resources
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 
-DLG_GENERAL DIALOG DISCARDABLE  30, 65, 212, 158
+DLG_GENERAL DIALOG DISCARDABLE  30, 65, 228, 158
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "Keyboard options"
 LANGUAGE 0x09, 0x1
 FONT 9, "Tahoma"
 {
    ICON		IDI_GENERAL,IDC_STATIC,4,5,18,21
-   GROUPBOX	"Select keyboard", IDC_STATIC,26,2,181,72 
+   GROUPBOX	"Select keyboard", IDC_STATIC,26,2,65,72 
    CONTROL	"&2 set", IDC_LAYOUT_OLD2BUL, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,15,70,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,15,54,11 
    CONTROL	"&3 set Final", IDC_LAYOUT_3FIN, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,29,70,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,29,54,11 
    CONTROL	"3 set 3&90", IDC_LAYOUT_390, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,43,70,11 
-   CONTROL	"3 set Soo&nare", IDC_LAYOUT_3SUN, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,57,70,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,43,54,11 
+   CONTROL	"3 set &No-shift", IDC_LAYOUT_3SUN, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,33,57,54,11 
+
+   GROUPBOX	"User defined keyboards", IDC_STATIC,95,2,126,72 
+   CONTROL	"Yet 2 set (&D)", IDC_LAYOUT_YET2BUL, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,15,54,11 
+   CONTROL	"Yet 3 set (&S)", IDC_LAYOUT_YET3BUL, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,29,54,11 
+   CONTROL	"3 set 3&89", IDC_LAYOUT_389, BUTTON,
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,43,54,11 
    CONTROL	"new 2 set (&D)", IDC_LAYOUT_NEW2BUL, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,15,77,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,15,54,11 
    CONTROL	"new 3 set (&S)", IDC_LAYOUT_NEW3BUL, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,29,77,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,29,54,11 
    CONTROL	"&Ahnmatae", IDC_LAYOUT_AHNMATAE, BUTTON,
-		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,43,77,11 
+		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,43,54,11 
    //CONTROL	"&User defined", IDC_LAYOUT_USER, BUTTON,
    //		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,115,57,77,11 
-   CONTROL      "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | CBS_SORT | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
-                ,115,57,77,95
+   CONTROL      "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
+                ,115,56,100,95
    CONTROL	"Co&llective", IDC_COMPOSITE_TYPING, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,79,53,10 
    CONTROL	"&Concurrent", IDC_CONCURRENT_TYPING, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,83,79,49,10 
    CONTROL	"D&Vorak", IDC_DVORAK_SUPPORT, BUTTON,
-		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,106,91,35,10
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,150,91,35,10
    CONTROL      "&Qwerty shortcut", IDC_QWERTY_HOTKEY_SUPPORT , BUTTON,
-                BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,143,91,67,10 
+                BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,150,103,67,10 
    CONTROL	"Delete by &Jaso unit", IDC_BACKSPACE_BY_JAMO, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,135,79,71,10
    CONTROL	"<&ESC> to ENG mode", IDC_ESCENG_SUPPORT, BUTTON,
-		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,91,79,10 
-   CONTROL	"<Shift>-<SPACE> toggle &Han/Eng mode", IDC_USE_SHIFT_SPACE, BUTTON,
-		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,103,155,10
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,103,79,10 
+   CONTROL	"<Shift>-<SPACE> toggle &Han/Eng", IDC_USE_SHIFT_SPACE, BUTTON,
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,90,122,10
    CONTROL	"Support e&Xtended Hanja (KS X 1002) ", IDC_KSX1002_SUPPORT, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,115,156,10 
    CONTROL	"Restrict to Wansung (&KS X 1001) syllables", IDC_KSX1001_SUPPORT, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,127,156,10 
    CONTROL	"Compose Hangul Jam&Os", IDC_JAMOS, BUTTON,
-		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,139,156,10 
+		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,139,86,10 
    CONTROL      "&Raw Jamo compose",
                     IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     115,139,78,10
 }
 
+DLG_REGISTERWORD DIALOG DISCARDABLE  46, 36, 191, 83
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Register Word"
+LANGUAGE 0x09, 0x01
+FONT 9, "Tahoma"
+BEGIN
+    LTEXT           "&String",-1,15,17,41,8
+    EDITTEXT        ID_WR_STRING,65,16,84,12,ES_AUTOHSCROLL
+    LTEXT           "S&tyle",-1,15,37,41,8
+    LTEXT           "&Reading",-1,15,57,41,8
+    EDITTEXT        ID_WR_READING,65,55,84,12,ES_AUTOHSCROLL
+    COMBOBOX        ID_WR_STYLE,65,33,85,35,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+DLG_SELECTDICTIONARY DIALOG DISCARDABLE  34, 31, 186, 85
+STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Select Dictionary"
+LANGUAGE 0x09, 0x01
+FONT 9, "Tahoma"
+BEGIN
+    LTEXT           "Current Dictionary",-1,5,15,84,8
+    LTEXT           "",ID_SD_DICPATH,11,28,162,9
+    PUSHBUTTON      "Select",ID_SD_SELDIC,123,43,40,14
+END
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
@@ -437,7 +517,7 @@ FONT 9, "Tahoma"
    ICON		IDI_ABOUT, IDC_STATIC, 98,6,18,18 
    LTEXT	"Hye-Sik Chang, Won-Kyu Park 2003-2010", IDC_STATIC, 41,42,136,8 
    LTEXT 	"THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.", IDC_STATIC, 10,59,198,42 
-   LTEXT	"The software product is protected by copyright laws in Korea. See the included license along with this program or visit the homepage(http://saenaru.i18n.org/) of this project.", IDC_STATIC,
+   LTEXT	"The software product is protected by copyright laws in Korea. See the included license along with this program or visit the homepage(http://kldp.net/projects/saenaru/) of this project.", IDC_STATIC,
 		8,102,198,27 
    GROUPBOX	"", IDC_STATIC, 3,53,209,77 
 }
@@ -458,18 +538,21 @@ BEGIN
 	MENUITEM "&2-set",  		IDM_OLD2BUL
 	MENUITEM "&3-set",  		IDM_3BUL
 	MENUITEM "3-set 3&90",  	IDM_390
-    	MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
-    	MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
-     	MENUITEM "&Ahnmatae",		IDM_AHNMATAE
+    	//MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
+    	//MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
+     	//MENUITEM "&Ahnmatae",		IDM_AHNMATAE
+    	MENUITEM "&Yet 2-set",	        IDM_YET2BUL
+    	MENUITEM "Yet 3-set(&Z)",	IDM_YET3BUL
+     	MENUITEM "3-set 3&89",		IDM_389
     	MENUITEM "3-set noshift(&N)",	IDM_3SOON
     	MENUITEM "&User keyboard",	IDM_USER
     	MENUITEM "&Compose Map",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "D&vorak",		IDM_DVORAK
-    	MENUITEM "&ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "&ESC to english(&E)",	IDM_ESC_ASCII
     	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
-    	MENUITEM "&Show keyboard",	IDM_SHOW_KEYBOARD
+    	MENUITEM "Sho&w keyboard",	IDM_SHOW_KEYBOARD
 	MENUITEM SEPARATOR
         MENUITEM "Re&Convert",		IDM_RECONVERT
 	MENUITEM "&About saenaru...",	IDM_ABOUT          
@@ -530,7 +613,7 @@ BEGIN
     IDS_MENU_DVORAK             "D&Vorak"
     IDS_MENU_ESC_ASCII          "&ESC to Ascii Mode"
     IDS_MENU_EDIT_WORD_UNIT     "&Word Unit Edit"
-    IDS_MENU_SHOW_KEYBOARD      "Show Keyboard"
+    IDS_MENU_SHOW_KEYBOARD      "Show &Keyboard"
 
     IDS_MENU_OLD2BUL            "&2-Set"
     IDS_MENU_3FIN               "&3-Set Final"
@@ -538,7 +621,10 @@ BEGIN
     IDS_MENU_NEW2BUL            "New 2-Set (&D)"
     IDS_MENU_NEW3BUL            "New 2-Set (&S)"
     IDS_MENU_AHNMATAE           "&Ahnmatae"
-    IDS_MENU_3SOON              "3-set Soo&Nare"
+    IDS_MENU_YET2BUL            "&Yet 2-Set"
+    IDS_MENU_YET3BUL            "Yet 2-Set (&Z)"
+    IDS_MENU_389                "3-Set 3&89"
+    IDS_MENU_3SOON              "3-set &No-shift"
     IDS_MENU_USER               "&User defined" 
     IDS_MENU_USER_COMP          "&Compose Map"
 END

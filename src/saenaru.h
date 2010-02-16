@@ -55,11 +55,14 @@
 #define LAYOUT_OLD2BUL      0x00000001
 #define LAYOUT_3FIN         0x00000002
 #define LAYOUT_390	    0x00000003
-#define LAYOUT_NEW2BUL	    0x00000004
-#define LAYOUT_NEW3BUL	    0x00000005
-#define LAYOUT_AHNMATAE	    0x00000006
-#define LAYOUT_3SUN	    0x00000007
-#define LAYOUT_USER         0x00000008
+#define LAYOUT_3SUN	    0x00000004
+#define LAYOUT_NEW2BUL	    0x00000005
+#define LAYOUT_NEW3BUL	    0x00000006
+#define LAYOUT_AHNMATAE	    0x00000007
+#define LAYOUT_YET2BUL	    0x00000008
+#define LAYOUT_YET3BUL	    0x00000009
+#define LAYOUT_389	    0x0000000a
+#define LAYOUT_USER         0x0000000b
 
 
 #define SAENARU_ONTHESPOT      0x00020000
@@ -481,6 +484,8 @@ void PASCAL UpdateGuideWindow(LPUIEXTRA lpUIExtra);
 LRESULT CALLBACK LineWndProc(HWND,UINT,WPARAM,LPARAM);
 
 /* config.c      */
+INT_PTR  CALLBACK RegWordDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK SelectDictionaryDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);

@@ -129,11 +129,14 @@ static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
 #endif
     { IDS_MENU_OLD2BUL  ,   NULL },
     { IDS_MENU_3FIN     ,   NULL },
+    { IDS_MENU_3SOON    ,   NULL },
     { IDS_MENU_390      ,   NULL },
+    { IDS_MENU_389      ,   NULL },
+    { IDS_MENU_YET2BUL  ,   NULL },
+    { IDS_MENU_YET3BUL  ,   NULL },
     { IDS_MENU_NEW2BUL  ,   NULL },
     { IDS_MENU_NEW3BUL  ,   NULL },
     { IDS_MENU_AHNMATAE ,   NULL },
-    { IDS_MENU_3SOON    ,   NULL },
     { IDS_MENU_USER     ,   TF_LBMENUF_SUBMENU },
     { IDS_MENU_USER_COMP,   TF_LBMENUF_SUBMENU },
 };
@@ -344,11 +347,14 @@ CLangBarItemImeButton::InitMenu (
 
     ITfMenu *pUserComposeMenu;
     int     idUserComposeMenu=0;
+    HKEY    hKey;
 
     DEBUGPRINTFEX (100, (TEXT ("CLangBarItemImeButton::InitMenu (ITfMenu:%p)\n"), pMenu));
 
     if (pMenu == NULL)
         return E_INVALIDARG;
+
+    GetRegKeyHandle(TEXT("\\Keyboard"), &hKey);
 
     id = 0;
     for (i = 0; i < 2; i ++) {
@@ -379,6 +385,7 @@ CLangBarItemImeButton::InitMenu (
     {
 	LPTSTR lpDesc;
 	TCHAR  szDesc[128];
+	DWORD  uFlag = TRUE;
 	lpDesc=(LPTSTR)&szDesc;
 
 	//if (c_rgKeyboardItems [i].chDesc == NULL)
@@ -392,13 +399,38 @@ CLangBarItemImeButton::InitMenu (
 
         if (dwFlag == NULL)
         {
-            dwFlag = _MenuItem_GetKeyboardFlag(id);
-            pMenu->AddMenuItem (id++,
+	    // make the Keyboard WID from the IDS.
+	    UINT ii = c_rgKeyboardItems [i].chDesc - 2100 + 1;
+
+            dwFlag = _MenuItem_GetKeyboardFlag(ii);
+	    if (dwFlag)
+		    uFlag = FALSE;
+
+	    if (hKey && ii > 5) {
+		LPTSTR lpDesc;
+		TCHAR  szDesc[128];
+
+		lpDesc=(LPTSTR)&szDesc;
+		LoadString(hInst,c_rgKeyboardItems [i].chDesc + 1000, lpDesc, 128);
+		// IDS_MENU_XXX => IDS_KEY_XXX
+
+		// Query if the user-defined keyboard exists or not. 
+		if (RegQueryValueEx(hKey, lpDesc, 0, NULL, NULL, NULL) != ERROR_SUCCESS)
+		    continue;
+	    }
+
+            pMenu->AddMenuItem (ii,
                    dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
+	    id++;
         } else if (idUserKeyboardMenu == 0) {
-            idUserKeyboardMenu = id;
-            pMenu->AddMenuItem (id++,
+	    UINT ii = c_rgKeyboardItems [i].chDesc - 2100 + 1;
+	    if (!uFlag)
+		    dwFlag |= TF_LBMENUF_RADIOCHECKED; // NOT WORK
+
+            idUserKeyboardMenu = ii;
+            pMenu->AddMenuItem (ii,
                    dwFlag, NULL, NULL, wstrDesc, nstrDesc, &pUserKeyboardMenu);
+	    id++;
         } else {
 	    id=20;
             idUserComposeMenu = id;
@@ -437,12 +469,11 @@ CLangBarItemImeButton::InitMenu (
     
     // add User defined Keyboads (SubMenu)
     if (idUserKeyboardMenu) {
-        HKEY hKey;
-
         id = idUserKeyboardMenu;
 
-        if (!GetRegKeyHandle(TEXT("\\Keyboard"), &hKey))
+        if (hKey == NULL)
             return S_OK;
+
         for (i=0;i<10;i++)
         {
             WCHAR achValue[256]; 
@@ -470,9 +501,11 @@ CLangBarItemImeButton::InitMenu (
             //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,
                             dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL);
         }
-	RegCloseKey(hKey);
         pUserKeyboardMenu->Release();
     }
+    if (hKey)
+	RegCloseKey(hKey);
+
     // add User defined Composes (SubMenu)
     if (idUserComposeMenu) {
         HKEY hKey;

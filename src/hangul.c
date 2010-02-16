@@ -1671,6 +1671,42 @@ int PASCAL set_keyboard(UINT type)
 	    atype=3;
 	    ctype=1;
 	    break;
+	case LAYOUT_389:
+            atype=
+             load_keyboard_map_from_reg(TEXT("¼¼¹ú½Ä 389"),0,keyboard_table_user);
+	    if (atype)
+                keyboard_table=keyboard_table_user;
+	    if (atype & 0xff00) {
+		ctype = (atype & 0xff00) >> 8;
+		atype = atype & 0x00ff;
+	    } else {
+		ctype=1;
+	    }
+	    break;
+	case LAYOUT_YET2BUL:
+            atype=
+	     load_keyboard_map_from_reg(TEXT("¿¾ÇÑ±Û µÎ¹ú"),0,keyboard_table_user);
+	    if (atype)
+	        keyboard_table=keyboard_table_user;
+	    if (atype & 0xff00) {
+		ctype = (atype & 0xff00) >> 8;
+		atype = atype & 0x00ff;
+	    } else {
+		ctype=2;
+	    }
+	    break;
+	case LAYOUT_YET3BUL:
+            atype=
+             load_keyboard_map_from_reg(TEXT("¿¾ÇÑ±Û ¼¼¹ú"),0,keyboard_table_user);
+	    if (atype)
+                keyboard_table=keyboard_table_user;
+	    if (atype & 0xff00) {
+		ctype = (atype & 0xff00) >> 8;
+		atype = atype & 0x00ff;
+	    } else {
+		ctype=1;
+	    }
+	    break;
 	case LAYOUT_NEW2BUL:
             atype=
 	     load_keyboard_map_from_reg(TEXT("»õµÎ¹ú"),0,keyboard_table_user);
@@ -1707,16 +1743,9 @@ int PASCAL set_keyboard(UINT type)
 		ctype=3;
 	    }
 	    break;
-#if 0
-	case LAYOUT_3YET:
-            keyboard_table=(WCHAR *)keyboard_table_3yet;
-	    atype=3;
-	    ctype=0;
-	    break;
-#endif
 	default:
 	    // User defined keyboard
-#define USER_DEFINED_KEYBOARD_OFFSET	8
+#define USER_DEFINED_KEYBOARD_OFFSET	11
 	    type-=USER_DEFINED_KEYBOARD_OFFSET;
             atype=
              load_keyboard_map_from_reg(NULL,type,keyboard_table_user);
@@ -1850,6 +1879,7 @@ LPARAM lParam;
 LPBYTE lpbKeyState;
 {
     WORD code = (WORD) HIWORD(wParam);
+    WORD scan = (WORD) HIWORD(wParam);
 
     LPMYSTR lpchText;
     LPMYSTR lpstr, lpread;
@@ -2712,7 +2742,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             case 2: // Áß¼º + Áß¼º
                 comb = hangul_compose(ic->jung, jamo);
 		// µ¿½ÃÄ¡±âÀÏ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ Áß+Áß Á¶ÇÕ
-		if ( ctyping && !hangul_is_jungseong(comb))
+		if ( !comb && ctyping && !hangul_is_jungseong(comb))
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( hangul_is_jungseong(comb) ) {
 		    ic->jung=comb;

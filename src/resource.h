@@ -40,6 +40,8 @@
 #define DLG_GENERAL             125
 #define DLG_ABOUT               126
 #define DLG_DEBUG               127
+#define DLG_REGISTERWORD        128
+#define DLG_SELECTDICTIONARY    129
 
 /* for dialog box */
 #define ID_WR_READING           200
@@ -65,7 +67,10 @@
 #define IDC_LAYOUT_NEW3BUL      1005
 #define IDC_LAYOUT_AHNMATAE     1006
 #define IDC_LAYOUT_3SUN         1007
-#define IDC_LAYOUT_USER         1008
+#define IDC_LAYOUT_YET2BUL      1008
+#define IDC_LAYOUT_YET3BUL      1009
+#define IDC_LAYOUT_389          1010
+#define IDC_LAYOUT_USER         1011
 
 #define IDC_CONCURRENT_TYPING   2000
 #define IDC_COMPOSITE_TYPING    2001
@@ -108,18 +113,28 @@
 #define IDS_MENU_OLD2BUL            2101
 #define IDS_MENU_3FIN               2102
 #define IDS_MENU_390                2103
-#define IDS_MENU_NEW2BUL            2104
-#define IDS_MENU_NEW3BUL            2105
-#define IDS_MENU_AHNMATAE           2106
-#define IDS_MENU_3SOON              2107
-#define IDS_MENU_USER               2108
-#define IDS_MENU_USER_COMP          2109
+#define IDS_MENU_3SOON              2104
+#define IDS_MENU_NEW2BUL            2105
+#define IDS_MENU_NEW3BUL            2106
+#define IDS_MENU_AHNMATAE           2107
+#define IDS_MENU_YET2BUL            2108
+#define IDS_MENU_YET3BUL            2109
+#define IDS_MENU_389                2110
+#define IDS_MENU_USER               2111
 
-#define IDS_MENU_ENV                2111
-#define IDS_MENU_DVORAK             2112
-#define IDS_MENU_ESC_ASCII          2113
-#define IDS_MENU_EDIT_WORD_UNIT     2114
-#define IDS_MENU_SHOW_KEYBOARD      2115
+#define IDS_KEY_NEW2BUL             3105
+#define IDS_KEY_NEW3BUL             3106
+#define IDS_KEY_AHNMATAE            3107
+#define IDS_KEY_YET2BUL             3108
+#define IDS_KEY_YET3BUL             3109
+#define IDS_KEY_389                 3110
+
+#define IDS_MENU_USER_COMP          2120
+#define IDS_MENU_ENV                2131
+#define IDS_MENU_DVORAK             2132
+#define IDS_MENU_ESC_ASCII          2133
+#define IDS_MENU_EDIT_WORD_UNIT     2134
+#define IDS_MENU_SHOW_KEYBOARD      2135
 
 #define IDC_STATIC                      -1
 
@@ -127,11 +142,15 @@
 #define IDM_OLD2BUL		40001
 #define IDM_3BUL		40002
 #define IDM_390			40003
-#define IDM_NEW2BUL		40004
-#define IDM_NEW3BUL		40005
-#define IDM_AHNMATAE		40006
-#define IDM_3SOON		40007
-#define IDM_USER		40010
+#define IDM_3SOON		40004
+#define IDM_NEW2BUL		40005
+#define IDM_NEW3BUL		40006
+#define IDM_AHNMATAE		40007
+#define IDM_YET2BUL		40008
+#define IDM_YET3BUL		40009
+#define IDM_389 		40010
+
+#define IDM_USER		40011
 #define IDM_USER_COMP		40020
 #define IDM_DVORAK		40031
 #define IDM_ESC_ASCII		40032
