@@ -344,6 +344,8 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
                   Mylstrlen(GETLPCOMPSTR(lpCompStr)));
             lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_TARGET_CONVERTED,
                   Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
+
+            lpCompStr->dwCompStrLen = Mylstrlen(GETLPCOMPSTR(lpCompStr));
         }
     }
 
@@ -1665,7 +1667,7 @@ LPBYTE lpbKeyState;
             break;
 
         case VK_RIGHT:
-            if (IsCompStr(hIMC) && ic.len)
+            if (ic.len && IsCompStr(hIMC) && (!(dwImeFlag & SAENARU_ONTHESPOT) || dwOptionFlag & HANGUL_JAMOS))
             {
                 hangul_ic_init(&ic);
                 return TRUE;
