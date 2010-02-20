@@ -518,6 +518,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             UINT wParam;
             // Simulate KEYDOWN event.
             if ( lKeyData & 0x80000000 ) {
+                if ((LOWORD(vKey) & 0x00FF) == VK_PROCESSKEY)
+                    MakeResultString(hIMC,TRUE);
+
                 fRet=TRUE;
             } else {
                 wParam=LOWORD(vKey) & 0x00FF;
