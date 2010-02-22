@@ -596,6 +596,25 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwLayoutFlag == LAYOUT_3SUN) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_USER, 
                                 (dwLayoutFlag >= LAYOUT_USER) ? 1 : 0);
+
+            if (GetRegKeyHandle(TEXT("\\Keyboard"), &hKey)) {
+                int i;
+                for (i = 0; i <= 5; i++) {
+		    LPTSTR lpDesc;
+		    TCHAR  szDesc[128];
+
+		    lpDesc = (LPTSTR)&szDesc;
+		    LoadString(hInst, IDS_KEY_NEW2BUL + i, lpDesc, 128);
+		    // get IDS_KEY_XXX string
+
+		    // Query if the user-defined keyboard exists or not. 
+		    if (RegQueryValueEx(hKey, lpDesc, 0, NULL, NULL, NULL) != ERROR_SUCCESS) {
+                        hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_NEW2BUL + i);
+                        EnableWindow (hwndRadio, FALSE);
+                    }
+                }
+                RegCloseKey(hKey);
+            }
             break;
 
         case WM_DESTROY:
@@ -912,18 +931,18 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
                 continue;
             //name = g_strdup(p);
             continue;
-        } else if (Mylstrcmp(p, TEXT("Map:")) == 0) { // Set default compose map
+        } else if (Mylstrcmp(p, TEXT("Compose:")) == 0) {
+            // Set default compose map
             p = Mystrtok(NULL, TEXT(" \t\0"));
             if (p == NULL)
                 continue;
             if (Mylstrcmp(p, TEXT("yet")) == 0) {
-                MyDebugPrint((TEXT("Saenaru: ComposeMap YET\n")));
+                ctype = SAENARU_COMPOSE_YET;
+            } else if (Mylstrcmp(p, TEXT("full")) == 0) {
                 ctype = SAENARU_COMPOSE_YET;
             } else if (Mylstrcmp(p, TEXT("2set")) == 0) {
-                MyDebugPrint((TEXT("Saenaru: ComposeMap 2set\n")));
                 ctype = SAENARU_COMPOSE_2SET;
             } else if (Mylstrcmp(p, TEXT("3set")) == 0) {
-                MyDebugPrint((TEXT("Saenaru: ComposeMap 3set\n")));
                 ctype = SAENARU_COMPOSE_3SET;
             } else if (Mylstrcmp(p, TEXT("ahn")) == 0) {
                 ctype = SAENARU_COMPOSE_AHN;
