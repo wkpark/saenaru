@@ -1684,9 +1684,18 @@ LPBYTE lpbKeyState;
         case VK_ESCAPE:
             if (IsCompStr(hIMC))
             {
+                TRANSMSG GnMsg;
+
                 MakeResultString(hIMC,TRUE);
                 // Simulate a key press
-                keybd_event( (BYTE)wParam, 0x0, 0, 0 );
+                //keybd_event( (BYTE)wVKey, 0x0, 0, lParam ); // not work correctly for HOME,END etc.
+
+                lpIMC = ImmLockIMC(hIMC);
+                GnMsg.message = WM_IME_KEYDOWN;
+                GnMsg.wParam = wParam;
+                GnMsg.lParam = lParam;
+                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                ImmUnlockIMC(hIMC);
 
                 // Simulate a key release
                 //keybd_event( (BYTE)wParam, 0x0, KEYEVENTF_KEYUP, 0);
