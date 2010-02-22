@@ -3,7 +3,6 @@
 ; $Saenaru: saenaru/setup/saenaru.nsi,v 1.9 2007/12/29 16:52:04 wkpark Exp $
 
 !define RELVERSION      "1.1.0cvs-snapshot"
-;!define RELVERSION      "1.1.0cvs-20100214"
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
@@ -18,11 +17,13 @@
 !include "x64.nsh"
 ;---------------------
 ;Include Modern UI
-!include "MUI.nsh"
+!include "MUI2.nsh"
 ;Include Radio buttons
 !include "Sections.nsh"
 
-BrandingText "새나루 인스톨러" 
+SetCompressor /SOLID lzma
+
+BrandingText "새나루 인스톨러"
 
 ;--------------------------------
 ;Configuration
@@ -49,6 +50,7 @@ BrandingText "새나루 인스톨러"
   !insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_INSTFILES
+  Page custom OpenInputSetting
   !insertmacro MUI_PAGE_FINISH 
   
   !insertmacro MUI_UNPAGE_CONFIRM
@@ -71,7 +73,7 @@ BrandingText "새나루 인스톨러"
 
 Section "새나루 입력기" SecBody
 
-  SectionIn RO
+  ;SectionIn RO
 
   SetOutPath "$SYSDIR"
   SetOverwrite try
@@ -229,58 +231,77 @@ SectionEnd
 Section /o "기본 한글입력기로 지정" SecDefault
   ; save current IME
   ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
-  StrCmp $0 "e0120412" exit
-  ; set as default IME
-  WriteRegStr HKCU "Keyboard Layout\Preload" "1" "e0120412"
-  SetRebootFlag true
-
-  ; set some Saenaru reg entries.
+  StrCmp $0 "e0120412" exit # saenaru
+  StrCmp $0 "e0130412" exit # saenaru dvorak
+  ; set Saenaru as the default IME
+  ; with rundll32
+  ;
+  ; save default IME
+  StrCpy $1 $0
 
   ; get last IME
-  StrCpy $1 1
-  StrCpy $3 2
-  loop:
-    IntOp $1 $1 + 1
-    ReadRegStr $2 HKCU "Keyboard Layout\Preload" "$1"
-    IfErrors exit
-    StrCmp $2 "e0120412" del loop1
-  del:
-    DeleteRegKey HKCU "Keyboard Layout\Preload\$1"
-  loop1:
-    IntOp $3 $3 + 1
-    StrCpy $0 $2
-    Goto loop
+  !tempfile FILE
+  !appendfile "${FILE}" '[RegionalSettings]$\r$\n;LanguageGroup="1","2","3","7","8"$\r$\n;SystemLocale=0412$\r$\n'
+  !appendfile "${FILE}" ';UserLocale=0412$\r$\n'
+  !appendfile "${FILE}" 'InputLocale="0412:e0120412","0412:e0130412"$\r$\n'
+  !appendfile "${FILE}" 'UserLocale_DefaultUser=0412$\r$\n'
+  !appendfile "${FILE}" ';InputLocale_DefaultUser="0412:e0010412"$\r$\n'
+  Exec 'RunDll32.exe shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
+  !undef FILE
   exit:
 SectionEnd
+
 
 Section "한글입력기 목록에 추가" SecAdd
-  ; get last IME
-  StrCpy $1 0
-  StrCpy $3 2
-  StrCpy $4 1
-  loop:
-    IntOp $1 $1 + 1
-    ReadRegStr $2 HKCU "Keyboard Layout\Preload" "$1"
-    IfErrors save
-    StrCmp $2 "e0120412" exit
-    IntCmp $2 $4 loop loop inc
-  inc:
-    StrCpy $4 $1
-    Goto loop
-
-  save:
   ; save current IME
-  ; set as default IME
-  IntCmp $1 $4 save2 save2 save1
-  save1:
-  StrCpy $4 $1
-  save2:
-  WriteRegStr HKCU "Keyboard Layout\Preload" "$4" "e0120412"
+  ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
+  StrCmp $0 "e0120412" exit
+  StrCmp $0 "e0130412" exit
 
-  SetRebootFlag true
+  ; known hangul IME
+  StrCmp $0 "e0010412" save ; IME 2002
+  StrCmp $0 "e0200412" save ; IME 2003
+  StrCmp $0 "e0220412" save ; 날개셋
+  ; set Saenaru as the default IME
+  ; with rundll32
+  ;
+  ; save default IME
+  save:
+  StrCpy $1 $0
+  StrCpy $2 $0 "" -4 # lang code 0412 etc.
+
+  ; get last IME
+  !tempfile FILE
+  !appendfile "${FILE}" '[RegionalSettings]$\r$\n;LanguageGroup="1","2","3","7","8"$\r$\n;SystemLocale="00000412"$\r$\n'
+  !appendfile "${FILE}" ';UserLocale=0412$\r$\n'
+  !appendfile "${FILE}" 'InputLocale="$2:$1","0412:e0120412","0412:e0130412"$\r$\n'
+  !appendfile "${FILE}" 'UserLocale_DefaultUser=0412$\r$\n'
+  !appendfile "${FILE}" ';InputLocale_DefaultUser="$2:$1"$\r$\n'
+  Exec 'RunDll32.exe shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
+  !undef FILE
   exit:
-
 SectionEnd
+
+  LangString DESC_IME_SETTING_TITLE ${LANG_KOREAN} "입력기 설정"
+  LangString DESC_IME_SETTING_SUBTITLE ${LANG_KOREAN} "입력기 설정을 사용자가 직접 변경할 수 있습니다."
+  LangString DESC_IME_SETTING_HEADER ${LANG_KOREAN} "제어판의 입력기 설정 변경창을 직접 열어 사용자가 입력기 설정을 추가 및 변경할 수 있습니다."
+  LangString DESC_IME_SETTING_BUTTON ${LANG_KOREAN} "입력기 설정"
+
+
+Function OpenInputSetting
+	nsDialogs::Create 1018
+	!insertmacro MUI_HEADER_TEXT "$(DESC_IME_SETTING_TITLE)" "$(DESC_IME_SETTING_SUBTITLE)"
+	${NSD_CreateLabel} 0 0 100% 143 "$(DESC_IME_SETTING_HEADER)"
+	${NSD_CreateButton} 0 144 90u 17u "$(DESC_IME_SETTING_BUTTON)"
+	Pop $0
+	${NSD_OnClick} $0 OpenKeyboardSettings
+	
+	nsDialogs::Show
+FunctionEnd
+
+Function OpenKeyboardSettings
+	Exec "RunDll32.exe shell32.dll,Control_RunDLL input.dll"
+FunctionEnd
 
 ;--------------------------------
 ;Descriptions
