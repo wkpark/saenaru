@@ -84,7 +84,7 @@ BEGIN
                     BS_AUTORADIOBUTTON,111,16,62,11
     CONTROL         "烤茄臂 技国 (&Z)",IDC_LAYOUT_YET3BUL,"Button",
                     BS_AUTORADIOBUTTON,111,28,62,11
-    CONTROL         "技国侥 389 (&A)",IDC_LAYOUT_389,"Button",
+    CONTROL         "技国侥 389 (&8)",IDC_LAYOUT_389,"Button",
                     BS_AUTORADIOBUTTON,111,39,62,11
     CONTROL         "货滴国 (&D)",IDC_LAYOUT_NEW2BUL,"Button",
                     BS_AUTORADIOBUTTON,174,15,46,11
@@ -538,21 +538,21 @@ BEGIN
 	MENUITEM "&2-set",  		IDM_OLD2BUL
 	MENUITEM "&3-set",  		IDM_3BUL
 	MENUITEM "3-set 3&90",  	IDM_390
-    	//MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
-    	//MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
-     	//MENUITEM "&Ahnmatae",		IDM_AHNMATAE
+    	MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
+    	MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
+     	MENUITEM "&Ahnmatae",		IDM_AHNMATAE
     	MENUITEM "&Yet 2-set",	        IDM_YET2BUL
     	MENUITEM "Yet 3-set(&Z)",	IDM_YET3BUL
      	MENUITEM "3-set 3&89",		IDM_389
-    	MENUITEM "3-set noshift(&N)",	IDM_3SOON
+    	MENUITEM "3-set &No-shift",	IDM_3SOON
     	MENUITEM "&User keyboard",	IDM_USER
     	MENUITEM "&Compose Map",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "D&vorak",		IDM_DVORAK
-    	MENUITEM "&ESC to english(&E)",	IDM_ESC_ASCII
+    	MENUITEM "&ESC to english",	IDM_ESC_ASCII
     	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
-    	MENUITEM "Sho&w keyboard",	IDM_SHOW_KEYBOARD
+    	MENUITEM "Show &Keyboard",	IDM_SHOW_KEYBOARD
 	MENUITEM SEPARATOR
         MENUITEM "Re&Convert",		IDM_RECONVERT
 	MENUITEM "&About saenaru...",	IDM_ABOUT          
@@ -617,12 +617,12 @@ BEGIN
 
     IDS_MENU_OLD2BUL            "&2-Set"
     IDS_MENU_3FIN               "&3-Set Final"
-    IDS_MENU_390                "3-Set 390"
+    IDS_MENU_390                "3-Set 3&90"
     IDS_MENU_NEW2BUL            "New 2-Set (&D)"
-    IDS_MENU_NEW3BUL            "New 2-Set (&S)"
+    IDS_MENU_NEW3BUL            "New 3-Set (&S)"
     IDS_MENU_AHNMATAE           "&Ahnmatae"
     IDS_MENU_YET2BUL            "&Yet 2-Set"
-    IDS_MENU_YET3BUL            "Yet 2-Set (&Z)"
+    IDS_MENU_YET3BUL            "Yet 3-Set (&Z)"
     IDS_MENU_389                "3-Set 3&89"
     IDS_MENU_3SOON              "3-set &No-shift"
     IDS_MENU_USER               "&User defined" 
