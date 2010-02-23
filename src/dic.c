@@ -689,56 +689,65 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
 
         lpptr = MyCharPrev( lpstr, lpstr+dwCurPos );
 
+        MyDebugPrint((TEXT(">>>>>>>> lpptr: %s:%d\r\n"), lpptr, dwCurPos));
         if ( is_combining_mark(*lpptr)) {
             LPMYSTR lpprev;
             // combining mark가 발견되면 먼저 지운다.
-            *lpptr = MYTEXT('\0');
+            MyDebugPrint((TEXT(">> Delete Combining Mark: %s:%d\r\n"), lpptr, dwCurPos));
             lpprev = lpptr - 1;
             dwCurPos--;
-            while(is_combining_mark(*lpprev))
+            while(is_combining_mark(*lpprev)) {
+                MyDebugPrint((TEXT(">> Delete Combining Mark: %s:%d\r\n"), lpprev, dwCurPos));
                 lpprev--;
+                dwCurPos--;
+            }
             cs = *lpprev;
-
+            *(lpprev+1) = MYTEXT('\0');
         } else if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
             // Delete jamos
-            if (ic.len-1 > 0) {
+            if (ic.len > 0) {
                 // 조합중인 글자?
                 WCHAR last;
                 int ncs = 0;
 
                 hangul_ic_pop(&ic); // delete
                 last= hangul_ic_peek(&ic); // get last
-                if (ic.laststate == 1) ic.cho=0;
-                else if (ic.laststate == 2) ic.jung=0;
-                else if (ic.laststate == 3) ic.jong=0;
+                if (last) {
+                    if (ic.laststate == 1) ic.cho=0;
+                    else if (ic.laststate == 2) ic.jung=0;
+                    else if (ic.laststate == 3) ic.jong=0;
+                }
 
-                //ic.laststate--;
                 if (ic.syllable) {
-
                     ncs = hangul_ic_get(&ic,0, lpptr);
-                    if (ncs >= 1)
-                    cs = *(lpptr + ncs - 1);
-                    MyDebugPrint((TEXT(">> Syllable Delete Han Char: %s:%d\r\n"), lpptr, dwCurPos));
+                    if (ncs >= 1) {
+                        cs = *(lpptr + ncs - 1);
+                    } else {
+                        // 조합중인 글자가 모두 지워짐.
+                        hangul_ic_init(&ic);
+                        if (dwCurPos > 0) {
+                            cs = *(lpptr-1);
+
+                            dwCurPos--;
+                        }
+                        Mylstrcpy( lpptr, lpstr+dwCurPos );
+                        *(lpptr) = MYTEXT('\0');
+                    }
+                    MyDebugPrint((TEXT(">> Syllable Delete Han Char: len=%d, %s:%d\r\n"), ic.len, lpptr, dwCurPos));
                 } else {
                     LPMYSTR lpprev;
                     // syllable이 아님.
                     // 옛한글.
 
                     MyDebugPrint((TEXT(">> Pre BACKSPACE Delete Han Char: %s:%d\r\n"), lpptr, dwCurPos));
-                    *lpptr = MYTEXT('\0'); // 마지막 문자 지움.
-                    MyDebugPrint((TEXT(">> deleted BACKSPACE Delete Han Char: %s\r\n"), lpptr));
-                    lpprev = lpptr - 1;
-                    dwCurPos--;
-                    cs = *(lpptr-1);
-
-                    if (ic.len > 0) {
+                    lpprev = lpptr;
 
                     ncs = hangul_del_prev(lpprev);
                     dwCurPos-= ncs - 1;
                     MyDebugPrint((TEXT(">> Post BACKSPACE Delete Han Char: %s %d\r\n"), lpprev, ncs));
 
-                    lpptr -= ncs; // 이전 문자 위치로.
-                    MyDebugPrint((TEXT(">>> Get Delete Han Char: %s\r\n"), lpptr));
+                    lpptr -= ncs - 1; // 이전 문자 위치로.
+                    MyDebugPrint((TEXT(">>> Get Delete Han Char: %s:%d\r\n"), lpptr, ncs));
 
                     // 재조합된 문자열을 가져옴.
                     ncs = hangul_ic_get(&ic,0, lpptr);
@@ -746,26 +755,33 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                         MyDebugPrint((TEXT(">>> Get result Han Char: %s : %d\r\n"), lpptr, ncs));
                         lpptr += ncs;
                         cs = *(lpptr - 1);
-                        *lpptr = MYTEXT('\0');
                         dwCurPos+= ncs - 1;
-                        MyDebugPrint((TEXT(">>> CompStr result: %s:%d\r\n"), lpstr, dwCurPos));
+                    } else {
+                        // 조합중인 글자가 모두 지워짐.
+                        hangul_ic_init(&ic);
+                        dwCurPos--;
                     }
-                    }
+                    MyDebugPrint((TEXT(">>> CompStr result: %s:%d\r\n"), lpstr, dwCurPos));
+                    *lpptr = MYTEXT('\0');
                 }
                 // change last state
-                if (hangul_is_choseong(last)) ic.laststate=1;
-                else if (hangul_is_jungseong(last)) ic.laststate=2;
-                else if (hangul_is_jongseong(last)) ic.laststate=3;
+                if (last) {
+                    if (hangul_is_choseong(last)) ic.laststate=1;
+                    else if (hangul_is_jungseong(last)) ic.laststate=2;
+                    else if (hangul_is_jongseong(last)) ic.laststate=3;
 
-                ic.last = last;
-
+                    ic.last = last;
+                }
             } else {
+                // 조합중인 글자가 모두 지워짐.
                 hangul_ic_init(&ic);
-                Mylstrcpy( lpptr, lpstr+dwCurPos );
                 if (dwCurPos > 0) {
                     cs = *(lpptr-1);
                 }
                 dwCurPos--;
+                Mylstrcpy( lpptr, lpstr+dwCurPos );
+                *lpptr = MYTEXT('\0');
+                MyDebugPrint((TEXT(">>> Delete Single Char: %s:%d\r\n"), lpstr, dwCurPos));
             }
         } else {
             LPMYSTR lpprev;
@@ -848,7 +864,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.wParam = cs;
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if (dwImeFlag & SAENARU_ONTHESPOT)
+            if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
@@ -871,7 +887,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.wParam = 0;
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if (dwImeFlag & SAENARU_ONTHESPOT)
+            if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
