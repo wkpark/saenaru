@@ -63,10 +63,10 @@
 #define IDC_LAYOUT_OLD2BUL      1001
 #define IDC_LAYOUT_3FIN         1002
 #define IDC_LAYOUT_390          1003
-#define IDC_LAYOUT_NEW2BUL      1004
-#define IDC_LAYOUT_NEW3BUL      1005
-#define IDC_LAYOUT_AHNMATAE     1006
-#define IDC_LAYOUT_3SUN         1007
+#define IDC_LAYOUT_3SUN         1004
+#define IDC_LAYOUT_NEW2BUL      1005
+#define IDC_LAYOUT_NEW3BUL      1006
+#define IDC_LAYOUT_AHNMATAE     1007
 #define IDC_LAYOUT_YET2BUL      1008
 #define IDC_LAYOUT_YET3BUL      1009
 #define IDC_LAYOUT_389          1010
