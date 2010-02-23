@@ -42,6 +42,150 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs);
 int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs);
 void PASCAL hangul_ic_init( HangulIC *ic );
 
+/**
+ * convert jamo to compatible jamo.
+ * binary search version of the libhangul's func.
+ */
+
+WCHAR PASCAL
+hangul_jamo_to_cjamo_full(WCHAR key)
+{
+    static const HangulCompose lookup[] = {
+        { 0x1100, 0x3131 },
+        { 0x1101, 0x3132 },
+        { 0x1102, 0x3134 },
+        { 0x1103, 0x3137 },
+        { 0x1104, 0x3138 },
+        { 0x1105, 0x3139 },
+        { 0x1106, 0x3141 },
+        { 0x1107, 0x3142 },
+        { 0x1108, 0x3143 },
+        { 0x1109, 0x3145 },
+        { 0x110a, 0x3146 },
+        { 0x110b, 0x3147 },
+        { 0x110c, 0x3148 },
+        { 0x110d, 0x3149 },
+        { 0x110e, 0x314a },
+        { 0x110f, 0x314b },
+        { 0x1110, 0x314c },
+        { 0x1111, 0x314d },
+        { 0x1112, 0x314e },
+        { 0x1114, 0x3165 },
+        { 0x1115, 0x3166 },
+        { 0x111a, 0x3140 },
+        { 0x111c, 0x316e },
+        { 0x111d, 0x3171 },
+        { 0x111e, 0x3172 },
+        { 0x1120, 0x3173 },
+        { 0x1121, 0x3144 },
+        { 0x1122, 0x3174 },
+        { 0x1123, 0x3175 },
+        { 0x1127, 0x3176 },
+        { 0x1129, 0x3177 },
+        { 0x112b, 0x3178 },
+        { 0x112c, 0x3179 },
+        { 0x112d, 0x317a },
+        { 0x112e, 0x317b },
+        { 0x112f, 0x317c },
+        { 0x1132, 0x317d },
+        { 0x1136, 0x317e },
+        { 0x1140, 0x317f },
+        { 0x1146, 0x3183 },
+        { 0x1147, 0x3180 },
+        { 0x114c, 0x3181 },
+        { 0x1157, 0x3184 },
+        { 0x1158, 0x3185 },
+        { 0x1159, 0x3186 },
+        { 0x115B, 0x3167 },
+        { 0x115C, 0x3135 },
+        { 0x115D, 0x3136 },
+        { 0x115f, 0x3164 }, /* L Fill */
+        { 0x1160, 0x3164 }, /* V Fill */
+        { 0x1161, 0x314f },
+        { 0x1162, 0x3150 },
+        { 0x1163, 0x3151 },
+        { 0x1164, 0x3152 },
+        { 0x1165, 0x3153 },
+        { 0x1166, 0x3154 },
+        { 0x1167, 0x3155 },
+        { 0x1168, 0x3156 },
+        { 0x1169, 0x3157 },
+        { 0x116a, 0x3158 },
+        { 0x116b, 0x3159 },
+        { 0x116c, 0x315a },
+        { 0x116d, 0x315b },
+        { 0x116e, 0x315c },
+        { 0x116f, 0x315d },
+        { 0x1170, 0x315e },
+        { 0x1171, 0x315f },
+        { 0x1172, 0x3160 },
+        { 0x1173, 0x3161 },
+        { 0x1174, 0x3162 },
+        { 0x1175, 0x3163 },
+        { 0x1184, 0x3187 },
+        { 0x1185, 0x3188 },
+        { 0x1188, 0x3189 },
+        { 0x1191, 0x318a },
+        { 0x1192, 0x318b },
+        { 0x1194, 0x318c },
+        { 0x119e, 0x318d },
+        { 0x11a1, 0x318e },
+        { 0x11aa, 0x3133 },
+        { 0x11ac, 0x3135 },
+        { 0x11ad, 0x3136 },
+        { 0x11b0, 0x313a },
+        { 0x11b1, 0x313b },
+        { 0x11b2, 0x313c },
+        { 0x11b3, 0x313d },
+        { 0x11b4, 0x313e },
+        { 0x11b5, 0x313f },
+        { 0x11c7, 0x3167 },
+        { 0x11c8, 0x3168 },
+        { 0x11cc, 0x3169 },
+        { 0x11ce, 0x316a },
+        { 0x11d3, 0x316b },
+        { 0x11d7, 0x316c },
+        { 0x11d9, 0x316d },
+        { 0x11dd, 0x316f },
+        { 0x11df, 0x3170 },
+        { 0x11f1, 0x3182 },
+        { 0x11f2, 0x3183 },
+        { 0xa964, 0x313a },
+        { 0xa966, 0x316a },
+        { 0xa968, 0x313b },
+        { 0xa969, 0x313c },
+        { 0xa96c, 0x313d },
+        { 0xa971, 0x316f },
+        { 0xd7cd, 0x3138 },
+        { 0xd7e3, 0x3173 },
+        { 0xd7e6, 0x3143 },
+        { 0xd7e7, 0x3175 },
+        { 0xd7e8, 0x3176 },
+        { 0xd7ef, 0x317e },
+        { 0xd7f9, 0x3149 },
+    };
+
+  int min, max, mid;
+  int size = (sizeof (lookup) / sizeof ((lookup)[0]));
+
+  /* binary search in table */
+  min = 0;
+  max = size - 1;
+
+  while (max >= min) {
+    mid = (min + max) / 2;
+    if (lookup[mid].key < key)
+      min = mid + 1;
+    else if (lookup[mid].key > key)
+      max = mid - 1;
+    else {
+      return lookup[mid].code;
+    }
+  }
+  return key;
+}
+
+
 WCHAR PASCAL
 hangul_choseong_to_cjamo(WCHAR ch)
 {
@@ -79,9 +223,9 @@ hangul_choseong_to_cjamo(WCHAR ch)
     return table[ch - 0x1100];
 }
 
-#define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x115e)
-#define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a7)
-#define hangul_is_jongseong(ch)	((ch) >= 0x11a8 && (ch) <= 0x11ff)
+#define hangul_is_choseong(ch)	(((ch) >= 0x1100 && (ch) <= 0x115f) || ((ch) >= 0xa960 && (ch) <= 0xa97c))
+#define hangul_is_jungseong(ch)	(((ch) >= 0x1160 && (ch) <= 0x11a7) || ((ch) >= 0xd7b0 && (ch) <= 0xd7c6))
+#define hangul_is_jongseong(ch)	(((ch) >= 0x11a8 && (ch) <= 0x11ff) || ((ch) >= 0xd7cb && (ch) <= 0xd7fb))
 #define hangul_is_bangjum(ch)	((ch) == 0x302e || (ch) == 0x302f)
 #define is_combining_mark(ch)	((ch) >= 0x0300 && (ch) <= 0x036f || \
 	(ch) >= 0x1dc0 && (ch) <= 0x1de6 || (ch) >= 0x20d0 && (ch) <= 0x20f0)
@@ -166,6 +310,164 @@ hangul_jongseong_to_cjamo(WCHAR ch)
     return table[ch - 0x11a8];
 }
 
+/**
+ * full featured binary search version.
+ * support Unicode 5.2
+ *
+ * all empty entries are not removed yet. FIXME
+ */
+
+WCHAR PASCAL
+hangul_choseong_to_jongseong_full(WCHAR ch)
+{
+static const HangulCompose lookup[] = {
+    { 0x1100, 0x11a8 }, /* choseong kiyeok      */
+    { 0x1101, 0x11a9 }, /* choseong ssangkiyeok */
+    { 0x1102, 0x11ab }, /* choseong nieun       */
+    { 0x1103, 0x11ae }, /* choseong tikeut      */
+    { 0x1104, 0x0000 }, /* choseong ssangtikeut */
+    { 0x1105, 0x11af }, /* choseong rieul       */
+    { 0x1106, 0x11b7 }, /* choseong mieum       */
+    { 0x1107, 0x11b8 }, /* choseong pieup       */
+    { 0x1108, 0x0000 }, /* choseong ssangpieup  */
+    { 0x1109, 0x11ba }, /* choseong sios        */
+    { 0x110a, 0x11bb }, /* choseong ssangsios   */
+    { 0x110b, 0x11bc }, /* choseong ieung       */
+    { 0x110c, 0x11bd }, /* choseong cieuc       */
+    { 0x110d, 0x0000 }, /* choseong ssangcieuc  */
+    { 0x110e, 0x11be }, /* choseong chieuch     */
+    { 0x110f, 0x11bf }, /* choseong khieukh     */
+    { 0x1110, 0x11c0 }, /* choseong thieuth     */
+    { 0x1111, 0x11c1 }, /* choseong phieuph     */
+    { 0x1112, 0x11c2 }, /* choseong hieuh       */
+    { 0x1113, 0x11c5 },	/* choseong nieun-kiyeok          */
+    { 0x1114, 0x11ff },	/* choseong ssangnieun            */
+    { 0x1115, 0x11c6 },	/* choseong nieun-tikeut          */
+    { 0x1116, 0x0000 },	/* choseong nieun-pieup           */
+    { 0x1117, 0x11ca },	/* choseong tikeut-kiyeok         */
+    { 0x1118, 0x11cd },	/* choseong rieul-nieun           */
+    { 0x1119, 0x11d0 },	/* choseong ssangrieul            */
+    { 0x111a, 0x0000 },	/* choseong rieul-hieuh           */
+    { 0x111b, 0xd7dd },	/* choseong kapyeounrieul         */
+    { 0x111c, 0x11dc },	/* choseong mieum-pieup           */
+    { 0x111d, 0x11e2 },	/* choseong kapyeounmieum         */
+    { 0x111e, 0x0000 },	/* choseong pieup-kiyeok          */
+    { 0x111f, 0x0000 },	/* choseong pieup-nieun           */
+    { 0x1120, 0xd7e3 },	/* choseong pieup-tikeut          */
+    { 0x1121, 0x0000 },	/* choseong pieup-sios            */
+    { 0x1122, 0x0000 },	/* choseong pieup-sios-kiyeok     */
+    { 0x1123, 0x0000 },	/* choseong pieup-sios-tikeut     */
+    { 0x1124, 0x0000 },	/* choseong pieup-sios-pieup      */
+    { 0x1125, 0x0000 },	/* choseong pieup-ssangsios       */
+    { 0x1126, 0x0000 },	/* choseong pieup-sios-cieuc      */
+    { 0x1127, 0xd7e8 },	/* choseong pieup-cieuc           */
+    { 0x1128, 0xd7e9 },	/* choseong pieup-chieuch         */
+    { 0x1129, 0x0000 },	/* choseong pieup-thieuth         */
+    { 0x112a, 0x11ea },	/* choseong pieup-phieuph         */
+    { 0x112b, 0x0000 },	/* choseong kapyeounpieup         */
+    { 0x112c, 0x0000 },	/* choseong kapyeounssangpieup    */
+    { 0x112d, 0x11e7 },	/* choseong sios-kiyeok           */
+    { 0x112e, 0x0000 },	/* choseong sios-nieun            */
+    { 0x112f, 0x11e8 },	/* choseong sios-tikeut           */
+    { 0x1130, 0x11e9 },	/* choseong sios-rieul            */
+    { 0x1131, 0xd7ea },	/* choseong sios-mieum            */
+    { 0x1132, 0x11ea },	/* choseong sios-pieup            */
+    { 0x1133, 0x0000 },	/* choseong sios-pieup-kiyeok     */
+    { 0x1134, 0x0000 },	/* choseong sios-ssangsios        */
+    { 0x1135, 0x0000 },	/* choseong sios-ieung            */
+    { 0x1136, 0xd7ef },	/* choseong sios-cieuc            */
+    { 0x1137, 0xd7f0 },	/* choseong sios-chieuch          */
+    { 0x1138, 0x0000 },	/* choseong sios-khieukh          */
+    { 0x1139, 0xd7f1 },	/* choseong sios-thieuth          */
+    { 0x113a, 0x0000 },	/* choseong sios-phieuph          */
+    { 0x113b, 0xd7f2 },	/* choseong sios-hieuh		  */
+    { 0x113c, 0x0000 },	/* choseong chitueumsios          */
+    { 0x113d, 0x0000 },	/* choseong chitueumssangsios     */
+    { 0x113e, 0x0000 },	/* choseong ceongchieumsios       */
+    { 0x113f, 0x0000 },	/* choseong ceongchieumssangsios  */
+    { 0x1140, 0x11eb },	/* choseong pansios		  */
+    { 0x1141, 0x11ec },	/* choseong ieung-kiyeok          */
+    { 0x1142, 0x0000 },	/* choseong ieung-tikeut          */
+    { 0x1143, 0xd7f5 },	/* choseong ieung-mieum           */
+    { 0x1144, 0x0000 },	/* choseong ieung-pieup           */
+    { 0x1145, 0x11f1 },	/* choseong ieung-sios            */
+    { 0x1146, 0x11f2 },	/* choseong ieung-pansios         */
+    { 0x1147, 0x11ee },	/* choseong ssangieung            */
+    { 0x1148, 0x0000 },	/* choseong ieung-cieuc           */
+    { 0x1149, 0x0000 },	/* choseong ieung-chieuch         */
+    { 0x114a, 0x0000 },	/* choseong ieung-thieuth         */
+    { 0x114b, 0x0000 },	/* choseong ieung-phieuph         */
+    { 0x114c, 0x11f0 },	/* choseong yesieung              */
+    { 0x114d, 0x0000 },	/* choseong cieuc-ieung           */
+    { 0x114e, 0x0000 },	/* choseong chitueumcieuc         */
+    { 0x114f, 0x0000 },	/* choseong chitueumssangcieuc    */
+    { 0x1150, 0x0000 },	/* choseong ceongchieumcieuc      */
+    { 0x1151, 0x0000 },	/* choseong ceongchieumssangcieuc */
+    { 0x1152, 0x0000 },	/* choseong chieuch-khieukh       */
+    { 0x1153, 0x0000 },	/* choseong chieuch-hieuh         */
+    { 0x1154, 0x0000 },	/* choseong chitueumchieuch       */
+    { 0x1155, 0x0000 },	/* choseong ceongchieumchieuch    */
+    { 0x1156, 0x11f3 },	/* choseong phieuph-pieup         */
+    { 0x1157, 0x11f4 },	/* choseong kapyeounphieuph       */
+    { 0x1158, 0x0000 },	/* choseong ssanghieuh            */
+    { 0x1159, 0x11f9 },	/* choseong yeorinhieuh           */
+    { 0x115a, 0x0000 },	/* choseong kiyeok-tikeut         */
+    { 0x115b, 0x0000 },	/* choseong nieun-sios            */
+    { 0x115c, 0x11ac },	/* choseong nieun-cieuc           */
+    { 0x115d, 0x11ad },	/* choseong nieun-hieuh           */
+    { 0x115e, 0x11cb },	/* choseong tikeut-rieul          */
+    { 0x115f, 0x0000 },	/* choseong filler                */
+
+    { 0xa960, 0x0000 },	/* choseong tikeut-mieum          */
+    { 0xa961, 0xd7cf },	/* choseong tikeut-pieup          */
+    { 0xa962, 0xd7d0 },	/* choseong tikeut-sios           */
+    { 0xa963, 0xd7d2 },	/* choseong tikeut-cieuc          */
+    { 0xa964, 0x11b0 },	/* choseong rieul-kiyeok          */
+    { 0xa965, 0xd7d5 },	/* choseong rieul-ssangkiyeok     */
+    { 0xa966, 0x11ce },	/* choseong rieul-tikeut          */
+    { 0xa967, 0x0000 },	/* choseong rieul-ssangtikeut     */
+    { 0xa968, 0x0000 },	/* choseong rieul-mieum           */
+    { 0xa969, 0x11b1 },	/* choseong rieul-pieup           */
+    { 0xa96a, 0x11b2 },	/* choseong rieul-ssangpieup      */
+    { 0xa96b, 0x11d5 },	/* choseong rieul-kapyeounpieup   */
+    { 0xa96c, 0x0000 },	/* choseong rieul-sios            */
+    { 0xa96d, 0x0000 },	/* choseong rieul-cieuc           */
+    { 0xa96e, 0x11d8 },	/* choseong rieul-khieukh         */
+    { 0xa96f, 0x11da },	/* choseong mieum-kiyeok          */
+    { 0xa970, 0x0000 },	/* choseong mieum-tikeut          */
+    { 0xa971, 0x11dd },	/* choseong mieum-sios            */
+    { 0xa972, 0x0000 },	/* choseong pieup-sios-thieuth    */
+    { 0xa973, 0x0000 },	/* choseong pieup-khieukh         */
+    { 0xa974, 0x11e5 },	/* choseong pieup-hieuh           */
+    { 0xa975, 0x0000 },	/* choseong ssangsios-pieup       */
+    { 0xa976, 0x0000 },	/* choseong ieung-rieul           */
+    { 0xa977, 0x0000 },	/* choseong ieung-hieuh           */
+    { 0xa978, 0x0000 },	/* choseong ssangcieuc-hieuh      */
+    { 0xa979, 0x0000 },	/* choseong ssangthieuth          */
+    { 0xa97a, 0x0000 },	/* choseong phieuph-hieuh         */
+    { 0xa97b, 0x0000 },	/* choseong hieuh-sios            */
+    { 0xa97c, 0x0000 }	/* choseong ssangyeorinhieuh      */
+};
+    int min, max, mid;
+    int size = (sizeof (lookup) / sizeof ((lookup)[0]));
+
+    /* binary search in table */
+    min = 0;
+    max = size - 1;
+
+    while (max >= min) {
+	mid = (min + max) / 2;
+	if (lookup[mid].key < ch)
+	    min = mid + 1;
+	else if (lookup[mid].key > ch)
+	    max = mid - 1;
+	else {
+	    return lookup[mid].code;
+	}
+    }
+    return ch;
+}
+
 WCHAR PASCAL
 hangul_choseong_to_jongseong(WCHAR ch)
 {
@@ -231,6 +533,10 @@ hangul_jongseong_to_choseong(WCHAR ch)
 	return 0;
     return table[ch - 0x11a8];
 }
+
+/**
+ * support Unicode 5.2
+ */
 
 void PASCAL
 hangul_jongseong_dicompose(WCHAR ch, WCHAR* jong, WCHAR* cho)
@@ -325,39 +631,197 @@ static const WCHAR table[][2] = {
     { 0x11a8, 0x1112 }, /* jong ㄱㅎ          = jong ㄱ + cho ㅎ */
     { 0x11ab, 0x1102 }  /* jong ㄴㄴ          = jong ㄴ + cho ㄴ */
 };
-    *jong = table[ch - 0x11a8][0];
-    *cho  = table[ch - 0x11a8][1];
+
+static const WCHAR table_ext_B[][2] = {
+    { 0x11ab, 0x1105 }, /* jong ㄴㄹ          = jong ㄴ + cho ㄹ */
+    { 0x11ab, 0x110e }, /* jong ㄴㅊ          = jong ㄴ + cho ㅊ */
+    { 0x11ae, 0x1103 }, /* jong ㄸ            = jong ㄷ + cho ㄷ */
+    { 0xd7cd, 0x1107 }, /* jong ㄸㅂ          = jong ㄸ + cho ㅂ */
+    { 0x11ae, 0x11b8 }, /* jong ㄷㅂ          = jong ㄷ + cho ㅂ */
+    { 0x11ae, 0x11ba }, /* jong ㄷㅅ          = jong ㄷ + cho ㅅ */
+    { 0xd7d0, 0x1100 }, /* jong ㄷㅅㄱ        = jong ㄷㅅ + cho ㄱ */
+    { 0x11ae, 0x110c }, /* jong ㄷㅈ          = jong ㄷ + cho ㅈ */
+    { 0x11ae, 0x110e }, /* jong ㄷㅊ          = jong ㄷ + cho ㅊ */
+    { 0x11ae, 0x11c0 }, /* jong ㄷㅌ          = jong ㄷ + cho ㅌ */
+
+    { 0x11ae, 0x1100 }, /* jong ㄺㄱ          = jong ㄺ + cho ㄱ */
+    { 0x11ae, 0x1112 }, /* jong ㄺㅎ          = jong ㄺ + cho ㅎ */
+    { 0x11d0, 0x110f }, /* jong ㄹㄹㅋ        = jong ㄹㄹ + cho ㅋ */
+    { 0x11b1, 0x1112 }, /* jong ㄹㅁㅎ        = jong ㄻ + cho ㅎ */
+    { 0x11b2, 0x1103 }, /* jong ㄹㅂㄷ        = jong ㄼ + cho ㄷ */
+    { 0x11b2, 0x1111 }, /* jong ㄹㅂㅍ        = jong ㄼ + cho ㅍ */
+    { 0x11af, 0x114c }, /* jong ㄹㆁ          = jong ㄹ + cho ㆁ */
+    { 0x11d9, 0x1112 }, /* jong ㅭㅎ          = jong ㅭ + cho ㅎ */
+    { 0x11af, 0x110b }, /* jong ㄹㅇ          = jong ㄹ + cho ㅇ */
+    { 0x11b7, 0x1102 }, /* jong ㅁㄴ          = jong ㅁ + cho ㄴ */
+    { 0xd7de, 0x1102 }, /* jong ㅁㄴㄴ        = jong ㅁㄴ + cho ㄴ */
+    { 0x11b7, 0x1106 }, /* jong ㅁㅁ          = jong ㅁ + cho ㅁ */
+    { 0x11b7, 0x1109 }, /* jong ㅁㅄ          = jong ㅁㅂ + cho ㅅ */
+    { 0x11b7, 0x110c }, /* jong ㅁㅈ          = jong ㅁ + cho ㅈ */
+    { 0x11b8, 0x1103 }, /* jong ㅂㄷ          = jong ㅂ + cho ㄷ */
+    { 0x11b8, 0x1111 }, /* jong ㅂㄿ          = jong ㅂㄹ + cho ㅍ */
+    { 0x11b8, 0x1106 }, /* jong ㅂㅁ          = jong ㅂ + cho ㅁ */
+    { 0x11b8, 0x1107 }, /* jong ㅃ            = jong ㅂ + cho ㅂ */
+    { 0x11b9, 0x1103 }, /* jong ㅄㄷ          = jong ㅄ + cho ㄷ */
+    { 0x11b8, 0x110c }, /* jong ㅂㅈ          = jong ㅂ + cho ㅈ */
+    { 0x11b8, 0x110e }, /* jong ㅂㅊ          = jong ㅂ + cho ㅊ */
+    { 0x11ba, 0x1106 }, /* jong ㅅㅁ          = jong ㅅ + cho ㅁ */
+    { 0x11ba, 0x110b }, /* jong ㅅㅸ          = jong ㅅㅂ + cho ㅇ */
+    { 0x11bb, 0x1100 }, /* jong ㅆㄱ          = jong ㅆ + cho ㄱ */
+    { 0x11bb, 0x1103 }, /* jong ㅆㄷ          = jong ㅆ + cho ㄷ */
+    { 0x11ba, 0x1140 }, /* jong ㅅㅿ          = jong ㅅ + cho ㅿ */
+    { 0x11ba, 0x110c }, /* jong ㅅㅈ          = jong ㅅ + cho ㅈ */
+    { 0x11ba, 0x110e }, /* jong ㅅㅊ          = jong ㅅ + cho ㅊ */
+    { 0x11ba, 0x1110 }, /* jong ㅅㅌ          = jong ㅅ + cho ㅌ */
+    { 0x11ba, 0x1112 }, /* jong ㅅㅎ          = jong ㅅ + cho ㅎ */
+    { 0x11eb, 0x1107 }, /* jong ㅿㅂ          = jong ㅿ + cho ㅂ */
+    { 0x11eb, 0x110b }, /* jong ㅿㅸ          = jong ㅿㅂ + cho ㅇ */
+    { 0x11f0, 0x1106 }, /* jong ㆁㅁ          = jong ㆁ + cho ㅁ */
+    { 0x11f0, 0x1112 }, /* jong ㆁㅎ          = jong ㆁ + cho ㅎ */
+    { 0x11bd, 0x1107 }, /* jong ㅈㅂ          = jong ㅈ + cho ㅂ */
+    { 0xd7f7, 0x1107 }, /* jong ㅈㅃ          = jong ㅈㅂ + cho ㅂ */
+    { 0x11bd, 0x110c }, /* jong ㅈㅈ          = jong ㅈ + cho ㅈ */
+    { 0x11c1, 0x1109 }, /* jong ㅍㅅ          = jong ㅍ + cho ㅅ */
+    { 0x11c1, 0x1110 }, /* jong ㅍㅌ          = jong ㅍ + cho ㅌ */
+};
+
+    *jong  = 0;
+    *cho = 0;
+
+    if ( ch >= 0x11a8 && ch <= 0x11ff ) {
+	*jong = table[ch - 0x11a8][0];
+	*cho  = table[ch - 0x11a8][1];
+	return;
+    }
+
+    if ( ch >= 0xd7cb && ch <= 0xd7fb ) {
+	*jong = table_ext_B[ch - 0xd7cb][0];
+	*cho  = table_ext_B[ch - 0xd7cb][1];
+	return;
+    }
+
+    return;
 }
+
+/**
+ * support Unicode 5.2
+ */
 
 void PASCAL
 hangul_jungseong_dicompose(WCHAR ch, WCHAR* jung, WCHAR* jung2)
 {
 static const WCHAR table[][2] = {
-  { 0x1163, 0x1175 }, /* jungseong ya     + i	= yae		*/
-  { 0x1165, 0x0000 }, /* */
-  { 0x1166, 0x0000 }, /* */
-  { 0x1167, 0x0000 }, /* */
-  { 0x1167, 0x1175 }, /* jungseong yeo    + i	= ye		*/
-  { 0x1169, 0x0000 }, /* */
-  { 0x1169, 0x1161 }, /* jungseong o      + a	= wa		*/
-  { 0x1169, 0x1162 }, /* jungseong o      + ae	= wae		*/
-  { 0x1169, 0x1175 }, /* jungseong o      + i	= oe		*/
-  { 0x116d, 0x0000 }, /* */
-  { 0x116e, 0x0000 }, /* */
-  { 0x116e, 0x1165 }, /* jungseong u      + eo	= weo		*/
-  { 0x116e, 0x1166 }, /* jungseong u      + e	= we		*/
-  { 0x116e, 0x1175 }, /* jungseong u      + i	= wi		*/
-  { 0x1172, 0x0000 }, /* */
-  { 0x1173, 0x0000 }, /* */
-  { 0x1173, 0x1175 }, /* jungseong eu     + i	= yi		*/
-};
-  *jung  = 0;
-  *jung2 = 0;
+    { 0x1163, 0x1175 }, /* ya     + i	= yae		*/
+    { 0x1165, 0x0000 }, /* */
+    { 0x1166, 0x0000 }, /* */
+    { 0x1167, 0x0000 }, /* */
+    { 0x1167, 0x1175 }, /* yeo    + i	= ye		*/
+    { 0x1169, 0x0000 }, /* */
+    { 0x1169, 0x1161 }, /* o      + a	= wa		*/
+    { 0x1169, 0x1162 }, /* o      + ae	= wae		*/
+    { 0x1169, 0x1175 }, /* o      + i	= oe		*/
+    { 0x116d, 0x0000 }, /* */
+    { 0x116e, 0x0000 }, /* */
+    { 0x116e, 0x1165 }, /* u      + eo	= weo		*/
 
-  if ( ch < 0x1164 || ch > 0x1174 )
-     return;
-  *jung  = table[ch - 0x1164][0];
-  *jung2 = table[ch - 0x1164][1];
+    { 0x116e, 0x1166 }, /* u      + e	= we		*/
+    { 0x116e, 0x1175 }, /* u      + i	= wi		*/
+    { 0x1172, 0x0000 }, /* */
+    { 0x1173, 0x0000 }, /* */
+    { 0x1173, 0x1175 }, /* eu     + i	= yi		*/
+    { 0x1175, 0x0000 }, /* i */
+    { 0x1161, 0x1169 }, /* a      + o	= a-o		*/
+    { 0x1161, 0x116e }, /* a      + u	= a-u		*/
+    { 0x1163, 0x1169 }, /* ya     + o	= ya-o		*/
+    { 0x1163, 0x116e }, /* ya     + yo	= ya-yo		*/
+    { 0x1165, 0x1169 }, /* eo     + o	= eo-o		*/
+    { 0x1165, 0x116e }, /* eo     + u	= eo-u		*/
+    { 0x1165, 0x1173 }, /* eo     + eu	= eo-eu		*/
+    { 0x1167, 0x1169 }, /* yeo    + o	= yeo-o		*/
+    { 0x1167, 0x116e }, /* yeo    + u	= yeo-u		*/
+    { 0x1169, 0x1165 }, /* o      + eo	= o-eo		*/
+  
+    { 0x1169, 0x1166 }, /* o      + e	= o-e		*/
+    { 0x1169, 0x1168 }, /* o      + ye	= o-ye		*/
+    { 0x1169, 0x1169 }, /* o      + o	= o-o		*/
+    { 0x1169, 0x116e }, /* o      + u	= o-u		*/
+    { 0x116d, 0x1163 }, /* yo     + ya	= yo-ya		*/
+    { 0x116d, 0x1164 }, /* yo     + yae	= yo-yae	*/
+    { 0x116d, 0x1167 }, /* yo     + yo	= yo-yeo	*/
+    { 0x116d, 0x1169 }, /* yo     + o	= yo-o		*/
+    { 0x116d, 0x1175 }, /* yo	+ i	= yo-i		*/
+    { 0x116e, 0x1161 }, /* u	+ a	= u-a		*/
+    { 0x116e, 0x1162 }, /* u	+ ae	= u-ae		*/
+    { 0x116f, 0x1173 }, /* weo	+ eu	= weo-eu	*/
+    { 0x116e, 0x1168 }, /* u	+ ye	= u-ye		*/
+    { 0x116e, 0x116e }, /* u	+ u	= u-u		*/
+    { 0x1172, 0x1161 }, /* yu	+ a	= yu-a		*/
+    { 0x1172, 0x1165 }, /* yu	+ eo	= yu-eo		*/
+  
+    { 0x1172, 0x1166 }, /* yu	+ e	= yu-e		*/
+    { 0x1172, 0x1167 }, /* yu	+ yeo	= yu-yeo	*/
+    { 0x1172, 0x1168 }, /* yu	+ ye	= yu-ye		*/
+    { 0x1172, 0x116e }, /* yu	+ u	= yu-u		*/
+    { 0x1172, 0x1175 }, /* yu	+ i	= yu-i		*/
+    { 0x1173, 0x116e }, /* eu	+ u	= eu-u		*/
+    { 0x1173, 0x1173 }, /* eu	+ eu	= eu-eu		*/
+    { 0x1174, 0x116e }, /* yi	+ u	= yi-u		*/
+    { 0x1175, 0x1161 }, /* i	+ a	= i-a		*/
+    { 0x1175, 0x1163 }, /* i	+ ya	= i-ya		*/
+    { 0x1175, 0x1169 }, /* i	+ o	= i-o		*/
+    { 0x1175, 0x116e }, /* i	+ u	= i-u		*/
+    { 0x1175, 0x1173 }, /* i	+ eu	= i-eu		*/
+    { 0x1175, 0x119e }, /* i	+ araea	= i-araea	*/
+    { 0x119e, 0x0000 }, /* araea */
+    { 0x119e, 0x1165 }, /* araea	+ eo	= araea-eo	*/
+  
+    { 0x119e, 0x116e }, /* araea	+ u	= araea-u	*/
+    { 0x119e, 0x1175 }, /* araea	+ i	= araea-i	*/
+    { 0x119e, 0x119e }, /* araea	+ araea	= araea-araea	*/
+    { 0x1161, 0x1173 }, /* a	+ eu	= a-eu		*/
+    { 0x1163, 0x116e }, /* ya	+ u	= ya-u		*/
+    { 0x1167, 0x1163 }, /* yeo	+ ya	= yeo-ya	*/
+    { 0x1169, 0x1163 }, /* o	+ ya	= o-ya		*/
+    { 0x1169, 0x1164 }, /* o	+ yae	= o-yae		*/
+};
+
+static const WCHAR table_ext_B[][2] = {
+    { 0x1169, 0x1167 }, /* o	+ yeo	= o-yeo		*/
+    { 0x1182, 0x1175 }, /* o-o	+ i	= o-o-i		*/
+    { 0x116d, 0x1161 }, /* yo	+ a	= yo-a		*/
+    { 0x116d, 0x1166 }, /* yo	+ ae	= yo-ae		*/
+    { 0x116d, 0x1165 }, /* yo	+ eo	= yo-eo		*/
+    { 0x116e, 0x1167 }, /* u	+ yeo	= u-yeo		*/
+    { 0x1171, 0x1175 }, /* wi	+ i	= wi-i		*/
+    { 0x1194, 0x1162 }, /* u	+ ae	= u-ae		*/
+    { 0x1172, 0x1169 }, /* u	+ o	= u-o		*/
+    { 0x1173, 0x1161 }, /* eu	+ a	= eu-a		*/
+    { 0x1173, 0x1165 }, /* eu	+ eo	= eu-eo		*/
+    { 0x1173, 0x1166 }, /* eu	+ ae	= eu-ae		*/
+    { 0x1173, 0x1169 }, /* eu	+ o	= eu-o		*/
+    { 0x1199, 0x1169 }, /* i-ya	+ o	= i-ya-o	*/
+    { 0x1175, 0x1164 }, /* i	+ yae	= i-yae		*/
+    { 0x1175, 0x1167 }, /* i	+ yeo	= i-yeo		*/
+    { 0x1175, 0x1168 }, /* i	+ ye	= i-ye		*/
+    { 0x119a, 0x1173 }, /* i-o	+ eu	= i-eu		*/
+    { 0x1175, 0x116d }, /* i	+ yo	= i-yo		*/
+    { 0x1175, 0x116e }, /* i	+ u	= i-u		*/
+    { 0x1175, 0x1175 }, /* i	+ i	= i-i		*/
+    { 0x119e, 0x1161 }, /* araea	+ a	= araea-a	*/
+    { 0x119e, 0x1166 }, /* araea	+ ae	= araea-ae	*/
+};
+
+    *jung  = 0;
+    *jung2 = 0;
+
+    if ( ch >= 0x1164 && ch <= 0x11a7 ) {
+	*jung  = table[ch - 0x1164][0];
+	*jung2 = table[ch - 0x1164][1];
+    } else if ( ch >= 0xd7b0 && ch <= 0xd7c6 ) {
+	*jung  = table_ext_B[ch - 0xd7b0][0];
+	*jung2 = table_ext_B[ch - 0xd7b0][1];
+    }
+    return;
 }
 
 static const WCHAR hangul_base    = 0xac00;
@@ -484,6 +948,9 @@ hangul_jamo_to_cjamo(WCHAR jamo)
         return hangul_jungseong_to_cjamo(jamo);
     if (jamo >= 0x11a8 && jamo <= 0x11c2)
         return hangul_jongseong_to_cjamo(jamo);
+
+    return hangul_jamo_to_cjamo_full(jamo);
+
     // else
     return jamo;
 }
@@ -1084,106 +1551,6 @@ static const WCHAR keyboard_table_3sun[] = {
   0x007e,	/* GDK_asciitilde:	tilde				*/
 };
 
-/* Hangul keyboard map table:
- * 3set keyboard yetguel (sebulsik yetguel)
- * see http://asadal.cs.pusan.ac.kr/hangeul/kbd/oldkbd.jpg */
-static const WCHAR keyboard_table_3yet[] = {
-  0x11bd,	/* GDK_exclam:		jongseong cieuc			*/
-  0x0022,	/* GDK_quotedbl:	quotatioin mark			*/
-  0x0023,	/* GDK_numbersign:	number sign	 		*/
-  0x0024,	/* GDK_dollar:		dollar sign			*/
-  0x0025,	/* GDK_percent:		percent sign			*/
-  0x0026,	/* GDK_ampersand:	ampersand		 	*/
-  0x1110,	/* GDK_apostrophe:	choseong thieuth		*/
-  0x0028,	/* GDK_parenleft:	left parenthesis		*/
-  0x0029,	/* GDK_parenright:	right parenthesis		*/
-  0x002a,	/* GDK_asterisk:	asterisk			*/
-  0x002b,	/* GDK_plus:		plus sign			*/
-  0x002c,	/* GDK_comma:		comma				*/
-  0x002d,	/* GDK_minus:		minus sign			*/
-  0x002e,	/* GDK_period:		period				*/
-  0x1169,	/* GDK_slash:		jungseong o			*/
-  0x110f,	/* GDK_0:		choseong  khieukh		*/
-  0x11c2,	/* GDK_1:		jongseong hieuh			*/
-  0x11bb,	/* GDK_2:		jongseong ssangsios		*/
-  0x11b8,	/* GDK_3:		jongseong pieup			*/
-  0x116d,	/* GDK_4:		jungseong yo			*/
-  0x1172,	/* GDK_5:		jungseong yu			*/
-  0x1163,	/* GDK_6:		jungseong ya			*/
-  0x1168,	/* GDK_7:		jungseong ye			*/
-  0x1174,	/* GDK_8:		jungseong yi			*/
-  0x116e,	/* GDK_9:		jungseong u			*/
-  0x003a,	/* GDK_colon:		colon				*/
-  0x1107,	/* GDK_semicolon:	choseong  pieup			*/
-  0x113c,	/* GDK_less:		choseong chitueumsios		*/
-  0x003d,	/* GDK_equal:		euals sign			*/
-  0x113e,	/* GDK_greater:		choseong ceongchieumsios	*/
-  0x003f,	/* GDK_question:	question mark	 		*/
-  0x11eb,	/* GDK_at:		jongseong pansios		*/
-  0x11ae,	/* GDK_A:		jongseong tikeut		*/
-  0x116e,	/* GDK_B:		jungseong u			*/
-  0x11b1,	/* GDK_C:		jongseong rieul-mieum		*/
-  0x11b0,	/* GDK_D:		jongseong rieul-kiyeok		*/
-  0x11bf,	/* GDK_E:		jongseong khieukh		*/
-  0x11a9,	/* GDK_F:		jongseong ssangkiyeok		*/
-  0x119e,	/* GDK_G:		jungseong araea			*/
-  0x1102,	/* GDK_H:		choseong nieun			*/
-  0x1154,	/* GDK_I:		choseong chitueumchieuch	*/
-  0x114c,	/* GDK_J:		choseong yesieung		*/
-  0x114e,	/* GDK_K:		choseong chitueumcieuc		*/
-  0x1150,	/* GDK_L:		choseong ceongchieumcieuc	*/
-  0x1159,	/* GDK_M:		choseong yeorinhieuh		*/
-  0x1140,	/* GDK_N:		choseong pansios		*/
-  0x1155,	/* GDK_O:		choseong ceongchieumchieuch	*/
-  0x1111,	/* GDK_P:		choseong phieuph		*/
-  0x11c1,	/* GDK_Q:		jongseong phieuph		*/
-  0x1164,	/* GDK_R:		jungseong yae			*/
-  0x11ad,	/* GDK_S:		jongseong nieun-hieuh		*/
-  0x1165,	/* GDK_T:		jungseong eo			*/
-  0x302e,	/* GDK_U:		single dot tone mark		*/
-  0x11b6,	/* GDK_V:		jongseong rieul-hieuh		*/
-  0x11c0,	/* GDK_W:		jongseong thikeuth		*/
-  0x11b9,	/* GDK_X:		jongseong pieup-sios		*/
-  0x302f,	/* GDK_Y:		double dot tone mark		*/
-  0x11be,	/* GDK_Z:		jongseong chieuch		*/
-  0x005b,	/* GDK_bracketleft:	left bracket			*/
-  0x005c,	/* GDK_backslash:	backslash			*/
-  0x005d,	/* GDK_bracketright:	right bracket			*/
-  0x005e,	/* GDK_asciicircum:	circumflex accent		*/
-  0x005f,	/* GDK_underscore:	underscore			*/
-  0x11f9,	/* GDK_quoteleft:	jongseong yeorinhieuh		*/
-  0x11bc,	/* GDK_a:		jongseong ieung			*/
-  0x116e,	/* GDK_b:		jungseong u			*/
-  0x1166,	/* GDK_c:		jungseong e			*/
-  0x1175,	/* GDK_d:		jungseong i			*/
-  0x1167,	/* GDK_e:		jungseong yeo			*/
-  0x1161,	/* GDK_f:		jungseong a			*/
-  0x1173,	/* GDK_g:		jungseong eu			*/
-  0x1102,	/* GDK_h:		choseong  nieun			*/
-  0x1106,	/* GDK_i:		choseong  mieum			*/
-  0x110b,	/* GDK_j:		choseong  ieung			*/
-  0x1100,	/* GDK_k:		choseong  kiyeok		*/
-  0x110c,	/* GDK_l:		choseong  cieuc			*/
-  0x1112,	/* GDK_m:		choseong  hieuh			*/
-  0x1109,	/* GDK_n:		choseong  sios			*/
-  0x110e,	/* GDK_o:		choseong  chieuch		*/
-  0x1111,	/* GDK_p:		choseong  phieuph		*/
-  0x11ba,	/* GDK_q:		jongseong sios			*/
-  0x1162,	/* GDK_r:		jungseong ae			*/
-  0x11ab,	/* GDK_s:		jongseong nieun			*/
-  0x1165, 	/* GDK_t:		jungseong eo			*/
-  0x1103,	/* GDK_u:		choseong  tikeut		*/
-  0x1169,	/* GDK_v:		jungseong o			*/
-  0x11af,	/* GDK_w:		jongseong rieul			*/
-  0x11a8,	/* GDK_x:		jongseong kiyeok		*/
-  0x1105,	/* GDK_y:		choseong  rieul			*/
-  0x11b7,	/* GDK_z:		jongseong mieum			*/
-  0x007b,	/* GDK_braceleft:	left brace			*/
-  0x007c,	/* GDK_bar:		vertical line(bar)		*/
-  0x007d,	/* GDK_braceright:	right brace			*/
-  0x11f0,	/* GDK_asciitilde:	jongseong yesieung		*/
-};
-
 /*
 struct _HangulCompose 
 {
@@ -1335,35 +1702,76 @@ static const HangulCompose compose_table_ahnmatae[] = {
 
 static const HangulCompose compose_table_yet[] = {
   { 0x11001100, 0x1101 }, /* CHOSEONG SSANGKIYEOK           = KIYEOK + KIYEOK */
+  { 0x11001102, 0x11fa }, /* JONGSEONG KIYEOK-NIEUN         = KIYEOK + NIEUN */
   { 0x11001103, 0x115a }, /* CHOSEONG KIYEOK-TIKEUT         = KIYEOK + TIKEUT */
+  { 0x11001105, 0x11c3 }, /* choseong kiyeok-rieul	    = kiyeok + rieul */
+  { 0x11001107, 0x11fb }, /* JONGSEONG KIYEOK-PIEUP         = KIYEOK + PIEUP */
   { 0x11001109, 0x11aa }, /* choseong kiyeok-sios	    = kiyeok + sios */
+  { 0x1100110e, 0x11fc }, /* JONGSEONG KIYEOK-CHIEUCH       = KIYEOK + CHIEUCH */
+  { 0x1100110f, 0x11fd }, /* JONGSEONG KIYEOK-KHIEUKH       = KIYEOK + KHIEUKH */
+  { 0x11001112, 0x11fe }, /* JONGSEONG KIYEOK-HIEUH         = KIYEOK + CHIEUCH */
   { 0x11021100, 0x1113 }, /* CHOSEONG NIEUN-KIYEOK          = NIEUN + KIYEOK */
   { 0x11021102, 0x1114 }, /* CHOSEONG SSANGNIEUN            = NIEUN + NIEUN */
   { 0x11021103, 0x1115 }, /* CHOSEONG NIEUN-TIKEUT          = NIEUN + TIKEUT */
   { 0x11021107, 0x1116 }, /* CHOSEONG NIEUN-PIEUP           = NIEUN + PIEUP */
   { 0x11021109, 0x115b }, /* CHOSEONG NIEUN-SIOS            = NIEUN + SIOS */
   { 0x1102110c, 0x115c }, /* CHOSEONG NIEUN-CIEUC           = NIEUN + CIEUC */
+  { 0x11021110, 0x11c9 }, /* CHOSEONG NIEUN-THIEUTH         = NIEUN + THIEUTH */
   { 0x11021112, 0x115d }, /* CHOSEONG NIEUN-HIEUH           = NIEUN + HIEUH */
+  { 0x11021140, 0x11c8 }, /* CHOSEONG NIEUN-PANSIOS         = NIEUN + PANSIOS */
   { 0x11031100, 0x1117 }, /* CHOSEONG TIKEUT-KIYEOK         = TIKEUT + KIYEOK */
   { 0x11031103, 0x1104 }, /* CHOSEONG SSANGTIKEUT           = TIKEUT + TIKEUT */
   { 0x11031105, 0x115e }, /* CHOSEONG TIKEUT-RIEUL          = TIKEUT + RIEUL */
+  { 0x11031106, 0xa960 }, /* CHOSEONG TIKEUT-MIEUM          = TIKEUT + MIEUM */
+  { 0x11031107, 0xa961 }, /* CHOSEONG TIKEUT-PIEUP          = TIKEUT + PIEUP */
+  { 0x11031109, 0xa962 }, /* CHOSEONG TIKEUT-SIOS           = TIKEUT + SIOS */
+  { 0x1103110c, 0xa963 }, /* CHOSEONG TIKEUT-SIOS           = TIKEUT + SIOS */
+  { 0x11051100, 0xa964 }, /* CHOSEONG RIEUL-KIYEOK          = RIEUL + KIYEOK */
+  { 0x11051101, 0xa965 }, /* CHOSEONG RIEUL-KIYEOK-KIYEOK   = RIEUL + SSANGKIYEOK */
   { 0x11051102, 0x1118 }, /* CHOSEONG RIEUL-NIEUN           = RIEUL + NIEUN */
+  { 0x11051103, 0xa966 }, /* CHOSEONG RIEUL-TIKEUT          = RIEUL + TIKEUT */
+  { 0x11051104, 0xa967 }, /* CHOSEONG RIEUL-TIKEUT-TIKEUT   = RIEUL + SSANGTIKEUT */
   { 0x11051105, 0x1119 }, /* CHOSEONG SSANGRIEUL            = RIEUL + RIEUL */
+  { 0x11051106, 0xa968 }, /* CHOSEONG RIEUL-MIEUM           = RIEUL + MIEUM */
+  { 0x11051107, 0xa969 }, /* CHOSEONG RIEUL-PIEUP           = RIEUL + PIEUP */
+  { 0x11051109, 0xa96c }, /* CHOSEONG RIEUL-SIOS            = RIEUL + SIOS */
   { 0x1105110b, 0x111b }, /* CHOSEONG KAPYEOUNRIEUL         = RIEUL + IEUNG */
+  { 0x1105110c, 0xa96d }, /* CHOSEONG RIEUL-CIEUC           = RIEUL + CIEUC */
+  { 0x1105110f, 0xa96e }, /* CHOSEONG RIEUL-KHIEUKH         = RIEUL + KHIEUKH */
+  { 0x11051110, 0x11b4 }, /* CHOSEONG RIEUL-THIEUTH         = RIEUL + THIEUTH */
+  { 0x11051111, 0x11b5 }, /* CHOSEONG RIEUL-PHIEUPH         = RIEUL + PHIEUPH */
   { 0x11051112, 0x111a }, /* CHOSEONG RIEUL-HIEUH           = RIEUL + HIEUH */
+  { 0x1105112b, 0xa96b }, /* CHOSEONG RIEUL-KAPYEOUNPIEUP   = RIEUL + KAPYEOUNPIEUP */
+  { 0x11051159, 0x11d9 }, /* JONGSEONG RIEUL-YEORINHIEUH    = RIEUL + YEORINHIEUH */
+
+  { 0x11061100, 0xa96f }, /* CHOSEONG MIEUM-KIYEOK          = MIEUM + KIYEOK */
+  { 0x11061102, 0xd7de }, /* JONGSEONG MIEUM-NIEUN          = MIEUM + NIEUN */
+  { 0x11061103, 0xa970 }, /* CHOSEONG MIEUM-NIEUN           = MIEUM + NIEUN */
+  { 0x11061105, 0x11db }, /* CHOSEONG MIEUM-KIYEOK          = MIEUM + KIYEOK */
+  { 0x11061106, 0xd7e0 }, /* JONGSEONG MIEUM-MIEUM          = MIEUM + MIEUM */
   { 0x11061107, 0x111c }, /* CHOSEONG MIEUM-PIEUP           = MIEUM + PIEUP */
+  { 0x11061109, 0xa971 }, /* CHOSEONG MIEUM-SIOS            = MIEUM + SIOS */
   { 0x1106110b, 0x111d }, /* CHOSEONG KAPYEOUNMIEUM         = MIEUM + IEUNG */
+  { 0x1106110c, 0xd7e2 }, /* JONGSEONG MIEUM-CIEUC          = MIEUM + CIEUC */
+  { 0x1106110e, 0x11e0 }, /* JONGSEONG MIEUM-CHIEUCH        = MIEUM + CHIEUCH */
+  { 0x11061112, 0x11e1 }, /* JONGSEONG MIEUM-HIEUH          = MIEUM + HIEUH */
+  { 0x11061140, 0x11df }, /* JONGSEONG MIEUM-PANSIOS        = MIEUM + PANSIOS */
+
   { 0x11071100, 0x111e }, /* CHOSEONG PIEUP-KIYEOK          = PIEUP + KIYEOK */
   { 0x11071102, 0x111f }, /* CHOSEONG PIEUP-NIEUN           = PIEUP + NIEUN */
   { 0x11071103, 0x1120 }, /* CHOSEONG PIEUP-TIKEUT          = PIEUP + TIKEUT */
+  { 0x11071106, 0xd7e5 }, /* CHOSEONG PIEUP-MIEUM           = PIEUP + MIEUM */
   { 0x11071107, 0x1108 }, /* CHOSEONG SSANGPIEUP            = PIEUP + PIEUP */
   { 0x11071109, 0x1121 }, /* CHOSEONG PIEUP-SIOS            = PIEUP + SIOS */
   { 0x1107110b, 0x112b }, /* CHOSEONG KAPYEOUNPIEUP         = PIEUP + IEUNG */
   { 0x1107110c, 0x1127 }, /* CHOSEONG PIEUP-CIEUC           = PIEUP + CIEUC */
   { 0x1107110e, 0x1128 }, /* CHOSEONG PIEUP-CHIEUCH         = PIEUP + CHIEUCH */
+  { 0x1107110f, 0xa973 }, /* CHOSEONG PIEUP-KHIEUKH         = PIEUP + KHIEUKH */
   { 0x11071110, 0x1129 }, /* CHOSEONG PIEUP-THIEUTH         = PIEUP + THIEUTH */
   { 0x11071111, 0x112a }, /* CHOSEONG PIEUP-PHIEUPH         = PIEUP + PHIEUPH */
+  { 0x11071112, 0xa974 }, /* CHOSEONG PIEUP-HIEUH           = PIEUP + HIEUH */
   { 0x1108110b, 0x112c }, /* CHOSEONG KAPYEOUNSSANGPIEUP    = SSANGPIEUP + IEUNG */
+
   { 0x11091100, 0x112d }, /* CHOSEONG SIOS-KIYEOK           = SIOS + KIYEOK */
   { 0x11091102, 0x112e }, /* CHOSEONG SIOS-NIEUN            = SIOS + NIEUN */
   { 0x11091103, 0x112f }, /* CHOSEONG SIOS-TIKEUT           = SIOS + TIKEUT */
@@ -1378,42 +1786,75 @@ static const HangulCompose compose_table_yet[] = {
   { 0x11091110, 0x1139 }, /* CHOSEONG SIOS-THIEUTH          = SIOS + THIEUTH */
   { 0x11091111, 0x113a }, /* CHOSEONG SIOS-PHIEUPH          = SIOS + PHIEUPH */
   { 0x11091112, 0x113b }, /* CHOSEONG SIOS-HIEUH            = SIOS + HIEUH */
-  { 0x110a1109, 0x1134 }, /* CHOSEONG SIOS-SSANGSIOS        = SSANGSIOS + SIOS */
+
+  { 0x1109112b, 0xd7eb }, /* CHOSEONG SIOS-KAPYEOUNPIEUP    = SIOS + KAPYEOUNPIEUP */
+  { 0x1109112d, 0xd7ec }, /* CHOSEONG SIOS-SIOS-KIYOEK      = SIOS + SIOS-KIYOEK */
+  { 0x1109112f, 0xd7ed }, /* CHOSEONG SIOS-SIOS-TIKEUT      = SIOS + SIOS-TIKEUT */
+  { 0x11091140, 0xd7ee }, /* CHOSEONG SIOS-PANSIOS          = SIOS + SIOS-PANSIOS */
+
+  { 0x110a1107, 0xa975 }, /* CHOSEONG SSANGSIOS-PIEUP       = SSANGSIOS + PIEUP */
+  { 0x110a1109, 0x1134 }, /* CHOSEONG SSANGSIOS-SIOS        = SSANGSIOS + SIOS */
+
   { 0x110b1100, 0x1141 }, /* CHOSEONG IEUNG-KIYEOK          = IEUNG + KIYEOK */
+  { 0x110b1101, 0x11ed }, /* JONGSEONG IEUNG-SSANGKIYOEK    = IEUNG + SSANGKIYOEK */
   { 0x110b1103, 0x1142 }, /* CHOSEONG IEUNG-TIKEUT          = IEUNG + TIKEUT */
+  { 0x110b1105, 0xa976 }, /* CHOSEONG IEUNG-RIEUL           = IEUNG + RIEUL */
   { 0x110b1106, 0x1143 }, /* CHOSEONG IEUNG-MIEUM           = IEUNG + MIEUM */
   { 0x110b1107, 0x1144 }, /* CHOSEONG IEUNG-PIEUP           = IEUNG + PIEUP */
   { 0x110b1109, 0x1145 }, /* CHOSEONG IEUNG-SIOS            = IEUNG + SIOS */
   { 0x110b110b, 0x1147 }, /* CHOSEONG SSANGIEUNG            = IEUNG + IEUNG */
   { 0x110b110c, 0x1148 }, /* CHOSEONG IEUNG-CIEUC           = IEUNG + CIEUC */
   { 0x110b110e, 0x1149 }, /* CHOSEONG IEUNG-CHIEUCH         = IEUNG + CHIEUCH */
+  { 0x110b110f, 0x11ef }, /* JONGSEONG IEUNG-KHIEUKH        = IEUNG + KHIEUKH */
   { 0x110b1110, 0x114a }, /* CHOSEONG IEUNG-THIEUTH         = IEUNG + THIEUTH */
   { 0x110b1111, 0x114b }, /* CHOSEONG IEUNG-PHIEUPH         = IEUNG + PHIEUPH */
+  { 0x110b1112, 0xa977 }, /* CHOSEONG IEUNG-HIEUH           = IEUNG + HIEUH */
   { 0x110b1140, 0x1146 }, /* CHOSEONG IEUNG-PANSIOS         = IEUNG + PANSIOS */
+
+
+
+  { 0x110c1107, 0xd7f7 }, /* JONGSEONG CIEUC-PIEUP          = CIEUC + PIEUP */
   { 0x110c110b, 0x114d }, /* CHOSEONG CIEUC-IEUNG           = CIEUC + IEUNG */
   { 0x110c110c, 0x110d }, /* CHOSEONG SSANGCIEUC            = CIEUC + CIEUC */
+  { 0x110d1112, 0xa978 }, /* CHOSEONG SSANGCIEUC-HIEUH      = SSANGCIEUC + HIEUH */
   { 0x110e110f, 0x1152 }, /* CHOSEONG CHIEUCH-KHIEUKH       = CHIEUCH + KHIEUKH */
   { 0x110e1112, 0x1153 }, /* CHOSEONG CHIEUCH-HIEUH         = CHIEUCH + HIEUH */
+  { 0x11101110, 0xa979 }, /* CHOSEONG SSANGTHIEUTH          = THIEUTH + THIEUTH */
   { 0x11111107, 0x1156 }, /* CHOSEONG PHIEUPH-PIEUP         = PHIEUPH + PIEUP */
+  { 0x11111109, 0xd7fa }, /* JONGSEONG PHIEUPH-SIOS         = PHIEUPH + SIOS */
+  { 0x11111110, 0xd7f8 }, /* JONGSEONG PHIEUPH-THIEUTH      = PHIEUPH + THIEUTH */
+  { 0x11111112, 0xa97a }, /* CHOSEONG PHIEUPH-HIEUH         = PHIEUPH + HIEUH */
   { 0x1111110b, 0x1157 }, /* CHOSEONG KAPYEOUNPHIEUPH       = PHIEUPH + IEUNG */
+  { 0x11121109, 0xa97b }, /* CHOSEONG HIEUH-SIOS            = HIEUH + SIOS */
   { 0x11121112, 0x1158 }, /* CHOSEONG SSANGHIEUH            = HIEUH + HIEUH */
   { 0x11211100, 0x1122 }, /* CHOSEONG PIEUP-SIOS-KIYEOK     = PIEUP-SIOS + KIYEOK */
   { 0x11211103, 0x1123 }, /* CHOSEONG PIEUP-SIOS-TIKEUT     = PIEUP-SIOS + TIKEUT */
   { 0x11211107, 0x1124 }, /* CHOSEONG PIEUP-SIOS-PIEUP      = PIEUP-SIOS + PIEUP */
   { 0x11211109, 0x1125 }, /* CHOSEONG PIEUP-SSANGSIOS       = PIEUP-SIOS + SIOS */
   { 0x1121110c, 0x1126 }, /* CHOSEONG PIEUP-SIOS-CIEUC      = PIEUP-SIOS + CIEUC */
+  { 0x11211110, 0xa972 }, /* CHOSEONG PIEUP-SIOS-THIKEUTH   = PIEUP-SIOS + THIKEUTH */
   { 0x11321100, 0x1133 }, /* CHOSEONG SIOS-PIEUP-KIYEOK     = SIOS-PIEUP + KIYEOK */
-  { 0x11351109, 0x1140 }, /* CHOSEONG ㅿ                    = SIOS-IEUNG + SIOS => ㅿ (cyclic input) */
-  { 0x1135110b, 0x1140 }, /* CHOSEONG ㅿ                    = SIOS-IEUNG + IEUNG => ㅿ (cyclic input) */
+  //{ 0x11351109, 0x1140 }, /* CHOSEONG PANSIOS               = SIOS-IEUNG + SIOS => PANSIOS (cyclic input) */
+  //{ 0x1135110b, 0x1140 }, /* CHOSEONG PANSIOS               = SIOS-IEUNG + IEUNG => PANSIOS (cyclic input) */
   { 0x113c113c, 0x113d }, /* CHOSEONG CHITUEUMSSANGSIOS     = CHITUEUMSIOS + CHITUEUMSIOS */
   { 0x113e113e, 0x113f }, /* CHOSEONG CEONGCHIEUMSSANGSIOS  = CEONGCHIEUMSIOS + CEONGCHIEUMSIOS */
-  { 0x11401109, 0x1109 }, /* CHOSEONG SIOS                  = ㅿ + SIOS => SIOS (cyclic input) */
-  { 0x1140110b, 0x110b }, /* CHOSEONG IEUNG                 = ㅿ + IEUNG => IEUNG (cyclic input) */
-  { 0x11451109, 0x1140 }, /* CHOSEONG ㅿ                    = IEUNG-SIOS + SIOS => ㅿ (cyclic input) */
-  { 0x1145110b, 0x1140 }, /* CHOSEONG ㅿ                    = IEUNG-SIOS + IEUNG => ㅿ (cyclic input) */
+  //{ 0x11401109, 0x1109 }, /* CHOSEONG SIOS                  = PANSIOS + SIOS => SIOS (cyclic input) */
+  //{ 0x1140110b, 0x110b }, /* CHOSEONG IEUNG                 = PANSIOS + IEUNG => IEUNG (cyclic input) */
+  //{ 0x11451109, 0x1140 }, /* CHOSEONG PANSIOS               = IEUNG-SIOS + SIOS => PANSIOS (cyclic input) */
+  //{ 0x1145110b, 0x1140 }, /* CHOSEONG PANSIOS               = IEUNG-SIOS + IEUNG => PANSIOS (cyclic input) */
+
+  { 0x114c1100, 0x11ec }, /* JONGSEONG IEUNG-KIYOEK         = YESIEUNG + KIYOEK */
+  { 0x114c1101, 0x11ed }, /* JONGSEONG IEUNG-SSANGKIYOEK    = YESIEUNG + SSANGKIYOEK */
+  { 0x114c110f, 0x11ef }, /* JONGSEONG IEUNG-KHIEUKH        = YESIEUNG + KHIEUKH */
+  { 0x114c114c, 0x1147 }, /* CHOSEONG SSANGIEUNG            = YESIEUNG + YESIEUNG XXX */
+
   { 0x114e114e, 0x114f }, /* CHOSEONG CHITUEUMSSANGCIEUC    = CHITUEUMCIEUC + CHITUEUMCIEUC */
   { 0x11501150, 0x1151 }, /* CHOSEONG CEONGCHIEUMSSANGCIEUC = CEONGCHIEUMCIEUC + CEONGCHIEUMCIEUC */
-  { 0x11611161, 0x119e }, /* JUNGSEONG A-A -> ARAEA         = A + A => ARAEA (cyclic change for simple 2-set automata like as a cellphone pad) */
+  { 0x11591159, 0xa97c }, /* JONGSEONG SSANGYEORINHIEUH     = YEORINHIEUH + YEORINHIEUH */
+
+    /* (cyclic change for simple 2-set automata like as a cellphone pad) */
+  { 0x11611161, 0x119e }, /* JUNGSEONG A-A -> ARAEA         = A + A => ARAEA */
+
   { 0x11611169, 0x1176 }, /* JUNGSEONG A-O                  = A + O */
   { 0x1161116e, 0x1177 }, /* JUNGSEONG A-U                  = A + U */
   { 0x11611173, 0x11a3 }, /* JUNGSEONG A-EU                 = A + EU */
@@ -1431,56 +1872,81 @@ static const HangulCompose compose_table_yet[] = {
   { 0x1167116e, 0x117e }, /* JUNGSEONG YEO-U                = YEO + U */
   { 0x11671175, 0x1168 }, /* JUNGSEONG YE                   = YEO */
   { 0x11691161, 0x116a }, /* JUNGSEONG WA                   = O + A */
-  { 0x11691162, 0x116b }, /* jungseong o      + ae	= wae		*/
+  { 0x11691162, 0x116b }, /* JUNGSEONG WAE		    = O + AE */
   { 0x11691163, 0x11a6 }, /* JUNGSEONG O-YA                 = O + YA */
   { 0x11691164, 0x11a7 }, /* JUNGSEONG O-YAE                = O + YAE */
   { 0x11691165, 0x117f }, /* JUNGSEONG O-EO                 = O + EO */
   { 0x11691166, 0x1180 }, /* JUNGSEONG O-E                  = O + E */
+  { 0x11691167, 0xd7b0 }, /* JUNGSEONG O-YOE                = O + YOE */
   { 0x11691168, 0x1181 }, /* JUNGSEONG O-YE                 = O + YE */
   { 0x11691169, 0x1182 }, /* JUNGSEONG O-O                  = O + O */
   { 0x1169116e, 0x1183 }, /* JUNGSEONG O-U                  = O + U */
   { 0x11691175, 0x116c }, /* JUNGSEONG OE                   = O */
   { 0x116a1175, 0x116b }, /* JUNGSEONG WAE                  = WA */
+  { 0x116d1161, 0xd7b2 }, /* JUNGSEONG YO-A                 = YO + A */
+  { 0x116d1162, 0xd7b3 }, /* JUNGSEONG YO-AE                = YO + AE*/
   { 0x116d1163, 0x1184 }, /* JUNGSEONG YO-YA                = YO + YA */
   { 0x116d1164, 0x1185 }, /* JUNGSEONG YO-YAE               = YO + YAE */
+  { 0x116d1165, 0xd7b4 }, /* JUNGSEONG YO-EO                = YO + EO */
   { 0x116d1167, 0x1186 }, /* JUNGSEONG YO-YEO               = YO + YEO */
   { 0x116d1169, 0x1187 }, /* JUNGSEONG YO-O                 = YO + O */
   { 0x116d1175, 0x1188 }, /* JUNGSEONG YO-I                 = YO + I */
   { 0x116e1161, 0x1189 }, /* JUNGSEONG U-A                  = U + A */
   { 0x116e1162, 0x118a }, /* JUNGSEONG U-AE                 = U + AE */
   { 0x116e1165, 0x116f }, /* JUNGSEONG WEO                  = U + EO */
+  { 0x116e1167, 0xd7b5 }, /* JUNGSEONG U-YEO                = U + YEO */
   { 0x116e1168, 0x118c }, /* JUNGSEONG U-YE                 = U + YE */
   { 0x116e116e, 0x118d }, /* JUNGSEONG U-U                  = U + U */
   { 0x116e1175, 0x1171 }, /* JUNGSEONG WI                   = U */
   { 0x116f1173, 0x118b }, /* JUNGSEONG U-EO-EU              = WEO + EU */
   { 0x116f1175, 0x1170 }, /* JUNGSEONG WE                   = WEO */
+  { 0x11711175, 0xd7b6 }, /* JUNGSEONG WI-I                 = WI + I */
   { 0x11721161, 0x118e }, /* JUNGSEONG YU-A                 = YU + A */
+  { 0x11721162, 0xd7b7 }, /* JUNGSEONG YU-AE                = YU + AE */
   { 0x11721165, 0x118f }, /* JUNGSEONG YU-EO                = YU + EO */
   { 0x11721166, 0x1190 }, /* JUNGSEONG YU-E                 = YU + E */
   { 0x11721167, 0x1191 }, /* JUNGSEONG YU-YEO               = YU + YEO */
   { 0x11721168, 0x1192 }, /* JUNGSEONG YU-YE                = YU + YE */
+  { 0x11721169, 0xd7b8 }, /* JUNGSEONG YU-O                 = YU + O */
   { 0x1172116e, 0x1193 }, /* JUNGSEONG YU-U                 = YU + U */
   { 0x11721175, 0x1194 }, /* JUNGSEONG YU-I                 = YU + I */
+  { 0x11731161, 0xd7b9 }, /* JUNGSEONG EU-A                 = EU + A */
+  { 0x11731165, 0xd7ba }, /* JUNGSEONG EU-EO                = EU + EO */
+  { 0x11731166, 0xd7bb }, /* JUNGSEONG EU-E                 = EU + E */
+  { 0x11731169, 0xd7bc }, /* JUNGSEONG EU-O                 = EU + O */
   { 0x1173116e, 0x1195 }, /* JUNGSEONG EU-U                 = EU + U */
   { 0x11731173, 0x1196 }, /* JUNGSEONG EU-EU                = EU + EU */
   { 0x11731175, 0x1174 }, /* JUNGSEONG YI                   = EU */
   { 0x1174116e, 0x1197 }, /* JUNGSEONG YI-U                 = YI + U */
   { 0x11751161, 0x1198 }, /* JUNGSEONG I-A                  = I + A */
   { 0x11751163, 0x1199 }, /* JUNGSEONG I-YA                 = I + YA */
+  { 0x11751164, 0xd7be }, /* JUNGSEONG I-YA-I               = I + YAE */
+  { 0x11751167, 0xd7bf }, /* JUNGSEONG I-YEO                = I + YEO */
+  { 0x11751168, 0xd7c0 }, /* JUNGSEONG I-YEO-I              = I + YE */
   { 0x11751169, 0x119a }, /* JUNGSEONG I-O                  = I + O */
+  { 0x1175116d, 0xd7c2 }, /* JUNGSEONG I-YO                 = I + YO */
   { 0x1175116e, 0x119b }, /* JUNGSEONG I-U                  = I + U */
+  { 0x11751172, 0xd7c3 }, /* JUNGSEONG I-YU                 = I + YU */
   { 0x11751173, 0x119c }, /* JUNGSEONG I-EU                 = I + EU */
+  { 0x11751175, 0xd7c4 }, /* JUNGSEONG I-I                  = I + I */
   { 0x1175119e, 0x119d }, /* JUNGSEONG I-ARAEA              = I + ARAEA */
+  { 0x11821175, 0xd7b1 }, /* JUNGSEONG O-O-I                = O-O + I */
+  { 0x11841175, 0x1184 }, /* JUNGSEONG YO-YAE               = YO-YA + I */
+  { 0x118e1175, 0xd7b7 }, /* JUNGSEONG YU-AE                = YU-A + I */
   { 0x11981161, 0x119d }, /* JUNGSEONG I-ARAEA              = I-A + A => A (cyclic change like as cellphone pad) */
+  { 0x11991169, 0xd7bd }, /* JUNGSEONG I-YA-O               = I-YA + O */
+  { 0x11991175, 0xd7be }, /* JUNGSEONG I-YA-I               = I-YA + I */
+  { 0x119a1175, 0xd7c1 }, /* JUNGSEONG I-O-I                = I-O + I */
   { 0x119d1161, 0x1198 }, /* JUNGSEONG I-A                  = I-ARAEA+ A => I-A (cyclic change like as cellphone pad) */
   //{ 0x119e1161, 0x1161 }, /* JUNGSEONG ARAEA-A              = ARAEA + A => A (cyclic change like as cellphone pad) */
-  { 0x119e1161, 0x11a2 }, /* JUNGSEONG ARAEA-ARAEA          = ARAEA + A => ARAEA-ARAEA (cyclic change like as cellphone pad) */
-  //{ 0x119e1161, 0xd7c5 }, /* JUNGSEONG ARAEA-A              = ARAEA + A => ARAEA-A (cyclic change like as cellphone pad) */
-  //{ 0xd7c51161, 0x11a2 }, /* JUNGSEONG ARAEA-ARAEA          = ARAEA-A + A => ARAEA-ARAEA (cyclic change like as cellphone pad) */
+  //{ 0x119e1161, 0x11a2 }, /* JUNGSEONG ARAEA-ARAEA          = ARAEA + A => ARAEA-ARAEA (cyclic change like as cellphone pad) */
+  { 0x119e1161, 0xd7c5 }, /* JUNGSEONG ARAEA-A              = ARAEA + A => ARAEA-A (cyclic change like as cellphone pad) */
   { 0x119e1165, 0x119f }, /* JUNGSEONG ARAEA-EO             = ARAEA + EO */
+  { 0x119e1166, 0xd7c6 }, /* JUNGSEONG ARAEA-E              = ARAEA + E */
   { 0x119e116e, 0x11a0 }, /* JUNGSEONG ARAEA-U              = ARAEA + U */
   { 0x119e1175, 0x11a1 }, /* JUNGSEONG ARAEA-I              = ARAEA + I */
   { 0x119e119e, 0x11a2 }, /* JUNGSEONG SSANGARAEA           = ARAEA + ARAEA */
+  { 0x119f1175, 0xd7c6 }, /* JUNGSEONG ARAEA-E              = ARAEA-EO + I */
   { 0x11a21161, 0x1161 }, /* JUNGSEONG A                    = ARAEA-ARAEA + A => A (cyclic change like as cellphone pad) */
   { 0x11a811a8, 0x11a9 }, /* JONGSEONG SSANGKIYEOK          = KIYEOK + KIYEOK */
   { 0x11a811ab, 0x11fa }, /* JONGSEONG KIYEOK-NIEUN         = KIYEOK + NIEUN */
@@ -1495,13 +1961,23 @@ static const HangulCompose compose_table_yet[] = {
   { 0x11ab11a8, 0x11c5 }, /* JONGSEONG NIEUN-KIYEOK         = NIEUN + KIYEOK */
   { 0x11ab11ab, 0x11ff }, /* JONGSEONG SSANGNIEUN           = NIEUN + NIEUN */
   { 0x11ab11ae, 0x11c6 }, /* JONGSEONG NIEUN-TIKEUT         = NIEUN + TIKEUT */
+  { 0x11ab11af, 0xd7cb }, /* JONGSEONG NIEUN-RIEUL          = NIEUN + RIEUL */
   { 0x11ab11ba, 0x11c7 }, /* JONGSEONG NIEUN-SIOS           = NIEUN + SIOS */
   { 0x11ab11bd, 0x11ac }, /* JONGSEONG NIEUN-CIEUC          = NIEUN + CIEUC */
+  { 0x11ab11be, 0xd7cc }, /* JONGSEONG NIEUN-CHIEUCH        = NIEUN + CHIEUCH */
   { 0x11ab11c0, 0x11c9 }, /* JONGSEONG NIEUN-THIEUTH        = NIEUN + THIEUTH */
   { 0x11ab11c2, 0x11ad }, /* JONGSEONG NIEUN-HIEUH          = NIEUN + HIEUH */
   { 0x11ab11eb, 0x11c8 }, /* JONGSEONG NIEUN-PANSIOS        = NIEUN + PANSIOS */
   { 0x11ae11a8, 0x11ca }, /* JONGSEONG TIKEUT-KIYEOK        = TIKEUT + KIYEOK */
+  { 0x11ae11ae, 0xd7cd }, /* JONGSEONG SSANGTIKEUT          = TIKEUT + TIKEUT */
   { 0x11ae11af, 0x11cb }, /* JONGSEONG TIKEUT-RIEUL         = TIKEUT + RIEUL */
+  { 0x11ae11b8, 0xd7cf }, /* JONGSEONG TIKEUT-PIEUP         = TIKEUT + PIEUP */
+  { 0x11ae11ba, 0xd7d0 }, /* JONGSEONG TIKEUT-SIOS          = TIKEUT + SIOS */
+
+  { 0x11ae11bd, 0xd7d2 }, /* JONGSEONG TIKEUT-CIEUC         = TIKEUT + CIEUC */
+  { 0x11ae11be, 0xd7d3 }, /* JONGSEONG TIKEUT-CHIEUCH       = TIKEUT + CHIEUCH */
+  { 0x11ae11c0, 0xd7d4 }, /* JONGSEONG TIKEUT-TIKEUT        = TIKEUT + TIKEUT */
+
   { 0x11af11a8, 0x11b0 }, /* JONGSEONG RIEUL-KIYEOK         = RIEUL + KIYEOK */
   { 0x11af11ab, 0x11cd }, /* JONGSEONG RIEUL-NIEUN          = RIEUL + NIEUN */
   { 0x11af11ae, 0x11ce }, /* JONGSEONG RIEUL-TIKEUT         = RIEUL + TIKEUT */
@@ -1509,51 +1985,119 @@ static const HangulCompose compose_table_yet[] = {
   { 0x11af11b7, 0x11b1 }, /* JONGSEONG RIEUL-MIEUM          = RIEUL + MIEUM */
   { 0x11af11b8, 0x11b2 }, /* JONGSEONG RIEUL-PIEUP          = RIEUL + PIEUP */
   { 0x11af11ba, 0x11b3 }, /* JONGSEONG RIEUL-SIOS           = RIEUL + SIOS */
+  { 0x11af11bc, 0xd7dd }, /* JONGSEONG KAPYEOUNRIEUL        = RIEUL + IEUNG */
   { 0x11af11bf, 0x11d8 }, /* JONGSEONG RIEUL-KHIEUKH        = RIEUL + KHIEUKH */
   { 0x11af11c0, 0x11b4 }, /* JONGSEONG RIEUL-THIEUTH        = RIEUL + THIEUTH */
   { 0x11af11c1, 0x11b5 }, /* JONGSEONG RIEUL-PHIEUPH        = RIEUL + PHIEUPH */
   { 0x11af11c2, 0x11b6 }, /* JONGSEONG RIEUL-HIEUH          = RIEUL + HIEUH */
   { 0x11af11eb, 0x11d7 }, /* JONGSEONG RIEUL-PANSIOS        = RIEUL + PANSIOS */
+  { 0x11af11f0, 0xd7db }, /* JONGSEONG RIEUL-YESIEUNG       = RIEUL + YESIEUNG */
   { 0x11af11f9, 0x11d9 }, /* JONGSEONG RIEUL-YEORINHIEUH    = RIEUL + YEORINHIEUH */
+  { 0x11b011a8, 0xd7d5 }, /* JONGSEONG RIEUL-KIYEOK-KIYEOK  = RIEUL-KIYEOK + KIYEOK */
   { 0x11b011ba, 0x11cc }, /* JONGSEONG RIEUL-KIYEOK-SIOS    = RIEUL-KIYEOK + SIOS */
+  { 0x11b011c2, 0xd7d6 }, /* JONGSEONG RIEUL-KIYEOK-HIEUH   = RIEUL-KIYEOK + HIEUH */
   { 0x11b111a8, 0x11d1 }, /* JONGSEONG RIEUL-MIEUM-KIYEOK   = RIEUL-MIEUM + KIYEOK */
   { 0x11b111ba, 0x11d2 }, /* JONGSEONG RIEUL-MIEUM-SIOS     = RIEUL-MIEUM + SIOS */
+  { 0x11b111c2, 0xd7d8 }, /* JONGSEONG RIEUL-MIEUM-HIEUH    = RIEUL-MIEUM + HIEUH */
+  { 0x11b211ae, 0xd7d9 }, /* JONGSEONG RIEUL-PIEUP-TIKEUH   = RIEUL-PIEUP + TIKEUH */
   { 0x11b211ba, 0x11d3 }, /* JONGSEONG RIEUL-PIEUP-SIOS     = RIEUL-PIEUP + SIOS */
   { 0x11b211bc, 0x11d5 }, /* JONGSEONG RIEUL-KAPYEOUNPIEUP  = RIEUL-PIEUP + IEUNG */
+  { 0x11b211c1, 0xd7da }, /* JONGSEONG RIEUL-PIEUP-PHIEUPH  = RIEUL-PIEUP + PHIEUPH */
   { 0x11b211c2, 0x11d4 }, /* JONGSEONG RIEUL-PIEUP-HIEUH    = RIEUL-PIEUP + HIEUH */
   { 0x11b311ba, 0x11d6 }, /* JONGSEONG RIEUL-SSANGSIOS      = RIEUL-SIOS + SIOS */
   { 0x11b711a8, 0x11da }, /* JONGSEONG MIEUM-KIYEOK         = MIEUM + KIYEOK */
+  { 0x11b711ab, 0xd7de }, /* JONGSEONG MIEUM-NIEUN          = MIEUM + NIEUN */
   { 0x11b711af, 0x11db }, /* JONGSEONG MIEUM-RIEUL          = MIEUM + RIEUL */
+  { 0x11b711b7, 0xd7e0 }, /* JONGSEONG SSANGMIEUM           = MIEUM + MIEUM */
   { 0x11b711b8, 0x11dc }, /* JONGSEONG MIEUM-PIEUP          = MIEUM + PIEUP */
   { 0x11b711ba, 0x11dd }, /* JONGSEONG MIEUM-SIOS           = MIEUM + SIOS */
   { 0x11b711bc, 0x11e2 }, /* JONGSEONG KAPYEOUNMIEUM        = MIEUM + IEUNG */
+  { 0x11b711bd, 0xd7e2 }, /* JONGSEONG MIEUM-CIEUC          = MIEUM + CIEUC */
   { 0x11b711be, 0x11e0 }, /* JONGSEONG MIEUM-CHIEUCH        = MIEUM + CHIEUCH */
   { 0x11b711c2, 0x11e1 }, /* JONGSEONG MIEUM-HIEUH          = MIEUM + HIEUH */
   { 0x11b711eb, 0x11df }, /* JONGSEONG MIEUM-PANSIOS        = MIEUM + PANSIOS */
+  { 0x11b811ae, 0xd7e3 }, /* JONGSEONG PIEUP-TIKEUT         = PIEUP + TIKEUT */
   { 0x11b811af, 0x11e3 }, /* JONGSEONG PIEUP-RIEUL          = PIEUP + RIEUL */
+  { 0x11b811b7, 0xd7e5 }, /* JONGSEONG PIEUP-MIEUM          = PIEUP + MIEUM */
+  { 0x11b811b8, 0xd7e6 }, /* JONGSEONG SSANGPIEUP           = PIEUP + PIEUP */
   { 0x11b811ba, 0x11b9 }, /* JONGSEONG PIEUP-SIOS           = PIEUP + SIOS */
   { 0x11b811bc, 0x11e6 }, /* JONGSEONG KAPYEOUNPIEUP        = PIEUP + IEUNG */
+  { 0x11b811bd, 0xd7e8 }, /* JONGSEONG PIEUP-CIEUC          = PIEUP + CIEUC */
+  { 0x11b811be, 0xd7e9 }, /* JONGSEONG PIEUP-CHIEUCH        = PIEUP + CHIEUCH */
   { 0x11b811c1, 0x11e4 }, /* JONGSEONG PIEUP-PHIEUPH        = PIEUP + PHIEUPH */
   { 0x11b811c2, 0x11e5 }, /* JONGSEONG PIEUP-HIEUH          = PIEUP + HIEUH */
+  { 0x11b911ae, 0xd7e7 }, /* JONGSEONG PIEUP-SIOS-TIKEUT    = PIEUP-SIOS + TIKEUT */
   { 0x11ba11a8, 0x11e7 }, /* JONGSEONG SIOS-KIYEOK          = SIOS + KIYEOK */
   { 0x11ba11ae, 0x11e8 }, /* JONGSEONG SIOS-TIKEUT          = SIOS + TIKEUT */
   { 0x11ba11af, 0x11e9 }, /* JONGSEONG SIOS-RIEUL           = SIOS + RIEUL */
+  { 0x11ba11b7, 0xd7ea }, /* JONGSEONG SIOS-MIEUM           = SIOS + MIEUM */
   { 0x11ba11b8, 0x11ea }, /* JONGSEONG SIOS-PIEUP           = SIOS + PIEUP */
   { 0x11ba11ba, 0x11bb }, /* JONGSEONG SSANGSIOS            = SIOS + SIOS */
+  { 0x11ba11bd, 0xd7ef }, /* JONGSEONG SIOS-CIEUC           = SIOS + CIEUC */
+  { 0x11ba11be, 0xd7f0 }, /* JONGSEONG SIOS-CHIEUCH         = SIOS + CHIEUCH */
+  { 0x11ba11c0, 0xd7f1 }, /* JONGSEONG SIOS-THIKEUTH        = SIOS + THIKEUTH */
+  { 0x11ba11c2, 0xd7f2 }, /* JONGSEONG SIOS-HIEUH           = SIOS + HIEUH */
+  { 0x11ba11eb, 0xd7ee }, /* JONGSEONG SIOS-PANSIOS         = SIOS + PANSIOS */
+  { 0x11bb11a8, 0xd7ec }, /* JONGSEONG SSANGSIOS-KIYEOK     = SSANGSIOS + KIYEOK */
+  { 0x11bb11ae, 0xd7ed }, /* JONGSEONG SSANGSIOS-TIKEUT     = SSANGSIOS + TIKEUT */
   { 0x11bc11a8, 0x11ec }, /* JONGSEONG IEUNG-KIYEOK         = IEUNG + KIYEOK */
+  { 0x11bc11a9, 0x11ed }, /* JONGSEONG IEUNG-SSANGKIYOEK    = IEUNG + SSANGKIYOEK */
+  //{ 0x11bc11ba, 0x11f1 }, /* JONGSEONG YESIEUNG-SIOS        = IEUNG + SIOS */
   { 0x11bc11bc, 0x11ee }, /* JONGSEONG SSANGIEUNG           = IEUNG + IEUNG */
   { 0x11bc11bf, 0x11ef }, /* JONGSEONG IEUNG-KHIEUKH        = IEUNG + KHIEUKH */
+  //{ 0x11bc11eb, 0x11f2 }, /* JONGSEONG YESIEUNG-PANSIOS     = IEUNG + PANSIOS */
+
+  { 0x11bd11b8, 0xd7f7 }, /* JONGSEONG CIEUC-PIEUP          = CIEUC + PIEUP */
+  { 0x11bd11bd, 0xd7f9 }, /* JONGSEONG SSANGCIEUC           = CIEUC + CIEUC */
+  { 0x11c011c0, 0xa979 }, /* JONGSEONG SSANGTHIEUTH         = THIEUTH + THIEUTH */
   { 0x11c111b8, 0x11f3 }, /* JONGSEONG PHIEUPH-PIEUP        = PHIEUPH + PIEUP */
+  { 0x11c111ba, 0xd7fa }, /* JONGSEONG PHIEUPH-SIOS         = PHIEUPH + SIOS */
   { 0x11c111bc, 0x11f4 }, /* JONGSEONG KAPYEOUNPHIEUPH      = PHIEUPH + IEUNG */
+  { 0x11c111c0, 0xd7fb }, /* JONGSEONG PHIEUPH-THIEUTH      = PHIEUPH + THIEUTH */
+  { 0x11c111c2, 0xd77a }, /* JONGSEONG PHIEUPH-HIEUH        = PHIEUPH + HIEUH */
   { 0x11c211ab, 0x11f5 }, /* JONGSEONG HIEUH-NIEUN          = HIEUH + NIEUN */
   { 0x11c211af, 0x11f6 }, /* JONGSEONG HIEUH-RIEUL          = HIEUH + RIEUL */
   { 0x11c211b7, 0x11f7 }, /* JONGSEONG HIEUH-MIEUM          = HIEUH + MIEUM */
   { 0x11c211b8, 0x11f8 }, /* JONGSEONG HIEUH-PIEUP          = HIEUH + PIEUP */
+  { 0x11c211ba, 0xa97b }, /* JONGSEONG HIEUH-SIOS           = HIEUH + SIOS */
   { 0x11ce11c2, 0x11cf }, /* JONGSEONG RIEUL-TIKEUT-HIEUH   = RIEUL-TIKEUT + HIEUH */
+  { 0x11d011bf, 0xd7d7 }, /* JONGSEONG SSANGRIEUL-KHIEUKH   = SSANGRIEUL + KHIEUKH */
+  { 0x11d911c2, 0xd7dc }, /* JONGSEONG RIEUL-YEORINHIEUH-HIEUH  = RIEUL-YEORINHIEUH + HIEUH */
+  { 0x11dc11ba, 0xd7e1 }, /* JONGSEONG MIEUM-PIEUP-SIOS     = MIEUM-PIEUP + SIOS */
   { 0x11dd11ba, 0x11de }, /* JONGSEONG MIEUM-SSANGSIOS      = MIEUM-SIOS + SIOS */
+
+  { 0x11e311c1, 0xd7e4 }, /* JONGSEONG PIEUP-RIEUL-PHIEUPH  = PIEUP-RIEUL + PHIEUPH */
+  { 0x11ea11bc, 0xd7eb }, /* JONGSEONG SIOS-KAPYEOUNPIEUP   = SIOS-PIEUP + IEUNG */
+  { 0x11eb11b8, 0xd7f3 }, /* JONGSEONG PANSIOS-PIEUP        = PANSIOS + PIEUP */
+  { 0x11eb11e6, 0xd7f4 }, /* JONGSEONG PANSIOS-KAPYEOUNPIEUP= PANSIOS + KAPYEOUNPIEUP */
+
   { 0x11ec11a8, 0x11ed }, /* JONGSEONG IEUNG-SSANGKIYEOK    = IEUNG-KIYEOK + KIYEOK */
+
+  { 0x11f011a8, 0x11ec }, /* JONGSEONG YESIEUNG-KIYOEK      = YESIEUNG + KIYOEK */
+  { 0x11f011a9, 0x11ed }, /* JONGSEONG IEUNG-SSANGKIYOEK    = YESIEUNG + SSANGKIYOEK */
+  { 0x11f011b7, 0xd7f5 }, /* JONGSEONG IEUNG-MIEUM          = YESIEUNG + MIEUM */
   { 0x11f011ba, 0x11f1 }, /* JONGSEONG YESIEUNG-SIOS        = YESIEUNG + SIOS */
+  { 0x11f011bf, 0x11ef }, /* JONGSEONG IEUNG-KHIEUKH        = YESIEUNG + KHIEUKH */
+  { 0x11f011c2, 0xd7f6 }, /* JONGSEONG YESIEUNG-HIEUH       = YESIEUNG + HIEUH */
   { 0x11f011eb, 0x11f2 }, /* JONGSEONG YESIEUNG-PANSIOS     = YESIEUNG + PANSIOS */
+  { 0x11f011f0, 0x11ee }, /* JONGSEONG SSANGIEUNG           = YESIEUNG + YESIEUNG */
+  { 0x11f911f9, 0xa97c }, /* JONGSEONG SSANGYEORINHIEUH     = YEORINHIEUH + YEORINHIEUH */
+
+  { 0xa9641100, 0xa965 }, /* CHOSEONG RIEUL-KIYEOK-KIYEOK   = RIEUL-KIYEOK + KIYEOK */
+  { 0xa9661103, 0xa967 }, /* CHOSEONG RIEUL-TIKEUT-TIKEUT   = RIEUL-TIKEUT + TIKEUT */
+  { 0xa9691107, 0xa96a }, /* CHOSEONG RIEUL-PIEUP-PIEUP     = RIEUL-PIEUP + PIEUP */
+  { 0xa969110b, 0xa96b }, /* CHOSEONG RIEUL-KAPYEOUNPIEUP   = RIEUL-PIEUP + IEUNG */
+
+  { 0xd7ba1175, 0xd7bb }, /* JUNGSEONG EU-E                 = EU-EO + I */
+  { 0xd7bf1175, 0xd7c0 }, /* JUNGSEONG I-YEO-I              = I-YEO + I */
+
+  { 0xd7c51161, 0x11a2 }, /* JUNGSEONG ARAEA-ARAEA          = ARAEA-A + A => ARAEA-ARAEA (cyclic change like as cellphone pad) */
+
+  { 0xd7cd11b8, 0xd7ce }, /* JONGSEONG SSANGTIKEUT-PIEUP    = SSANGTIKEUT + PIEUP */
+  { 0xd7d011a8, 0xd7d1 }, /* JONGSEONG TIKEUT-SIOS-KIYEOK   = TIKEUT-SIOS + KIYEOK */
+  { 0xd7de11ab, 0xd7df }, /* JONGSEONG MIEUM-NIEUN-NIEUN    = MIEUM-NIEUN + NIEUN */
+  { 0xd7f311bc, 0xd7f4 }, /* JONGSEONG PANSIOS-KAPYEOUNPIEUP= PANSIOS-PIEUP + IEUNG */
+  { 0xd7f711b8, 0xd7f8 }, /* JONGSEONG CIEUC-PIEUP-PIEUP    = CIEUC-PIEUP + PIEUP */
 };
 
 //#define compose_table compose_table_default
@@ -1848,6 +2392,11 @@ int hangul_del_prev(LPMYSTR lptr)
     LPMYSTR lpSave = lptr;
 
     MyDebugPrint((TEXT("-- Input for del_prev: %s %x\r\n"), lptr, *lptr));
+    if (hangul_is_cjamo(*lptr) || hangul_is_syllable(*lptr)) {
+        MyDebugPrint((TEXT("--- CJamo or syllable: %s %x\r\n"), lptr, *lptr));
+	lptr--;
+	return 1;
+    }
     if (hangul_is_jongseong(*lptr)) {
         MyDebugPrint((TEXT("--- Jong del_prev: %s %x\r\n"), lptr, *lptr));
         lptr--;
@@ -1858,14 +2407,14 @@ int hangul_del_prev(LPMYSTR lptr)
 	    }
 	}
     } else if (hangul_is_jungseong(*lptr) || *lptr == 0x1160) {
-	MyDebugPrint((TEXT("--- Jung Han Char: %s %d\r\n"), lptr));
+	MyDebugPrint((TEXT("--- Jung del_prev: %s %d\r\n"), lptr));
         lptr--;
 	if (hangul_is_choseong(*lptr) || *lptr == 0x115f) {
-	    MyDebugPrint((TEXT("-- Cho Han Char: %s %d\r\n"), lptr));
+	    MyDebugPrint((TEXT("---- Cho Han Char: %s %d\r\n"), lptr));
 	    lptr--;
 	}
     } else if (hangul_is_choseong(*lptr) || *lptr == 0x115f) {
-	MyDebugPrint((TEXT("--- Input Cho del_prev: %s %x\r\n"), lptr, *lptr));
+	MyDebugPrint((TEXT("--- Cho del_prev: %s %x\r\n"), lptr, *lptr));
         lptr--;
     }
 
@@ -2152,22 +2701,24 @@ LPBYTE lpbKeyState;
 		ncs = hangul_ic_get(&ic, 0, lcs);
 		if (ncs > 0)
 		    cs = lcs[ncs - 1]; // XXX 마지막 입력 문자로
-		MyDebugPrint((TEXT(" * 조합중: %d, %s\r\n"), ncs, lcs));
+		MyDebugPrint((TEXT(" * 조합중: %d, %s, syl=%d\r\n"), ncs, lcs,ic.syllable));
 
 		if (ncs) {
-		    if (ncs == 1 && ic.syllable) { // composable with compatability jamo
+		    if (ncs == 1 && ic.syllable) {
+			// composable with compatability jamo
 			MYCHAR c = *(lpstr - 1);
 			// syllable이거나 compatible jamo이면
 			if (hangul_is_syllable(c) || hangul_is_cjamo(c)) {
 			    *(lpstr - 1) = cs;
-			} else if (hangul_is_choseong(c) || hangul_is_jungseong(c) || hangul_is_jongseong(c)) {
+			} else if (hangul_is_choseong(c) ||
+				hangul_is_jungseong(c) ||
+				hangul_is_jongseong(c)) {
 			    // 그렇지 않고 첫가끝 자모인 경우.
 			    int n = 0;
 			    LPWSTR lpstrprev = lpstr - 1;
 			    n = hangul_del_prev(lpstrprev);
 
 			    MyDebugPrint((TEXT("** Delete Han Char: %d\r\n"), n));
-
 			    lpCompStr->dwCursorPos -= n;
 
 			    *lpstr++ = cs;
@@ -2178,51 +2729,17 @@ LPBYTE lpbKeyState;
 			    *(lpstr - 1) = cs;
 			}
 		    } else {
-			// 옛한글.
-			// syllable이 있으면 분해하여 집어넣음.
-			if (ic.len > 0 && hangul_is_syllable(*(lpstr - 1))) {
-			    WCHAR l, v, t;
-			    hangul_syllable_to_jamo(*(lpstr - 1),&l, &v, &t);
-			    if (l && v) {
-				*(lpstr - 1) = l;
-				*lpstr++ = v;
-				lpCompStr->dwCursorPos++;
-				if (t) {
-				    *lpstr++ = t;
-				    lpCompStr->dwCursorPos++;
-				}
-			    }
-			}
+			int n = 0;
+			LPWSTR lpstrprev = lpstr - 1;
 
-			//WCHAR last = hangul_ic_peek(&ic);
-			// not composable. full jamo XXX
-			if (ic.laststate == 1) { // cho
-			    cs = ic.cho;
+			// delete prev compstr
+			n = hangul_del_prev(lpstrprev);
+			lpstr -= n;
+			lpCompStr->dwCursorPos -= n;
 
-			    if (ic.last != ic.cho) { // composed
-				*(lpstr - 1) = cs;
-			    } else {
-				*lpstr++ = ic.cho;
-				lpCompStr->dwCursorPos++;
-			    }
-			} else if (ic.laststate == 2) { // jung
-			    cs = ic.jung;
-
-			    if (ic.last != ic.jung) { // composed
-				*(lpstr - 1) = cs;
-			    } else {
-				*lpstr++ = ic.jung;
-				lpCompStr->dwCursorPos++;
-			    }
-			} else if (ic.laststate == 3) { // jong
-			    cs = ic.jong;
-
-			    if (ic.last != ic.jong) { // composed
-				*(lpstr - 1) = cs;
-			    } else {
-				*lpstr++ = ic.jong;
-				lpCompStr->dwCursorPos++;
-			    }
+			for (n = 0; n < ncs; n++) {
+			    *lpstr++ = lcs[n];
+			    lpCompStr->dwCursorPos++;
 			}
 		    }
 		}
@@ -2494,17 +3011,24 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
     WCHAR code=0;
     UINT i = 0;
 
+    if (!ic->len) {
+	if (lcs)
+	    lcs[0] = MYTEXT('\0');
+	return 0;
+    }
+
     if (ic->len == 1)
     {
 	if (ic->cho)
-            code = hangul_choseong_to_cjamo(ic->cho);
+            code = hangul_jamo_to_cjamo(ic->cho);
 	else if (ic->jung)
-            code = hangul_jungseong_to_cjamo(ic->jung);
+            code = hangul_jamo_to_cjamo(ic->jung);
 	else if (ic->jong)
-            code = hangul_jongseong_to_cjamo(ic->jong);
+            code = hangul_jamo_to_cjamo(ic->jong);
 
-	if (!ic->syllable && hangul_is_cjamo(code))
-	    ic->syllable = TRUE;
+	if (!hangul_is_cjamo(code)) {
+	    ic->syllable = FALSE;
+	}
     }
     else if (ic->len == 3)
     {
@@ -2538,20 +3062,51 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
     }
 
     if (ic->len > 3 || !ic->syllable) {
+	int state = 0;
+	UINT j = 0;
+
 	if (lcs == NULL)
 	    return 0;
 
-	for (i = 0; i < ic->len; i++) {
-	    lcs[i] = ic->read[i];
-	    // Normalize가 필요하다. FIXME
+	if (ic->len == 1 && hangul_is_cjamo(code)) {
+	    if (mode == 1)
+		hangul_ic_init(ic);
+
+	    lcs[0] = code;
+	    lcs[1] = MYTEXT('\0');
+	    return 1;
 	}
-	lcs[i] = MYTEXT('\0');
+
+	// the hangul ic buffer does not have fill code info.
+	while (i < ic->len && hangul_is_choseong(ic->read[i])) {
+	    lcs[j++] = ic->read[i++];
+	    state = 1;
+	}
+	if (state != 1) {
+	    lcs[j++] = 0x115f;
+	    state = 1;
+	}
+
+	while (i < ic->len && hangul_is_jungseong(ic->read[i])) {
+	    lcs[j++] = ic->read[i++];
+	    state = 2;
+	}
+	if (state != 2) {
+	    lcs[j++] = 0x1160;
+	    state = 2;
+	}
+
+	while (i < ic->len) {
+	    lcs[j++] = ic->read[i++];
+	}
+
+	lcs[j] = MYTEXT('\0');
 
 	if (mode == 1)
 	    hangul_ic_init(ic);
 
 	// 개수 리턴
-	return i;
+	return j;
     }
 
     if (mode == 1)
@@ -2636,7 +3191,8 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                         hangul_ic_push(ic,comb);
                         ic->last=jamo;
 
-		        if (!hangul_jamo_to_syllable(ic->cho,0x1161,0)) {
+		        //if (!hangul_jamo_to_syllable(ic->cho, 0x1161,0)) {
+		        if (hangul_jamo_to_cjamo(ic->cho) == ic->cho) {
 		 	    // 옛한글이면 완성형 음절로 만들지 못함.
 			    ic->syllable=FALSE;
 		        }
@@ -2651,7 +3207,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                         hangul_ic_push(ic,comb);
                         ic->last=jamo;
                         ic->laststate=3;
-                        return -1;
+                        return 0;
 		    }
                 }
                 // 초성을 compose할 수 없다.
@@ -2704,19 +3260,36 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 // 초성이 없을 경우 : 나비에서는 중성+초성을 교정한다.
                 if (!ic->cho &&
                    ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
+		    int commit = FALSE;
 			// 입력 순서 교정.
 			// 따라서, ㅏ,ㄹ 를 차례로 입력하면 "라"가 된다.
 			// 여기서 backspace를 누르면 "ㅏ"가 지워지게 된다.
 			// FIXME "ㅏ"가 지워지는 것이 옳은가? "ㄹ"이 지워지는 게 맞나?
-                    ic->cho=jamo;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,jamo);
-                    hangul_ic_push(ic,ic->jung);
+		    if (!hangul_jamo_to_syllable(ic->cho,ic->jung,0)) {
+			if (dwOptionFlag & HANGUL_JAMOS) {
+			    ic->syllable = FALSE;
+			} else {
+			    commit = TRUE;
+			}
+		    }
+
+		    if (commit) {
+			*ncs = hangul_ic_commit(ic, lcs);
+
+			ic->cho=jamo;
+			ic->laststate=1;
+			hangul_ic_push(ic,jamo);
+			return -1;
+		    }
+		    ic->cho=jamo;
+		    hangul_ic_pop(ic);
+		    hangul_ic_push(ic,jamo);
+		    hangul_ic_push(ic,ic->jung);
                     ic->laststate=2;
 		    return 0;	
                 }
                 // 초성을 종성으로 바꾸고,
-                jong = hangul_choseong_to_jongseong(jamo);
+                jong = hangul_choseong_to_jongseong_full(jamo);
                 if (jong && hangul_jamo_to_syllable(ic->cho,ic->jung,jong)) {
                     ic->jong=jong;
                     hangul_ic_push(ic,jong);
@@ -2744,12 +3317,18 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		// 동시치기일 경우는 순서를 바꿔서 중+중 조합
 		if ( !comb && ctyping && !hangul_is_jungseong(comb))
 		    comb = hangul_compose(jamo,ic->jung);
-                if ( hangul_is_jungseong(comb) ) {
+                if ( comb && hangul_is_jungseong(comb) ) {
 		    ic->jung=comb;
 		    hangul_ic_pop(ic);
 		    hangul_ic_push(ic,comb);
 		    ic->last=jamo;
-		    if (hangul_jamo_to_syllable(ic->cho,comb,0)) {
+
+		    if (ic->len == 1) {
+		        if (hangul_jamo_to_cjamo(ic->jung) == ic->jung) {
+			    ic->syllable=FALSE;
+			}
+			return 0;
+		    } else if (ic->cho && hangul_jamo_to_syllable(ic->cho,comb,0)) {
 			return 0;
 		    } else {
 			// 옛한글이면 완성형 음절 아님.
@@ -2806,12 +3385,12 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             switch(kind) {
             case 1: // 초성을 종성으로 바꿔서
 		cho = jamo;
-                jong = hangul_choseong_to_jongseong(jamo);
+                jong = hangul_choseong_to_jongseong_full(jamo);
                 comb = hangul_compose(ic->jong, jong);
 		// 동시치기일 경우는 순서를 바꿔서 종+종 조합
 		if ( ctyping && !hangul_is_jongseong(comb))
 		    comb = hangul_compose(jong,ic->jong);
-                if ( hangul_is_jongseong(comb) )
+                if ( comb && hangul_is_jongseong(comb) )
                 {
 		    if (!hangul_jamo_to_syllable(ic->cho,ic->jung,comb)) {
 			ic->syllable = FALSE;
@@ -2894,7 +3473,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			tmp = cho;
 			//cho = hangul_jongseong_to_choseong(jong);
 			cho = last;
-			ic->jong = hangul_choseong_to_jongseong(tmp);
+			ic->jong = hangul_choseong_to_jongseong_full(tmp);
 		    } else {
 			ic->jong = jong;
 		    }
@@ -3278,7 +3857,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			hangul_jongseong_dicompose(ic->jong, &j1, &j2);
 
 			if (j1 && j2) {
-			    jong = hangul_choseong_to_jongseong(j2); // XXX
+			    jong = hangul_choseong_to_jongseong_full(j2); // XXX
 			    hangul_ic_pop(ic);
 			    hangul_ic_push(ic,j1);
 			    ic->jong = j1;
@@ -3353,7 +3932,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			// hangul_jongseong_discompose2()?
 
 			if (j1 && j2) {
-			    jong = hangul_choseong_to_jongseong(j2);
+			    jong = hangul_choseong_to_jongseong_full(j2);
 			    hangul_ic_pop(ic);
 			    hangul_ic_push(ic,j1);
 			    ic->jong = j1;
