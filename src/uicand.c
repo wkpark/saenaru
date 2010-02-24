@@ -32,6 +32,7 @@
 
 /**********************************************************************/
 #include "windows.h"
+#include "commctrl.h"
 #include "immdev.h"
 #include "saenaru.h"
 
@@ -54,13 +55,15 @@ LPARAM lParam;
     HWND hSvrWnd;
     HIMC hIMC;
     LPINPUTCONTEXT lpIMC;
-    static INT dy=0;
+    static INT dx=0, dy=0;
 #endif
     DWORD dwPushedCand;
     POINT pt;
     RECT rc;
-    INT select;
+    INT select, selpos;
     INT offset;
+    static INT o_selpos = -1;
+    static HWND hwndTip;
 
     switch (message)
     {
@@ -69,6 +72,14 @@ LPARAM lParam;
             PaintCandWindow(hWnd);
             break;
         case WM_CREATE:
+            hwndTip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
+                              WS_POPUP |TTS_ALWAYSTIP | TTS_NOFADE,
+                              //WS_POPUP |TTS_ALWAYSTIP | TTS_BALLOON,
+                              CW_USEDEFAULT, CW_USEDEFAULT,
+                              CW_USEDEFAULT, CW_USEDEFAULT,
+                              hWnd, NULL, 
+                              hInst, NULL);
+
             MyDebugPrint((TEXT(" * WM_CREATE Cand\r\n")));
             break;
         case WM_MOUSEACTIVATE:
@@ -109,9 +120,13 @@ LPARAM lParam;
 
             select = 0;
             offset = 0;
-            while (HIWORD(lParam) == WM_LBUTTONDOWN) {
+            while (HIWORD(lParam) == WM_LBUTTONDOWN || HIWORD(lParam) == WM_MOUSEMOVE) {
+                LPCANDIDATEINFO lpCandInfo;
+                LPCANDIDATELIST lpCandList;
+                int sel;
                 HDC hDC;
                 PAINTSTRUCT ps;
+                TOOLINFO tip = { 0 };
                 GetCursorPos(&pt);
                 ScreenToClient(hWnd,&pt);
                 GetClientRect(hWnd,&rc);
@@ -136,13 +151,82 @@ LPARAM lParam;
                     select = 0;
                 }
 #endif
-                MyDebugPrint((TEXT("Cand offset %d\n"),offset));
                 hSvrWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
-                if (select > 0 &&
-                    (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) )
-                {
-                    ConvHanja(hIMC,offset,select);
+
+                if (!(hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) )
+                    break;
+
+                lpIMC = ImmLockIMC(hIMC);
+                if (!lpIMC)
+                    break;
+
+                if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo)) {
+                    UINT start;
+                    UINT ii, jj;
+
+                    lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+
+                    if (select > (int) lpCandList->dwPageSize)
+                        select = lpCandList->dwPageSize;
+
+                    if (lpCandList->dwStyle == IME_CAND_CODE) {
+                        dx = 50;
+                        start = pt.x / dx + ((pt.x % dx) ? 1:0) - 1;
+                        start *= lpCandList->dwPageSize;
+                        ii = start + select - 1;
+                        sel = (lpCandList->dwSelection + 1) / lpCandList->dwPageSize + 
+                            ((lpCandList->dwSelection + 1) % lpCandList->dwPageSize ? 1:0) - 1;
+                        sel *= lpCandList->dwPageSize;
+                        sel = ii - sel + 1;
+                    } else {
+                        start = lpCandList->dwPageStart;
+                        ii = start + select - 1;
+                        sel = select;
+                    }
+
+                    selpos = ii;
+
+                    if (selpos != o_selpos && ii <= lpCandList->dwCount) {
+                        TCHAR buf[128];
+                        LPMYSTR lpstr;
+
+                        if (ii >= lpCandList->dwCount) {
+                            buf[0] = TEXT('\0');
+                        } else {
+                            TCHAR mybuf[128];
+                            LPMYSTR lpTemp, lpmystr;
+
+                            lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[ii]);
+
+                            lpmystr = (LPTSTR) mybuf;
+                            Mylstrcpy(lpmystr, lpstr);
+                            if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':')))) {
+                                *lpTemp = MYTEXT('\0');
+                                wsprintf(buf, TEXT("%s"), (lpTemp + 1));
+                            } else {
+                                wsprintf(buf, TEXT("%s"), lpmystr);
+                            }
+                        }
+
+                        tip.cbSize = sizeof(tip);
+                        tip.hwnd = hWnd;
+                        tip.uFlags = TTF_SUBCLASS;
+                        tip.lpszText = buf;
+                        tip.rect.left = rc.left;
+                        tip.rect.right = rc.right;
+                        tip.rect.top = rc.right;
+                        tip.rect.bottom = dy * select;
+                        tip.rect.top = dy * (select - 1);
+
+                        SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM) (LPTOOLINFO) &tip);
+                        ImmUnlockIMCC(lpIMC->hCandInfo);
+
+                        o_selpos = ii;
+
+                        ConvHanja(hIMC,offset,sel);
+                    }
                 }
+                ImmUnlockIMC(hIMC);
                 break;
             }
 
@@ -470,7 +554,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     LPCANDIDATELIST lpCandList;
     HBRUSH hbr;
     HDC hDC;
-    RECT rc,rc2;
+    RECT rc,rc2,rcn;
     LPMYSTR lpstr;
     int height;
     DWORD i;
@@ -485,14 +569,20 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     HFONT hNumFont;
 
     GetClientRect(hCandWnd,&rc);
-    rc2.left=rc.left+25; // left margin: 25
-    rc2.right=rc.right - 1;
+    rc2.left=rc.left; // left margin: 25
+    rc2.right=rc.right;
     rc2.top=rc.top+1;
     rc2.bottom=rc.bottom- 8 * GetSystemMetrics(SM_CYEDGE); // bottom space: 8
     hDC = BeginPaint(hCandWnd,&ps);
     hBrush=CreateSolidBrush(GetBkColor(hDC));
     FillRect(hDC,&rc,(HBRUSH) (COLOR_BTNFACE + 1));
     FillRect(hDC,&rc2,hBrush); // fill text area
+
+    rcn.left=rc.left; // left margin: 25
+    rcn.right=rc.left + 25;
+    rcn.top=rc.top;
+    rcn.bottom=rc.bottom- 8 * GetSystemMetrics(SM_CYEDGE); // bottom space: 8
+
     SetBkMode(hDC,TRANSPARENT);
 
     // set number font
@@ -523,28 +613,80 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         hOldFont = CheckNativeCharset(hDC);
         if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
         {
+            UINT start, end;
+            UINT left, width;
+            UINT sel_page;
+            UINT pos;
+
             height = GetSystemMetrics(SM_CYEDGE); 
             lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
-            for (i = lpCandList->dwPageStart; 
-                 i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
+            left = 0;
+
+            // calc selected page.
+            pos = ((LPMYCAND)lpCandInfo)->cl.dwSelection;
+            sel_page = (pos + 1) / lpCandList->dwPageSize +
+                (((pos + 1) % lpCandList->dwPageSize) ? 1:0);
+
+            if (lpCandList->dwStyle == IME_CAND_READ) {
+                start = lpCandList->dwPageStart;
+                end = lpCandList->dwPageStart + lpCandList->dwPageSize;
+                width = rc.right; // full width
+            } else {
+                start = 0;
+                end = lpCandList->dwCount;
+                width = 50;
+
+                rcn.left += (sel_page - 1) * width;
+                rcn.right += (sel_page - 1) * width;
+            }
+            // selection number area
+            FillRect(hDC,&rcn,(HBRUSH) (COLOR_BTNFACE + 1));
+
+            for (i = start; i < end; i++)
             {
                 TCHAR num[4];
                 INT wtype; // KSX 1002 set or not
                 INT highlighted;
+                TCHAR mybuf[128];
+                LPTSTR myTemp, lpmystr;
+                UINT pg;
+
+                pg = (i + 1) / lpCandList->dwPageSize +
+                    (((i + 1) % lpCandList->dwPageSize) ? 1:0);
+
+                if (i % lpCandList->dwPageSize == 0 && lpCandList->dwStyle == IME_CAND_CODE) {
+                    left = (i / lpCandList->dwPageSize) * 50;
+                    height = GetSystemMetrics(SM_CYEDGE); 
+                }
+
                 wtype=0;
                 highlighted=0;
                 wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
 
                 if (i >= lpCandList->dwCount) 
                     lpstr=(LPMYSTR)(LPSTR)" ";
-                else
+                else {
+                    LPMYSTR lpTemp, lpmystr;
+
                     lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[i]);
+
+                    lpmystr = (LPTSTR) mybuf;
+                    Mylstrcpy(lpmystr, lpstr);
+                    if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':')))) {
+                        if (lpCandList->dwStyle == IME_CAND_READ)
+                            *lpTemp = MYTEXT(' '); // with meaning
+                        else
+                            *lpTemp = MYTEXT('\0'); // show only candidate
+                    }
+
+                    lpstr = lpmystr;
+                }
 
                 MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz);
                 if (((LPMYCAND)lpCandInfo)->cl.dwSelection == (DWORD)i)
                 {
                     hbr = SelectObject(hDC,hbrHightLight);
-                    PatBlt(hDC,0,height,rc.right,sz.cy,PATCOPY);
+                    PatBlt(hDC,left,height,width,sz.cy,PATCOPY);
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,GetSysColor(COLOR_HIGHLIGHTTEXT));
                     highlighted=1;
@@ -556,8 +698,8 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     SelectObject(hDC,hbr);
                     SetTextColor(hDC,RGB(0,0,0));
                 }
-                if (i < lpCandList->dwCount) {
-                    MyTextOut(hDC,5 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
+                if (i < lpCandList->dwCount && sel_page == pg) {
+                    MyTextOut(hDC,5 + GetSystemMetrics(SM_CXEDGE) + left,height,num,Mylstrlen(num));
                     //MyTextOut(hDC,6 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                 }
                 // 한 글자이면서 KSX1002 지원이 아니면 charset 체크
@@ -578,7 +720,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                         SetTextColor(hDC,RGB(0,0,0)); // shadow
                     else
                         SetTextColor(hDC,RGB(220,220,220));
-                    MyTextOut(hDC,25 + 1 + GetSystemMetrics(SM_CXEDGE),
+                    MyTextOut(hDC,25 + 1 + GetSystemMetrics(SM_CXEDGE) + left,
                             height + 1,lpstr, Mylstrlen(lpstr));
                 }
                 // 완성형 4888자가 아닌 경우 색을 청색조로.
@@ -587,7 +729,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                 else if (wtype==1)
                     SetTextColor(hDC,RGB(16,83,239));
 
-                MyTextOut(hDC,25 + GetSystemMetrics(SM_CXEDGE),height,lpstr,
+                MyTextOut(hDC,25 + GetSystemMetrics(SM_CXEDGE) + left,height,lpstr,
                     Mylstrlen(lpstr));
                 // 25 is left margin of candwin
                 height += sz.cy + 4;
@@ -626,6 +768,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         MyTextOut(hDC,rc.left + 10 - Mylstrlen(num),rc.bottom - 15 ,num,Mylstrlen(num));
 
         //pos= GetScrollPos(hCandWnd,SB_VERT);
+        ShowScrollBar(hCandWnd,SB_VERT, (pages == 1 || lpCandList->dwStyle == IME_CAND_CODE) ? FALSE : TRUE);
         SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
     }
 
@@ -669,11 +812,27 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
             for (i = lpCandList->dwPageStart; 
                  i < (lpCandList->dwPageStart + lpCandList->dwPageSize); i++)
             {
+                LPTSTR lpTemp;
+                TCHAR buf[128];
+
                 lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[i]);
-                MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz);
+                Mylstrcpy(buf, lpstr);
+
+                if (lpCandList->dwStyle == IME_CAND_CODE && (NULL != (lpTemp = Mystrchr(buf, MYTEXT(':'))))) {
+                    *lpTemp = MYTEXT('\0');
+                    MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(buf),&sz); // show only candidates
+                } else {
+                    MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz); // with meanings
+                }
                 if (width < sz.cx)
                     width = sz.cx;
                 height += sz.cy + 4; // plus linespace 4
+            }
+            width += 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE);
+            if (lpCandList->dwStyle == IME_CAND_CODE) {
+                width *= (lpCandList->dwCount / lpCandList->dwPageSize) + (lpCandList->dwCount % lpCandList->dwPageSize ? 1 : 0);
+            } else {
+                width+= GetSystemMetrics(SM_CXVSCROLL);
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);
         }
@@ -686,8 +845,7 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
         MoveWindow(lpUIExtra->uiCand.hWnd,
                        rc.left,
                        rc.top,
-                       width+ 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE) +
-                       GetSystemMetrics(SM_CXVSCROLL),
+                       width,
                        /* 25 is a left margin */
                        height+ 8 * GetSystemMetrics(SM_CYEDGE),
                        // bottom margin is 8 * SM_CYEDGE

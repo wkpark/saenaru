@@ -64,6 +64,7 @@ BOOL GetAnsiPathName(LPCWSTR lpszUniPath,LPSTR lpszAnsiPath,UINT nMaxLen)
 
 }
 
+DWORD dwCandStyle = IME_CAND_READ;
 
 /**********************************************************************/
 /*                                                                    */
@@ -223,6 +224,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
     LPMYSTR lpmystr, lpTemp;
     MYCHAR myBuf[128];
     BOOL isasc=FALSE;
+    UINT cand_mode = dwCandStyle;
 
     lpmystr = (LPMYSTR)myBuf;
 
@@ -276,8 +278,10 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
         lpDic = (LPTSTR)&szDic;
         if (Mylstrlen(lpT2) > 1) { // word dic.
             LoadString( hInst, IDS_WORD_KEY, lpKey, 128);
+            cand_mode = IME_CAND_READ; // force CAND_READ
         } else if (isasc || (*lpT2 >= 0x3131 && 0x314e >= *lpT2) ) { // symbol
             LoadString( hInst, IDS_SYM_KEY, lpKey, 128);
+            cand_mode = IME_CAND_CODE; // force CAND_CODE
         } else {
             LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
         }
@@ -429,7 +433,7 @@ set_compstr:
                 //
 
                 Mylstrcpy(lpmystr,lpstr);
-                if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(' '))))
+                if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':'))))
                     *lpTemp = MYTEXT('\0');
 
                 Mylstrcpy(GETLPCOMPSTR(lpCompStr),lpmystr);
@@ -544,7 +548,7 @@ set_compstr:
 
         lpCandList->dwSize = sizeof(CANDIDATELIST) +
                           (MAXCANDSTRNUM * (sizeof(DWORD) + MAXCANDSTRSIZE));
-        lpCandList->dwStyle = IME_CAND_READ;
+        lpCandList->dwStyle = cand_mode;
         lpCandList->dwCount = i;
         if (i < MAXCANDPAGESIZE)
             lpCandList->dwPageSize  = i;
@@ -1244,7 +1248,7 @@ LPBYTE lpbKeyState;
 
     BOOL cf=FALSE;
     int next=0;
-    UINT select=0;
+    UINT select=0, changed=0;
     LRESULT candOk=FALSE;
 
     // Candidate문자 선택
@@ -1252,6 +1256,27 @@ LPBYTE lpbKeyState;
     {
         switch( wParam )
         {
+            case VK_TAB:
+                {
+                    // toggle cand style
+                    if (dwCandStyle == IME_CAND_READ)
+                        dwCandStyle = IME_CAND_CODE;
+                    else
+                        dwCandStyle = IME_CAND_READ;
+                    changed = 1;
+                }
+                break;
+            case VK_LEFT:
+                if (dwCandStyle == IME_CAND_CODE) {
+                    next=-2;
+                }
+                break;
+            case VK_RIGHT:
+                if (dwCandStyle == IME_CAND_CODE) {
+                    next=2;
+                }
+                break;
+            
             case VK_UP:
                 next=-1;
                 break;
@@ -1287,10 +1312,10 @@ LPBYTE lpbKeyState;
             default:
                 break;
         }
-        if (next || select)
+        if (next || select || changed)
         {
             ConvHanja(hIMC,next,select);
-            if (next) return TRUE;
+            if (next || changed) return TRUE;
             wParam=VK_RETURN;
         }
     }
@@ -2179,7 +2204,7 @@ int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lp
             }
             // 뜻이 있으면
             if ( Mylstrlen(lpTemp+1) > 1) {
-                *lpTemp = MYTEXT(' ');
+                *lpTemp = MYTEXT(':');
                 len = Mylstrlen(lpToken);
             }
             // XXX 뜻이 길어서 전체 크기가 커지면 입력기가 죽는다
