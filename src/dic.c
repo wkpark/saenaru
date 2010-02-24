@@ -205,7 +205,7 @@ void PASCAL RevertText(HIMC hIMC)
 /* VK_HANJA Key handling function                                     */
 /*                                                                    */
 /**********************************************************************/
-BOOL PASCAL ConvHanja(HIMC hIMC, int offset, UINT select)
+BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 {
     LPINPUTCONTEXT lpIMC;
     LPCOMPOSITIONSTRING lpCompStr;
@@ -561,7 +561,7 @@ set_compstr:
         {
             int sel = lpCandList->dwSelection / lpCandList->dwPageSize;
             sel *= lpCandList->dwPageSize;
-            if (select != -1) {
+            if (select != -999) {
                 sel +=select - 1;
                 if (sel >= i)
                     sel = i - 1;
@@ -624,7 +624,7 @@ set_compstr:
         // If the selected candidate string is changed, the composition string
         // should be updated.
         //
-        if (select != -1)
+        if (select != -999)
         lpstr = (LPMYSTR)((LPSTR)lpCandList +
                    lpCandList->dwOffset[lpCandList->dwSelection]);
         else
@@ -1307,7 +1307,7 @@ LPBYTE lpbKeyState;
                 select= wParam - VK_1 + 1;
                 break;
             case VK_ESCAPE:
-                select= -1; // XXX
+                select= -999; // XXX
                 break;
             default:
                 break;

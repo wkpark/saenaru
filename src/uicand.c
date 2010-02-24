@@ -161,7 +161,7 @@ LPARAM lParam;
                     break;
 
                 if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo)) {
-                    UINT start;
+                    int start;
                     UINT ii, jj;
 
                     lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
@@ -484,7 +484,7 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
 
         lpUIExtra->uiCand.hWnd = 
                 CreateWindowEx(WS_EX_WINDOWEDGE|
-#if 0
+#if 1
 #if (WINVER >= 0x0500)
                              WS_EX_COMPOSITED|
 #endif
@@ -828,10 +828,11 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                     width = sz.cx;
                 height += sz.cy + 4; // plus linespace 4
             }
-            width += 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE);
             if (lpCandList->dwStyle == IME_CAND_CODE) {
+                width = 50; // IME_CAND_CODE unit width.
                 width *= (lpCandList->dwCount / lpCandList->dwPageSize) + (lpCandList->dwCount % lpCandList->dwPageSize ? 1 : 0);
             } else {
+                width += 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE);
                 width+= GetSystemMetrics(SM_CXVSCROLL);
             }
             ImmUnlockIMCC(lpIMC->hCandInfo);

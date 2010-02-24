@@ -507,7 +507,7 @@ void PASCAL  hangul_ic_init(HangulIC*);
 
 int hangul_del_prev(LPWSTR);
 
-BOOL PASCAL ConvHanja(HIMC, int, UINT);
+BOOL PASCAL ConvHanja(HIMC, int, int);
 BOOL WINAPI MakeResultString(HIMC,BOOL);
 BOOL PASCAL MakeGuideLine(HIMC, DWORD);
 BOOL PASCAL GenerateMessage(HIMC,LPINPUTCONTEXT,LPTRANSMSGLIST,LPTRANSMSG);
