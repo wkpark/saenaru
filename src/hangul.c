@@ -2428,7 +2428,8 @@ LPARAM lParam;
 LPBYTE lpbKeyState;
 {
     WORD code = (WORD) HIWORD(wParam);
-    WORD scan = (WORD) HIWORD(wParam);
+    WORD scan = (WORD) LOWORD(wParam);
+    WORD ocode;
 
     LPMYSTR lpchText;
     LPMYSTR lpstr, lpread;
@@ -2453,6 +2454,7 @@ LPBYTE lpbKeyState;
     // Get ConvMode from IMC.
     fdwConversion = lpIMC->fdwConversion;
 
+    ocode = code;
     if (fdwConversion & IME_CMODE_NATIVE && capital) {
 	WORD ch = code;
 	if (ch >= 'a' && ch <= 'z')
@@ -2614,7 +2616,7 @@ LPBYTE lpbKeyState;
 
             MyDebugPrint((TEXT("automata result : %d, %s\r\n"), ncs, lcs));
 
-            ic.lastvkey = (UINT)VkKeyScan(code);
+            ic.lastvkey = (UINT)VkKeyScan(ocode);
             MyDebugPrint((TEXT(" * last vkey: 0x%x\r\n"), ic.lastvkey));
             MyDebugPrint((TEXT(" * last scancode: 0x%x\r\n"), lParam >> 16));
 
