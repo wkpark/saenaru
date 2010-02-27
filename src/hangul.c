@@ -2428,7 +2428,7 @@ LPARAM lParam;
 LPBYTE lpbKeyState;
 {
     WORD code = (WORD) HIWORD(wParam);
-    WORD scan = (WORD) LOWORD(wParam);
+    WORD scan = (WORD) HIWORD(lParam);
     WORD ocode;
 
     LPMYSTR lpchText;
@@ -2449,6 +2449,8 @@ LPBYTE lpbKeyState;
     register BOOL fModeInit = FALSE;
     BOOL capital = lpbKeyState[VK_CAPITAL];
     lcs[0] = 0;
+
+    MyDebugPrint((TEXT("scan= 0x%x, code= 0x%x\r\n"), scan, code));
 
     lpIMC = ImmLockIMC(hIMC);
     // Get ConvMode from IMC.
@@ -3267,7 +3269,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			// 따라서, ㅏ,ㄹ 를 차례로 입력하면 "라"가 된다.
 			// 여기서 backspace를 누르면 "ㅏ"가 지워지게 된다.
 			// FIXME "ㅏ"가 지워지는 것이 옳은가? "ㄹ"이 지워지는 게 맞나?
-		    if (!hangul_jamo_to_syllable(ic->cho,ic->jung,0)) {
+		    if (!hangul_jamo_to_syllable(jamo,ic->jung,0)) {
 			if (dwOptionFlag & HANGUL_JAMOS) {
 			    ic->syllable = FALSE;
 			} else {
