@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/data.c,v 1.4 2004/11/29 17:06:14 wkpark Exp $
+ * $Saenaru: saenaru/src/data.c,v 1.5 2006/10/08 09:16:02 wkpark Exp $
  */
 
 #include "windows.h"
@@ -72,6 +72,7 @@ DWORD dwDebugFlag = 0L;
 DWORD dwLayoutFlag = 0L;
 DWORD dwComposeFlag = 0L;
 DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
+DWORD dwHanjaMode = 0L;
 
 BOOL gfSaenaruSecure = FALSE;
 

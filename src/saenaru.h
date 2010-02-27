@@ -181,10 +181,12 @@ typedef TCHAR             MYCHAR;
 #define FIGWL_COMPSTARTNUM (FIGWL_COMPSTARTSTR+sizeof(LONG))
 #define FIGWL_STATUSBMP    (FIGWL_COMPSTARTNUM+sizeof(LONG))
 #define FIGWL_CLOSEBMP     (FIGWL_STATUSBMP+sizeof(LONG_PTR))
-#define FIGWL_PUSHSTATUS   (FIGWL_CLOSEBMP+sizeof(LONG_PTR))
+#define FIGWL_HANJA_MODEBMP  (FIGWL_CLOSEBMP+sizeof(LONG_PTR))
+#define FIGWL_HANJA_CHECKBMP (FIGWL_HANJA_MODEBMP+sizeof(LONG_PTR))
+#define FIGWL_PUSHSTATUS     (FIGWL_HANJA_CHECKBMP+sizeof(LONG_PTR))
 #define FIGWL_CHILDWND     (FIGWL_PUSHSTATUS+sizeof(LONG))
 
-#define FIGWL_PREVCURSOR   (FIGWL_COMPSTARTNUM+sizeof(LONG))
+//#define FIGWL_PREVCURSOR   (FIGWL_COMPSTARTNUM+sizeof(LONG))
 
 
 #define UIEXTRASIZE        (FIGWL_CHILDWND+sizeof(LONG_PTR))
@@ -386,6 +388,7 @@ extern DWORD dwDebugFlag;
 extern DWORD dwLayoutFlag;
 extern DWORD dwComposeFlag;
 extern DWORD dwOptionFlag;
+extern DWORD dwHanjaMode;
 
 extern DWORD dwImeFlag;
 

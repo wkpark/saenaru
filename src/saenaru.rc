@@ -55,6 +55,8 @@ CLOSEBMP                BITMAP  DISCARDABLE     "..\\resource\\close.bmp"
 CHECKBMP                BITMAP  DISCARDABLE     "..\\resource\\check.bmp"
 UNCHECKBMP              BITMAP  DISCARDABLE     "..\\resource\\uncheck.bmp"
 FACEBMP                 BITMAP  DISCARDABLE     "..\\resource\\face.bmp"
+HANJA_MODE_BMP          BITMAP  DISCARDABLE     "..\\resource\\hjmode.bmp"
+HANJA_CHECK_BMP         BITMAP  DISCARDABLE     "..\\resource\\hjcheck.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////

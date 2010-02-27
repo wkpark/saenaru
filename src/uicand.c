@@ -53,6 +53,7 @@ WPARAM wParam;
 LPARAM lParam;
 {
     HWND hUIWnd;
+    HBITMAP hbmpHanja, hbmpCheck;
 #if 1
     HWND hSvrWnd;
     HIMC hIMC;
@@ -74,6 +75,66 @@ LPARAM lParam;
             PaintCandWindow(hWnd);
             break;
         case WM_CREATE:
+
+            hbmpHanja = LoadImage(hInst,TEXT("HANJA_MODE_BMP"), IMAGE_BITMAP,
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+
+            hbmpCheck = LoadImage(hInst,TEXT("HANJA_CHECK_BMP"), IMAGE_BITMAP,
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+
+            if (hbmpHanja) {
+                HDC hdc = CreateCompatibleDC(NULL);
+                COLORREF cTransColor;
+                DWORD dwColor= GetSysColor(COLOR_MENU);
+                cTransColor= RGB(0,255,0);
+                if (hdc) {
+                    UINT iColor;
+                    HBITMAP hbmPrev = SelectObject(hdc, hbmpHanja);
+                    RGBQUAD rgbColors[256];
+                    UINT cColors = GetDIBColorTable(hdc, 0, 256, rgbColors);
+                    for (iColor = 0; iColor < cColors; iColor++) {
+                        if (rgbColors[iColor].rgbRed == 0 &&
+                            rgbColors[iColor].rgbGreen == 255 &&
+                            rgbColors[iColor].rgbBlue == 0) {
+                            rgbColors[iColor].rgbRed=GetRValue(dwColor);
+                            rgbColors[iColor].rgbGreen=GetGValue(dwColor);
+                            rgbColors[iColor].rgbBlue=GetBValue(dwColor);
+                            break;
+                        }
+                    }
+                    SetDIBColorTable(hdc, 0, cColors, rgbColors);
+                    SelectObject(hdc, hbmPrev);
+                    DeleteDC(hdc);
+                }
+                SetWindowLongPtr(hWnd,FIGWL_HANJA_MODEBMP,(LONG_PTR)hbmpHanja);
+            }
+            if (hbmpCheck) {
+                HDC hdc = CreateCompatibleDC(NULL);
+                COLORREF cTransColor;
+                DWORD dwColor= GetSysColor(COLOR_BTNFACE + 1);
+                cTransColor= RGB(0,255,0);
+                if (hdc) {
+                    UINT iColor;
+                    HBITMAP hbmPrev = SelectObject(hdc, hbmpCheck);
+                    RGBQUAD rgbColors[256];
+                    UINT cColors = GetDIBColorTable(hdc, 0, 256, rgbColors);
+                    for (iColor = 0; iColor < cColors; iColor++) {
+                        if (rgbColors[iColor].rgbRed == 0 &&
+                            rgbColors[iColor].rgbGreen == 255 &&
+                            rgbColors[iColor].rgbBlue == 0) {
+                            rgbColors[iColor].rgbRed=GetRValue(dwColor);
+                            rgbColors[iColor].rgbGreen=GetGValue(dwColor);
+                            rgbColors[iColor].rgbBlue=GetBValue(dwColor);
+                            break;
+                        }
+                    }
+                    SetDIBColorTable(hdc, 0, cColors, rgbColors);
+                    SelectObject(hdc, hbmPrev);
+                    DeleteDC(hdc);
+                }
+                SetWindowLongPtr(hWnd,FIGWL_HANJA_CHECKBMP,(LONG_PTR)hbmpCheck);
+            }
+
             g_hwndTip = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
                               0,
                               //WS_POPUP | TTS_NOFADE,
@@ -105,6 +166,11 @@ LPARAM lParam;
             break;
         case WM_DESTROY:
             MyDebugPrint((TEXT(" * WM_DESTORY Cand\r\n")));
+            hbmpHanja = (HBITMAP)GetWindowLongPtr(hWnd,FIGWL_HANJA_MODEBMP);
+            hbmpCheck = (HBITMAP)GetWindowLongPtr(hWnd,FIGWL_HANJA_CHECKBMP);
+            DeleteObject(hbmpHanja);
+            DeleteObject(hbmpCheck);
+
             DestroyWindow(g_hwndTip);
             break;
 #if 0
@@ -121,7 +187,7 @@ LPARAM lParam;
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
 
-            DragUI(hWnd,message,wParam,lParam);
+            //DragUI(hWnd,message,wParam,lParam);
 
             if (dy == 0)
             {
@@ -149,6 +215,29 @@ LPARAM lParam;
 
                 if (!PtInRect(&rc,pt)) {
                     // not in the candlist wind
+                    break;
+                }
+
+                rc.bottom -= 15;
+                if (!PtInRect(&rc,pt)) {
+                    // on hanja-mode
+                    //
+                    if (HIWORD(lParam) == WM_LBUTTONDOWN) {
+                        if (pt.x < 80) {
+                            if (dwHanjaMode == 1)
+                                dwHanjaMode = 0;
+                            else
+                                dwHanjaMode = 1;
+                        } else if (pt.x < 144) {
+                            if (dwHanjaMode == 2)
+                                dwHanjaMode = 0;
+                            else
+                                dwHanjaMode = 2;
+                        }
+                        MyDebugPrint((TEXT(" * hanja_mode=%d\r\n"), dwHanjaMode));
+                        PaintCandWindow(hWnd);
+                        InvalidateRect(hWnd,NULL,FALSE);
+                    }
                     break;
                 }
 
@@ -260,6 +349,7 @@ LPARAM lParam;
             break;
 
         case WM_LBUTTONDBLCLK:
+
             hSvrWnd = (HWND)GetWindowLongPtr(hWnd,FIGWL_SVRWND);
             if (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC) )
                 MakeResultString(hIMC,TRUE);
@@ -573,7 +663,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     HBRUSH hbr;
     HDC hDC;
     // double buffering
-    HDC hMemDC;
+    HDC hMemDC, hTempDC, hTempDC2;
     HBITMAP hOldBit, hBit;
     RECT rc,rc2,rcn;
     LPMYSTR lpstr;
@@ -585,6 +675,8 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     HBRUSH hbrLGR = (HBRUSH)(COLOR_BTNFACE + 1);
     HFONT hOldFont = NULL;
     HBRUSH hBrush;
+
+    HBITMAP hbmpHanja, hbmpCheck, hbmpOld = NULL;
 
     LOGFONT lfFont;
     HFONT hNumFont;
@@ -599,6 +691,8 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     hBit = CreateCompatibleBitmap(hDC, rc.right, rc.bottom);
     // save
     hMemDC = CreateCompatibleDC(hDC);
+    hTempDC = CreateCompatibleDC(hDC);
+    hTempDC2 = CreateCompatibleDC(hDC);
     // save OldBit
     hOldBit = (HBITMAP) SelectObject(hMemDC, hBit);
 
@@ -839,6 +933,24 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
     }
 
+    if (lpCandList->dwStyle == IME_CAND_READ) {
+        // hanjamod icon text
+        hbmpHanja = (HBITMAP)GetWindowLongPtr(hCandWnd,FIGWL_HANJA_MODEBMP);
+        hbmpOld = SelectObject(hTempDC,hbmpHanja);
+
+        BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 114, rc.bottom - 1, hTempDC, 0, 0, SRCCOPY);
+
+        if (dwHanjaMode) {
+            hbmpCheck = (HBITMAP)GetWindowLongPtr(hCandWnd,FIGWL_HANJA_CHECKBMP);
+            SelectObject(hTempDC2,hbmpCheck);
+            if (dwHanjaMode == 1)
+                BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 8, rc.bottom - 1, hTempDC2, 0, 0, SRCCOPY);
+            else
+                BitBlt(hMemDC, rc.left + 88, rc.bottom - 15, rc.left + 88 + 8, rc.bottom - 1, hTempDC2, 0, 0, SRCCOPY);
+        }
+    }
+
+
     BitBlt(hDC, 0, 0, rc.right, rc.bottom, hMemDC, 0, 0, SRCCOPY);
     SelectObject(hMemDC, hOldBit);
 
@@ -852,6 +964,10 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
 
     DeleteObject(hBit);
     DeleteDC(hMemDC);
+    if (hbmpOld)
+        SelectObject(hTempDC,hbmpOld);
+    DeleteDC(hTempDC);
+    DeleteDC(hTempDC2);
 }
 
 /**********************************************************************/
@@ -906,6 +1022,8 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 width = 50; // IME_CAND_CODE unit width.
                 width *= (lpCandList->dwCount / lpCandList->dwPageSize) + (lpCandList->dwCount % lpCandList->dwPageSize ? 1 : 0);
             } else {
+                if (width < 144) // Hanja mode bitmap width
+                    width = 144;
                 width += 25 + 4 + 4 * GetSystemMetrics(SM_CXEDGE);
                 width+= GetSystemMetrics(SM_CXVSCROLL);
             }

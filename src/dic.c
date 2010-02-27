@@ -225,6 +225,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     MYCHAR myBuf[128];
     BOOL isasc=FALSE;
     UINT cand_mode = dwCandStyle;
+    UINT word_mode = 0;
 
     lpmystr = (LPMYSTR)myBuf;
 
@@ -284,6 +285,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
             cand_mode = IME_CAND_CODE; // force CAND_CODE
         } else {
             LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
+            word_mode = 1;
         }
 
         lpDic += GetSaenaruDirectory(lpDic,256);
@@ -446,7 +448,8 @@ set_compstr:
                 // Set the length and cursor position to the structure.
                 //
                 lpCompStr->dwCompStrLen = Mylstrlen(lpmystr);
-                lpCompStr->dwCursorPos = 0;
+                //lpCompStr->dwCursorPos = 0; // XXX
+                lpCompStr->dwCursorPos = Mylstrlen(lpmystr);
                 // Because SAENARU does not support clause, DeltaStart is 0 anytime.
                 lpCompStr->dwDeltaStart = 0;
 
@@ -1870,6 +1873,8 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
     LPCOMPOSITIONSTRING lpCompStr;
     LPCANDIDATEINFO lpCandInfo;
     LPINPUTCONTEXT lpIMC;
+    MYCHAR retbuf[128];
+    retbuf[0]=MYTEXT('\0');
 
     if (!IsCompStr(hIMC))
         return FALSE;
@@ -1881,12 +1886,49 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
     if (IsCandidate(lpIMC))
     {
         lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+
+        // check HanjaMode 
+        if (dwHanjaMode) {
+            LPCANDIDATELIST lpCandList;
+            MYCHAR buf[128];
+            MYCHAR buf2[128];
+            LPMYSTR lpstr;
+
+            lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+
+            if (lpCandList->dwSelection != 0) {
+                lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
+                Mylstrcpy(buf, lpstr); // hangul word
+
+                Mylstrcpy(buf2, GETLPCOMPSTR(lpCompStr)); // hanja
+
+                if (dwHanjaMode == 1) {
+                    wsprintf(retbuf, TEXT("%s(%s)"), buf, buf2); // hangul(hanja)
+                } else {
+                    wsprintf(retbuf, TEXT("%s(%s)"), buf2, buf); // hanja(hangul)
+                }
+                MyDebugPrint(( TEXT("%s\n"), retbuf));
+            }
+        }
+
         ClearCandidate(lpCandInfo);
         ImmUnlockIMCC(lpIMC->hCandInfo);
         GnMsg.message = WM_IME_NOTIFY;
         GnMsg.wParam = IMN_CLOSECANDIDATE;
         GnMsg.lParam = 1L;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+    }
+
+    if (retbuf[0] != MYTEXT('\0')) {
+        // has hanja(hangul) or hangul(hanja) data ?
+        Mylstrcpy(GETLPCOMPSTR(lpCompStr), retbuf);
+        Mylstrcpy(GETLPCOMPREADSTR(lpCompStr), retbuf);
+
+        lpCompStr->dwCompStrLen = Mylstrlen(retbuf);
+        lpCompStr->dwCompReadStrLen = lpCompStr->dwCompStrLen;
+    } else {
+        lpCompStr->dwCompStrLen = Mylstrlen(GETLPCOMPSTR(lpCompStr));
+        lpCompStr->dwCompReadStrLen = lpCompStr->dwCompStrLen;
     }
 
     Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
