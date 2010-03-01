@@ -1391,7 +1391,205 @@ LPBYTE lpbKeyState;
                 return TRUE;
             } else if (IsCompStr(hIMC))
             {
+                if (IsSHFTPushed(lpbKeyState)) {
+                    hangul_ic_init(&ic);
+                    DeleteChar(hIMC,wParam);
+
+                    return TRUE;
+                }
                 DeleteChar(hIMC,wParam);
+                return TRUE;
+            } else if (IsSHFTPushed(lpbKeyState)) {
+                int ns=0;
+                DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_DOCUMENTFEED, 0);
+
+                MyDebugPrint((TEXT(">>>>>>>IMR_DOCUMENTFEED result %d\r\n"),dwSize));
+
+                if (!(lpIMC = ImmLockIMC(hIMC)))
+                     return FALSE;
+
+                if (dwSize) {
+                    LPRECONVERTSTRING lpRS;
+
+                    lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
+                    lpRS->dwSize = dwSize;
+
+                    if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_DOCUMENTFEED, (LPARAM)lpRS)) {
+                        BOOL convOk= FALSE;
+                        TRANSMSG GnMsg;
+
+#ifdef DEBUG
+                        TCHAR szDev[80];
+#endif
+                        //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                        // *(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
+                        //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                        LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+
+                        MyDebugPrint((TEXT(">>>>>>>IMR_DOCUMENTFEED str %s\r\n"),lpDump));
+#ifdef DEBUG
+                        OutputDebugString(TEXT("IMR_DOCUMENTFEED\r\n"));
+                        wsprintf(szDev, TEXT("dwSize       %d\r\n"), lpRS->dwSize);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwVersion    %d\r\n"), lpRS->dwVersion);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwStrLen     %d\r\n"), lpRS->dwStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwStrOffset  %d\r\n"), lpRS->dwStrOffset);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwCompStrLen %d\r\n"), lpRS->dwCompStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwCompStrOffset %d\r\n"), lpRS->dwCompStrOffset);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwTargetStrLen %d\r\n"), lpRS->dwTargetStrLen);
+                        OutputDebugString(szDev);
+                        wsprintf(szDev, TEXT("dwTargetStrOffset %d\r\n"), lpRS->dwTargetStrOffset);
+                        OutputDebugString(szDev);
+#endif
+
+                        *(lpDump) = MYTEXT('\0');
+                        if (lpRS->dwCompStrOffset > 1) {
+                            lpDump--;
+                            MyDebugPrint((TEXT(">>>>>> %s\r\n"), lpDump));
+                            lpRS->dwCompStrLen = 1;
+                            lpRS->dwTargetStrLen = 1;
+                            lpRS->dwCompStrOffset -= sizeof(MYCHAR);
+
+                            {
+                                LPCOMPOSITIONSTRING	lpCompStr;
+
+                                if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
+                                {
+                                    DWORD dwSize = sizeof(MYCOMPSTR);
+                                    lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
+                                    lpCompStr =
+                                        (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+                                    lpCompStr->dwSize = dwSize;
+                                } else
+                                    lpCompStr =
+                                        (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
+                                {
+                                    LPMYSTR lpstr,lpread;
+
+                                    if (lpCompStr != NULL) {
+                                        // XXX
+                                        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+
+#if 1
+                                        // 워드패드와 M$ Explorer는 반드시 WM_IME_STARTCOMPOSITION으로 시작해야 한다.
+                                        // 2006/10/09
+                                        GnMsg.message = WM_IME_STARTCOMPOSITION;
+                                        GnMsg.wParam = 0;
+                                        GnMsg.lParam = 0;
+                                        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+#endif
+
+                                        lpstr = GETLPCOMPSTR(lpCompStr);
+                                        lpread = GETLPCOMPREADSTR(lpCompStr);
+                                        Mylstrcpy(lpread,lpDump);
+                                        Mylstrcpy(lpstr,lpDump);
+
+                                        // delta start
+                                        lpCompStr->dwDeltaStart =
+                                            (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                                        // cursor pos
+                                        //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
+                                        //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
+                                        //lpCompStr->dwCursorPos = Mylstrlen(lpstr)-1; // Err
+                                        lpCompStr->dwCursorPos = Mylstrlen(lpstr);
+
+                                        //MakeAttrClause(lpCompStr);
+                                        lmemset((LPBYTE)GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
+                                                Mylstrlen(lpstr));
+                                        lmemset((LPBYTE)GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
+                                                Mylstrlen(lpread));
+
+                                        // make length
+                                        lpCompStr->dwCompStrLen = Mylstrlen(lpstr);
+                                        lpCompStr->dwCompReadStrLen = Mylstrlen(lpread);
+                                        lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
+                                        lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
+
+                                        //
+                                        // make clause info
+                                        //
+                                        SetClause(GETLPCOMPCLAUSE(lpCompStr),Mylstrlen(lpstr));
+                                        SetClause(GETLPCOMPREADCLAUSE(lpCompStr),Mylstrlen(lpread));
+                                        lpCompStr->dwCompClauseLen = 8;
+                                        lpCompStr->dwCompReadClauseLen = 8;
+                                        //
+
+#if 1
+                                        Mylstrcpy(GETLPRESULTSTR(lpCompStr),GETLPCOMPSTR(lpCompStr));
+                                        Mylstrcpy(GETLPRESULTREADSTR(lpCompStr),GETLPCOMPREADSTR(lpCompStr));
+
+                                        lpCompStr->dwResultStrLen = lpCompStr->dwCompStrLen;
+                                        lpCompStr->dwResultReadStrLen = lpCompStr->dwCompReadStrLen;
+                                        //
+                                        // make clause info
+                                        //
+                                        SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
+                                        SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
+                                        lpCompStr->dwResultClauseLen = 8;
+#endif
+                                        //
+                                        //
+                                        //if (lpCompStr->dwCompReadStrLen > 0)
+                                        //    lpCompStr->dwCompReadStrLen--;
+
+#if 0
+                                        GnMsg.message = WM_IME_COMPOSITION;
+                                        GnMsg.wParam = 0;
+                                        //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                                        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+                                        //if (dwImeFlag & SAENARU_ONTHESPOT)
+                                        //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+                                        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+#endif
+                                    } else {
+                                        OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
+                                    }
+
+                                    convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
+                                    if (!convOk) {
+                                        // MS IE와 모질라는 이 부분이 뒤에 와야 한다. 즉, CompStr으 세팅한 후에
+                                        // 시작해야 한다 ?
+                                        OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
+                                    } else {
+                                        OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
+#ifdef DEBUG
+                                        wsprintf(szDev, TEXT(" *** result: dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                                        OutputDebugString(szDev);
+#endif
+
+                                        if (hangul_is_syllable(*lpDump)) {
+                                            WCHAR l, v, t;
+                                            hangul_syllable_to_jamo(*lpDump, &l, &v, &t);
+                                            if (l && v) {
+                                                hangul_ic_init(&ic);
+                                                ic.cho = l;
+                                                ic.jung = v;
+                                                ic.laststate = 2;
+                                                hangul_ic_push(&ic, l);
+                                                hangul_ic_push(&ic, v);
+                                                if (t) {
+                                                    hangul_ic_push(&ic, t);
+                                                    ic.laststate = 3;
+                                                }
+                                            }
+                                        }
+                                        // 
+                                        DeleteChar(hIMC,wParam);
+                                    }
+                                }
+                                ImmUnlockIMCC (lpIMC->hCompStr);
+                            }
+                        }
+                        GlobalFree((HANDLE)lpRS);
+
+                    }
+                }
+                ImmUnlockIMC(hIMC);
                 return TRUE;
             }
             break;

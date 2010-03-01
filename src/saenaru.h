@@ -339,6 +339,7 @@ typedef struct _tagHangulIC {
     WCHAR jung;
     WCHAR jong;
     WCHAR last;
+    WCHAR last0;
     UINT  len;
     UINT  lastvkey;
     int   laststate;
@@ -507,6 +508,7 @@ UINT PASCAL hangul_ic_get(HangulIC*, UINT, LPMYSTR);
 WCHAR PASCAL hangul_ic_pop(HangulIC*);
 WCHAR PASCAL hangul_ic_peek(HangulIC*);
 void PASCAL  hangul_ic_init(HangulIC*);
+void hangul_ic_push(HangulIC *, WCHAR);
 
 int hangul_del_prev(LPWSTR);
 
@@ -525,6 +527,9 @@ WORD PASCAL checkDvorak(WORD);
 int PASCAL set_keyboard(UINT);
 int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);
+
+BOOL hangul_is_syllable(WCHAR);
+void PASCAL hangul_syllable_to_jamo(WCHAR, WCHAR*, WCHAR*, WCHAR*);
 
 /* hanjaidx.c       */
 int GetHangulFromHanjaIndex(LPMYSTR, LPMYSTR, DWORD, LPTSTR);

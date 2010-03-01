@@ -327,6 +327,12 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
 
+
+    //if (IsSHFTPushed(lpbKeyState) && vkey == VK_BACK && !IsCompStr(hIMC)) {
+    //    return TRUE;
+    //    // Make it option or default ? FIXME see also process.c
+    //}
+
     if ( !(lKeyData & 0x80000000) && 
             (LOWORD(vKey) & 0x00FF) == VK_HANGUL) {
         OSVERSIONINFO os;

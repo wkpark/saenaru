@@ -3004,6 +3004,7 @@ void PASCAL hangul_ic_init( HangulIC *ic )
     ic->jung=0;
     ic->jong=0;
     ic->last=0;
+    ic->last0=0;
     ic->len=0;
     ic->laststate=0;
     ic->lastvkey=0;
@@ -3124,6 +3125,8 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 void hangul_ic_push( HangulIC *ic, WCHAR ch )
 {
     ic->read[ic->len++] = ch;
+    if (ic->last)
+	ic->last0 = ic->last;
     ic->last = ch;
 }
 
@@ -3693,13 +3696,24 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     if (ic->jung != ic->last) {
                         WCHAR j1,j2;
                         comb = ic->jung;
-                        hangul_jungseong_dicompose(comb, &j1, &j2);
-                        if (j1 && j2) {
-                            hangul_ic_pop(ic);
-                            hangul_ic_push(ic,j1);
-                            ic->jung = j1;
-                            jung = j2;
-                        }
+			hangul_jungseong_dicompose(comb, &j1, &j2);
+
+			if (j1 && j2 && ic->last0 == j1 && ic->last == j2) {
+			    // 중성이 분해되고 last0 == j1, last == j2가 맞는 경우.
+			    hangul_ic_pop(ic);
+			    hangul_ic_push(ic,j1);
+			    ic->jung = j1;
+			    jung = j2;
+			} else if (hangul_is_jungseong(ic->last0)) {
+			    // 중성을 분해할 수 없는 경우: ㅜ+ㅜ=ㅠ
+			    // last0, last 버퍼를 근거로 되돌림.
+			    j1 = ic->last0;
+			    j2 = ic->last;
+			    hangul_ic_pop(ic);
+			    hangul_ic_push(ic,j1);
+			    ic->jung = j1;
+			    jung = j2;
+			}
                     } else
                         jung = 0;
                     *ncs = hangul_ic_commit(ic, lcs);
