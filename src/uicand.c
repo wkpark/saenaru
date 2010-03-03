@@ -187,7 +187,7 @@ LPARAM lParam;
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
 
-            //DragUI(hWnd,message,wParam,lParam);
+            DragUI(hWnd,message,wParam,lParam);
 
             if (dy == 0)
             {
