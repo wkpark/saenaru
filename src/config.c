@@ -566,6 +566,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
             if (hCur == LongToHandle(0xE0130412)) {
                 hwndRadio = GetDlgItem (hDlg, IDC_DVORAK_SUPPORT);
                 EnableWindow (hwndRadio, FALSE);
+                hwndRadio = GetDlgItem (hDlg, IDC_QWERTY_HOTKEY_SUPPORT);
+                EnableWindow (hwndRadio, FALSE);
             } else if (!(dwOptionFlag & DVORAK_SUPPORT)) {
                 hwndRadio = GetDlgItem (hDlg, IDC_QWERTY_HOTKEY_SUPPORT);
                 EnableWindow (hwndRadio, FALSE);
