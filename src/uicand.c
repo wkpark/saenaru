@@ -775,6 +775,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                 INT wtype; // KSX 1002 set or not
                 INT highlighted;
                 TCHAR mybuf[128];
+                TCHAR mycode[10];
                 LPMYSTR lpTemp, lpmystr;
                 UINT pg;
                 BOOL mean = FALSE;
@@ -806,8 +807,19 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                         } else {
                             *lpTemp = MYTEXT('\0'); // show only candidate
                         }
+                        lpTemp ++;
                     } else {
-                        mean = FALSE;
+                        DWORD code = (DWORD) *(lpstr);
+                        if (i != 0 && lpCandList->dwStyle == IME_CAND_CODE && code >= 0x3400) {
+                            if (code < 0xffff)
+                                wsprintf(mycode, TEXT("U+%04X"), code);
+                            else
+                                wsprintf(mycode, TEXT("U+%05X"), code);
+                            lpTemp = mycode;
+                            mean = TRUE;
+                        } else {
+                            mean = FALSE;
+                        }
                     }
 
                     lpstr = lpmystr;
@@ -829,7 +841,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                         tip.hwnd = hCandWnd;
                         //tip.uFlags = TTF_SUBCLASS;
                         tip.uFlags = TTF_TRACK;
-                        tip.lpszText = lpTemp + 1;
+                        tip.lpszText = lpTemp;
                         tip.rect.left = 5 + left;
                         tip.rect.right = tip.rect.left + width;
                         tip.rect.top = height;
@@ -866,17 +878,22 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     //MyTextOut(hDC,6 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                 }
                 // 한 글자이면서 KSX1002 지원이 아니면 charset 체크
-                if (wtype != -1 && dwOptionFlag & KSX1002_SUPPORT)
+                if (i < lpCandList->dwCount && wtype != -1 && dwOptionFlag & KSX1002_SUPPORT)
                 {
                     WORD mb;
-                    WideCharToMultiByte(949, WC_COMPOSITECHECK,
+                    int ret;
+
+                    ret = WideCharToMultiByte(949, WC_COMPOSITECHECK,
                         lpstr, 1, (char *)&mb, 2, NULL, NULL);
 
-                    if(LOBYTE(mb) < 0xa1 || LOBYTE(mb) > 0xfe 
-                        || HIBYTE(mb) < 0xa1 || HIBYTE(mb) > 0xfe)
-                        wtype=1;
-                    // XXX 한중일 통합을 동시에 지원할 경우
-                    // KS X 1002를 처리하기 위한 특별 루틴 필요?
+                    if (ret == 1) {
+                        DWORD code = (DWORD) *(lpstr);
+                        wtype = 1;
+
+                        // KS X 1002에 포함 안되는 확장 한자의 경우
+                        if (!is_ksx1002(code))
+                            wtype = 2;
+                    }
                 }
                 if (wtype) {
                     if (highlighted)
@@ -887,10 +904,15 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                             height + 1,lpstr, Mylstrlen(lpstr));
                 }
                 // 완성형 4888자가 아닌 경우 색을 청색조로.
-                if (highlighted)
+                if (highlighted) {
                     SetTextColor(hMemDC,GetSysColor(COLOR_HIGHLIGHTTEXT));
-                else if (wtype==1)
-                    SetTextColor(hMemDC,RGB(16,83,239));
+                } else if (wtype) {
+                    if (wtype == 1)
+                        SetTextColor(hMemDC,RGB(16,83,239));
+                    else
+                        // KS X 1002에도 포함 안되는 경우는 녹색.
+                        SetTextColor(hMemDC,RGB(30,150,30));
+                }
 
                 MyTextOut(hMemDC,25 + GetSystemMetrics(SM_CXEDGE) + left,height,lpstr,
                     Mylstrlen(lpstr));

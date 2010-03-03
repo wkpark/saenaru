@@ -532,6 +532,7 @@ BOOL hangul_is_syllable(WCHAR);
 void PASCAL hangul_syllable_to_jamo(WCHAR, WCHAR*, WCHAR*, WCHAR*);
 
 /* hanjaidx.c       */
+UINT PASCAL is_ksx1002(UINT);
 int GetHangulFromHanjaIndex(LPMYSTR, LPMYSTR, DWORD, LPTSTR);
 
 /* DIC2.C        */
