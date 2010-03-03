@@ -2111,9 +2111,11 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
 
             lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
 
-            if (lpCandList->dwSelection != 0) {
+            while (lpCandList->dwSelection != 0) {
                 lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
                 Mylstrcpy(buf, lpstr); // hangul word
+                if (*lpstr >= 0x3131 && *lpstr <=0x314e)
+                    break;
 
                 Mylstrcpy(buf2, GETLPCOMPSTR(lpCompStr)); // hanja
 
@@ -2123,6 +2125,7 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
                     wsprintf(retbuf, TEXT("%s(%s)"), buf2, buf); // hanja(hangul)
                 }
                 MyDebugPrint(( TEXT("%s\n"), retbuf));
+                break;
             }
         }
 
