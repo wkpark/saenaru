@@ -1563,11 +1563,11 @@ typedef struct _HangulCompose	HangulCompose;
 
 static const HangulCompose compose_table_default[] = {
   { 0x11001100, 0x1101 }, /* choseong  kiyeok + kiyeok	= ssangkiyeok	*/
-  { 0x11001109, 0x11aa }, /* choseong  kiyeok + sios	= kiyeok-sios	*/
   { 0x11031103, 0x1104 }, /* choseong  tikeut + tikeut	= ssangtikeut	*/
   { 0x11071107, 0x1108 }, /* choseong  pieup  + pieup	= ssangpieup	*/
   { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
   { 0x110c110c, 0x110d }, /* choseong  cieuc  + cieuc	= ssangcieuc	*/
+
   { 0x11611161, 0x1163 }, /* jungseong a      + a	= ya		*/
   { 0x11621162, 0x1164 }, /* jungseong ae     + ae	= yae		*/
   { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
@@ -1604,21 +1604,22 @@ static const HangulCompose compose_table_default[] = {
 
 static const HangulCompose compose_table_2set[] = {
   { 0x11001100, 0x1101 }, /* choseong  kiyeok + kiyeok	= ssangkiyeok	*/
-  { 0x11001109, 0x11aa }, /* choseong  kiyeok + sios	= kiyeok-sios	*/
-  { 0x1102110c, 0x11ac }, /* choseong  nieun  + cieuc	= nieun-cieuc	*/
-  { 0x11021112, 0x11ad }, /* choseong  nieun  + hieuh	= nieun-hieuh	*/
+  { 0x11001109, 0x11aa }, /* jongseong kiyeok + sios	= kiyeok-sios	*/
+  { 0x1102110c, 0x11ac }, /* jongseong nieun  + cieuc	= nieun-cieuc	*/
+  { 0x11021112, 0x11ad }, /* jongseong nieun  + hieuh	= nieun-hieuh	*/
   { 0x11031103, 0x1104 }, /* choseong  tikeut + tikeut	= ssangtikeut	*/
-  { 0x11051100, 0x11b0 }, /* choseong  rieul  + kiyeok	= rieul-kiyeok	*/
-  { 0x11051106, 0x11b1 }, /* choseong  rieul  + mieum	= rieul-mieum	*/
-  { 0x11051107, 0x11b2 }, /* choseong  rieul  + pieup	= rieul-pieup	*/
-  { 0x11051109, 0x11b3 }, /* choseong  rieul  + sios	= rieul-sios	*/
-  { 0x11051110, 0x11b4 }, /* choseong  rieul  + thieuth = rieul-thieuth	*/
-  { 0x11051111, 0x11b5 }, /* choseong  rieul  + phieuph = rieul-phieuph	*/
-  { 0x11051112, 0x11b6 }, /* choseong  rieul  + hieuh	= rieul-hieuh	*/
+  { 0x11051100, 0x11b0 }, /* jongseong rieul  + kiyeok	= rieul-kiyeok	*/
+  { 0x11051106, 0x11b1 }, /* jongseong rieul  + mieum	= rieul-mieum	*/
+  { 0x11051107, 0x11b2 }, /* jongseong rieul  + pieup	= rieul-pieup	*/
+  { 0x11051109, 0x11b3 }, /* jongseong rieul  + sios	= rieul-sios	*/
+  { 0x11051110, 0x11b4 }, /* jongseong rieul  + thieuth = rieul-thieuth	*/
+  { 0x11051111, 0x11b5 }, /* jongseong rieul  + phieuph = rieul-phieuph	*/
+  { 0x11051112, 0x11b6 }, /* jongseong rieul  + hieuh	= rieul-hieuh	*/
   { 0x11071107, 0x1108 }, /* choseong  pieup  + pieup	= ssangpieup	*/
-  { 0x11071109, 0x11b9 }, /* choseong  pieup  + sios	= pieup-sios	*/
+  { 0x11071109, 0x11b9 }, /* jongseong pieup  + sios	= pieup-sios	*/
   { 0x11091109, 0x110a }, /* choseong  sios   + sios	= ssangsios	*/
   { 0x110c110c, 0x110d }, /* choseong  cieuc  + cieuc	= ssangcieuc	*/
+
   { 0x11621162, 0x1164 }, /* jungseong ae      + ae	= yae		*/
   { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
   { 0x11661166, 0x1168 }, /* jungseong e      + e	= ye		*/
@@ -3991,11 +3992,10 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		comb = 0;
 		if (hangul_is_jongseong(ic->last))
 		    comb = hangul_compose(ic->jong, jamo);
-                if ( hangul_is_jongseong(comb) && ic->cho && ic->jung)
-                {
-		    if (!hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
+                if ( comb && hangul_is_jongseong(comb) )
+		{
+		    if (!hangul_jamo_to_syllable(0x1100, 0x1161, comb))
 			ic->syllable = FALSE;
-
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS) {
 			ic->jong=comb;
 			hangul_ic_pop(ic);
