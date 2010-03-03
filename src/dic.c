@@ -1257,6 +1257,23 @@ LPBYTE lpbKeyState;
     // Candidate문자 선택
     if (IsConvertedCompStr(hIMC))
     {
+        LPCANDIDATEINFO lpCandInfo;
+        LPCANDIDATELIST lpCandList;
+        DWORD cand_style = dwCandStyle;
+
+        if ((wParam == VK_LEFT || wParam == VK_RIGHT) && (lpIMC = ImmLockIMC(hIMC)) ) {
+            lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+
+            if (lpCandInfo) {
+                lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+
+                cand_style = lpCandList->dwStyle;
+                ImmUnlockIMCC(lpIMC->hCandInfo);
+            }
+            ImmUnlockIMC(hIMC);
+        }
+
+        // XXX
         switch( wParam )
         {
             case VK_TAB:
@@ -1270,12 +1287,12 @@ LPBYTE lpbKeyState;
                 }
                 break;
             case VK_LEFT:
-                if (dwCandStyle == IME_CAND_CODE) {
+                if (cand_style == IME_CAND_CODE) {
                     next=-2;
                 }
                 break;
             case VK_RIGHT:
-                if (dwCandStyle == IME_CAND_CODE) {
+                if (cand_style == IME_CAND_CODE) {
                     next=2;
                 }
                 break;
