@@ -1897,6 +1897,7 @@ static const HangulCompose compose_table_yet[] = {
   { 0x116e1161, 0x1189 }, /* JUNGSEONG U-A                  = U + A */
   { 0x116e1162, 0x118a }, /* JUNGSEONG U-AE                 = U + AE */
   { 0x116e1165, 0x116f }, /* JUNGSEONG WEO                  = U + EO */
+  { 0x116e1166, 0x1170 }, /* JUNGSEONG WE		    = U + E */
   { 0x116e1167, 0xd7b5 }, /* JUNGSEONG U-YEO                = U + YEO */
   { 0x116e1168, 0x118c }, /* JUNGSEONG U-YE                 = U + YE */
   { 0x116e116e, 0x118d }, /* JUNGSEONG U-U                  = U + U */
@@ -3994,8 +3995,12 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    comb = hangul_compose(ic->jong, jamo);
                 if ( comb && hangul_is_jongseong(comb) )
 		{
-		    if (!hangul_jamo_to_syllable(0x1100, 0x1161, comb))
+		    if (ic->len == 1) { // has only ic->jong
+			if (hangul_jamo_to_cjamo(comb) == comb)
+			    ic->syllable = FALSE;
+		    } else if (!hangul_jamo_to_syllable(0x1100, 0x1161, comb)) {
 			ic->syllable = FALSE;
+		    }
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS) {
 			ic->jong=comb;
 			hangul_ic_pop(ic);
