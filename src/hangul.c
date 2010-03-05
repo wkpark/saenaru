@@ -2728,6 +2728,7 @@ LPBYTE lpbKeyState;
 
 			    MyDebugPrint((TEXT("** Delete Han Char: %d\r\n"), n));
 			    lpCompStr->dwCursorPos -= n;
+			    lpstr -= n;
 
 			    *lpstr++ = cs;
 			    lpCompStr->dwCursorPos++;
@@ -3056,17 +3057,17 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 	}
 	else
 	{
-#if 0
-            if (1)
-                code = 0x3000;
-#endif
-	    if (ic->cho && ic->jong)
-                code = hangul_jamo_to_syllable(ic->cho,0x1161,ic->jong);
-	    else if (ic->jung && ic->jong)
-                code = hangul_jamo_to_syllable(0x110b,ic->jung,ic->jong);
+            if (dwOptionFlag & HANGUL_JAMOS) {
+		ic->syllable = FALSE;
+	    } else {
+		if (ic->cho && ic->jong)
+		    code = hangul_jamo_to_syllable(ic->cho,0x1161,ic->jong);
+		else if (ic->jung && ic->jong)
+		    code = hangul_jamo_to_syllable(0x110b,ic->jung,ic->jong);
 
-	    if (!ic->syllable && hangul_is_syllable(code))
-		ic->syllable = TRUE;
+		if (!ic->syllable && hangul_is_syllable(code))
+		    ic->syllable = TRUE;
+	    }
 	}
     }
 
@@ -3850,6 +3851,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     if (!hangul_jamo_to_syllable(jamo,ic->jung ? ic->jung:0x1161,ic->jong)) {
 			ic->syllable = FALSE;
+		    } else {
+			ic->syllable = TRUE;
 		    }
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
 		    {
@@ -3921,6 +3924,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     if (!hangul_jamo_to_syllable(ic->cho ? ic->cho:0x110b,jamo,ic->jong)) {
 			ic->syllable = FALSE;
+		    } else {
+			ic->syllable = TRUE;
 		    }
 
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
