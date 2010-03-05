@@ -1608,6 +1608,10 @@ LPBYTE lpbKeyState;
                 }
                 ImmUnlockIMC(hIMC);
                 return TRUE;
+            } else {
+                // Simulate a key press
+                keybd_event( (BYTE)wParam, 0x0, 0, 0 );
+                return TRUE;
             }
             break;
 
