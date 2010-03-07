@@ -610,17 +610,28 @@ HFONT CheckNativeCharset(HDC hDC)
     BOOL bDiffCharSet = FALSE;
     LOGFONT lfFont;
     HFONT hOldFont, hTemp;
+    static TCHAR font[256] = TEXT("");
+    LPTSTR lpFont;
+    long ret;
+
+    lpFont = font;
+
+    if (font[0] == TEXT('\0')) {
+        ret = GetRegStringValue(NULL, TEXT("CandFont"), lpFont);
+        if (ret == -1)
+            /* 기본값을 새굴림으로 한다 */
+            lpFont = TEXT("New Gulim");
+    }
 
     hOldFont = GetCurrentObject(hDC, OBJ_FONT);
     GetObject(hOldFont, sizeof(LOGFONT), &lfFont);
 
     lfFont.lfWeight = FW_NORMAL;
     lfFont.lfCharSet = NATIVE_CHARSET;
-    /* 기본값을 새굴림으로 한다 */
-    Mylstrcpy(lfFont.lfFaceName,TEXT("New Gulim"));
+    Mylstrcpy(lfFont.lfFaceName,lpFont);
     hTemp = CreateFontIndirect(&lfFont);
     hOldFont = SelectObject(hDC, hTemp);
-    /* 글꼴이 없으면 기본 값을 가져온다 */
+    /* 아무 글꼴이 없으면 기본 값을 가져온다 */
     if (lfFont.lfCharSet != NATIVE_CHARSET) {
         DeleteObject(hTemp);
 
