@@ -73,6 +73,7 @@ DWORD dwLayoutFlag = 0L;
 DWORD dwComposeFlag = 0L;
 DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
 DWORD dwHanjaMode = 0L;
+DWORD dwScanCodeBased = 0L;
 
 BOOL gfSaenaruSecure = FALSE;
 

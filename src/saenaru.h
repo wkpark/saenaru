@@ -84,6 +84,7 @@
 #define QWERTY_HOTKEY_SUPPORT  0x00000400
 #define HANGUL_JAMOS           0x00000800
 #define HANJA_CAND_WITH_SPACE  0x00001000
+#define SCANCODE_BASED         0x00010000
 
 /* for Unicode SAENARU */
 typedef LPTSTR            LPMYSTR;
@@ -391,6 +392,7 @@ extern DWORD dwLayoutFlag;
 extern DWORD dwComposeFlag;
 extern DWORD dwOptionFlag;
 extern DWORD dwHanjaMode;
+extern DWORD dwScanCodeBased;
 
 extern DWORD dwImeFlag;
 

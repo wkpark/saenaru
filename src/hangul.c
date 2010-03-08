@@ -1053,6 +1053,66 @@ static const WCHAR dvorak2qwerty_table[] = {
   0x007e,    /* GDK_asciitilde */
 };
 
+#define ______ 0x0000
+typedef struct _SCANCODE_MAP {
+  unsigned short code[2];
+} SCANCODE_MAP;
+
+const SCANCODE_MAP scan2qwerty[] = {
+  { 0x0031, /* GDK_1 */ 0x0021 /* GDK_exclam */ },
+  { 0x0032, /* GDK_2 */ 0x0040 /* GDK_at */ },
+  { 0x0033, /* GDK_3 */ 0x0023 /* GDK_numbersign */ },
+  { 0x0034, /* GDK_4 */ 0x0024 /* GDK_dollar */ },
+  { 0x0035, /* GDK_5 */ 0x0025 /* GDK_percent */ },
+  { 0x0036, /* GDK_6 */ 0x005e /* GDK_asciicircum */ },
+  { 0x0037, /* GDK_7 */ 0x0026 /* GDK_ampersand */ },
+  { 0x0038, /* GDK_8 */ 0x002a /* GDK_asterisk */ },
+  { 0x0039, /* GDK_9 */ 0x0028 /* GDK_parenleft */ },
+  { 0x0030, /* GDK_0 */ 0x0029 /* GDK_parenright */ },
+  { 0x002d, /* GDK_minus */ 0x005f /* GDK_underscore */ },
+  { 0x003d, /* GDK_equal */ 0x002b /* GDK_plus */ },
+  { ______, ______ },
+  { ______, ______ },
+  { 0x0071, /* GDK_q */ 0x0051 /* GDK_Q */ },
+  { 0x0077, /* GDK_w */ 0x0057 /* GDK_W */ },
+  { 0x0065, /* GDK_e */ 0x0045 /* GDK_E */ },
+  { 0x0072, /* GDK_r */ 0x0052 /* GDK_R */ },
+  { 0x0074, /* GDK_t */ 0x0054 /* GDK_T */ },
+  { 0x0079, /* GDK_y */ 0x0059 /* GDK_Y */ },
+  { 0x0075, /* GDK_u */ 0x0055 /* GDK_U */ },
+  { 0x0069, /* GDK_i */ 0x0049 /* GDK_I */ },
+  { 0x006f, /* GDK_o */ 0x004f /* GDK_O */ },
+  { 0x0070, /* GDK_p */ 0x0050 /* GDK_P */ },
+  { 0x005b, /* GDK_bracketleft */ 0x007b /* GDK_braceleft */ },
+  { 0x005d, /* GDK_bracketright */ 0x007d /* GDK_braceright */ },
+  { ______, ______ },
+  { ______, ______ },
+  { 0x0061, /* GDK_a */ 0x0041 /* GDK_A */ },
+  { 0x0073, /* GDK_s */ 0x0053 /* GDK_S */ },
+  { 0x0064, /* GDK_d */ 0x0044 /* GDK_D */ },
+  { 0x0066, /* GDK_f */ 0x0046 /* GDK_F */ },
+  { 0x0067, /* GDK_g */ 0x0047 /* GDK_G */ },
+  { 0x0068, /* GDK_h */ 0x0048 /* GDK_H */ },
+  { 0x006a, /* GDK_j */ 0x004a /* GDK_J */ },
+  { 0x006b, /* GDK_k */ 0x004b /* GDK_K */ },
+  { 0x006c, /* GDK_l */ 0x004c /* GDK_L */ },
+  { 0x003b, /* GDK_semicolon */ 0x003a /* GDK_colon */ },
+  { 0x0027, /* GDK_apostrophe */ 0x0022 /* GDK_quotedbl */ },
+  { 0x0060, /* GDK_quoteleft */ 0x007e /* GDK_asciitilde */ },
+  { ______, ______ },
+  { 0x005c, /* GDK_backslash */ 0x007c /* GDK_bar */ },
+  { 0x007a, /* GDK_z */ 0x005a /* GDK_Z */ },
+  { 0x0078, /* GDK_x */ 0x0058 /* GDK_X */ },
+  { 0x0063, /* GDK_c */ 0x0043 /* GDK_C */ },
+  { 0x0076, /* GDK_v */ 0x0056 /* GDK_V */ },
+  { 0x0062, /* GDK_b */ 0x0042 /* GDK_B */ },
+  { 0x006e, /* GDK_n */ 0x004e /* GDK_N */ },
+  { 0x006d, /* GDK_m */ 0x004d /* GDK_M */ },
+  { 0x002c, /* GDK_comma */ 0x003c /* GDK_less */ },
+  { 0x002e, /* GDK_period */ 0x003e /* GDK_greater */ },
+  { 0x002f, /* GDK_slash */ 0x003f /* GDK_question */ }
+};
+
 // imported from the imhangul 0.9.7
 // s/gunichar/WCHAR/g
 
@@ -2461,19 +2521,39 @@ LPBYTE lpbKeyState;
     fdwConversion = lpIMC->fdwConversion;
 
     ocode = code;
-    if (fdwConversion & IME_CMODE_NATIVE && capital) {
-	WORD ch = code;
-	if (ch >= 'a' && ch <= 'z')
-	    code -= 'a' - 'A';
-	if (ch >= 'A' && ch <= 'Z')
-	    code += 'a' - 'A';
-    }
 
-    /* check dvorak layout */
-    if (fdwConversion & IME_CMODE_NATIVE)
-	hkey= code = checkDvorak(code);
-    else
-	hkey= code;
+    if (dwScanCodeBased) {
+	WORD mycode;
+	if (fdwConversion & IME_CMODE_NATIVE &&
+		scan >= 0x02 && scan <=0x35) {
+	    if (IsSHFTPushed(lpbKeyState)) {
+		mycode = scan2qwerty[scan - 0x02].code[1];
+	    } else {
+		mycode = scan2qwerty[scan - 0x02].code[0];
+	    }
+	    if (mycode)
+		hkey = code = mycode; // scan based conversion
+	    else
+		hkey = code;
+	} else {
+	    hkey = code;
+	}
+	MyDebugPrint((TEXT("scancode based = 0x%x, code= 0x%x\r\n"), scan, code));
+    } else {
+	if (fdwConversion & IME_CMODE_NATIVE) {
+	    if (capital) {
+		WORD ch = code;
+		if (ch >= 'a' && ch <= 'z')
+		    code -= 'a' - 'A';
+		if (ch >= 'A' && ch <= 'Z')
+		    code += 'a' - 'A';
+	    }
+	    /* check dvorak layout */
+	    hkey= code = checkDvorak(code);
+	} else {
+	    hkey= code;
+	}
+    }
 
     if (fdwConversion & IME_CMODE_NATIVE)
 	hkey = keyToHangulKey( code );

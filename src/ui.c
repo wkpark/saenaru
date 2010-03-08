@@ -284,6 +284,9 @@ LPARAM lParam;
             //SetConsoleHookFunc();
             InitLanguageBar();
 
+            // get ScanCode based setting.
+            dwScanCodeBased = GetDwordFromSetting(TEXT("ScanCodeBased"));
+
             break;
 
         case WM_IME_SETCONTEXT:
