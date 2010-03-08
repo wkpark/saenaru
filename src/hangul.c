@@ -4083,7 +4083,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    if (ic->len == 1) { // has only ic->jong
 			if (hangul_jamo_to_cjamo(comb) == comb)
 			    ic->syllable = FALSE;
-		    } else if (!hangul_jamo_to_syllable(0x1100, 0x1161, comb)) {
+		    } else if (!hangul_jamo_to_syllable(ic->cho, ic->jung, comb)) {
 			ic->syllable = FALSE;
 		    }
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS) {
