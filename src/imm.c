@@ -332,6 +332,16 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     //    return TRUE;
     //    // Make it option or default ? FIXME see also process.c
     //}
+    if (vkey == 0xFF) {
+        // unknown VK Key.
+        // builtin support HANGUL, HANJA
+        UINT vk = (lKeyData & 0x00ff0000) >> 16;
+        if (vk == 0xf2) { // VK_HANGUL
+            vKey = VK_HANGUL;
+        } if (vk == 0xf1) { // VK_HANJA
+            vKey = VK_HANJA;
+        }
+    }
 
     if ( !(lKeyData & 0x80000000) && 
             (LOWORD(vKey) & 0x00FF) == VK_HANGUL) {
@@ -371,8 +381,10 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
 
         GetKeyboardState((LPBYTE)&pbKeyState);
         ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
-        if (ShiftState)
+        if (IsSHFTPushed(pbKeyState))
             vKey = VK_HANGUL;
+        else if (IsCTLPushed(pbKeyState))
+            vKey = VK_HANJA;
     }
 
     fOpen = lpIMC->fOpen;
