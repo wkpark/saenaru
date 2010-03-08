@@ -1631,6 +1631,7 @@ static const HangulCompose compose_table_default[] = {
   { 0x11611161, 0x1163 }, /* jungseong a      + a	= ya		*/
   { 0x11621162, 0x1164 }, /* jungseong ae     + ae	= yae		*/
   { 0x11631175, 0x1164 }, /* jungseong ya     + i	= yae		*/
+  { 0x11651165, 0x1167 }, /* jungseong eo     + eo	= yeo		*/
   { 0x11661166, 0x1168 }, /* jungseong e      + e	= ye		*/
   { 0x11671175, 0x1168 }, /* jungseong yeo    + i	= ye		*/
   { 0x11691161, 0x116a }, /* jungseong o      + a	= wa		*/
