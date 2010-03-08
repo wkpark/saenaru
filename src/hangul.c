@@ -2527,6 +2527,7 @@ LPBYTE lpbKeyState;
 	WORD mycode;
 	if (fdwConversion & IME_CMODE_NATIVE &&
 		scan >= 0x02 && scan <=0x35) {
+	    // code conversion based on ScanCode
 	    if (IsSHFTPushed(lpbKeyState)) {
 		mycode = scan2qwerty[scan - 0x02].code[1];
 	    } else {
@@ -2537,6 +2538,7 @@ LPBYTE lpbKeyState;
 	    else
 		hkey = code;
 	} else {
+	    // use VK keycode.
 	    hkey = code;
 	}
 	MyDebugPrint((TEXT("scancode based = 0x%x, code= 0x%x\r\n"), scan, code));
@@ -2556,8 +2558,15 @@ LPBYTE lpbKeyState;
 	}
     }
 
-    if (fdwConversion & IME_CMODE_NATIVE)
+    if (fdwConversion & IME_CMODE_NATIVE) {
 	hkey = keyToHangulKey( code );
+
+	if (dwScanCodeBased && hkey == code) {
+	    // there are no keymap entry.
+	    // use original VK codes.
+	    hkey = code = (WORD) HIWORD(wParam);
+	}
+    }
 #ifndef USE_NO_WM_CHAR
     if ( (!hkey || (hkey >= TEXT('!') && hkey <= TEXT('~')) )
 	    && !IsCompStr(hIMC)) {
