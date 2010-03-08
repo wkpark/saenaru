@@ -1071,8 +1071,8 @@ const SCANCODE_MAP scan2qwerty[] = {
   { 0x0030, /* GDK_0 */ 0x0029 /* GDK_parenright */ },
   { 0x002d, /* GDK_minus */ 0x005f /* GDK_underscore */ },
   { 0x003d, /* GDK_equal */ 0x002b /* GDK_plus */ },
-  { ______, ______ },
-  { ______, ______ },
+  { ______, ______ }, /* backspace */
+  { ______, ______ }, /* tab */
   { 0x0071, /* GDK_q */ 0x0051 /* GDK_Q */ },
   { 0x0077, /* GDK_w */ 0x0057 /* GDK_W */ },
   { 0x0065, /* GDK_e */ 0x0045 /* GDK_E */ },
@@ -1085,8 +1085,8 @@ const SCANCODE_MAP scan2qwerty[] = {
   { 0x0070, /* GDK_p */ 0x0050 /* GDK_P */ },
   { 0x005b, /* GDK_bracketleft */ 0x007b /* GDK_braceleft */ },
   { 0x005d, /* GDK_bracketright */ 0x007d /* GDK_braceright */ },
-  { ______, ______ },
-  { ______, ______ },
+  { ______, ______ }, /* enter */
+  { ______, ______ }, /* ??? */
   { 0x0061, /* GDK_a */ 0x0041 /* GDK_A */ },
   { 0x0073, /* GDK_s */ 0x0053 /* GDK_S */ },
   { 0x0064, /* GDK_d */ 0x0044 /* GDK_D */ },
@@ -1099,7 +1099,7 @@ const SCANCODE_MAP scan2qwerty[] = {
   { 0x003b, /* GDK_semicolon */ 0x003a /* GDK_colon */ },
   { 0x0027, /* GDK_apostrophe */ 0x0022 /* GDK_quotedbl */ },
   { 0x0060, /* GDK_quoteleft */ 0x007e /* GDK_asciitilde */ },
-  { ______, ______ },
+  { ______, ______ }, /* L-Shift */
   { 0x005c, /* GDK_backslash */ 0x007c /* GDK_bar */ },
   { 0x007a, /* GDK_z */ 0x005a /* GDK_Z */ },
   { 0x0078, /* GDK_x */ 0x0058 /* GDK_X */ },
