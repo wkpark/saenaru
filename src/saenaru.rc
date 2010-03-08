@@ -307,7 +307,7 @@ BEGIN
     	MENUITEM "사용자 조합(&C)",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "드보락(&V)",		IDM_DVORAK
-    	MENUITEM "ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "<ESC> 영문전환(&E)",	IDM_ESC_ASCII
     	MENUITEM "<Shift>-<SPACE> 한/영 키",	IDM_HANGUL_TOGGLE
     	MENUITEM "단어단위 편집(&W)",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
@@ -558,9 +558,9 @@ BEGIN
     	MENUITEM "&Compose Map",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "D&vorak",		IDM_DVORAK
-    	MENUITEM "&ESC to english",	IDM_ESC_ASCII
-    	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
+    	MENUITEM "<&ESC> to english",	IDM_ESC_ASCII
         MENUITEM "Use <Shift>-<S&PACE>", IDM_HANGUL_TOGGLE
+    	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
     	MENUITEM "Show &Keyboard",	IDM_SHOW_KEYBOARD
 	MENUITEM SEPARATOR
@@ -621,7 +621,7 @@ LANGUAGE 0x09, 0x1
 BEGIN
     IDS_MENU_ENV                "Configuration(&C)"
     IDS_MENU_DVORAK             "D&Vorak"
-    IDS_MENU_ESC_ASCII          "&ESC to Ascii Mode"
+    IDS_MENU_ESC_ASCII          "<&ESC> to Ascii Mode"
     IDS_MENU_EDIT_WORD_UNIT     "&Word Unit Edit"
     IDS_MENU_SHOW_KEYBOARD      "Show &Keyboard"
     IDS_MENU_HANGUL_TOGGLE      "Use <Shift>-<S&PACE> Toggle"
