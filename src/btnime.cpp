@@ -62,6 +62,7 @@ static void  _Menu_Reconversion (UINT);
 static void  _Menu_ToggleShowKeyboard (UINT);
 static void  _Menu_ToggleDvorak (UINT);
 static void  _Menu_ToggleEscEng (UINT);
+static void  _Menu_ToggleHanEng (UINT);
 static void  _Menu_ToggleOnTheSpot (UINT);
 static void  _Menu_SelectKeyboard (UINT);
 static void  _Menu_SelectCompose (UINT);
@@ -72,6 +73,7 @@ static DWORD _MenuItem_GetToggleKeyboardFlag (UINT);
 static DWORD _MenuItem_GetToggleComposeFlag (UINT);
 static DWORD _MenuItem_GetToggleDvorakFlag (UINT);
 static DWORD _MenuItem_GetToggleEscEngFlag (UINT);
+static DWORD _MenuItem_GetToggleHanEngFlag (UINT);
 static DWORD _MenuItem_GetToggleOnTheSpotFlag (UINT);
 static DWORD _UserKeyboardMenu_GetKeyboardFlag (UINT);
 
@@ -102,6 +104,7 @@ static const TSFLBMENUINFOEX c_rgMenuItems[] = {
     { NULL, NULL, NULL },
     { IDS_MENU_DVORAK,   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
     { IDS_MENU_ESC_ASCII, _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
+    { IDS_MENU_HANGUL_TOGGLE, _MenuItem_GetToggleHanEngFlag,_Menu_ToggleHanEng },
     { IDS_MENU_EDIT_WORD_UNIT, _MenuItem_GetToggleOnTheSpotFlag,_Menu_ToggleOnTheSpot },
     { NULL, NULL, NULL },
     { IDS_MENU_SHOW_KEYBOARD,  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
@@ -819,6 +822,17 @@ _Menu_ToggleDvorak (UINT wID)
         dwOptionFlag |= DVORAK_SUPPORT;
     return;
 }
+
+void
+_Menu_ToggleHanEng (UINT wID)
+{
+    if (dwOptionFlag & USE_SHIFT_SPACE)
+        dwOptionFlag &= ~USE_SHIFT_SPACE;
+    else
+        dwOptionFlag |= USE_SHIFT_SPACE;
+    return;
+}
+
 void
 _Menu_ToggleEscEng (UINT wID)
 {
@@ -854,6 +868,12 @@ _MenuItem_GetToggleDvorakFlag (UINT wID)
         return TF_LBI_STATUS_DISABLED;
 
     return (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0;
+}
+
+DWORD
+_MenuItem_GetToggleHanEngFlag (UINT wID)
+{
+    return (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0;
 }
 
 DWORD
