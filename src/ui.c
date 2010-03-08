@@ -1309,8 +1309,8 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
     /* check dvorak layout */
     /* XXX */
     hcur= GetKeyboardLayout(0);
-    if (hcur == LongToHandle(0xE0130412))
-        fDvorak = FALSE; // do not convert. It is already dvorak!!
+    if (hcur != LongToHandle(0xE0120412))
+        fDvorak = FALSE; // do not convert. It use it's own kbd driver
 
     GetKeyboardState((LPBYTE)&pbKeyState);
     nocheck = pbKeyState[VK_CONTROL] & 0x80 || pbKeyState[VK_MENU] & 0x80;

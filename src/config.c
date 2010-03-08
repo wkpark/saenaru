@@ -567,7 +567,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
 
             /* check dvorak layout */
             hCur= GetKeyboardLayout(0);
-            if (hCur == LongToHandle(0xE0130412)) {
+            if (hCur != LongToHandle(0xE0120412)) {
                 hwndRadio = GetDlgItem (hDlg, IDC_DVORAK_SUPPORT);
                 EnableWindow (hwndRadio, FALSE);
                 hwndRadio = GetDlgItem (hDlg, IDC_QWERTY_HOTKEY_SUPPORT);
