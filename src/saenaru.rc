@@ -377,7 +377,7 @@ LANGUAGE 0x12, 0x1
 BEGIN
     IDS_MENU_ENV                "환경설정(&R)"
     IDS_MENU_DVORAK             "드보락(&V)"
-    IDS_MENU_ESC_ASCII          "&ESC 영문전환"
+    IDS_MENU_ESC_ASCII          "<&ESC> 영문전환"
     IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
     IDS_MENU_HANGUL_TOGGLE      "<Shift>-<S&PACE> 한/영키"
     IDS_MENU_SHOW_KEYBOARD      "키보드 보기(&K)"
