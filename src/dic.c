@@ -1902,7 +1902,8 @@ LPBYTE lpbKeyState;
 
             // 스페이스를 한자 페이지 넘기는 키로 사용한다.
             // 옵션으로 켜고 킬 수 있게.
-            if (IsCompStr(hIMC) && IsCandidate(lpIMC) &&
+            if (dwOptionFlag & HANJA_CAND_WITH_SPACE &&
+                    IsCompStr(hIMC) && IsCandidate(lpIMC) &&
                     (fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
                 hangul_ic_init(&ic); // 이 경우는 한글을 초기화함.

@@ -83,6 +83,7 @@
 #define ESCENG_SUPPORT         0x00000200
 #define QWERTY_HOTKEY_SUPPORT  0x00000400
 #define HANGUL_JAMOS           0x00000800
+#define HANJA_CAND_WITH_SPACE  0x00001000
 
 /* for Unicode SAENARU */
 typedef LPTSTR            LPMYSTR;

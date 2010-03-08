@@ -83,6 +83,7 @@
 #define IDC_ESCENG_SUPPORT      2008
 #define IDC_QWERTY_HOTKEY_SUPPORT 2009
 #define IDC_JAMOS               2010
+#define IDC_HANJA_CAND_SPACE    2011
 
 /* string tables */
 #define IDS_CONFIGNAME              1000
@@ -135,6 +136,7 @@
 #define IDS_MENU_ESC_ASCII          2133
 #define IDS_MENU_EDIT_WORD_UNIT     2134
 #define IDS_MENU_SHOW_KEYBOARD      2135
+#define IDS_MENU_HANGUL_TOGGLE      2136
 
 #define IDC_STATIC                      -1
 
@@ -156,6 +158,7 @@
 #define IDM_ESC_ASCII		40032
 #define IDM_WORD_UNIT		40033
 #define IDM_SHOW_KEYBOARD	40041
+#define IDM_HANGUL_TOGGLE       40042
 #define IDM_HANGUL		40051
 #define IDM_ENG			40052
 #define IDM_HANJA		40053

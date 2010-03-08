@@ -411,6 +411,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp |= QWERTY_HOTKEY_SUPPORT;
                     if (IsDlgButtonChecked(hDlg, IDC_ESCENG_SUPPORT))
                         dwTemp |= ESCENG_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_HANJA_CAND_SPACE))
+                        dwTemp |= HANJA_CAND_WITH_SPACE;
                     dwOptionFlag = dwTemp;
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
@@ -560,6 +562,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
                                 (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_HANJA_CAND_SPACE, 
+                                (dwOptionFlag & HANJA_CAND_WITH_SPACE) ? 1 : 0);
 
             /* check dvorak layout */
             hCur= GetKeyboardLayout(0);
