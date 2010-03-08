@@ -335,7 +335,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     if (vkey == 0xFF) {
         // unknown VK Key.
         // builtin support HANGUL, HANJA
-        UINT vk = (lKeyData & 0x00ff0000) >> 16;
+        UINT vk = (UINT) (lKeyData & 0x00ff0000) >> 16;
         if (vk == 0xf2) { // VK_HANGUL
             vKey = VK_HANGUL;
         } if (vk == 0xf1) { // VK_HANJA
