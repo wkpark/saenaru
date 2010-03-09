@@ -1,4 +1,5 @@
-//Microsoft Developer Studio generated resource script.
+//
+// $Id$
 //
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -86,7 +87,7 @@ BEGIN
                     BS_AUTORADIOBUTTON,111,16,62,11
     CONTROL         "¿¾ÇÑ±Û ¼¼¹ú (&Z)",IDC_LAYOUT_YET3BUL,"Button",
                     BS_AUTORADIOBUTTON,111,28,62,11
-    CONTROL         "¼¼¹ú½Ä 389 (&8)",IDC_LAYOUT_389,"Button",
+    CONTROL         "ºÏÇÑ µÎ¹ú½Ä (&P)",IDC_LAYOUT_NK_2BUL,"Button",
                     BS_AUTORADIOBUTTON,111,39,62,11
     CONTROL         "»õµÎ¹ú (&D)",IDC_LAYOUT_NEW2BUL,"Button",
                     BS_AUTORADIOBUTTON,174,15,46,11
@@ -126,7 +127,7 @@ BEGIN
 */
     CONTROL         "È®ÀåÇÑÀÚ Áö¿ø (&X)",IDC_KSX1002_SUPPORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,115,77 ,10
-    CONTROL         "<SPACE> ÇÑÀÚ ¼±ÅÃ (&P)", IDC_HANJA_CAND_SPACE,
+    CONTROL         "<SPACE> ÇÑÀÚ ¼±ÅÃ (&L)", IDC_HANJA_CAND_SPACE,
                     BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,134, 128, 90, 10 
     CONTROL         "¿Ï¼ºÇü(KS X 1001) À½Àý Á¦ÇÑ (&K)",IDC_KSX1001_SUPPORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,114,114,10
@@ -301,14 +302,14 @@ BEGIN
 	MENUITEM "¼¼¹ú½Ä 390(&9)",  	IDM_390
     	MENUITEM "¿¾ÇÑ±Û µÎ¹ú(&D)",	IDM_YET2BUL
     	MENUITEM "¿¾ÇÑ±Û ¼¼¹ú(&S)",	IDM_YET3BUL
-     	MENUITEM "¼¼¹ú½Ä 389(&A)",	IDM_389
+     	MENUITEM "ºÏÇÑ µÎ¹ú½Ä(&P)",	IDM_NK_2BUL
     	MENUITEM "¼¼¹ú½Ä ¼ø¾Æ·¡(&N)",	IDM_3SOON
     	MENUITEM "»ç¿ëÀÚ ÀÚÆÇ(&U)",	IDM_USER
     	MENUITEM "»ç¿ëÀÚ Á¶ÇÕ(&C)",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "µåº¸¶ô(&V)",		IDM_DVORAK
     	MENUITEM "<ESC> ¿µ¹®ÀüÈ¯(&E)",	IDM_ESC_ASCII
-    	MENUITEM "<Shift>-<SPACE> ÇÑ/¿µ Å°",	IDM_HANGUL_TOGGLE
+    	MENUITEM "<Shift>-<SPACE> ÇÑ/¿µÅ° (&H)", IDM_HANGUL_TOGGLE
     	MENUITEM "´Ü¾î´ÜÀ§ ÆíÁý(&W)",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
     	MENUITEM "Å°º¸µå º¸±â(&K)",	IDM_SHOW_KEYBOARD
@@ -379,7 +380,7 @@ BEGIN
     IDS_MENU_DVORAK             "µåº¸¶ô(&V)"
     IDS_MENU_ESC_ASCII          "<&ESC> ¿µ¹®ÀüÈ¯"
     IDS_MENU_EDIT_WORD_UNIT     "´Ü¾î´ÜÀ§ ÆíÁý(&W)"
-    IDS_MENU_HANGUL_TOGGLE      "<Shift>-<S&PACE> ÇÑ/¿µÅ°"
+    IDS_MENU_HANGUL_TOGGLE      "<Shift>-<SPACE> ÇÑ/¿µÅ° (&H)"
     IDS_MENU_SHOW_KEYBOARD      "Å°º¸µå º¸±â(&K)"
 
     IDS_MENU_OLD2BUL            "µÎ¹ú½Ä(&2)"
@@ -388,7 +389,7 @@ BEGIN
     IDS_MENU_NEW2BUL            "»õµÎ¹ú(&S)"
     IDS_MENU_NEW3BUL            "»õ¼¼¹ú(&D)"
     IDS_MENU_AHNMATAE           "¾È¸¶ÅÂ(&A)"
-    IDS_MENU_389                "¼¼¹ú½Ä 3&89"
+    IDS_MENU_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä(&P)"
     IDS_MENU_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú(&Y)"
     IDS_MENU_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú(&Z)"
     IDS_MENU_3SOON              "¼¼¹ú½Ä ¼ø¾Æ·¡(&N)"
@@ -397,11 +398,28 @@ BEGIN
 END
 
 STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_TIP_ASCII              "¿µ¹®"
+    IDS_TIP_OLD2BUL            "µÎ¹ú½Ä"
+    IDS_TIP_3FIN               "¼¼¹ú½Ä"
+    IDS_TIP_390                "¼¼¹ú½Ä 390"
+    IDS_TIP_3SOON              "¼¼¹ú½Ä ¼ø¾Æ·¡"
+    IDS_TIP_NEW2BUL            "»õµÎ¹ú"
+    IDS_TIP_NEW3BUL            "»õ¼¼¹ú"
+    IDS_TIP_AHNMATAE           "¾È¸¶ÅÂ"
+    IDS_TIP_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä"
+    IDS_TIP_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú"
+    IDS_TIP_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú"
+    IDS_TIP_USER               "»ç¿ëÀÚ ÀÚÆÇ"
+END
+
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_KEY_NEW2BUL            "»õµÎ¹ú"
     IDS_KEY_NEW3BUL            "»õ¼¼¹ú"
     IDS_KEY_AHNMATAE           "¾È¸¶ÅÂ"
-    IDS_KEY_389                "¼¼¹ú½Ä 389"
+    IDS_KEY_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä"
     IDS_KEY_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú"
     IDS_KEY_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú"
 END
@@ -450,11 +468,11 @@ FONT 8, "MS Shell Dlg"
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,15,54,11 
    CONTROL	"Yet 3 set (&Z)", IDC_LAYOUT_YET3BUL, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,29,54,11 
-   CONTROL	"3 set 3&89", IDC_LAYOUT_389, BUTTON,
+   CONTROL	"2 set North Korea(&P)", IDC_LAYOUT_NK_2BUL, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,101,43,54,11 
-   CONTROL	"new 2 set (&D)", IDC_LAYOUT_NEW2BUL, BUTTON,
+   CONTROL	"New 2 set (&D)", IDC_LAYOUT_NEW2BUL, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,15,54,11 
-   CONTROL	"new 3 set (&S)", IDC_LAYOUT_NEW3BUL, BUTTON,
+   CONTROL	"New 3 set (&S)", IDC_LAYOUT_NEW3BUL, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,29,54,11 
    CONTROL	"&Ahnmatae", IDC_LAYOUT_AHNMATAE, BUTTON,
 		BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,161,43,54,11 
@@ -478,7 +496,7 @@ FONT 8, "MS Shell Dlg"
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,90,122,10
    CONTROL	"E&xtended Hanja", IDC_KSX1002_SUPPORT, BUTTON,
 		BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,26,115,96,10 
-   CONTROL      "Select Hanja with <S&PACE>", IDC_HANJA_CAND_SPACE, BUTTON,
+   CONTROL      "Se&Lect Hanja with <SPACE>", IDC_HANJA_CAND_SPACE, BUTTON,
                 BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
                     126, 115, 122, 10 
    CONTROL	"Restrict to Wansung (&KS X 1001) syllables", IDC_KSX1001_SUPPORT, BUTTON,
@@ -552,14 +570,14 @@ BEGIN
      	MENUITEM "&Ahnmatae",		IDM_AHNMATAE
     	MENUITEM "&Yet 2-set",	        IDM_YET2BUL
     	MENUITEM "Yet 3-set(&Z)",	IDM_YET3BUL
-     	MENUITEM "3-set 3&89",		IDM_389
+     	MENUITEM "2-set North-Korea(&P)", IDM_NK_2BUL
     	MENUITEM "3-set &No-shift",	IDM_3SOON
     	MENUITEM "&User keyboard",	IDM_USER
     	MENUITEM "&Compose Map",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "D&vorak",		IDM_DVORAK
     	MENUITEM "<&ESC> to english",	IDM_ESC_ASCII
-        MENUITEM "Use <Shift>-<S&PACE>", IDM_HANGUL_TOGGLE
+        MENUITEM "Use <Shift>-<SPACE>(&H)", IDM_HANGUL_TOGGLE
     	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
     	MENUITEM "Show &Keyboard",	IDM_SHOW_KEYBOARD
@@ -624,7 +642,7 @@ BEGIN
     IDS_MENU_ESC_ASCII          "<&ESC> to Ascii Mode"
     IDS_MENU_EDIT_WORD_UNIT     "&Word Unit Edit"
     IDS_MENU_SHOW_KEYBOARD      "Show &Keyboard"
-    IDS_MENU_HANGUL_TOGGLE      "Use <Shift>-<S&PACE> Toggle"
+    IDS_MENU_HANGUL_TOGGLE      "Use <Shift>-<SPACE> (&H)"
 
     IDS_MENU_OLD2BUL            "&2-Set"
     IDS_MENU_3FIN               "&3-Set Final"
@@ -634,10 +652,27 @@ BEGIN
     IDS_MENU_AHNMATAE           "&Ahnmatae"
     IDS_MENU_YET2BUL            "&Yet 2-Set"
     IDS_MENU_YET3BUL            "Yet 3-Set (&Z)"
-    IDS_MENU_389                "3-Set 3&89"
+    IDS_MENU_NK_2BUL            "North Korea 2-Set (&P)"
     IDS_MENU_3SOON              "3-set &No-shift"
     IDS_MENU_USER               "&User defined" 
     IDS_MENU_USER_COMP          "&Compose Map"
+END
+
+STRINGTABLE DISCARDABLE 
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_TIP_ASCII              "English"
+    IDS_TIP_OLD2BUL            "2-Set"
+    IDS_TIP_3FIN               "3-Set Final"
+    IDS_TIP_390                "3-Set 390"
+    IDS_TIP_3SOON              "3-Set No-Shift"
+    IDS_TIP_NEW2BUL            "New 2-Set"
+    IDS_TIP_NEW3BUL            "New 3-Set"
+    IDS_TIP_AHNMATAE           "Ahnmatae"
+    IDS_TIP_NK_2BUL            "North Korea 2-set"
+    IDS_TIP_YET2BUL            "Yet 2-Set"
+    IDS_TIP_YET3BUL            "Yet 3-Set"
+    IDS_TIP_USER               "User Defined"
 END
 
 #endif // English (U.S.) resources

@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnime.cpp,v 1.8 2006/11/17 08:58:32 wkpark Exp $
+ * $Id$
  */
 
 #if !defined (NO_TSF)
@@ -134,7 +134,7 @@ static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
     { IDS_MENU_3FIN     ,   NULL },
     { IDS_MENU_3SOON    ,   NULL },
     { IDS_MENU_390      ,   NULL },
-    { IDS_MENU_389      ,   NULL },
+    { IDS_MENU_NK_2BUL  ,   NULL },
     { IDS_MENU_YET2BUL  ,   NULL },
     { IDS_MENU_YET3BUL  ,   NULL },
     { IDS_MENU_NEW2BUL  ,   NULL },
@@ -864,7 +864,7 @@ _MenuItem_GetToggleDvorakFlag (UINT wID)
 {
     HKL hcur;
     hcur= GetKeyboardLayout(0);
-    if (hcur == LongToHandle(0xE0130412))
+    if (hcur != LongToHandle(0xE0120412))
         return TF_LBI_STATUS_DISABLED;
 
     return (dwOptionFlag & DVORAK_SUPPORT) ? 1 : 0;

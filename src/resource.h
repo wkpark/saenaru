@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/resource.h,v 1.11 2006/11/20 08:42:28 wkpark Exp $
+ * $Id$
  */
 
 //{{NO_DEPENDENCIES}}
@@ -69,7 +69,7 @@
 #define IDC_LAYOUT_AHNMATAE     1007
 #define IDC_LAYOUT_YET2BUL      1008
 #define IDC_LAYOUT_YET3BUL      1009
-#define IDC_LAYOUT_389          1010
+#define IDC_LAYOUT_NK_2BUL      1010
 #define IDC_LAYOUT_USER         1011
 
 #define IDC_CONCURRENT_TYPING   2000
@@ -120,7 +120,7 @@
 #define IDS_MENU_AHNMATAE           2107
 #define IDS_MENU_YET2BUL            2108
 #define IDS_MENU_YET3BUL            2109
-#define IDS_MENU_389                2110
+#define IDS_MENU_NK_2BUL            2110
 #define IDS_MENU_USER               2111
 
 #define IDS_KEY_NEW2BUL             3105
@@ -128,7 +128,20 @@
 #define IDS_KEY_AHNMATAE            3107
 #define IDS_KEY_YET2BUL             3108
 #define IDS_KEY_YET3BUL             3109
-#define IDS_KEY_389                 3110
+#define IDS_KEY_NK_2BUL             3110
+
+#define IDS_TIP_ASCII               4000
+#define IDS_TIP_OLD2BUL             4001
+#define IDS_TIP_3FIN                4002
+#define IDS_TIP_390                 4003
+#define IDS_TIP_3SOON               4004
+#define IDS_TIP_NEW2BUL             4005
+#define IDS_TIP_NEW3BUL             4006
+#define IDS_TIP_AHNMATAE            4007
+#define IDS_TIP_YET2BUL             4008
+#define IDS_TIP_YET3BUL             4009
+#define IDS_TIP_NK_2BUL             4010
+#define IDS_TIP_USER                4011
 
 #define IDS_MENU_USER_COMP          2120
 #define IDS_MENU_ENV                2131
@@ -150,7 +163,7 @@
 #define IDM_AHNMATAE		40007
 #define IDM_YET2BUL		40008
 #define IDM_YET3BUL		40009
-#define IDM_389 		40010
+#define IDM_NK_2BUL 		40010
 
 #define IDM_USER		40011
 #define IDM_USER_COMP		40020

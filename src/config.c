@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/config.c,v 1.8 2006/11/20 08:51:05 wkpark Exp $
+ * $Id$
  */
 
 #include "windows.h"
@@ -437,8 +437,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp = LAYOUT_3FIN;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_390))
                         dwTemp = LAYOUT_390;
-                    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_389))
-                        dwTemp = LAYOUT_389;
+                    else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_NK_2BUL))
+                        dwTemp = LAYOUT_NK_2BUL;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_YET2BUL))
                         dwTemp = LAYOUT_YET2BUL;
                     else if (IsDlgButtonChecked(hDlg, IDC_LAYOUT_YET3BUL))
@@ -586,8 +586,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwLayoutFlag == LAYOUT_3FIN) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_390, 
                                 (dwLayoutFlag == LAYOUT_390) ? 1 : 0);
-            CheckDlgButton(hDlg, IDC_LAYOUT_389, 
-                                (dwLayoutFlag == LAYOUT_389) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_LAYOUT_NK_2BUL, 
+                                (dwLayoutFlag == LAYOUT_NK_2BUL) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_YET2BUL, 
                                 (dwLayoutFlag == LAYOUT_YET2BUL) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_LAYOUT_YET3BUL, 

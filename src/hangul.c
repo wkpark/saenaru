@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/hangul.c,v 1.30 2006/12/16 09:30:24 wkpark Exp $
+ * $Id$
  */
 
 #include <windows.h>
@@ -2280,16 +2280,16 @@ int PASCAL set_keyboard(UINT type)
 	    atype=3;
 	    ctype=1;
 	    break;
-	case LAYOUT_389:
+	case LAYOUT_NK_2BUL:
             atype=
-             load_keyboard_map_from_reg(TEXT("技国侥 389"),0,keyboard_table_user);
+             load_keyboard_map_from_reg(TEXT("合茄 滴国侥"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
 		ctype = (atype & 0xff00) >> 8;
 		atype = atype & 0x00ff;
 	    } else {
-		ctype=1;
+		ctype=2;
 	    }
 	    break;
 	case LAYOUT_YET2BUL:

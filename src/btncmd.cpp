@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btncmd.cpp,v 1.4 2006/10/11 03:46:34 wkpark Exp $
+ * $Id$
  */
 
 #if !defined (NO_TSF)
@@ -241,10 +241,31 @@ STDAPI
 CLangBarItemCModeButton::GetTooltipString (
 	BSTR*					pbstrToolTip)
 {
+	LPTSTR lpDesc;
+	TCHAR  szDesc[128];
+	HIMC   hIMC ;
+
 	if (pbstrToolTip == NULL)
 		return	E_INVALIDARG ;
 
-	*pbstrToolTip	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
+	hIMC	= _GetCurrentHIMC () ;
+	if (hIMC != NULL && dwLayoutFlag) {
+		lpDesc=(LPTSTR)szDesc;
+		if (! ImmGetOpenStatus (hIMC)) {
+			LoadString(hInst, IDS_TIP_ASCII, lpDesc, 128);
+		} else if (dwLayoutFlag < 11) {
+			LoadString(hInst, dwLayoutFlag + 4000, lpDesc, 128);
+		} else {
+			LoadString(hInst, IDS_TIP_USER, lpDesc, 128);
+		}
+	} else {
+		lpDesc=(LPTSTR)&_tfLangBarItemInfo.szDescription;
+		LoadString(hInst,IDS_INPUT_CMODE_DESC, lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
+	}
+
+	// SafeStringCopy (_tfLangBarItemInfo.szDescription, ARRAYSIZE (_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC) ;
+	//*pbstrToolTip	= SysAllocString (_tfLangBarItemInfo.szDescription) ;
+	*pbstrToolTip	= SysAllocString (lpDesc) ;
 	return	(*pbstrToolTip == NULL)? E_OUTOFMEMORY : S_OK ;
 }
 

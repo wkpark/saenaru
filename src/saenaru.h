@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/saenaru.h,v 1.18 2006/12/16 09:30:24 wkpark Exp $
+ * $Id$
  */
 
 #include <indicml.h>
@@ -61,7 +61,7 @@
 #define LAYOUT_AHNMATAE	    0x00000007
 #define LAYOUT_YET2BUL	    0x00000008
 #define LAYOUT_YET3BUL	    0x00000009
-#define LAYOUT_389	    0x0000000a
+#define LAYOUT_NK_2BUL	    0x0000000a
 #define LAYOUT_USER         0x0000000b
 
 
