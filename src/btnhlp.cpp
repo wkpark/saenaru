@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/btnhlp.cpp,v 1.1 2006/11/18 01:45:08 wkpark Exp $
+ * $Id$
  */
 
 #if !defined (NO_TSF)
@@ -163,7 +163,6 @@ STDAPI
 CLangBarItemHelpMenu::InitMenu (
 	ITfMenu* pMenu)
 {
-	register HIMC		hIMC;
 	register int		i;
 	register DWORD		dwFlag;
 	register LPCWSTR	wstrDesc;
@@ -173,28 +172,25 @@ CLangBarItemHelpMenu::InitMenu (
 	if (pMenu == NULL)
 		return	E_INVALIDARG ;
 
-	hIMC	= _GetCurrentHIMC () ;
-	if (hIMC != NULL) {
-		for (i = 0 ; i < ARRAYSIZE (c_rgMenuItems) ; i ++) {
-			LPTSTR lpDesc;
-			TCHAR szDesc[128];
+	for (i = 0 ; i < ARRAYSIZE (c_rgMenuItems) ; i ++) {
+		LPTSTR lpDesc;
+		TCHAR szDesc[128];
 
-			lpDesc=(LPTSTR)&szDesc;
-			if (c_rgMenuItems [i].chDesc!=NULL)
-				LoadString(hInst,c_rgMenuItems [i].chDesc,lpDesc,128);
-			else
-				lpDesc=NULL;
-			wstrDesc		= (LPCWSTR)lpDesc;
-			//wstrDesc		= c_rgMenuItems [i].pchDesc ;
-			if (wstrDesc != NULL) {
-				nstrDesc	= wcslen (wstrDesc) ;
-				dwFlag		= 0;
-			} else {
-				nstrDesc	= 0 ;
-				dwFlag		= TF_LBMENUF_SEPARATOR ;
-			}
-			pMenu->AddMenuItem (i, dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL) ;
+		lpDesc=(LPTSTR)&szDesc;
+		if (c_rgMenuItems [i].chDesc!=NULL)
+			LoadString(hInst,c_rgMenuItems [i].chDesc,lpDesc,128);
+		else
+			lpDesc=NULL;
+		wstrDesc		= (LPCWSTR)lpDesc;
+		//wstrDesc		= c_rgMenuItems [i].pchDesc ;
+		if (wstrDesc != NULL) {
+			nstrDesc	= wcslen (wstrDesc) ;
+			dwFlag		= 0;
+		} else {
+			nstrDesc	= 0 ;
+			dwFlag		= TF_LBMENUF_SEPARATOR ;
 		}
+		pMenu->AddMenuItem (i, dwFlag, NULL, NULL, wstrDesc, nstrDesc, NULL) ;
 	}
 	return	S_OK ;
 }
