@@ -226,6 +226,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     BOOL isasc=FALSE;
     UINT cand_mode = dwCandStyle;
     UINT word_mode = 0;
+    int readcand = 0;
 
     lpmystr = (LPMYSTR)myBuf;
 
@@ -262,7 +263,34 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     Mylstrcpy(szBuf,lpT2); // add Hangul
     szBuf[Mylstrlen(lpT2)] = 0;
 
-    {
+    if (IsCandidate(lpIMC)) {
+        MYCHAR buf[128];
+        LPMYSTR lpmy;
+
+        // get already made cadidate info.
+        lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+
+        if (lpCandList->dwSelection == 0) {
+            lpmy = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
+            Mylstrcpy(buf, lpmy); // hangul word
+
+            if (0 != Mylstrcmp(lpmy, lpT2)) {
+                // need to update candidate info.
+                readcand = 1;
+            }
+        }
+    }
+
+    // set candidate style
+    if (Mylstrlen(lpT2) > 1) { // word dic.
+        cand_mode = IME_CAND_READ; // force CAND_READ
+    } else if (isasc || (*lpT2 >= 0x3131 && 0x314e >= *lpT2) ) { // symbol
+        cand_mode = IME_CAND_CODE; // force CAND_CODE
+    } else {
+        word_mode = 1;
+    }
+
+    if (!IsCandidate(lpIMC) || readcand) {
         LPTSTR  lpKey;
         TCHAR   szKey[128];
         LPTSTR  lpDic;
@@ -279,13 +307,10 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
         lpDic = (LPTSTR)&szDic;
         if (Mylstrlen(lpT2) > 1) { // word dic.
             LoadString( hInst, IDS_WORD_KEY, lpKey, 128);
-            cand_mode = IME_CAND_READ; // force CAND_READ
         } else if (isasc || (*lpT2 >= 0x3131 && 0x314e >= *lpT2) ) { // symbol
             LoadString( hInst, IDS_SYM_KEY, lpKey, 128);
-            cand_mode = IME_CAND_CODE; // force CAND_CODE
         } else {
             LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
-            word_mode = 1;
         }
 
         lpDic += GetSaenaruDirectory(lpDic,256);
@@ -353,6 +378,8 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 
             lpCompStr->dwCompStrLen = Mylstrlen(GETLPCOMPSTR(lpCompStr));
         }
+    } else {
+        nBufLen = 1;
     }
 
     //
@@ -515,11 +542,11 @@ set_compstr:
         int pages = 0;
         LPDWORD lpdw;
 
-        //
-        // generate WM_IME_NOTFIY IMN_OPENCANDIDATE message.
-        //
         if (!IsCandidate(lpIMC))
         {
+            //
+            // generate WM_IME_NOTFIY IMN_OPENCANDIDATE message.
+            //
             GnMsg.message = WM_IME_NOTIFY;
             GnMsg.wParam = IMN_OPENCANDIDATE;
             GnMsg.lParam = 1L;
@@ -527,47 +554,54 @@ set_compstr:
             MyDebugPrint((TEXT("ConvHanja: OpenCandidate\r\n")));
         }
 
-        //
-        // Make candidate structures.
-        //
-        lpCandInfo->dwSize = sizeof(MYCAND);
-        lpCandInfo->dwCount = 1;
-        lpCandInfo->dwOffset[0] =
-              (DWORD)((LPSTR)&((LPMYCAND)lpCandInfo)->cl - (LPSTR)lpCandInfo);
-        lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
-        lpdw = (LPDWORD)&(lpCandList->dwOffset);
-        while (*lpstr)
+        if (!IsCandidate(lpIMC) || readcand)
         {
-            lpCandList->dwOffset[i] =
-                   (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-            Mylstrcpy(lpmystr,lpstr);
-            if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
-              *lpTemp = MYTEXT('\0');
-            Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
-            lpstr += (Mylstrlen(lpstr) + 1);
-            i++;
-        }
-        MyDebugPrint((TEXT("ConvHanja: OpenCandidate - %d\r\n"), i));
+            //
+            // Make candidate structures.
+            //
+            lpCandInfo->dwSize = sizeof(MYCAND);
+            lpCandInfo->dwCount = 1;
+            lpCandInfo->dwOffset[0] =
+                (DWORD)((LPSTR)&((LPMYCAND)lpCandInfo)->cl - (LPSTR)lpCandInfo);
+            lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+            lpdw = (LPDWORD)&(lpCandList->dwOffset);
+            while (*lpstr)
+            {
+                lpCandList->dwOffset[i] =
+                    (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
+                Mylstrcpy(lpmystr,lpstr);
+                if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
+                    *lpTemp = MYTEXT('\0');
+                Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
+                lpstr += (Mylstrlen(lpstr) + 1);
+                i++;
+            }
+            MyDebugPrint((TEXT("ConvHanja: OpenCandidate - %d\r\n"), i));
 
-        lpCandList->dwSize = sizeof(CANDIDATELIST) +
-                          (MAXCANDSTRNUM * (sizeof(DWORD) + MAXCANDSTRSIZE));
+            lpCandList->dwSize = sizeof(CANDIDATELIST) +
+                (MAXCANDSTRNUM * (sizeof(DWORD) + MAXCANDSTRSIZE));
+            lpCandList->dwCount = i;
+
+            if (i < MAXCANDPAGESIZE)
+                lpCandList->dwPageSize  = i;
+            else
+                lpCandList->dwPageSize  = MAXCANDPAGESIZE;
+        }
+        // set candidate style.
         lpCandList->dwStyle = cand_mode;
-        lpCandList->dwCount = i;
-        if (i < MAXCANDPAGESIZE)
-            lpCandList->dwPageSize  = i;
-        else
-            lpCandList->dwPageSize  = MAXCANDPAGESIZE;
+
         // Total pages
-        pages = i / lpCandList->dwPageSize + i % lpCandList->dwPageSize;
+        pages = lpCandList->dwCount / lpCandList->dwPageSize + lpCandList->dwCount % lpCandList->dwPageSize;
 
         if (select)
         {
             int sel = lpCandList->dwSelection / lpCandList->dwPageSize;
             sel *= lpCandList->dwPageSize;
             if (select != -999) {
+                int count = lpCandList->dwCount;
                 sel +=select - 1;
-                if (sel >= i)
-                    sel = i - 1;
+                if (sel >= count)
+                    sel = count - 1;
             } else {
                 sel = 0;
             }
@@ -577,7 +611,7 @@ set_compstr:
         else if (offset > 2)
         {
             // last (END)
-            lpCandList->dwSelection = i - 1;
+            lpCandList->dwSelection = lpCandList->dwCount - 1;
             offset = 0; // reset
         } else if (offset < -2)
         {
@@ -593,19 +627,20 @@ set_compstr:
         if (offset < 0 && (int)(lpCandList->dwSelection + offset) < 0)
         {
             int select = lpCandList->dwSelection + offset;
+            int count = lpCandList->dwCount;
             //if (select < 0) select= pages * lpCandList->dwPageSize - offset;
             if (select < 0) select= 0;
-            if (select >= i)
-                select = i - 1;    
+            if (select >= count)
+                select = count - 1;    
             lpCandList->dwSelection = (DWORD)select;
         } else {
             lpCandList->dwSelection += offset;
-            if (offset > 1 && lpCandList->dwSelection >= (DWORD)i)
-                lpCandList->dwSelection = i - 1;
+            if (offset > 1 && lpCandList->dwSelection >= (DWORD)lpCandList->dwCount)
+                lpCandList->dwSelection = lpCandList->dwCount - 1;
         }
 
         // 맨 끝 + 1이면 맨 처음으로
-        if (lpCandList->dwSelection >= (DWORD)i)
+        if (lpCandList->dwSelection >= (DWORD)lpCandList->dwCount)
         {
             lpCandList->dwPageStart = 0;
             lpCandList->dwSelection = 0;
