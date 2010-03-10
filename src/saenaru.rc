@@ -308,8 +308,8 @@ BEGIN
     	MENUITEM "사용자 조합(&C)",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "드보락(&V)",		IDM_DVORAK
-    	MENUITEM "<ESC> 영문전환(&E)",	IDM_ESC_ASCII
-    	MENUITEM "<Shift>-<SPACE> 한/영키 (&H)", IDM_HANGUL_TOGGLE
+    	MENUITEM "ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "Shift-SPACE 한/영키 (&H)", IDM_HANGUL_TOGGLE
     	MENUITEM "단어단위 편집(&W)",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
     	MENUITEM "키보드 보기(&K)",	IDM_SHOW_KEYBOARD
@@ -378,9 +378,9 @@ LANGUAGE 0x12, 0x1
 BEGIN
     IDS_MENU_ENV                "환경설정(&R)"
     IDS_MENU_DVORAK             "드보락(&V)"
-    IDS_MENU_ESC_ASCII          "<&ESC> 영문전환"
+    IDS_MENU_ESC_ASCII          "&ESC 영문전환"
     IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
-    IDS_MENU_HANGUL_TOGGLE      "<Shift>-<SPACE> 한/영키 (&H)"
+    IDS_MENU_HANGUL_TOGGLE      "Shift-SPACE 한/영키 (&H)"
     IDS_MENU_SHOW_KEYBOARD      "키보드 보기(&K)"
 
     IDS_MENU_OLD2BUL            "두벌식(&2)"
@@ -576,8 +576,8 @@ BEGIN
     	MENUITEM "&Compose Map",	IDM_USER_COMP
 	MENUITEM SEPARATOR
     	MENUITEM "D&vorak",		IDM_DVORAK
-    	MENUITEM "<&ESC> to english",	IDM_ESC_ASCII
-        MENUITEM "Use <Shift>-<SPACE>(&H)", IDM_HANGUL_TOGGLE
+    	MENUITEM "&ESC to english",	IDM_ESC_ASCII
+        MENUITEM "Use Shift-SPACE(&H)", IDM_HANGUL_TOGGLE
     	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
     	MENUITEM "Show &Keyboard",	IDM_SHOW_KEYBOARD
@@ -639,10 +639,10 @@ LANGUAGE 0x09, 0x1
 BEGIN
     IDS_MENU_ENV                "Configuration(&C)"
     IDS_MENU_DVORAK             "D&Vorak"
-    IDS_MENU_ESC_ASCII          "<&ESC> to Ascii Mode"
+    IDS_MENU_ESC_ASCII          "&ESC to Ascii Mode"
     IDS_MENU_EDIT_WORD_UNIT     "&Word Unit Edit"
     IDS_MENU_SHOW_KEYBOARD      "Show &Keyboard"
-    IDS_MENU_HANGUL_TOGGLE      "Use <Shift>-<SPACE> (&H)"
+    IDS_MENU_HANGUL_TOGGLE      "Use Shift-SPACE (&H)"
 
     IDS_MENU_OLD2BUL            "&2-Set"
     IDS_MENU_3FIN               "&3-Set Final"
