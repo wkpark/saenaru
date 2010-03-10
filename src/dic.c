@@ -2606,7 +2606,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         }
 
         if ((lpToken != NULL && (iFlag == 0 && MYTEXT('[') == *lpToken)) ||
-                (lpWrite != NULL && (dwBufLen - dwWritten <= 0)) || force || !dwRead) {
+                (lpWrite != NULL && (dwBufLen - dwWritten <= 1)) || force || !dwRead) {
             break;
         }
 
