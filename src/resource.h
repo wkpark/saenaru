@@ -84,6 +84,7 @@
 #define IDC_QWERTY_HOTKEY_SUPPORT 2009
 #define IDC_JAMOS               2010
 #define IDC_HANJA_CAND_SPACE    2011
+#define IDC_SIMILAR_WORDS       2012
 
 /* string tables */
 #define IDS_CONFIGNAME              1000

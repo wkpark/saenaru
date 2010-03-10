@@ -411,6 +411,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp |= QWERTY_HOTKEY_SUPPORT;
                     if (IsDlgButtonChecked(hDlg, IDC_ESCENG_SUPPORT))
                         dwTemp |= ESCENG_SUPPORT;
+                    if (IsDlgButtonChecked(hDlg, IDC_SIMILAR_WORDS))
+                        dwTemp |= SEARCH_SIMILAR_WORDS;
                     if (IsDlgButtonChecked(hDlg, IDC_HANJA_CAND_SPACE))
                         dwTemp |= HANJA_CAND_WITH_SPACE;
                     dwOptionFlag = dwTemp;
@@ -562,6 +564,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_USE_SHIFT_SPACE, 
                                 (dwOptionFlag & USE_SHIFT_SPACE) ? 1 : 0);
+            CheckDlgButton(hDlg, IDC_SIMILAR_WORDS, 
+                                (dwOptionFlag & SEARCH_SIMILAR_WORDS) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_HANJA_CAND_SPACE, 
                                 (dwOptionFlag & HANJA_CAND_WITH_SPACE) ? 1 : 0);
 

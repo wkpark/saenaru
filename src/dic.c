@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/dic.c,v 1.28 2006/12/16 09:30:24 wkpark Exp $
+ * $Id$
  */
 
 #include <windows.h>
@@ -2448,40 +2448,108 @@ hsa_exit:
 }
 
 
-int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen)
+int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, int iFlag)
 {
     DWORD dwWritten = 0;
-    LPMYSTR lpSection, lpTemp, lpTemp2;
-    //const LPMYSTR szSep = MYTEXT(" \r\n\t");
-    const LPMYSTR szSep = MYTEXT("\r\n\t");
+    MYCHAR  myBuf[4098];
+    LPMYSTR lpDic, lpSection, lpTemp, lpTemp2;
+    const LPMYSTR szSep = MYTEXT("\n");
+    LPMYSTR lpToken = NULL, lpNext = NULL;
+    DWORD llen = 0, found = 0, dwRead;
+    LPMYSTR lpWrite = lpBuf;
 
-    LPMYSTR lpToken = Mystrtok(lpDic, szSep);
-    while (NULL != lpToken)
+    myBuf[0] = MYTEXT('\0');
+    lpDic = myBuf;
+
+    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && dwRead > 0)
     {
-        if (MYTEXT('[') == *lpToken)
-        {
-            lpSection = lpToken + 1;
-            if (NULL != (lpTemp = Mystrchr(lpSection, MYTEXT(']'))))
-                *lpTemp = MYTEXT('\0');
-            if (0 == Mylstrcmp(lpSection, lpRead))
+        *(LPMYSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
+
+        lpToken = Mystrtok(lpDic, szSep);
+        while (NULL != lpToken) {
+            if (MYTEXT('[') == *lpToken)
             {
-                lpToken = Mystrtok(NULL, szSep);
-                break; // found it.
+                lpSection = lpToken + 1;
+                if (NULL != (lpTemp = Mystrchr(lpSection, MYTEXT(']'))))
+                    *lpTemp = MYTEXT('\0');
+                if (0 == Mylstrcmp(lpSection, lpRead))
+                {
+                    found = 1;
+                    MyDebugPrint((TEXT(">>>>FOUND %s\n"), lpSection));
+                    break; // found it.
+                } else if ( *(lpSection) > *(lpRead) ) {
+                    found = -1; // not found
+                    break;
+                }
             }
+            lpToken = Mystrtok(NULL, szSep);
         }
-        lpToken = Mystrtok(NULL, szSep);
+        lpToken = Mystrtok(NULL, MYTEXT(""));
+        llen = Mylstrlen(lpToken);
+        if (llen > 0) {
+            Mylstrcpy(lpDic, lpToken); // copy last
+            llen = Mylstrlen(lpDic); // adjust XXX
+            *(lpDic+llen) = MYTEXT('\0');
+            MyDebugPrint((TEXT(">>>>lpDic Last:%d %s\n"), llen, lpDic));
+        }
+        if (found)
+            break;
     }
-    if (NULL != lpToken)
-    {
-        LPMYSTR lpWrite = lpBuf;
+
+    // not found
+    if (found != 1)
+        return 0;
+
+    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL)) {
         DWORD dwW;
         DWORD len;
+        UINT force = 0;
+
+        *(LPWSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
+        lpNext = Mystrchr(lpDic, MYTEXT('\n'));
+        if (lpNext != NULL) lpNext++; // point to next line
+
+        //MyDebugPrint((TEXT(">>>>lpDic=%d, lpNext=%d\n"), lpDic, lpNext));
+
+        lpToken = Mystrtok(lpDic, szSep);
+
         while ((NULL != lpToken) &&
-               ((dwBufLen - dwWritten) > 1) &&
-               (MYTEXT('[') != *lpToken))
+                (lpWrite == NULL || (dwBufLen - dwWritten) > 1))
         {
-            INT isasc;
+            INT isasc, skip;
+            LPMYSTR lpNext2;
             isasc=FALSE;
+            skip=FALSE;
+
+            if (*lpToken == MYTEXT('[')) {
+                if (iFlag) {
+                    // naver style search
+                    lpSection = lpToken + 1;
+                    if (NULL != (lpTemp = Mystrchr(lpSection, MYTEXT(']'))))
+                        *lpTemp = MYTEXT('\0');
+                    MyDebugPrint((TEXT(">>>> lpSection=%s\n"), lpSection));
+                    if (Mylstrlen(lpSection) >= Mylstrlen(lpRead)) {
+                        MYCHAR buf[128];
+                        Mylstrcpyn(buf, lpSection, Mylstrlen(lpRead)+1);
+                        if (0 == Mylstrcmp(buf, lpRead)) {
+                            // ok. continue
+                            MyDebugPrint((TEXT(">>>> lpSection=%s\n"), lpSection));
+                            skip = TRUE;
+                        } else {
+                            force = TRUE;
+                            break;
+                        }
+                    } else {
+                        force = TRUE;
+                        break;
+                    }
+                } else {
+                    force = TRUE;
+                    break;
+                }
+            }
+
+            //MyDebugPrint((TEXT(">>>>WORD lpToken:%s\n"), lpToken));
             if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT('='))))
                 *lpTemp = MYTEXT('\0');
 
@@ -2496,31 +2564,68 @@ int CopyCandidateStringsFromDictionary(LPMYSTR lpDic, LPMYSTR lpRead, LPMYSTR lp
                         lpToken, 1, (char *)&mb, 2, NULL, NULL);
 
                 if(LOBYTE(mb) < 0xa1 || LOBYTE(mb) > 0xfe 
-                    || HIBYTE(mb) < 0xa1 || HIBYTE(mb) > 0xfe)
+                        || HIBYTE(mb) < 0xa1 || HIBYTE(mb) > 0xfe)
                 {
-                    lpToken = Mystrtok(NULL, szSep);
-                    continue;
+                    skip = TRUE;
                 }
             }
             // 뜻이 있으면
-            if ( Mylstrlen(lpTemp+1) > 1) {
+            if ( !skip && Mylstrlen(lpTemp+1) > 1) {
                 *lpTemp = MYTEXT(':');
+
+                // 뜻이 길 경우는 잘라냄. FIXME
+                if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT(','))))
+                    *lpTemp = MYTEXT('\0');
+
                 len = Mylstrlen(lpToken);
             }
             // XXX 뜻이 길어서 전체 크기가 커지면 입력기가 죽는다
-            if ((dwBufLen - dwWritten -1) < len) break;
+            if ( !skip && lpWrite != NULL && (dwBufLen - dwWritten -1) < len) {
+                force = TRUE;
+                break;
+            }
 
-            Mylstrcpyn(lpWrite, lpToken, dwBufLen - dwWritten - 1);
-            dwW = len + 1;
-            lpWrite += dwW;
-            dwWritten += dwW;
-            lpToken = Mystrtok(NULL, szSep);
+            if (!skip) {
+                dwW = len + 1;
+                if (lpWrite != NULL) {
+                    Mylstrcpyn(lpWrite, lpToken, dwBufLen - dwWritten - 1);
+                    lpWrite += dwW;
+                }
+                dwWritten += dwW;
+            }
+
+            if (lpNext == NULL) break; // empty line.
+            lpNext2 = Mystrchr(lpNext, MYTEXT('\n'));
+            if (lpNext2 == NULL) // have no CR
+                break;
+            else
+                lpNext2++; // point to next line
+
+            lpToken = Mystrtok(lpNext, szSep);
+            lpNext = lpNext2;
         }
+
+        if ((lpToken != NULL && (iFlag == 0 && MYTEXT('[') == *lpToken)) ||
+                (lpWrite != NULL && (dwBufLen - dwWritten <= 0)) || force || !dwRead) {
+            break;
+        }
+
+        if (lpToken != NULL) {
+            lpToken = Mystrtok(NULL, MYTEXT(""));
+            llen = Mylstrlen(lpToken);
+            if (llen > 0) {
+                Mylstrcpy(lpDic, lpToken); // copy last
+                llen = Mylstrlen(lpDic); // adjust XXX
+            }
+        } else {
+            llen = 0;
+        }
+    }
+    if (lpWrite != NULL) {
         *lpWrite = MYTEXT('\0');
         dwWritten++;
-        return dwWritten;
     }
-    return 0;
+    return dwWritten;
 }
 
 int GetCandidateStringsFromDictionary(LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename)
@@ -2549,17 +2654,15 @@ int GetCandidateStringsFromDictionary(LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBuf
     {
         if ((dwFileSize = GetFileSize(hTblFile, (LPDWORD)NULL)) != 0xffffffff)
         {
-            if ((lpDic = (LPMYSTR)GlobalAlloc(GPTR, dwFileSize + 2)))
+            MYCHAR  buf[2];
+            buf[0] = MYTEXT('\0');
+            lpDic = (LPMYSTR)buf;
+            if (ReadFile(hTblFile, lpDic, sizeof(MYCHAR), &dwRead, NULL)) // read BOM char.
             {
-                if (ReadFile(hTblFile,    lpDic, dwFileSize, &dwRead, NULL))
+                if (*lpDic == 0xfeff) // is it BOM ?
                 {
-                    if (*lpDic == 0xfeff)
-                    {
-                        *(LPWSTR)(((LPBYTE)lpDic) + dwFileSize) = MYTEXT('\0');
-                        nSize = CopyCandidateStringsFromDictionary(lpDic+1, lpRead, lpBuf, dwBufLen);
-                    }
-                }
-                GlobalFree(lpDic);
+                    nSize = CopyCandidateStringsFromDictionary(hTblFile, lpRead, lpBuf, dwBufLen, dwOptionFlag & SEARCH_SIMILAR_WORDS ? 1:0);
+                } // else ignore.
             }
         }
     }
