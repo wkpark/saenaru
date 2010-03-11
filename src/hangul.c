@@ -2610,13 +2610,27 @@ LPBYTE lpbKeyState;
         hangul_ic_init(&ic);
     }
 
-    if (0 && IsConvertedCompStr(hIMC)) // 후보창을 보여주면서 그와 동시에 글자를 계속 조합할 수 있도록. XXX
+    if (IsConvertedCompStr(hIMC))
     {
-        MakeResultString(hIMC,FALSE);
-        InitCompStr(lpCompStr,CLR_UNDET);
-        dwGCR = GCS_RESULTALL;
+	LPCANDIDATEINFO lpCandInfo;
+	LPCANDIDATELIST lpCandList;
 
-        hangul_ic_init(&ic);
+	// 후보창을 보여주면서 그와 동시에 글자를 계속 조합할 수 있도록.
+	lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+	if (lpCandInfo) {
+	    // 후보창 정보를 가져온다. dwSelection != 0인 경우는 아직 한글이 이미 한자로 변환된 경우
+	    // 이 경우는 선택된 한자를 커밋하고 다시 한글을 입력받는 모드로
+	    lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
+	    if (lpCandList && lpCandList->dwSelection != 0) {
+		// converted.
+		MakeResultString(hIMC,FALSE);
+		InitCompStr(lpCompStr,CLR_UNDET);
+		dwGCR = GCS_RESULTALL;
+
+		hangul_ic_init(&ic);
+	    }
+	    ImmUnlockIMCC(lpIMC->hCandInfo);
+	}
     }
 
     // Init lpstr
