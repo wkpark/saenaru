@@ -327,14 +327,15 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
         nBufLen = GetCandidateStringsFromDictionary(lpT2,
                 szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
 
-        while (nBufLen < 1 && Mylstrlen(lpT2)==1) {
-            MYCHAR han[2];
-            han[0]=0;
+        //
+        // 사전에서 발견되지 않음. 한자가 섞여있거나 한자단어이면 이것을 한글로 변환 시도.
+        //
+        while (nBufLen < 1 && Mylstrlen(lpT2) < 255) {
+            MYCHAR han[256];
+            LPMYSTR lpstr = lpT2, lpHan = han;
+            han[0]=MYTEXT('\0');
 
-            if (*lpT2 < 0x3400 || *lpT2 >=0xfaff) break;
-            if (*lpT2 >= 0xa000 && *lpT2 <=0xf8ff) break;
             // check the hanja_to_hangul table
-
             lpIdx = (LPTSTR)&szIdx;
             LoadString( hInst, IDS_HIDX_KEY, lpKey, 128);
             lpIdx += GetSaenaruDirectory(lpIdx,256);
@@ -343,26 +344,38 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
             sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
             if (sz > 2) {
                 sz= GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpIdx);
-                nBufLen = GetHangulFromHanjaIndex(lpT2, han, 2, (LPTSTR)szIdx);
                 MyDebugPrint((TEXT("Saenaru: %s Idx %s:%d\n"),lpKey, szIdx,sz));
+            } else {
+                break; // hanjaidx not found
             }
-#if 0
-            else 
-                han[0] = (MYCHAR)hanja_search(*lpT2);
-#endif
-            if (han[0]) {
-                han[1]= 0;
-                szBuf[0]= (MYCHAR)han[0]; // set hangul
-                szBuf[1]= 0;
-                //szBuf[1]= MYTEXT(' ');
-                //szBuf[3]= 0;
-                //*lpT2=(MYCHAR)han;
+
+            while (*lpstr) {
+                UINT n;
+                if (*lpstr < 0x3400 || *lpstr >=0xfaff) {
+                    *lpHan = *lpstr; // skip. just copy
+                } else if (*lpstr >= 0xa000 && *lpstr <=0xf8ff) {
+                    *lpHan = *lpstr; // skip. just copy
+                } else {
+                    // FIXME
+                    nBufLen = GetHangulFromHanjaIndex(lpstr, lpHan, 2, (LPTSTR)szIdx); // search Hangul
+                    if (nBufLen < 1)
+                        break; // not found in the hanja idx
+                }
+                lpstr++;
+                lpHan++;
+            }
+
+            if (nBufLen > 0) {
+                *lpHan = MYTEXT('\0');
+                Mylstrcpy(szBuf, han); // copy hangul to candidate list first.
+                szBuf[Mylstrlen(han)] = 0;
+
                 // get hanja list for this hangul
                 nBufLen = GetCandidateStringsFromDictionary(han,
-                        szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
+                        szBuf+Mylstrlen(han)+1, 1024, (LPTSTR)szDic);
                 if (nBufLen == 0) { // not found in the dic
                     nBufLen=1;
-                    szBuf[2]= 0; // double terminate
+                    szBuf[Mylstrlen(han) + 1]= 0; // double terminate
                 }
                 fHanja=TRUE;
             }
