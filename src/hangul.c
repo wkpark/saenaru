@@ -2199,6 +2199,7 @@ int PASCAL set_compose(UINT type)
            compose_table_size =
 		   sizeof(compose_table_yet) / sizeof(HangulCompose);
 	   dwComposeFlag=4;
+           dwImeFlag &= ~SAENARU_ONTHESPOT;
 	   break;
 	default:
 	    // User defined compose map
@@ -2655,7 +2656,8 @@ LPBYTE lpbKeyState;
 		}
 	    }
 	    if (!comb) {
-		if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS)) {
+		//if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS)) {
+		if (dwImeFlag & SAENARU_ONTHESPOT) {
 		    if (lpCompStr->dwCursorPos > 0)
 			// check jamos and convert it to compatible jamos
 			*lpprev = hangul_jamo_to_cjamo((WCHAR) *lpprev);
@@ -2775,7 +2777,8 @@ LPBYTE lpbKeyState;
 		}
 		*lpstr = MYTEXT('\0');
 
-		if (dwImeFlag & SAENARU_ONTHESPOT && !(dwOptionFlag & HANGUL_JAMOS))
+		//if (dwImeFlag & SAENARU_ONTHESPOT && !(dwOptionFlag & HANGUL_JAMOS))
+		if (dwImeFlag & SAENARU_ONTHESPOT)
 		{
                     dwGCR=GCS_RESULTALL;
 
@@ -2965,7 +2968,8 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.a
         GnMsg.wParam = cs;
         //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
         GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
-        if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+        //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+        if (dwImeFlag & SAENARU_ONTHESPOT)
             GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
     }
@@ -3000,25 +3004,7 @@ ac_exit:
 		(fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
 	    // 입력 즉시 후보 창 뜨게 하기.
-	    BOOL candOk = FALSE;
-	    CANDIDATEFORM lc;
-	    /*
-	    candOk = MyImmRequestMessage(hIMC, IMR_CANDIDATEWINDOW, (LPARAM)&lc);   
-	    if (candOk) {
-                // 어떤 어플은 자체 내장된 candidate리스트를 쓰고, 어떤것은 그렇지 않다.
-                // 그런데 이러한 동작이 일관성이 없어서 어떤 어플은 특별처리 해야 한다.
-                // always generage WM_IME_KEYDOWN for VK_HANJA XXX
-                TRANSMSG GnMsg;
-                GnMsg.message = WM_IME_KEYDOWN;
-                GnMsg.wParam = wParam;
-                GnMsg.lParam = lParam;
-                GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-                OutputDebugString(TEXT("Auto DicKeydown: WM_IME_KEYDOWN\r\n"));
-            }
-	    */
-            if (!candOk) {
-                ConvHanja(hIMC,0,0);
-            }
+            ConvHanja(hIMC,0,0);
 	}
     } else {
         WCHAR result = 0;
@@ -3047,7 +3033,8 @@ ac_exit:
             ClearCompStr(lpCompStr,CLR_UNDET);
 	}
 
-        if (((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS)) && resultlen)
+        //if (((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS)) && resultlen)
+        if ((dwImeFlag & SAENARU_ONTHESPOT) && resultlen)
 	    result = *(lpstr - 1);
 
         GnMsg.message = WM_IME_COMPOSITION;
@@ -3083,9 +3070,19 @@ ac_exit:
             GnMsg.wParam = cs;
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+            //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+            if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+
+	    if (ic.len > 1 && // 초성+중성 두글자 이상일 경우.
+		IsCompStr(hIMC) &&
+		(fdwConversion & IME_CMODE_HANJACONVERT) &&
+                    (fdwConversion & IME_CMODE_NATIVE)) {
+
+		// 입력 즉시 후보 창 뜨게 하기.
+                ConvHanja(hIMC,0,0);
+	    }
 	}
 
     }
