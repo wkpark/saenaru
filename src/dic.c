@@ -227,6 +227,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     UINT cand_mode = dwCandStyle;
     UINT word_mode = 0;
     int readcand = 0;
+    BOOL fHanja=FALSE;
 
     lpmystr = (LPMYSTR)myBuf;
 
@@ -298,7 +299,6 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
         LPTSTR  lpIdx;
         TCHAR   szIdx[256];
         INT sz;
-        BOOL    fHanja=FALSE;
 
         if (0x7F > *lpT2) isasc=TRUE;
         MyDebugPrint((TEXT(" * Dic: %x\n"), *lpT2));
@@ -573,6 +573,12 @@ set_compstr:
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
                 Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
+
+                if (fHanja && *lpmystr == *lpT2) {
+                    // 한자를 한글로 변환하는 경우.
+                    // 한자 후보 리스트에 한자가 발견되면 이것을 가리키도록 한다.
+                    select = i + 1;
+                }
                 lpstr += (Mylstrlen(lpstr) + 1);
                 i++;
             }
