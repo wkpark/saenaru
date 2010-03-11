@@ -222,7 +222,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     BOOL bRc = FALSE;
     WCHAR cs=0;
     LPMYSTR lpmystr, lpTemp;
-    MYCHAR myBuf[128];
+    MYCHAR myBuf[256];
     BOOL isasc=FALSE;
     UINT cand_mode = dwCandStyle;
     UINT word_mode = 0;
@@ -411,6 +411,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
             //
             // The dic is too big....
             //
+            MyDebugPrint((TEXT(">>> TOO Big Dic=%d\n"), cnt));
             goto cvk_exit40;
         }
     }
@@ -591,6 +592,7 @@ set_compstr:
                     // 한자를 한글로 변환하는 경우.
                     // 한자 후보 리스트에 한자가 발견되면 이것을 가리키도록 한다.
                     select = i + 1;
+                    fHanja = 0;
                 }
                 lpstr += (Mylstrlen(lpstr) + 1);
                 i++;
@@ -2589,7 +2591,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 }
             }
             // 뜻이 있으면
-            if ( !skip && Mylstrlen(lpTemp+1) > 1) {
+            if ( !skip && lpTemp && Mylstrlen(lpTemp+1) > 1) {
                 *lpTemp = MYTEXT(':');
 
                 // 뜻이 길 경우는 잘라냄. FIXME
@@ -2599,7 +2601,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 len = Mylstrlen(lpToken);
             }
             // XXX 뜻이 길어서 전체 크기가 커지면 입력기가 죽는다
-            if ( !skip && lpWrite != NULL && (dwBufLen - dwWritten -1) < len) {
+            if ( !skip && lpWrite != NULL && (dwBufLen - dwWritten - 2) < len) {
                 force = TRUE;
                 break;
             }
@@ -2607,7 +2609,8 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             if (!skip) {
                 dwW = len + 1;
                 if (lpWrite != NULL) {
-                    Mylstrcpyn(lpWrite, lpToken, dwBufLen - dwWritten - 1);
+                    Mylstrcpyn(lpWrite, lpToken, dwW);
+                    //Mylstrcpyn(lpWrite, lpToken, dwBufLen - dwWritten - 1);
                     lpWrite += dwW;
                 }
                 dwWritten += dwW;
@@ -2626,6 +2629,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
 
         if ((lpToken != NULL && (iFlag == 0 && MYTEXT('[') == *lpToken)) ||
                 (lpWrite != NULL && (dwBufLen - dwWritten <= 1)) || force || !dwRead) {
+            MyDebugPrint((TEXT(">>>>Wow lpToken:%c, force=%d, dwRead=%d, dwBuf - dwWrite=%d\n"), *lpToken, force, dwRead, dwBufLen - dwWritten));
             break;
         }
 

@@ -800,6 +800,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
 
                     lpmystr = (LPTSTR) mybuf;
                     Mylstrcpy(lpmystr, lpstr);
+                    lpmystr[MAXCANDSTRSIZE]=MYTEXT('\0'); // force terminate str
                     if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':')))) {
                         mean = TRUE;
                         if (lpCandList->dwStyle == IME_CAND_READ) {

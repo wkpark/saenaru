@@ -117,7 +117,7 @@ typedef TCHAR             MYCHAR;
 #define MAXCANDSTRSIZE          16
 #define MAXGLCHAR               32
 //#define MAXCANDSTRNUM           32
-#define MAXCANDSTRNUM           256
+#define MAXCANDSTRNUM           300
 
 
 /* for GlobalAlloc */
