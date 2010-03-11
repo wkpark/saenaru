@@ -961,15 +961,18 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         hbmpHanja = (HBITMAP)GetWindowLongPtr(hCandWnd,FIGWL_HANJA_MODEBMP);
         hbmpOld = SelectObject(hTempDC,hbmpHanja);
 
-        BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 114, rc.bottom - 1, hTempDC, 0, 0, SRCCOPY);
+        BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 114, rc.bottom - 1,
+                hTempDC, 0, 0, SRCAND);
 
         if (dwHanjaMode) {
             hbmpCheck = (HBITMAP)GetWindowLongPtr(hCandWnd,FIGWL_HANJA_CHECKBMP);
             SelectObject(hTempDC2,hbmpCheck);
             if (dwHanjaMode == 1)
-                BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 8, rc.bottom - 1, hTempDC2, 0, 0, SRCCOPY);
+                BitBlt(hMemDC, rc.left + 32, rc.bottom - 15, rc.left + 32 + 8, rc.bottom - 1,
+                        hTempDC2, 0, 0, SRCAND);
             else
-                BitBlt(hMemDC, rc.left + 88, rc.bottom - 15, rc.left + 88 + 8, rc.bottom - 1, hTempDC2, 0, 0, SRCCOPY);
+                BitBlt(hMemDC, rc.left + 88, rc.bottom - 15, rc.left + 88 + 8, rc.bottom - 1,
+                        hTempDC2, 0, 0, SRCAND);
         }
     }
 
