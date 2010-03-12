@@ -314,10 +314,16 @@ LPARAM lParam;
                         lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
                         if (IsWindow(lpUIExtra->uiCand.hWnd))
                             HideCandWindow(lpUIExtra);
+
+                        // http://msdn.microsoft.com/en-us/library/dd374142(VS.85).aspx
+                        // Is it needed for Korean IME ?
                         if (lParam & ISC_SHOWUICANDIDATEWINDOW)
                         {
-                            if (lpCandInfo->dwCount)
+                            // Saenaru always commit compStr when it lost its focus.
+                            // and then the following if statement always false.
+                            if (lpCandInfo->dwCount && IsConvertedCompStr(hUICurIMC))
                             {
+                                // not reach :)
                                 CreateCandWindow(hWnd,lpUIExtra,lpIMC );
                                 ResizeCandWindow(lpUIExtra,lpIMC);
                                 MoveCandWindow(hWnd,lpIMC,lpUIExtra,FALSE);
@@ -452,14 +458,40 @@ LPARAM lParam;
             break;
 
         case WM_IME_SELECT:
+            MyDebugPrint((TEXT("* WM_IME_SELECT\r\n")));
             if (wParam)
             {
+                MyDebugPrint((TEXT("***** TRUE\r\n")));
                 hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
                 lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
                 lpUIExtra->hIMC = hUICurIMC;
+
+                //
+                // Close and clear CandInfo!
+                // Some IME like as the MS IME 2002 do not close the CandInfo properly.
+                // Saenaru check prev CandInfo and force to close it.
+                lpIMC = ImmLockIMC(hUICurIMC);
+                if (lpIMC) {
+                    LPCANDIDATEINFO lpCandInfo;
+                    lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+                    if (lpCandInfo) {
+                        if (IsCandidate(lpIMC)) {
+                            TRANSMSG GnMsg;
+
+                            ClearCandidate(lpCandInfo);
+                            GnMsg.message = WM_IME_NOTIFY;
+                            GnMsg.wParam = IMN_CLOSECANDIDATE;
+                            GnMsg.lParam = 1;
+                            GenerateMessage(hUICurIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
+                        }
+                        ImmUnlockIMCC(lpIMC->hCandInfo);
+                    }
+                }
+
                 GlobalUnlock(hUIExtra);
             }
-            // XXX
+            if (lParam)
+                MyDebugPrint((TEXT("* hKL=%x\r\n"),lParam));
             //
             break;
 
