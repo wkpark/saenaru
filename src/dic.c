@@ -2468,16 +2468,100 @@ hsa_exit:
     ImmUnlockIMC(hIMC);
 }
 
+WCHAR PASCAL
+hangul_cho_to_jamo(WCHAR key)
+{
+#define ______ 0x0
+    static const WCHAR table[] = {
+        0x1100,
+        0x1101,
+        ______,
+        0x1102,
+        ______,
+        ______,
+        0x1103,
+        0x1104,
+        0x1105,
+        ______,
+        ______,
+        ______,
+        ______,
+        ______,
+        ______,
+        ______,
+        0x1106,
+        0x1107,
+        0x1108,
+        ______,
+        0x1109,
+        0x110a,
+        0x110b,
+        0x110c,
+        0x110d,
+        0x110e,
+        0x110f,
+        0x1110,
+        0x1111,
+        0x1112
+    };
+    if (0x3131 <= key && key <= 0x314e) {
+        return table[ key - 0x3131];
+    }
+    return 0;
+}
 
 int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, int iFlag)
 {
     DWORD dwWritten = 0;
     MYCHAR  myBuf[4098];
     LPMYSTR lpDic, lpSection, lpTemp, lpTemp2;
+    MYCHAR  myBase[128];
+    LPMYSTR lpReadBase;
     const LPMYSTR szSep = MYTEXT("\n");
     LPMYSTR lpToken = NULL, lpNext = NULL;
     DWORD llen = 0, found = 0, dwRead;
     LPMYSTR lpWrite = lpBuf;
+    int olen = Mylstrlen(lpRead);
+    MYCHAR r_from = 0, r_to = 0;
+
+    lpReadBase = myBase;
+    //
+    // make a code range to match hangul words
+    // check 자유(ㄷ) or 자유(도)
+    //
+    while (iFlag && olen > 1 && olen < 128) {
+        MYCHAR last = *(lpRead + olen - 1);
+
+        if (0x3131 <= last && last <= 0x314e) {
+            // check choseong
+            last = hangul_cho_to_jamo(last);
+            if (!last)
+                break;
+        } else if (hangul_is_syllable(last)) {
+            // check syllable without jongseong
+            WCHAR cho, jung, jong;
+            hangul_syllable_to_jamo(last, &cho, &jung, &jong);
+            if (!jong) {
+                // make range from cho-jung to cho-jung-HIEUH
+                r_from = last;
+                r_to = hangul_jamo_to_syllable(cho, jung, 0x11c2);
+                Mylstrcpyn(lpReadBase, lpRead, olen);
+                *(lpReadBase + olen - 1) = MYTEXT('\0');
+                break;
+            }
+        }
+
+        if (0x1100 <= last && last <= 0x1112) {
+            // make range from cho-A to cho-I-HIEUH
+            r_from = hangul_jamo_to_syllable(last, 0x1161,0);
+            r_to = hangul_jamo_to_syllable(last, 0x1175, 0x11c2);
+            MyDebugPrint((TEXT(">>>> Range from=%c, to=%c\n"), r_from, r_to));
+
+            Mylstrcpyn(lpReadBase, lpRead, olen);
+            *(lpReadBase + olen - 1) = MYTEXT('\0');
+        }
+        break;
+    }
 
     myBuf[0] = MYTEXT('\0');
     lpDic = myBuf;
@@ -2501,6 +2585,24 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 } else if ( *(lpSection) > *(lpRead) ) {
                     found = -1; // not found
                     break;
+                } else if ( *(lpSection) == *(lpRead) && iFlag) {
+                    int nlen = Mylstrlen(lpSection);
+                    if (nlen > olen && olen > 1 && olen < 128) {
+                        MYCHAR tmp[128];
+                        Mylstrcpyn(tmp, lpSection, olen + 1);
+                        tmp[olen] = MYTEXT('\0');
+                        if (0 == Mylstrcmp(lpRead, tmp)) {
+                            found = 1;
+                            break;
+                        } else if (r_from) {
+                            MYCHAR next = lpSection[olen - 1];
+                            tmp[olen - 1] = MYTEXT('\0');
+                            if (0 == Mylstrcmp(lpReadBase, tmp) && next >= r_from && next <= r_to) {
+                                found = 1;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             lpToken = Mystrtok(NULL, szSep);
@@ -2556,6 +2658,15 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                             // ok. continue
                             MyDebugPrint((TEXT(">>>> lpSection=%s\n"), lpSection));
                             skip = TRUE;
+                        } else if (r_from) {
+                            MYCHAR next = lpSection[olen - 1];
+                            buf[olen - 1] = MYTEXT('\0');
+                            if (0 == Mylstrcmp(lpReadBase, buf) && next >= r_from && next <= r_to) {
+                                skip = TRUE;
+                            } else {
+                                force = TRUE;
+                                break;
+                            }
                         } else {
                             force = TRUE;
                             break;
