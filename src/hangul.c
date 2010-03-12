@@ -3013,7 +3013,7 @@ ac_exit:
     if ( dwGCR != GCS_RESULTALL ) {
 	if (!cs) {
             MakeResultString(hIMC,TRUE);
-	} else if (lpCompStr->dwCompStrLen > 1 && // 초성+중성 두글자 이상일 경우.
+	} else if ((lpCompStr->dwCompStrLen > 1 || ic.len > 1) && // 초성+중성 두글자 이상일 경우.
 		IsCompStr(hIMC) &&
 		(fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
