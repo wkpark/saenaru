@@ -39,6 +39,7 @@
 int PASCAL GetCompFontHeight(LPUIEXTRA lpUIExtra);
 
 HWND g_hwndTip = NULL;
+DWORD dwFixing = 0;
 
 /**********************************************************************/
 /*                                                                    */
@@ -66,6 +67,7 @@ LPARAM lParam;
     INT select, selpos;
     INT offset;
     static INT o_selpos = -1;
+    DWORD  dwT;
 
 
     switch (message)
@@ -188,6 +190,11 @@ LPARAM lParam;
         case WM_RBUTTONUP:
 
             DragUI(hWnd,message,wParam,lParam);
+
+            dwT = GetWindowLong(hWnd,FIGWL_MOUSE);
+
+            if (dwT & FIM_MOVED)
+                dwFixing = 1;
 
             if (dy == 0)
             {
@@ -1095,6 +1102,7 @@ void PASCAL HideCandWindow( LPUIEXTRA lpUIExtra)
     ti.uFlags=0;
     ti.hwnd=lpUIExtra->uiCand.hWnd;
     ti.uId=0;
+    dwFixing = 0;
 
     SendMessage(g_hwndTip, TTM_TRACKACTIVATE, (WPARAM) FALSE, (LPARAM) &ti);
 }
@@ -1279,6 +1287,13 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
         }
         //ScreenToClient(lpIMC->hWnd,&pt);
         //ClientToScreen(lpIMC->hWnd,&pt);
+    }
+
+    // moved and fixed ?
+    if (dwFixing && IsWindow(lpUIExtra->uiCand.hWnd)) {
+        GetWindowRect(lpUIExtra->uiCand.hWnd,&rc);
+        pt.x = rc.left;
+        pt.y = rc.top;
     }
 
     {
