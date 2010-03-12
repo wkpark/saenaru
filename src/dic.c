@@ -1310,6 +1310,11 @@ LPBYTE lpbKeyState;
     UINT select=0, changed=0;
     LRESULT candOk=FALSE;
 
+    if ( (dwOptionFlag & USE_SHIFT_SPACE) && wParam == VK_SPACE && IsCTLPushed(lpbKeyState))
+    {
+        wParam = VK_F9;
+    }
+
     // Candidate문자 선택
     if (IsConvertedCompStr(hIMC))
     {

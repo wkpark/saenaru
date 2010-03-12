@@ -376,15 +376,13 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     {
         //SHORT ShiftState = (GetKeyState(VK_SHIFT) >> 31) & 1;
         //SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
-        BYTE pbKeyState [256];
-        SHORT ShiftState;
+        //BYTE pbKeyState [256];
 
-        GetKeyboardState((LPBYTE)&pbKeyState);
-        ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
-        if (IsSHFTPushed(pbKeyState))
-            vKey = VK_HANGUL;
-        else if (IsCTLPushed(pbKeyState))
-            vKey = VK_HANJA;
+        //GetKeyboardState((LPBYTE)&pbKeyState);
+        if (IsSHFTPushed(lpbKeyState))
+            vkey = VK_HANGUL;
+        else if (IsCTLPushed(lpbKeyState))
+            vkey = VK_HANJA;
     }
 
     fOpen = lpIMC->fOpen;
@@ -397,7 +395,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     }
 #endif
 
-    switch ( ( LOWORD(vKey) & 0x00FF ) ) {
+    switch ( vkey ) {
         case VK_HANJA:
             if ( lKeyData & 0x80000000 ) break;
 
@@ -424,10 +422,12 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 if (!fOpen)
                     ImmSetOpenStatus(hIMC,FALSE);
 
-                //ImmUnlockIMC(hIMC);
+            }
 
-                //return FALSE;
-                break;
+            if ((LOWORD(vKey) & 0x00FF) == VK_SPACE) {
+                // Ctrl-SPACE
+                ImmUnlockIMC(hIMC);
+                return TRUE;
             }
             break;
 #if 0
