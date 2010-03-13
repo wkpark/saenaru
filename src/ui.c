@@ -492,6 +492,10 @@ LPARAM lParam;
             }
             if (lParam)
                 MyDebugPrint((TEXT("* hKL=%x\r\n"),lParam));
+
+            if (!dwScanCodeBased &&
+                    ((HANDLE)lParam != LongToHandle(0xE0120412) || (HANDLE)lParam != LongToHandle(0xE0130412)))
+                dwScanCodeBased = 1;
             //
             break;
 
