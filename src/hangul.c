@@ -2562,7 +2562,7 @@ LPBYTE lpbKeyState;
     if (fdwConversion & IME_CMODE_NATIVE) {
 	hkey = keyToHangulKey( code );
 
-	if (dwScanCodeBased && hkey == code) {
+	if (dwScanCodeBased > 1 && hkey == code) {
 	    // there are no keymap entry.
 	    // use original VK codes.
 	    hkey = code = (WORD) HIWORD(wParam);
