@@ -2494,7 +2494,7 @@ LPARAM lParam;
 LPBYTE lpbKeyState;
 {
     WORD code = (WORD) HIWORD(wParam);
-    WORD scan = (WORD) HIWORD(lParam);
+    WORD scan = (WORD) (HIWORD(lParam) & 0xFF);
     WORD ocode;
 
     LPMYSTR lpchText;
