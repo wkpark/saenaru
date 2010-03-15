@@ -88,3 +88,14 @@
 #undef  T31
  #define T31 _EQ(                                        'K'                      )
 
+#undef T3A
+ #define T3A _EQ(                                       BACK                      )
+#undef X3A
+ #define X3A _EQ(                                       BACK                      )
+
+#if defined KBD_TYPE == 10
+ #undef T5C
+  #define T5C _EQ(                                       RMENU                     )
+ #undef X5C
+  #define X5C _EQ(                                       RMENU                     )
+#endif
