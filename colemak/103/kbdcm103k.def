@@ -1,0 +1,4 @@
+LIBRARY kbdcm103k
+ 
+ EXPORTS 
+    KbdLayerDescriptor @1

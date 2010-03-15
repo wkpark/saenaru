@@ -1,0 +1,30 @@
+TARGETNAME=kbdcm103k
+
+#****************************** File Header ******************************\
+# File Name: sources.inc for KBDs
+#
+# Project specific SOURCES file.
+#
+#***************************************************************************/
+
+INCLUDES=..\..\..\..\inc
+
+C_DEFINES=-DKBD_TYPE=13
+UMTYPE=nt
+UMTEST=
+UMAPPL=
+UMBASE=0x1000000
+UMLIBS=
+TARGETLIBS=
+DLLDEF=$(TARGETNAME).def
+
+!if $(IA64)
+SECTION_ALIGNMENT=0x4000
+!endif
+LINKER_FLAGS = -merge:.edata=.data -merge:.rdata=.data -merge:.text=.data -merge:.bss=.data -section:.data,re
+
+TARGETPATH=$(_OBJ_DIR)
+TARGETTYPE=DYNLINK
+
+SOURCES=../kbdcmk.c $(TARGETNAME).rc
+

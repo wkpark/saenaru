@@ -1,0 +1,4 @@
+LIBRARY Colemak
+ 
+ EXPORTS 
+    KbdLayerDescriptor @1
