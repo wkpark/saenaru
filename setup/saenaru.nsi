@@ -1,6 +1,6 @@
 ; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
-; $Saenaru: saenaru/setup/saenaru.nsi,v 1.9 2007/12/29 16:52:04 wkpark Exp $
+; $Id$
 
 !define RELVERSION      "1.1.0cvs-snapshot"
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
@@ -9,6 +9,8 @@
 !define DDK64BUILDDIR   "..\src\objfre_wnet_amd64\amd64"
 !define DVBUILDDIR      "..\kbddvk\objfre_wxp_x86\i386"
 !define DV64BUILDDIR    "..\kbddvk\objfre_wnet_amd64\amd64"
+!define CMBUILDDIR      "..\colemak\objfre_wxp_x86\i386"
+!define CM64BUILDDIR    "..\colemak\objfre_wnet_amd64\amd64"
 !define RESOURCEDIR     "..\resource"
 !define HELPDIR         "..\help"
 !define SRCROOTDIR      ".."
@@ -51,6 +53,7 @@ BrandingText "새나루 인스톨러"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_INSTFILES
   Page custom OpenInputSetting
+  Page custom OpenUserKeyboard OpenUserKbdSettings
   !insertmacro MUI_PAGE_FINISH 
   
   !insertmacro MUI_UNPAGE_CONFIRM
@@ -132,7 +135,11 @@ Section "새나루 입력기" SecBody
   File "${RESOURCEDIR}\jinsuk.dic"
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
+  File "${RESOURCEDIR}\old2set3set.reg"
   File "${RESOURCEDIR}\comp_default.reg"
+  ;;
+  ;;File "seongjo.reg"
+  ;;
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
   
   ;Store install folder
@@ -183,6 +190,47 @@ Section "새나루 입력기" SecBody
   noreboot:
 SectionEnd
 
+Section /o "새나루 콜맥(Colemak)" SecColemak
+
+  ;SectionIn RO
+
+  SetOutPath "$SYSDIR"
+  SetOverwrite try
+
+  File "${CMBUILDDIR}\kbdcmk.dll"
+  IfErrors 0 kbdcmkDone
+
+  GetTempFileName $3
+  File /oname=$3 "${CMBUILDDIR}\kbdcmk.dll"
+  Rename /REBOOTOK $3 $SYSDIR\kbdcmk.dll
+  kbdcmkDone:
+
+  #
+  # 64bit install
+  #
+  ${If} ${RunningX64}
+    ${DisableX64FSRedirection}
+
+    File "${CM64BUILDDIR}\kbdcmk.dll"
+    IfErrors 0 kbdcmk64Done
+
+    GetTempFileName $3
+    File /oname=$3 "${CM64BUILDDIR}\kbdcmk.dll"
+    Rename /REBOOTOK $3 $SYSDIR\kbdcmk.dll
+    kbdcmk64Done:
+    ${EnableX64FSRedirection}
+  ${EndIf}
+
+  ; Colemak driver support
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout file" "kbdcmk.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout text" "새나루 한글 입력기"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout display name" "한글 입력기 (새나루 콜맥)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "IME file" "SAENARU.IME"
+
+  IfRebootFlag 0 noreboot
+    MessageBox MB_OK|MB_ICONINFORMATION "새나루가 사용중이기 때문에 설치/업데이트가 완료되지 못했습니다. 재부팅을 해야 설치가 완료됩니다."
+  noreboot:
+SectionEnd
 
 Section /o "새나루 소스 코드" SecSource
 
@@ -287,6 +335,13 @@ SectionEnd
   LangString DESC_IME_SETTING_HEADER ${LANG_KOREAN} "제어판의 입력기 설정 변경창을 직접 열어 사용자가 입력기 설정을 추가 및 변경할 수 있습니다."
   LangString DESC_IME_SETTING_BUTTON ${LANG_KOREAN} "입력기 설정"
 
+  LangString DESC_KBD_SETTING_TITLE ${LANG_KOREAN} "사용자 정의 키보드 설정"
+  LangString DESC_KBD_SETTING_SUBTITLE ${LANG_KOREAN} "미리 정의된 사용자 정의 키보드 정보를 등록합니다."
+  LangString DESC_KBD_SETTING_HEADER ${LANG_KOREAN} "미리 정의된 사용자 정의 키보드입니다. 아래 목록에 있는 사용자 정의 자판은 새나루 환경설정 메뉴에 나타나며 기본자판처럼 쓸 수 있습니다."
+  LangString DESC_KBD_OLD_BUTTON ${LANG_KOREAN} "옛한글 두벌/세벌 자판 (&Y)"
+  LangString DESC_KBD_NEW_BUTTON ${LANG_KOREAN} "새두벌/새세벌 자판 (&N)"
+  LangString DESC_KBD_SEONG_BUTTON ${LANG_KOREAN} "한글성조 자판 (&S)"
+
 
 Function OpenInputSetting
 	nsDialogs::Create 1018
@@ -303,6 +358,42 @@ Function OpenKeyboardSettings
 	Exec "RunDll32.exe shell32.dll,Control_RunDLL input.dll"
 FunctionEnd
 
+Var old_kbd
+Var new_kbd
+Var seong_kbd
+Var dialog
+Function OpenUserKeyboard
+	nsDialogs::Create 1018
+        Pop $dialog
+	!insertmacro MUI_HEADER_TEXT "$(DESC_KBD_SETTING_TITLE)" "$(DESC_KBD_SETTING_SUBTITLE)"
+	${NSD_CreateLabel} 0 0 100% 103 "$(DESC_KBD_SETTING_HEADER)"
+	${NSD_CreateCheckBox} 0 104 110u 17u "$(DESC_KBD_OLD_BUTTON)"
+	Pop $old_kbd
+	${NSD_CreateCheckBox} 120u 104 110u 17u "$(DESC_KBD_NEW_BUTTON)"
+	Pop $new_kbd
+	;${NSD_CreateCheckBox} 0 144 110u 17u "$(DESC_KBD_SEONG_BUTTON)"
+	;Pop $seong_kbd
+	;
+	nsDialogs::Show
+FunctionEnd
+
+Function OpenUserKbdSettings
+        ${NSD_GetState} $old_kbd $0
+        ${If} $0 == 1
+	  Exec "Regedit /s $INSTDIR\old2set3set.reg"
+        ${EndIf}
+
+        ${NSD_GetState} $new_kbd $0
+        ${If} $0 == 1
+	  Exec "Regedit /s $INSTDIR\2set3set.reg"
+        ${EndIf}
+
+        ${NSD_GetState} $seong_kbd $0
+        ${If} $0 == 1
+	  Exec "Regedit /s $INSTDIR\seongjo.reg"
+        ${EndIf}
+FunctionEnd
+
 ;--------------------------------
 ;Descriptions
 
@@ -310,9 +401,11 @@ FunctionEnd
   LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다.$\r$\n새나루는 모든 소스코드가 공개된 자유 소프트웨어입니다.$\r$\n소스코드는 http://kldp.net/projects/saenaru 사이트에서 직접 받으실 수 있습니다."
   LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.$\r$\n로그오프 후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다."
   LangString DESC_SecAdd ${LANG_KOREAN} "새나루를 한글 입력기 목록에 추가합니다.$\r$\n이 경우 입력기 상태바에서 새나루를 선택하실 수 있게 됩니다."
+  LangString DESC_SecColemak ${LANG_KOREAN} "새나루 콜맥(Colemak)자판 지원을 위한 콜맥 키보드 레이아웃 드라이버 설치 및 설정을 합니다."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecBody} $(DESC_SecBody)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecColemak} $(DESC_SecColemak)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecAdd} $(DESC_SecAdd)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDefault} $(DESC_SecDefault)
@@ -333,7 +426,16 @@ FunctionEnd
 
 Section "Uninstall"
 
+  ${If} ${RunningX64}
+    ${DisableX64FSRedirection}
+    Delete "$SYSDIR\saenaru.ime"
+    Delete "$SYSDIR\kbddvk.dll"
+    ${EnableX64FSRedirection}
+  ${EndIf}
+
   Delete "$SYSDIR\saenaru.ime"
+  Delete "$SYSDIR\kbddvk.dll"
+
   Delete "$INSTDIR\saenaru.dic"
   Delete "$INSTDIR\nabi.dic"
   Delete "$INSTDIR\winsym.dic"
