@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru$
+ * $Id$
  */
 
 /****************************** Module Header ******************************\
@@ -48,8 +48,25 @@
  * kbd type should be controlled by cl command-line argument
  */
 
+#ifndef KBD_TYPE
 /* Korean 101 Type A */
 #define KBD_TYPE 10
+#endif
+
+/*
+ * KO 101 Hanguel Keyboard Type B
+ */
+//#define KBD_TYPE 11
+
+/*
+ * KO 101 Hanguel Keyboard Type C
+ */
+//#define KBD_TYPE 12
+//
+/*
+ * KO 103/106 Hanguel Keyboard
+ */
+//#define KBD_TYPE 13
 
 /*
 * Include the basis of all keyboard table values
