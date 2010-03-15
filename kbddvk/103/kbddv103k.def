@@ -1,4 +1,4 @@
-LIBRARY kbddvk103
+LIBRARY kbddv103k
  
  EXPORTS 
     KbdLayerDescriptor @1

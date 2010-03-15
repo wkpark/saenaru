@@ -9,7 +9,7 @@ TARGETNAME=kbddv103k
 
 INCLUDES=..\..\..\..\inc
 
-C_DEFINES=
+C_DEFINES=-DKBD_TYPE=13
 UMTYPE=nt
 UMTEST=
 UMAPPL=
@@ -26,5 +26,5 @@ LINKER_FLAGS = -merge:.edata=.data -merge:.rdata=.data -merge:.text=.data -merge
 TARGETPATH=$(_OBJ_DIR)
 TARGETTYPE=DYNLINK
 
-SOURCES=$(TARGETNAME).c $(TARGETNAME).rc
+SOURCES=..\kbddvk.c $(TARGETNAME).rc
 
