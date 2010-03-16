@@ -328,10 +328,10 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         return FALSE;
 
 
-    //if (IsSHFTPushed(lpbKeyState) && vkey == VK_BACK && !IsCompStr(hIMC)) {
-    //    return TRUE;
-    //    // Make it option or default ? FIXME see also process.c
-    //}
+    if (IsSHFTPushed(lpbKeyState) && vkey == VK_BACK && !IsCompStr(hIMC)) {
+        return TRUE;
+        // Make it option or default ? FIXME see also process.c
+    }
     if (vkey == 0xFF) {
         // unknown VK Key.
         // builtin support HANGUL, HANJA

@@ -1655,6 +1655,12 @@ LPBYTE lpbKeyState;
                                                     ic.laststate = 3;
                                                 }
                                             }
+
+                                            if (!(lpIMC->fdwConversion & IME_CMODE_NATIVE)) {
+                                                ChangeMode(hIMC,TO_CMODE_HANGUL);
+                                            }
+                                        } else {
+                                            hangul_ic_init(&ic);
                                         }
                                         // 
                                         DeleteChar(hIMC,wParam);

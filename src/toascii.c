@@ -45,6 +45,7 @@ UINT WINAPI ImeToAsciiEx (UINT uVKey,UINT uScanCode,CONST LPBYTE lpbKeyState,LPT
     LPARAM lParam;
     LPINPUTCONTEXT lpIMC;
     BOOL fOpen;
+    DWORD vkey = LOWORD(uVKey) & 0x00FF;
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeToAsciiEx"));
 
@@ -66,7 +67,7 @@ UINT WINAPI ImeToAsciiEx (UINT uVKey,UINT uScanCode,CONST LPBYTE lpbKeyState,LPT
     ImmUnlockIMC(hIMC);
 
     // The current status of IME is "closed".
-    if (!fOpen)
+    if (!fOpen && vkey != VK_BACK)
         goto itae_exit;
 
     if (uScanCode & 0x8000)
