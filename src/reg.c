@@ -286,6 +286,7 @@ void SetDwordToSetting(LPCTSTR lpszKey, DWORD dwFlag)
 
 void PASCAL SetGlobalFlags()
 {
+    DWORD tmp;
 #ifdef DEBUG
     dwLogFlag = GetDwordFromSetting(TEXT("LogFlag"));
     dwDebugFlag = GetDwordFromSetting(TEXT("DebugFlag"));
@@ -293,6 +294,14 @@ void PASCAL SetGlobalFlags()
 
     dwOptionFlag = GetDwordFromSetting(TEXT("OptionFlag"));
     dwLayoutFlag = GetDwordFromSetting(TEXT("LayoutFlag"));
+
+    // get ScanCode based setting.
+    dwScanCodeBased = GetDwordFromSetting(TEXT("ScanCodeBased"));
+
+    tmp = GetDwordFromSetting(TEXT("ImeFlag"));
+    if (tmp) {
+        dwImeFlag = tmp;
+    }
 }
 
 #ifdef DEBUG

@@ -158,6 +158,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 
                                 for (i = 0; i < Mylstrlen(lpData); i++) {
                                         if (*((LPMYSTR)lpData + i) == MYTEXT(' ') ||
+                                                *((LPMYSTR)lpData + i) == MYTEXT('\r') ||
                                                 *((LPMYSTR)lpData + i) == MYTEXT('\n'))
                                             break;
                                 }
@@ -381,7 +382,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         //GetKeyboardState((LPBYTE)&pbKeyState);
         if (IsSHFTPushed(lpbKeyState))
             vkey = VK_HANGUL;
-        else if (IsCTLPushed(lpbKeyState))
+        else if (dwImeFlag & USE_CTRL_SPACE && IsCTLPushed(lpbKeyState))
             vkey = VK_HANJA;
     }
 
@@ -399,7 +400,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         case VK_HANJA:
             if ( lKeyData & 0x80000000 ) break;
 
-            if (!IsCompStr(hIMC)) {
+            if (!IsCompStr(hIMC) && IsCTLPushed(lpbKeyState)) {
                 fOpen = ImmGetOpenStatus(hIMC);
                 if (!fOpen)
                     ImmSetOpenStatus(hIMC,TRUE);

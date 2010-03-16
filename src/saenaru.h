@@ -85,6 +85,7 @@
 #define HANGUL_JAMOS           0x00000800
 #define HANJA_CAND_WITH_SPACE  0x00001000
 #define SEARCH_SIMILAR_WORDS   0x00002000
+#define USE_CTRL_SPACE         0x00004000
 #define SCANCODE_BASED         0x00010000
 
 /* for Unicode SAENARU */
