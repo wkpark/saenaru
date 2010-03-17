@@ -1758,7 +1758,7 @@ LPBYTE lpbKeyState;
                                 // clause dictionary.
                                 *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
                             } else  {
-                                const LPMYSTR szSep = MYTEXT("\r\n\t");
+                                const LPMYSTR szSep = MYTEXT(" \r\n\t");
                                 LPMYSTR lpToken;
                                 // one char reconversion.
                                 *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');

@@ -140,8 +140,12 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             if (!lpIMC) return FALSE;
 
             fOpen = lpIMC->fOpen;
-            if (!fOpen)
+            if (!fOpen) {
                 MyDebugPrint((TEXT("\t === XXX IME NOT OPEN:\r\n")));
+                //ImmUnlockIMC(hIMC);
+                //return FALSE;
+                ImmSetOpenStatus(hIMC,TRUE);
+            }
 
 #ifndef USE_NO_IME_ESCAPE
             while (!IsCompStr(hIMC)) {
@@ -164,6 +168,25 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                 }
                                 if (i == 0) {
                                     lRet = FALSE;
+
+        		            lpCompStr =
+                                        (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr);
+        		            if (lpCompStr != NULL) {
+                                        TRANSMSG GnMsg;
+                                        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+#if 1
+                                        // 노트패드에서 이상하게 쓰레기값이 붙는다.
+                                        // 그래서 WM_IME_ENDCOMPOSITION 메시지를 날리니
+                                        // 정상적으로 작동
+                                        GnMsg.message = WM_IME_ENDCOMPOSITION;
+                                        GnMsg.wParam = 0;
+                                        GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
+                                        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+                                        GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
+#endif
+                                        ImmUnlockIMCC (lpIMC->hCompStr);
+                                    }
+
                                     break;
                                 }
                                 Mylstrcpyn(lpDump,lpData, i * sizeof(MYCHAR));
@@ -250,6 +273,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                                     GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
 #endif
+                                    ImmUnlockIMCC (lpIMC->hCompStr);
                                     lRet=TRUE;
         		        } else {
                                     OutputDebugString(TEXT(" *** lpCompStr== NULL\r\n"));
@@ -259,6 +283,8 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
             }
 
 #endif
+            if (!fOpen)
+                ImmSetOpenStatus(hIMC,FALSE);
 
             ImmUnlockIMC (hIMC);
 
