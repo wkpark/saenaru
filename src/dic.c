@@ -1726,6 +1726,7 @@ LPBYTE lpbKeyState;
                         BOOL convOk= FALSE;
                         TRANSMSG GnMsg;
                         MYCHAR myDump[2];
+                        LPMYSTR lpToken;
 #ifdef DEBUG
                         TCHAR szDev[80];
 #endif
@@ -1735,44 +1736,51 @@ LPBYTE lpbKeyState;
         
 #ifdef DEBUG
                         OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
-                        wsprintf(szDev, TEXT("dwSize       %x\r\n"), lpRS->dwSize);
+                        wsprintf(szDev, TEXT("dwSize       %d\r\n"), lpRS->dwSize);
                         OutputDebugString(szDev);
                         wsprintf(szDev, TEXT("dwVersion    %x\r\n"), lpRS->dwVersion);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwStrLen     %x\r\n"), lpRS->dwStrLen);
+                        wsprintf(szDev, TEXT("dwStrLen     %d\r\n"), lpRS->dwStrLen);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwStrOffset  %x\r\n"), lpRS->dwStrOffset);
+                        wsprintf(szDev, TEXT("dwStrOffset  %d\r\n"), lpRS->dwStrOffset);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwCompStrLen %x\r\n"), lpRS->dwCompStrLen);
+                        wsprintf(szDev, TEXT("dwCompStrLen %d\r\n"), lpRS->dwCompStrLen);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwCompStrOffset %x\r\n"), lpRS->dwCompStrOffset);
+                        wsprintf(szDev, TEXT("dwCompStrOffset %d\r\n"), lpRS->dwCompStrOffset);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwTargetStrLen %x\r\n"), lpRS->dwTargetStrLen);
+                        wsprintf(szDev, TEXT("dwTargetStrLen %d\r\n"), lpRS->dwTargetStrLen);
                         OutputDebugString(szDev);
-                        wsprintf(szDev, TEXT("dwTargetStrOffset %x\r\n"), lpRS->dwTargetStrOffset);
+                        wsprintf(szDev, TEXT("dwTargetStrOffset %d\r\n"), lpRS->dwTargetStrOffset);
                         OutputDebugString(szDev);
 #endif
                         Mylstrcpyn(myDump,lpDump,1);
                         if ( (lpRS->dwStrOffset+lpRS->dwCompStrOffset) < lpRS->dwSize) {
-                            if (lpRS->dwCompStrLen >1) {
+                            const LPMYSTR szSep = MYTEXT(" \r\n\t");
+
+                            LPMYSTR lpTemp= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
+                            MyDebugPrint((TEXT(">>>>>>lpDump='%s'\n"),(LPMYSTR)lpDump));
+                            MyDebugPrint((TEXT(">>>>>>lpTemp='%s'\n"),(LPMYSTR)lpTemp));
+                            if (lpRS->dwCompStrLen > 0) {
+                                // 선택영역이 있는 경우 강제로 단어/글자를 종료.
                                 // clause dictionary.
                                 *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
-                            } else  {
-                                const LPMYSTR szSep = MYTEXT(" \r\n\t");
-                                LPMYSTR lpToken;
-                                // one char reconversion.
-                                *(LPMYSTR)(lpDump + 1) = MYTEXT('\0');
-
-                                lpToken = Mystrtok(lpDump, szSep);
-                                if (lpToken == NULL) {
-                                    GlobalFree((HANDLE)lpRS);
-                                    break;
-                                }
-                        
-                                lpRS->dwCompStrLen=1;
-                                lpRS->dwTargetStrLen=1;
-                                // XXX 1. manage not convertable ascii chars.
                             }
+                            // MS워드같은 경우는 커서자리의 앞쪽에 있는 단어를 reconvert한다.
+                            // 반면 새나루는 strtok()를 사용하므로 커서 뒤쪽에 있는 단어를 reconvert한다.
+                            lpToken = Mystrtok(lpDump, szSep);
+                            if (lpToken == NULL) {
+                                MyDebugPrint((TEXT(">>>>>>lpToken == NULL\n")));
+                                GlobalFree((HANDLE)lpRS);
+                                break;
+                            }
+                            MyDebugPrint((TEXT(">>>>>>lpToken ='%s'\n"), lpToken));
+
+                            lpRS->dwCompStrOffset += (lpToken - lpDump)*sizeof(MYCHAR);
+                            lpRS->dwTargetStrOffset += (lpToken - lpDump)*sizeof(MYCHAR);
+                            // XXX 1. manage not convertable ascii chars.
+
+                            lpRS->dwCompStrLen = Mylstrlen(lpToken);
+                            lpRS->dwTargetStrLen = Mylstrlen(lpToken);
                         } else {
                             // XXX Mozilla bug.
                             OutputDebugString(TEXT(" Reconversion error\r\n"));
@@ -1784,7 +1792,7 @@ LPBYTE lpbKeyState;
                         MyOutputDebugString(lpDump);
                         OutputDebugString(TEXT("\r\n"));
 #endif
-        		{
+        		if (lpToken) {
         		    LPCOMPOSITIONSTRING	lpCompStr;
         
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
@@ -1815,12 +1823,13 @@ LPBYTE lpbKeyState;
         
                                     lpstr = GETLPCOMPSTR(lpCompStr);
                                     lpread = GETLPCOMPREADSTR(lpCompStr);
-                                    Mylstrcpy(lpread,lpDump);
-                                    Mylstrcpy(lpstr,lpDump);
+                                    Mylstrcpy(lpread, lpToken);
+                                    Mylstrcpy(lpstr, lpToken);
         
                                     // delta start
-                                    lpCompStr->dwDeltaStart =
-        	                        (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                                    //lpCompStr->dwDeltaStart =
+        	                    //    (DWORD)(MyCharPrev(lpstr, lpstr+Mylstrlen(lpstr)) - lpstr);
+                                    lpCompStr->dwDeltaStart = 0;
                                     // cursor pos
                                     //lpCompStr->dwCursorPos-=lpRS->dwStrLen;
                                     //if (lpCompStr->dwCursorPos <= 0) lpCompStr->dwCursorPos=0;
@@ -1866,13 +1875,11 @@ LPBYTE lpbKeyState;
                                     //if (lpCompStr->dwCompReadStrLen > 0)
                                     //    lpCompStr->dwCompReadStrLen--;
 
-#if 0
+#if 1
                                     GnMsg.message = WM_IME_COMPOSITION;
                                     GnMsg.wParam = 0;
                                     //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
                                     GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
-                                    //if (dwImeFlag & SAENARU_ONTHESPOT)
-                                    //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 #endif
         		        } else {
