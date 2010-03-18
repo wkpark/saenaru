@@ -567,7 +567,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 if (lpbKeyState[VK_CONTROL] & 0x80) {
                     // simulate key for CTRL-X
                     keybd_event( (BYTE)wParam, 0x0, 0, 0 );
-                    fRet=TRUE;
+                    fRet=FALSE;
                 }
             }
         }
