@@ -1479,7 +1479,7 @@ LPBYTE lpbKeyState;
                 return TRUE;
             } else if (IsSHFTPushed(lpbKeyState)) {
                 int ns=0;
-                DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_DOCUMENTFEED, 0);
+                DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
 
                 MyDebugPrint((TEXT(">>>>>>>IMR_DOCUMENTFEED result %d\r\n"),dwSize));
 
@@ -1492,7 +1492,7 @@ LPBYTE lpbKeyState;
                     lpRS = (LPRECONVERTSTRING)GlobalAlloc(GPTR, dwSize);
                     lpRS->dwSize = dwSize;
 
-                    if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_DOCUMENTFEED, (LPARAM)lpRS)) {
+                    if (dwSize = (DWORD) MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, (LPARAM)lpRS)) {
                         BOOL convOk= FALSE;
                         TRANSMSG GnMsg;
 
@@ -1502,7 +1502,7 @@ LPBYTE lpbKeyState;
                         //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
                         // *(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
                         //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
-                        LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+                        LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset) + lpRS->dwCompStrLen;
 
                         MyDebugPrint((TEXT(">>>>>>>IMR_DOCUMENTFEED str %s\r\n"),lpDump));
 #ifdef DEBUG
@@ -1525,10 +1525,16 @@ LPBYTE lpbKeyState;
                         OutputDebugString(szDev);
 #endif
 
-                        *(lpDump) = MYTEXT('\0');
-                        if (lpRS->dwCompStrOffset > 1) {
+                        if (lpRS->dwCompStrOffset > 0) {
+                            *(lpDump) = MYTEXT('\0');
                             lpDump--;
                             MyDebugPrint((TEXT(">>>>>> %s\r\n"), lpDump));
+
+                            if (lpRS->dwCompStrLen > 0) {
+                                lpRS->dwCompStrOffset += lpRS->dwCompStrLen * sizeof(MYCHAR);
+                                lpRS->dwTargetStrOffset += lpRS->dwCompStrLen * sizeof(MYCHAR);
+                            }
+
                             lpRS->dwCompStrLen = 1;
                             lpRS->dwTargetStrLen = 1;
                             lpRS->dwCompStrOffset -= sizeof(MYCHAR);
