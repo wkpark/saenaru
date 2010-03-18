@@ -1,8 +1,10 @@
-; Saenaru Installation Script
+ï»¿; Saenaru Installation Script
 ; Written by Hye-Shik Chang <perky@i18n.org>
 ; $Id$
 
 !define RELVERSION      "1.1.0cvs-snapshot"
+!define APPNAME         "ìƒˆë‚˜ë£¨ ìŠ¤ëƒ…ìƒ· ${RELVERSION}"
+
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
 !define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
@@ -14,7 +16,9 @@
 !define RESOURCEDIR     "..\resource"
 !define HELPDIR         "..\help"
 !define SRCROOTDIR      ".."
-!define SMPATH          "$SMPROGRAMS\»õ³ª·ç"
+!define SMPATH          "$SMPROGRAMS\ìƒˆë‚˜ë£¨"
+
+!include /NONFATAL ".\local.nsi"
 
 !include "x64.nsh"
 ;---------------------
@@ -25,13 +29,13 @@
 
 SetCompressor /SOLID lzma
 
-BrandingText "»õ³ª·ç ÀÎ½ºÅç·¯"
+BrandingText "ìƒˆë‚˜ë£¨ ì¸ìŠ¤í†¨ëŸ¬"
 
 ;--------------------------------
 ;Configuration
 
   ;General
-  Name "»õ³ª·ç ½ÃÇèÆÇ ${RELVERSION}"
+  Name "${APPNAME}"
   OutFile "Saenaru-${RELVERSION}.exe"
   !define MUI_ICON "install.ico"
   !define MUI_UNICON "install.ico"
@@ -74,7 +78,7 @@ BrandingText "»õ³ª·ç ÀÎ½ºÅç·¯"
 ;--------------------------------
 ;Installer Sections
 
-Section "»õ³ª·ç ÀÔ·Â±â" SecBody
+Section "ìƒˆë‚˜ë£¨ ì…ë ¥ê¸°" SecBody
 
   ;SectionIn RO
 
@@ -136,9 +140,10 @@ Section "»õ³ª·ç ÀÔ·Â±â" SecBody
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
   File "${RESOURCEDIR}\old2set3set.reg"
+  File "${RESOURCEDIR}\nk2set.reg"
   File "${RESOURCEDIR}\comp_default.reg"
   ;;
-  ;;File "seongjo.reg"
+  !include /NONFATAL ".\userkbd\file.nsi"
   ;;
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
   
@@ -147,14 +152,14 @@ Section "»õ³ª·ç ÀÔ·Â±â" SecBody
 
   ;IME keys
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout file" "kbdkor.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout text" "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "ÇÑ±Û ÀÔ·Â±â (»õ³ª·ç)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout text" "ìƒˆë‚˜ë£¨ í•œê¸€ ì…ë ¥ê¸°"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "í•œê¸€ ì…ë ¥ê¸° (ìƒˆë‚˜ë£¨)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
 
   ; dvorak driver support
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbddvk.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "ÇÑ±Û ÀÔ·Â±â (»õ³ª·ç µåº¸¶ô)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "ìƒˆë‚˜ë£¨ í•œê¸€ ì…ë ¥ê¸°"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "í•œê¸€ ì…ë ¥ê¸° (ìƒˆë‚˜ë£¨ ë“œë³´ë½)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME file" "SAENARU.IME"
 
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
@@ -169,7 +174,7 @@ Section "»õ³ª·ç ÀÔ·Â±â" SecBody
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
   ;Write uninstallation info
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "DisplayName" "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "DisplayName" "ìƒˆë‚˜ë£¨ í•œê¸€ ì…ë ¥ê¸°"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "UninstallString" "$INSTDIR\Uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "InstallLocation" "$INSTDIR"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "DisplayIcon" "$INSTDIR\saenaru.ico,-0"
@@ -181,16 +186,16 @@ Section "»õ³ª·ç ÀÔ·Â±â" SecBody
   ;Create short cuts
   CreateDirectory "${SMPATH}"
   SetOutPath "${SMPATH}"
-  File "/oname=»õ³ª·ç ÇÁ·ÎÁ§Æ®.url" "httplink-saenaru.url"
-  File "/oname=¿­¸° ÇÑ±Û ÇÁ·ÎÁ§Æ®.url" "httplink-hangul.url"
+  File "/oname=ìƒˆë‚˜ë£¨ í”„ë¡œì íŠ¸.url" "httplink-saenaru.url"
+  File "/oname=ì—´ë¦° í•œê¸€ í”„ë¡œì íŠ¸.url" "httplink-hangul.url"
   CreateShortCut "${SMPATH}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 
   IfRebootFlag 0 noreboot
-    MessageBox MB_OK|MB_ICONINFORMATION "»õ³ª·ç°¡ »ç¿ëÁßÀÌ±â ¶§¹®¿¡ ¼³Ä¡/¾÷µ¥ÀÌÆ®°¡ ¿Ï·áµÇÁö ¸øÇß½À´Ï´Ù. ÀçºÎÆÃÀ» ÇØ¾ß ¼³Ä¡°¡ ¿Ï·áµË´Ï´Ù."
+    MessageBox MB_OK|MB_ICONINFORMATION "ìƒˆë‚˜ë£¨ê°€ ì‚¬ìš©ì¤‘ì´ê¸° ë•Œë¬¸ì— ì„¤ì¹˜/ì—…ë°ì´íŠ¸ê°€ ì™„ë£Œë˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì¬ë¶€íŒ…ì„ í•´ì•¼ ì„¤ì¹˜ê°€ ì™„ë£Œë©ë‹ˆë‹¤."
   noreboot:
 SectionEnd
 
-Section /o "»õ³ª·ç Äİ¸Æ(Colemak)" SecColemak
+Section /o "ìƒˆë‚˜ë£¨ ì½œë§¥(Colemak)" SecColemak
 
   ;SectionIn RO
 
@@ -223,16 +228,16 @@ Section /o "»õ³ª·ç Äİ¸Æ(Colemak)" SecColemak
 
   ; Colemak driver support
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout file" "kbdcmk.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout text" "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout display name" "ÇÑ±Û ÀÔ·Â±â (»õ³ª·ç Äİ¸Æ)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout text" "ìƒˆë‚˜ë£¨ í•œê¸€ ì…ë ¥ê¸°"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout display name" "í•œê¸€ ì…ë ¥ê¸° (ìƒˆë‚˜ë£¨ ì½œë§¥)"
   WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "IME file" "SAENARU.IME"
 
   IfRebootFlag 0 noreboot
-    MessageBox MB_OK|MB_ICONINFORMATION "»õ³ª·ç°¡ »ç¿ëÁßÀÌ±â ¶§¹®¿¡ ¼³Ä¡/¾÷µ¥ÀÌÆ®°¡ ¿Ï·áµÇÁö ¸øÇß½À´Ï´Ù. ÀçºÎÆÃÀ» ÇØ¾ß ¼³Ä¡°¡ ¿Ï·áµË´Ï´Ù."
+    MessageBox MB_OK|MB_ICONINFORMATION "ìƒˆë‚˜ë£¨ê°€ ì‚¬ìš©ì¤‘ì´ê¸° ë•Œë¬¸ì— ì„¤ì¹˜/ì—…ë°ì´íŠ¸ê°€ ì™„ë£Œë˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì¬ë¶€íŒ…ì„ í•´ì•¼ ì„¤ì¹˜ê°€ ì™„ë£Œë©ë‹ˆë‹¤."
   noreboot:
 SectionEnd
 
-Section /o "»õ³ª·ç ¼Ò½º ÄÚµå" SecSource
+Section /o "ìƒˆë‚˜ë£¨ ì†ŒìŠ¤ ì½”ë“œ" SecSource
 
   SetOutPath "$INSTDIR\Source"
   File ${SRCROOTDIR}\DIRS
@@ -276,7 +281,7 @@ Section /o "»õ³ª·ç ¼Ò½º ÄÚµå" SecSource
 
 SectionEnd
 
-Section /o "±âº» ÇÑ±ÛÀÔ·Â±â·Î ÁöÁ¤" SecDefault
+Section /o "ê¸°ë³¸ í•œê¸€ì…ë ¥ê¸°ë¡œ ì§€ì •" SecDefault
   ; save current IME
   ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
   StrCmp $0 "e0120412" exit # saenaru
@@ -300,7 +305,7 @@ Section /o "±âº» ÇÑ±ÛÀÔ·Â±â·Î ÁöÁ¤" SecDefault
 SectionEnd
 
 
-Section "ÇÑ±ÛÀÔ·Â±â ¸ñ·Ï¿¡ Ãß°¡" SecAdd
+Section "í•œê¸€ì…ë ¥ê¸° ëª©ë¡ì— ì¶”ê°€" SecAdd
   ; save current IME
   ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
   StrCmp $0 "e0120412" exit
@@ -309,7 +314,7 @@ Section "ÇÑ±ÛÀÔ·Â±â ¸ñ·Ï¿¡ Ãß°¡" SecAdd
   ; known hangul IME
   StrCmp $0 "e0010412" save ; IME 2002
   StrCmp $0 "e0200412" save ; IME 2003
-  StrCmp $0 "e0220412" save ; ³¯°³¼Â
+  StrCmp $0 "e0220412" save ; ë‚ ê°œì…‹
   ; set Saenaru as the default IME
   ; with rundll32
   ;
@@ -330,18 +335,19 @@ Section "ÇÑ±ÛÀÔ·Â±â ¸ñ·Ï¿¡ Ãß°¡" SecAdd
   exit:
 SectionEnd
 
-  LangString DESC_IME_SETTING_TITLE ${LANG_KOREAN} "ÀÔ·Â±â ¼³Á¤"
-  LangString DESC_IME_SETTING_SUBTITLE ${LANG_KOREAN} "ÀÔ·Â±â ¼³Á¤À» »ç¿ëÀÚ°¡ Á÷Á¢ º¯°æÇÒ ¼ö ÀÖ½À´Ï´Ù."
-  LangString DESC_IME_SETTING_HEADER ${LANG_KOREAN} "Á¦¾îÆÇÀÇ ÀÔ·Â±â ¼³Á¤ º¯°æÃ¢À» Á÷Á¢ ¿­¾î »ç¿ëÀÚ°¡ ÀÔ·Â±â ¼³Á¤À» Ãß°¡ ¹× º¯°æÇÒ ¼ö ÀÖ½À´Ï´Ù."
-  LangString DESC_IME_SETTING_BUTTON ${LANG_KOREAN} "ÀÔ·Â±â ¼³Á¤"
+  LangString DESC_IME_SETTING_TITLE ${LANG_KOREAN} "ì…ë ¥ê¸° ì„¤ì •"
+  LangString DESC_IME_SETTING_SUBTITLE ${LANG_KOREAN} "ì…ë ¥ê¸° ì„¤ì •ì„ ì‚¬ìš©ìê°€ ì§ì ‘ ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤."
+  LangString DESC_IME_SETTING_HEADER ${LANG_KOREAN} "ì œì–´íŒì˜ ì…ë ¥ê¸° ì„¤ì • ë³€ê²½ì°½ì„ ì§ì ‘ ì—´ì–´ ì‚¬ìš©ìê°€ ì…ë ¥ê¸° ì„¤ì •ì„ ì¶”ê°€ ë° ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤."
+  LangString DESC_IME_SETTING_BUTTON ${LANG_KOREAN} "ì…ë ¥ê¸° ì„¤ì •"
 
-  LangString DESC_KBD_SETTING_TITLE ${LANG_KOREAN} "»ç¿ëÀÚ Á¤ÀÇ Å°º¸µå ¼³Á¤"
-  LangString DESC_KBD_SETTING_SUBTITLE ${LANG_KOREAN} "¹Ì¸® Á¤ÀÇµÈ »ç¿ëÀÚ Á¤ÀÇ Å°º¸µå Á¤º¸¸¦ µî·ÏÇÕ´Ï´Ù."
-  LangString DESC_KBD_SETTING_HEADER ${LANG_KOREAN} "¹Ì¸® Á¤ÀÇµÈ »ç¿ëÀÚ Á¤ÀÇ Å°º¸µåÀÔ´Ï´Ù. ¾Æ·¡ ¸ñ·Ï¿¡ ÀÖ´Â »ç¿ëÀÚ Á¤ÀÇ ÀÚÆÇÀº »õ³ª·ç È¯°æ¼³Á¤ ¸Ş´º¿¡ ³ªÅ¸³ª¸ç ±âº»ÀÚÆÇÃ³·³ ¾µ ¼ö ÀÖ½À´Ï´Ù."
-  LangString DESC_KBD_OLD_BUTTON ${LANG_KOREAN} "¿¾ÇÑ±Û µÎ¹ú/¼¼¹ú ÀÚÆÇ (&Y)"
-  LangString DESC_KBD_NEW_BUTTON ${LANG_KOREAN} "»õµÎ¹ú/»õ¼¼¹ú ÀÚÆÇ (&N)"
-  LangString DESC_KBD_SEONG_BUTTON ${LANG_KOREAN} "ÇÑ±Û¼ºÁ¶ ÀÚÆÇ (&S)"
+  LangString DESC_KBD_SETTING_TITLE ${LANG_KOREAN} "ì‚¬ìš©ì ì •ì˜ í‚¤ë³´ë“œ ì„¤ì •"
+  LangString DESC_KBD_SETTING_SUBTITLE ${LANG_KOREAN} "ë¯¸ë¦¬ ì •ì˜ëœ ì‚¬ìš©ì ì •ì˜ í‚¤ë³´ë“œ ì •ë³´ë¥¼ ë“±ë¡í•©ë‹ˆë‹¤."
+  LangString DESC_KBD_SETTING_HEADER ${LANG_KOREAN} "ë¯¸ë¦¬ ì •ì˜ëœ ì‚¬ìš©ì ì •ì˜ í‚¤ë³´ë“œì…ë‹ˆë‹¤. ì•„ë˜ ëª©ë¡ì— ìˆëŠ” ì‚¬ìš©ì ì •ì˜ ìíŒì€ ìƒˆë‚˜ë£¨ í™˜ê²½ì„¤ì • ë©”ë‰´ì— ë‚˜íƒ€ë‚˜ë©° ê¸°ë³¸ìíŒì²˜ëŸ¼ ì“¸ ìˆ˜ ìˆìŠµë‹ˆë‹¤."
+  LangString DESC_KBD_OLD_BUTTON ${LANG_KOREAN} "ì˜›í•œê¸€ ë‘ë²Œ/ì„¸ë²Œ ìíŒ (&Y)"
+  LangString DESC_KBD_NEW_BUTTON ${LANG_KOREAN} "ìƒˆë‘ë²Œ/ìƒˆì„¸ë²Œ ìíŒ (&N)"
+  LangString DESC_KBD_NK_BUTTON ${LANG_KOREAN} "ë¶í•œ ë‘ë²Œì‹ (&K)"
 
+!include /NONFATAL ".\userkbd\extra.nsi"
 
 Function OpenInputSetting
 	nsDialogs::Create 1018
@@ -360,7 +366,8 @@ FunctionEnd
 
 Var old_kbd
 Var new_kbd
-Var seong_kbd
+Var nk_kbd
+Var user1_kbd
 Var dialog
 Function OpenUserKeyboard
 	nsDialogs::Create 1018
@@ -371,9 +378,11 @@ Function OpenUserKeyboard
 	Pop $old_kbd
 	${NSD_CreateCheckBox} 120u 104 110u 17u "$(DESC_KBD_NEW_BUTTON)"
 	Pop $new_kbd
-	;${NSD_CreateCheckBox} 0 144 110u 17u "$(DESC_KBD_SEONG_BUTTON)"
-	;Pop $seong_kbd
-	;
+	${NSD_CreateCheckBox} 0 144 110u 17u "$(DESC_KBD_NK_BUTTON)"
+	Pop $nk_kbd
+
+        !include /NONFATAL "userkbd\ui.nsi"
+
 	nsDialogs::Show
 FunctionEnd
 
@@ -388,20 +397,25 @@ Function OpenUserKbdSettings
 	  Exec "Regedit /s $INSTDIR\2set3set.reg"
         ${EndIf}
 
-        ${NSD_GetState} $seong_kbd $0
+        ${NSD_GetState} $nk_kbd $0
         ${If} $0 == 1
-	  Exec "Regedit /s $INSTDIR\seongjo.reg"
+	  Exec "Regedit /s $INSTDIR\nk2set.reg"
+        ${EndIf}
+
+        ${NSD_GetState} $user1_kbd $0
+        ${If} $0 == 1
+	  Exec "Regedit /s $INSTDIR\user1.reg"
         ${EndIf}
 FunctionEnd
 
 ;--------------------------------
 ;Descriptions
 
-  LangString DESC_SecBody ${LANG_KOREAN} "»õ³ª·ç ÀÔ·Â±â¸¦ À§ÇÑ ±âº»ÀûÀÎ ÆÄÀÏÀ» ¼³Ä¡ÇÕ´Ï´Ù."
-  LangString DESC_SecSource ${LANG_KOREAN} "»õ³ª·ç ¼Ò½º¸¦ ¼³Ä¡ÇÕ´Ï´Ù.$\r$\n»õ³ª·ç´Â ¸ğµç ¼Ò½ºÄÚµå°¡ °ø°³µÈ ÀÚÀ¯ ¼ÒÇÁÆ®¿ş¾îÀÔ´Ï´Ù.$\r$\n¼Ò½ºÄÚµå´Â http://kldp.net/projects/saenaru »çÀÌÆ®¿¡¼­ Á÷Á¢ ¹ŞÀ¸½Ç ¼ö ÀÖ½À´Ï´Ù."
-  LangString DESC_SecDefault ${LANG_KOREAN} "»õ³ª·ç¸¦ ±âº» ÀÔ·Â±â·Î ÁöÁ¤ÇÕ´Ï´Ù.$\r$\n·Î±×¿ÀÇÁ ÈÄ¿¡ ´Ù½Ã ·Î±×ÀÎÀ» ÇÏ°Å³ª ÀçºÎÆÃÀ» ÇÏ¼Å¾ß ¼³Á¤ÀÌ ¹İ¿µµË´Ï´Ù."
-  LangString DESC_SecAdd ${LANG_KOREAN} "»õ³ª·ç¸¦ ÇÑ±Û ÀÔ·Â±â ¸ñ·Ï¿¡ Ãß°¡ÇÕ´Ï´Ù.$\r$\nÀÌ °æ¿ì ÀÔ·Â±â »óÅÂ¹Ù¿¡¼­ »õ³ª·ç¸¦ ¼±ÅÃÇÏ½Ç ¼ö ÀÖ°Ô µË´Ï´Ù."
-  LangString DESC_SecColemak ${LANG_KOREAN} "»õ³ª·ç Äİ¸Æ(Colemak)ÀÚÆÇ Áö¿øÀ» À§ÇÑ Äİ¸Æ Å°º¸µå ·¹ÀÌ¾Æ¿ô µå¶óÀÌ¹ö ¼³Ä¡ ¹× ¼³Á¤À» ÇÕ´Ï´Ù."
+  LangString DESC_SecBody ${LANG_KOREAN} "ìƒˆë‚˜ë£¨ ì…ë ¥ê¸°ë¥¼ ìœ„í•œ ê¸°ë³¸ì ì¸ íŒŒì¼ì„ ì„¤ì¹˜í•©ë‹ˆë‹¤."
+  LangString DESC_SecSource ${LANG_KOREAN} "ìƒˆë‚˜ë£¨ ì†ŒìŠ¤ë¥¼ ì„¤ì¹˜í•©ë‹ˆë‹¤.$\r$\nìƒˆë‚˜ë£¨ëŠ” ëª¨ë“  ì†ŒìŠ¤ì½”ë“œê°€ ê³µê°œëœ ììœ  ì†Œí”„íŠ¸ì›¨ì–´ì…ë‹ˆë‹¤.$\r$\nì†ŒìŠ¤ì½”ë“œëŠ” http://kldp.net/projects/saenaru ì‚¬ì´íŠ¸ì—ì„œ ì§ì ‘ ë°›ìœ¼ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤."
+  LangString DESC_SecDefault ${LANG_KOREAN} "ìƒˆë‚˜ë£¨ë¥¼ ê¸°ë³¸ ì…ë ¥ê¸°ë¡œ ì§€ì •í•©ë‹ˆë‹¤.$\r$\në¡œê·¸ì˜¤í”„ í›„ì— ë‹¤ì‹œ ë¡œê·¸ì¸ì„ í•˜ê±°ë‚˜ ì¬ë¶€íŒ…ì„ í•˜ì…”ì•¼ ì„¤ì •ì´ ë°˜ì˜ë©ë‹ˆë‹¤."
+  LangString DESC_SecAdd ${LANG_KOREAN} "ìƒˆë‚˜ë£¨ë¥¼ í•œê¸€ ì…ë ¥ê¸° ëª©ë¡ì— ì¶”ê°€í•©ë‹ˆë‹¤.$\r$\nì´ ê²½ìš° ì…ë ¥ê¸° ìƒíƒœë°”ì—ì„œ ìƒˆë‚˜ë£¨ë¥¼ ì„ íƒí•˜ì‹¤ ìˆ˜ ìˆê²Œ ë©ë‹ˆë‹¤."
+  LangString DESC_SecColemak ${LANG_KOREAN} "ìƒˆë‚˜ë£¨ ì½œë§¥(Colemak)ìíŒ ì§€ì›ì„ ìœ„í•œ ì½œë§¥ í‚¤ë³´ë“œ ë ˆì´ì•„ì›ƒ ë“œë¼ì´ë²„ ì„¤ì¹˜ ë° ì„¤ì •ì„ í•©ë‹ˆë‹¤."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecBody} $(DESC_SecBody)
@@ -430,11 +444,13 @@ Section "Uninstall"
     ${DisableX64FSRedirection}
     Delete "$SYSDIR\saenaru.ime"
     Delete "$SYSDIR\kbddvk.dll"
+    Delete "$SYSDIR\kbdcmk.dll"
     ${EnableX64FSRedirection}
   ${EndIf}
 
   Delete "$SYSDIR\saenaru.ime"
   Delete "$SYSDIR\kbddvk.dll"
+  Delete "$SYSDIR\kbdcmk.dll"
 
   Delete "$INSTDIR\saenaru.dic"
   Delete "$INSTDIR\nabi.dic"
