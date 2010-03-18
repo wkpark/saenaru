@@ -150,52 +150,45 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 #ifndef USE_NO_IME_ESCAPE
             while (!IsCompStr(hIMC)) {
         		    LPCOMPOSITIONSTRING	lpCompStr;
-                            LPMYSTR lpDump;
+                            LPMYSTR lpDump, lpToken;
                             MYCHAR szBuf[256];
 
                             lpDump=szBuf;
 
                             // 노트패드에서는 이상하게 lpData가 제대로 세팅이 안된다.
                             if (Mylstrlen(lpData) < 255) {
-                                int i;
-                                MyDebugPrint((TEXT("ImeEscape %s:%d\n"),lpData, Mylstrlen(lpData)));
+                                const LPMYSTR szSep = MYTEXT(" \r\n\t");
+                                MyDebugPrint((TEXT("ImeEscape '%s':%d\n"),lpData, Mylstrlen(lpData)));
 
-                                for (i = 0; i < Mylstrlen(lpData); i++) {
-                                        if (*((LPMYSTR)lpData + i) == MYTEXT(' ') ||
-                                                *((LPMYSTR)lpData + i) == MYTEXT('\r') ||
-                                                *((LPMYSTR)lpData + i) == MYTEXT('\n'))
-                                            break;
-                                }
-                                if (i == 0) {
+                                lpToken = Mystrtok(lpData, szSep);
+                                if (lpToken == NULL) {
+                                    TRANSMSG GnMsg;
                                     lRet = FALSE;
 
         		            lpCompStr =
                                         (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr);
         		            if (lpCompStr != NULL) {
-                                        TRANSMSG GnMsg;
                                         InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
-#if 1
-                                        // 노트패드에서 이상하게 쓰레기값이 붙는다.
-                                        // 그래서 WM_IME_ENDCOMPOSITION 메시지를 날리니
-                                        // 정상적으로 작동
-                                        GnMsg.message = WM_IME_ENDCOMPOSITION;
-                                        GnMsg.wParam = 0;
-                                        GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
-                                        GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
-#endif
                                         ImmUnlockIMCC (lpIMC->hCompStr);
                                     }
+#if 1
+                                    // 노트패드에서 이상하게 쓰레기값이 붙는다.
+                                    // 그래서 WM_IME_ENDCOMPOSITION 메시지를 날리니
+                                    // 정상적으로 작동
+                                    GnMsg.message = WM_IME_ENDCOMPOSITION;
+                                    GnMsg.wParam = 0;
+                                    GnMsg.lParam = 0;
+                                    GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
+#endif
 
                                     break;
                                 }
-                                Mylstrcpyn(lpDump,lpData, i * sizeof(MYCHAR));
-                                *(lpDump + i) = MYTEXT('\0');
-                                MyDebugPrint((TEXT("ImeEscape %s:%d\n"),lpDump, i));
+                                Mylstrcpy(lpDump,lpToken);
+                                MyDebugPrint((TEXT("ImeEscape '%s'\n"),lpToken));
                             } else {
                                 Mylstrcpyn(lpDump,lpData,2); // XXX
                                 szBuf[1]=MYTEXT('\0');
-                                MyDebugPrint((TEXT("ImeEscape #2 %s\n"),lpDump));
+                                MyDebugPrint((TEXT("ImeEscape #2 '%s'\n"),lpDump));
                             }
  
         		    if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
