@@ -1372,31 +1372,60 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 #if DEBUG
     if (vKey == VK_PROCESSKEY) {
         MyDebugPrint((TEXT("\tMainProc: VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
+    } else if (vKey == VK_MENU) {
+        MyDebugPrint((TEXT("\tMainProc: VK_MENU and 0x%x\r\n"),lpmsg->lParam));
     }
 #endif
+
+    // check soft Han/Eng toggle key.
+    if ( dwOptionFlag & USE_SHIFT_SPACE && (dwToggleKey & 0xFF) == vKey ) {
+        switch (lpmsg->message) {
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN:
+        //case WM_SYSKEYUP:
+        //case WM_KEYUP:
+            while (1) {
+                UINT ok;
+
+                if (dwToggleKey & MASK_SHIFT) {
+                    ok = 0;
+                    if ((dwToggleKey & MASK_LSHIFT) && (pbKeyState[VK_LSHIFT] & 0x80)) ok = 1;
+                    if ((dwToggleKey & MASK_RSHIFT) && (pbKeyState[VK_RSHIFT] & 0x80)) ok = 1;
+                    if (!ok) break;
+                }
+                if (dwToggleKey & MASK_CTRL) {
+                    ok = 0;
+                    if ((dwToggleKey & MASK_LCTRL) && (pbKeyState[VK_LCONTROL] & 0x80)) ok = 1;
+                    if ((dwToggleKey & MASK_RCTRL) && (pbKeyState[VK_RCONTROL] & 0x80)) ok = 1;
+                    if (!ok) break;
+                }
+                if (dwToggleKey & MASK_ALT) {
+                    ok = 0;
+                    if ((dwToggleKey & MASK_LALT) && (pbKeyState[VK_LMENU] & 0x80)) ok = 1;
+                    if ((dwToggleKey & MASK_RALT) && (pbKeyState[VK_RMENU] & 0x80)) ok = 1;
+                    if (!ok) break;
+                }
+
+                // WM_SYSKEYXXX events can't posted to ImeProcesskey()
+                // so make this events as WM_KEYXXX...
+                // but still ImeProcesskey() doesn't accept it.
+                if (lpmsg->message > WM_KEYUP)
+                    lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4. See WINUSER.H
+
+                lpmsg->wParam=VK_HANGUL; // XXX
+                //lpmsg->lParam=(0xF2<<16) | 0x41000001;
+                MyDebugPrint((TEXT(">>> Fake Hangul Toggle + %x\n"), vKey));
+                break;
+            }
+            break;
+        }
+    }
 
     switch (lpmsg->message)
     {
         case WM_KEYUP:
             break;
         case WM_KEYDOWN:
-            //GetKeyboardState((LPBYTE)&pbKeyState);
-            if ( vKey == VK_SPACE && dwOptionFlag & USE_SHIFT_SPACE)
-            {
-               // SHORT ShiftState = (GetAsyncKeyState(VK_LSHIFT) >> 31) & 1;
-                SHORT ShiftState;
-                ShiftState = pbKeyState[VK_LSHIFT] & 0x80;
-
-                MyDebugPrint((TEXT("ShiftState is %x\r\n"),ShiftState));
-                MyDebugPrint((TEXT(" * VKey %x\r\n"),lpmsg->wParam));
-                MyDebugPrint((TEXT("\t** ShiftState is 0x%x\r\n"),ShiftState));
-                if (ShiftState)
-                {
-                     lpmsg->message=WM_KEYDOWN;
-                     lpmsg->wParam=VK_HANGUL; // XXX
-                     lpmsg->lParam=(0xF2<<16) | 0x41000001;
-                }
-            } else 
             if ( dvorak && pbKeyState[VK_CONTROL] & 0x80 &&
                     !(dwOptionFlag & QWERTY_HOTKEY_SUPPORT) ) {
                 if (vKey >= VK_OEM_1 && vKey <= VK_OEM_102) {
@@ -1469,6 +1498,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                         MakeResultString(hIMC,TRUE);
                 }
             }
+
             // hack to use RALT(VK_RMENU) as a Mode_Switch
             if ( pbKeyState[VK_RMENU] & 0x80 && !(lpmsg->lParam & 0x01000000))
             {
