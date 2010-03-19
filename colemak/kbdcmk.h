@@ -93,7 +93,7 @@
 #undef X3A
  #define X3A _EQ(                                       BACK                      )
 
-#if defined KBD_TYPE == 10
+#if ( KBD_TYPE == 10 )
  #undef T5C
   #define T5C _EQ(                                       RMENU                     )
  #undef X5C

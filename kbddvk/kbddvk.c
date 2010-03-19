@@ -404,6 +404,8 @@ static ALLOC_SECTION_LDATA VSC_LPWSTR aKeyNamesExt[] = {
     0x5b,    L"Left Windows",
     0x5c,    L"Right Windows",
     0x5d,    L"Application",
+    0xf1,    L"Hanguel",
+    0xf1,    L"Hanja",
     0   ,    NULL
 };
 
