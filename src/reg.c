@@ -298,6 +298,9 @@ void PASCAL SetGlobalFlags()
     // get ScanCode based setting.
     dwScanCodeBased = GetDwordFromSetting(TEXT("ScanCodeBased"));
 
+    // HangulToggle Key
+    dwToggleKey = GetDwordFromSetting(TEXT("HangulToggle"));
+
     tmp = GetDwordFromSetting(TEXT("ImeFlag"));
     if (tmp) {
         dwImeFlag = tmp;

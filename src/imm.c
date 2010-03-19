@@ -329,6 +329,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
     DWORD dwConversion, dwSentense ;
     WORD ch;
     UINT vkey = LOWORD(vKey) & 0x00FF;
+    UINT vkToggle = (dwToggleKey & 0x00FF) ? dwToggleKey & 0x00FF : VK_SPACE;
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeProcessKey"));
 
@@ -388,20 +389,42 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         }
     }
 
-    // SHIFT-SPACE
+    // use SHIFT-SPACE or User defined toggle key.
     // See ui.c how to hook the shift-space event.
     if ( !(lKeyData & 0x80000000) &&
-            (LOWORD(vKey) & 0x00FF) == VK_SPACE &&
             dwOptionFlag & USE_SHIFT_SPACE)
     {
-        //SHORT ShiftState = (GetKeyState(VK_SHIFT) >> 31) & 1;
-        //SHORT ShiftState = lpbKeyState[VK_SHIFT] & 0x80;
-        //BYTE pbKeyState [256];
+        MyDebugPrint((TEXT(">>>>>>>> Check Hangul Toggle key=%x, vkey=%x\n"), vkToggle, LOWORD(vKey) & 0xFF));
+        while ((LOWORD(vKey) & 0x00FF) == vkToggle) {
+            UINT ModState = dwToggleKey & 0xffff0000;
+            UINT ok;
+            MyDebugPrint((TEXT(">>>>>>>> Hangul Toggle key\n")));
 
-        //GetKeyboardState((LPBYTE)&pbKeyState);
-        if (IsSHFTPushed(lpbKeyState))
+            if (ModState & MASK_SHIFT) {
+                ok = 0;
+                if ((ModState & MASK_LSHIFT) && lpbKeyState[VK_LSHIFT] & 0x80) ok = 1;
+                else if ((ModState & MASK_RSHIFT) && lpbKeyState[VK_RSHIFT] & 0x80) ok = 1;
+                if (!ok) break;
+            }
+            if (ModState & MASK_CTRL) {
+                ok = 0;
+                if ((ModState & MASK_LCTRL) && lpbKeyState[VK_LCONTROL] & 0x80) ok = 1;
+                else if ((ModState & MASK_RCTRL) && lpbKeyState[VK_RCONTROL] & 0x80) ok = 1;
+                if (!ok) break;
+            }
+            if (ModState & MASK_ALT) {
+                ok = 0;
+                if ((ModState & MASK_LALT) && lpbKeyState[VK_LMENU] & 0x80) ok = 1;
+                else if ((ModState & MASK_RALT) && lpbKeyState[VK_RMENU] & 0x80) ok = 1;
+                if (!ok) break;
+            }
+
             vkey = VK_HANGUL;
-        else if (dwImeFlag & USE_CTRL_SPACE && IsCTLPushed(lpbKeyState))
+            break;
+        }
+
+        // FIXME
+        if (vkToggle == VK_SPACE && dwImeFlag & USE_CTRL_SPACE && IsCTLPushed(lpbKeyState))
             vkey = VK_HANJA;
     }
 
@@ -498,6 +521,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
                 ImmSetOpenStatus(hIMC,FALSE);
 
             ImmUnlockIMC(hIMC);
+
             return FALSE;
             break;
         case VK_ESCAPE:

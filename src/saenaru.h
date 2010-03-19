@@ -88,6 +88,16 @@
 #define USE_CTRL_SPACE         0x00004000
 #define SCANCODE_BASED         0x00010000
 
+#define MASK_LSHIFT         0x00010000
+#define MASK_LCTRL          0x00020000
+#define MASK_LALT           0x00040000
+#define MASK_RSHIFT         0x00100000
+#define MASK_RCTRL          0x00200000
+#define MASK_RALT           0x00400000
+#define MASK_SHIFT          0x00110000
+#define MASK_CTRL           0x00220000
+#define MASK_ALT            0x00440000
+
 /* for Unicode SAENARU */
 typedef LPTSTR            LPMYSTR;
 typedef TCHAR             MYCHAR;
@@ -395,6 +405,7 @@ extern DWORD dwComposeFlag;
 extern DWORD dwOptionFlag;
 extern DWORD dwHanjaMode;
 extern DWORD dwScanCodeBased;
+extern DWORD dwToggleKey;
 
 extern DWORD dwImeFlag;
 
