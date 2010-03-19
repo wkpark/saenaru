@@ -107,11 +107,13 @@ BEGIN
 
     CONTROL         "자소 단위 지움 (&J)", IDC_BACKSPACE_BY_JAMO, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 134, 76, 71, 10 
-    CONTROL         "<ESC> 영문전환 (&E)", IDC_ESCENG_SUPPORT, "Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP, 16, 101,79, 10 
     CONTROL         "<Shift>-<SPACE> 한/영키 (&H)", IDC_USE_SHIFT_SPACE, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 16, 89, 126, 10
 
+    CONTROL         "한/영키 설정(&T)", IDC_HANGUL_TOGGLE, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 88, 62, 13 
+
+    CONTROL         "<ESC> 영문전환 (&E)", IDC_ESCENG_SUPPORT, "Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 16, 101,79, 10 
     CONTROL         "드보락 지원 (&V)", IDC_DVORAK_SUPPORT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 98, 102, 64, 11
     CONTROL         "쿼티 단축키 (&Q)", IDC_QWERTY_HOTKEY_SUPPORT, "Button",
@@ -126,10 +128,6 @@ BEGIN
     CONTROL         "<Shift>-<SPACE> 한/영 전환 (&H)",IDC_USE_SHIFT_SPACE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,26,103,124,10
 */
-    CONTROL         "확장한자 지원 (&X)",IDC_KSX1002_SUPPORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,115,77 ,10
-    CONTROL         "<SPACE> 한자 선택 (&L)", IDC_HANJA_CAND_SPACE,
-                    BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,134, 128, 90, 10 
     CONTROL         "완성형(KS X 1001) 음절 제한 (&K)",IDC_KSX1001_SUPPORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,114,114,10
     CONTROL         "한글 첫가끝 조합 (&O)",
@@ -138,9 +136,12 @@ BEGIN
     CONTROL         "전체 단자모 조합 (&U)",
                     IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     16,139,78,10
+    CONTROL         "확장한자 지원 (&X)",IDC_KSX1002_SUPPORT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,115,77 ,10
+    CONTROL         "<SPACE> 한자 선택 (&L)", IDC_HANJA_CAND_SPACE,
+                    BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,134, 128, 90, 10 
     CONTROL         "비슷한 단어 보기(&M)", IDC_SIMILAR_WORDS, BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,
                     134,140,90,10 
-    CONTROL         "한/영키 설정(&T)", IDC_HANGUL_TOGGLE, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 88, 62, 13 
 END
 
 DLG_REGISTERWORD DIALOG DISCARDABLE  46, 36, 191, 83
