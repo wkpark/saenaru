@@ -164,7 +164,7 @@ void PASCAL ClearCandidate(LPCANDIDATEINFO lpCandInfo)
 /*                                                                    */
 /*      ChangeMode()                                                  */
 /*                                                                    */
-/*    return value: fdwConversion                                        */
+/*    return value: fdwConversion                                     */
 /*                                                                    */
 /**********************************************************************/
 void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
@@ -177,6 +177,11 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return;
 
+    fOpen = ImmGetOpenStatus(hIMC);
+
+    if (!fOpen)
+        ImmSetOpenStatus(hIMC, TRUE);
+
     fdwConversion = lpIMC->fdwConversion;
 
     switch (dwToMode)
@@ -186,21 +191,20 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
             break;
 
         case TO_CMODE_HANGUL:
-        // XXX turn off FULLSHAPE
+            // XXX turn off FULLSHAPE
             if (fdwConversion & IME_CMODE_FULLSHAPE)
                 fdwConversion &= ~IME_CMODE_FULLSHAPE;
 
-        // Toggle CHAR MODE to the HANGUL composition mode
+            // Toggle CHAR MODE to the HANGUL composition mode
             if (fdwConversion & IME_CMODE_HANGUL) {
-                ImmSetOpenStatus(hIMC,FALSE);
+                fOpen = FALSE;
                 fdwConversion &= ~IME_CMODE_HANGUL;
                 fdwConversion = (fdwConversion & ~IME_CMODE_LANGUAGE);
-        } else {
-                ImmSetOpenStatus(hIMC,TRUE);
+            } else {
+                fOpen = TRUE;
                 fdwConversion &= ~IME_CMODE_LANGUAGE;
                 fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_HANGUL);
-        }
-
+            }
             break;
 
 /*
@@ -209,26 +213,21 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
                 ((fdwConversion & ~IME_CMODE_LANGUAGE) | IME_CMODE_NATIVE);
             fdwConversion |= IME_CMODE_FULLSHAPE;
             break;
+*/
 
         case TO_CMODE_FULLSHAPE:
-            if (fdwConversion & IME_CMODE_FULLSHAPE)
-            {
+            if (fdwConversion & IME_CMODE_FULLSHAPE) {
                 // To SBCS mode.
                 fdwConversion &= ~IME_CMODE_FULLSHAPE;
  
                 // If hiragana mode, make it katakana mode.
                 if ((fdwConversion & IME_CMODE_LANGUAGE) == IME_CMODE_NATIVE)
                     fdwConversion |= (IME_CMODE_NATIVE | IME_CMODE_HANGUL);
-                
-            }
-            else
-            {
+            } else {
                 // To DBCS mode.
                 fdwConversion |= IME_CMODE_FULLSHAPE;
-
             }
             break;
-*/
 
         case TO_CMODE_ROMAN:
             if (fdwConversion & IME_CMODE_ROMAN)
@@ -245,14 +244,10 @@ void PASCAL ChangeMode(HIMC hIMC, DWORD dwToMode)
             break;
     }
 
-    if (lpIMC->fdwConversion != fdwConversion)
-    {
-        lpIMC->fdwConversion = fdwConversion;
-        GnMsg.message = WM_IME_NOTIFY;
-        GnMsg.wParam = IMN_SETCONVERSIONMODE;
-        GnMsg.lParam = 0L;
-        GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
-    }
+    ImmSetConversionStatus (hIMC, fdwConversion, 0);
+
+    if (!fOpen)
+        ImmSetOpenStatus(hIMC, FALSE);
 
     ImmUnlockIMC(hIMC);
     return;    
