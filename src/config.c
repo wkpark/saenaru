@@ -550,8 +550,9 @@ INT_PTR CALLBACK SelectToggleDlgProc(HWND hDlg, UINT message , WPARAM wParam, LP
 
             break;
 
+        case WM_CLOSE:
         case WM_DESTROY:
-            EndDialog(hDlg, wParam); 
+            EndDialog(hDlg, 0); 
             break;
 
         case WM_HELP:
