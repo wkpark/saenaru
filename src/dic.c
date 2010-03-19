@@ -927,7 +927,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.wParam = cs;
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+            if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
         }
@@ -950,7 +950,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.wParam = 0;
             //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
-            if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
+            if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
@@ -2011,7 +2011,7 @@ LPBYTE lpbKeyState;
             break;
 
         case VK_RIGHT:
-            if (ic.len && IsCompStr(hIMC) && (!(dwImeFlag & SAENARU_ONTHESPOT) || dwOptionFlag & HANGUL_JAMOS))
+            if (ic.len && IsCompStr(hIMC) && !(dwImeFlag & SAENARU_ONTHESPOT))
             {
                 hangul_ic_init(&ic);
                 return TRUE;
