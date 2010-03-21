@@ -79,7 +79,7 @@ BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData)
     ImeLog(LOGF_API, TEXT("ImeConfigure"));
 
     psh.dwSize = sizeof(psh);
-    psh.dwFlags = PSH_PROPTITLE;
+    psh.dwFlags = PSH_PROPTITLE | PSH_NOAPPLYNOW;
     psh.hwndParent = hWnd;
     psh.hInstance = hInst;
     psh.pszCaption = MAKEINTRESOURCE(IDS_CONFIGNAME);
