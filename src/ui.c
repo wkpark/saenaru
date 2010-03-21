@@ -394,8 +394,8 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
-            // if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
-            CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+            if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
+                CreateCompWindow(hWnd,lpUIExtra,lpIMC );
 
             MyDebugPrint((TEXT("WM_IME_STARTCOMPOSITION\r\n")));
 
@@ -425,9 +425,9 @@ LPARAM lParam;
                       CreateCompWindow(hWnd,lpUIExtra,lpIMC );
                 }
                 ImmUnlockIMCC(lpIMC->hCompStr); // XXX
+                MoveCompWindow(lpUIExtra,lpIMC);
             }
             //
-            MoveCompWindow(lpUIExtra,lpIMC);
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra, FALSE); // NateOn flicking
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE); // EditPlus problem
@@ -807,7 +807,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
 
             lpUIExtra->hFont = CreateFontIndirect((LPLOGFONT)&lf);
             SetFontCompWindow(lpUIExtra);
-            MoveCompWindow(lpUIExtra,lpIMC);
+            if (!(dwImeFlag & SAENARU_ONTHESPOT))
+                MoveCompWindow(lpUIExtra,lpIMC);
 
             // lRet=1L; for fail
 
@@ -886,7 +887,8 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             break;
 
         case IMN_SETCOMPOSITIONWINDOW:
-            MoveCompWindow(lpUIExtra,lpIMC);
+            if (!(dwImeFlag & SAENARU_ONTHESPOT))
+                MoveCompWindow(lpUIExtra,lpIMC);
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
             MyDebugPrint((TEXT("IMN_SETCOMPOSITIONWINDOW\n")));
 
