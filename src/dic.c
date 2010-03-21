@@ -2732,6 +2732,9 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 // 뜻이 길 경우는 잘라냄. FIXME
                 if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
+                // strip \r
+                else if (NULL != (lpTemp2 = Mystrchr(lpToken, MYTEXT('\r'))))
+                    *lpTemp2 = MYTEXT('\0');
 
                 len = Mylstrlen(lpToken);
             }
