@@ -54,6 +54,7 @@ LPARAM lParam;
     {
         case WM_PAINT:
             PaintCompWindow( hWnd);
+            DrawCompCaret(hWnd);
             break;
 
         case WM_SETCURSOR:
@@ -636,6 +637,7 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
 {
     LPMYSTR lpStart = lpstr;
     LPMYSTR lpEnd = lpstr + num - 1;
+    HPEN MyPen, hPen;
     int x,y;
     RECT rc;
 
@@ -643,6 +645,9 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
         return;
 
     GetClientRect (hCompWnd,&rc);
+
+    MyPen = CreatePen(PS_DOT, 1, RGB(0, 0, 0));
+    hPen = (HPEN)SelectObject(hDC, MyPen);
 
     if (!fVert)
     {
@@ -673,8 +678,8 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
             case ATTR_INPUT:
                 // XXX SetTextColor(hDC,RGB(0,0,0));
                 //SetBkMode(hDC,TRANSPARENT);
-                MoveToEx(hDC, rc.right, rc.top, NULL);
-                LineTo  (hDC, rc.right, rc.bottom);
+                MoveToEx(hDC, rc.left, rc.bottom - 1, NULL);
+                LineTo  (hDC, rc.right, rc.bottom - 1);
                 break;
 
             case ATTR_TARGET_CONVERTED:
@@ -709,18 +714,97 @@ void PASCAL DrawTextOneLine( HWND hCompWnd, HDC hDC, LPMYSTR lpstr, LPBYTE lpatt
         TextOut(hDC,x,y,lpstr,cnt);
         GetTextExtentPoint(hDC,lpstr,cnt,&sz);
         lpstr += cnt;
-        if (bAttr == ATTR_INPUT)
-        {
-                MoveToEx(hDC, rc.right, rc.top, NULL);
-                LineTo  (hDC, rc.right, rc.bottom);
-        }
 
         if (!fVert)
             x += sz.cx;
         else
             y += sz.cx;
     }
+    SelectObject(hDC, hPen);
+    DeleteObject(MyPen);
+}
 
+/**********************************************************************/
+/*                                                                    */
+/* DrawCompCaret(hCompWnd)                                            */
+/*                                                                    */
+/**********************************************************************/
+int PASCAL DrawCompCaret( HWND hCompWnd) {
+    RECT rc;
+    HIMC hIMC;
+    LPINPUTCONTEXT lpIMC;
+    HWND hSvrWnd;
+    LPCOMPOSITIONSTRING lpCompStr;
+    LONG lstart, num;
+    int ret = 0;
+
+    GetClientRect(hCompWnd,&rc);
+
+    if (rc.right == 0)
+        return 0;
+
+    hSvrWnd = (HWND)GetWindowLongPtr(hCompWnd,FIGWL_SVRWND);
+    if (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) {
+        lpIMC = ImmLockIMC(hIMC);
+        if (lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr)) {
+            if ((lpCompStr->dwSize > sizeof(COMPOSITIONSTRING))
+               && (lpCompStr->dwCompStrLen > 0)) {
+                LPMYSTR lpstr;
+                LPBYTE lpattr;
+                LPMYSTR lpEnd;
+                BYTE bAttr = ATTR_INPUT;
+
+                lpstr = GETLPCOMPSTR(lpCompStr);
+                lpattr = GETLPCOMPATTR(lpCompStr);
+
+                lstart = GetWindowLong(hCompWnd,FIGWL_COMPSTARTSTR);
+                num = GetWindowLong(hCompWnd,FIGWL_COMPSTARTNUM);
+
+                lpstr+=lstart;
+                lpattr+=lstart;
+
+                lpEnd = lpstr + num - 1;
+
+                // Pseudo caret. Invert last char
+                if (bAttr == ATTR_INPUT && *(lpEnd + 1) == TEXT('\0') ) {
+                    HDC hDC;
+                    PAINTSTRUCT ps;
+                    HBRUSH hMybr, hbr;
+                    SIZE sz;
+                    HFONT hFont = (HFONT)NULL;
+                    HFONT hOldFont = (HFONT)NULL;
+
+                    hDC = GetDC(hCompWnd);
+
+                    if (hFont = (HFONT)GetWindowLongPtr(hCompWnd,FIGWL_FONT))
+                        hOldFont = SelectObject(hDC,hFont);
+
+                    hMybr = CreateSolidBrush(RGB(255, 255, 255));
+                    hbr = SelectObject(hDC,hMybr);
+                    if (ic.len > 0) { // 한글 조합중.
+                        GetTextExtentPoint(hDC, lpEnd, 1,&sz);
+                        rc.left = rc.right - sz.cx;
+                    } else { // 조합중 아님.
+                        rc.left = rc.right - 2;
+                        //InvalidateRect(hCompWnd,NULL,FALSE); // FIXME
+                    }
+                    rc.right = rc.right;
+                    // Invert
+                    InvertRect(hDC,&rc);
+
+                    SelectObject(hDC,hbr);
+
+                    if (hFont && hOldFont)
+                        SelectObject(hDC,hOldFont);
+                    ReleaseDC(hCompWnd, hDC);
+                    ret = 1;
+                }
+                ImmUnlockIMCC(lpIMC->hCompStr);
+            }
+        }
+        ImmUnlockIMC(hIMC);
+    }
+    return ret;
 }
 
 /**********************************************************************/

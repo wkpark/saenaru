@@ -186,6 +186,15 @@ HANDLE hInstance;
     return TRUE;
 }
 
+void caretTimerProc( hWnd, uMsg, idEvent, dwTime)
+HWND hWnd;
+UINT uMsg;
+UINT_PTR idEvent;
+DWORD dwTime;
+{
+    PostMessage(hWnd, WM_IME_NOTIFY, IMN_PRIVATE, WM_UI_CARET);
+}
+
 /**********************************************************************/
 /*                                                                    */
 /* SAENARUWndProc()                                                   */
@@ -420,9 +429,21 @@ LPARAM lParam;
             {
                 LPCOMPOSITIONSTRING lpCompStr;
                 lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
+
+                // 아래의 내용은 IME_STARTCOMPOSITION에 들어가야 한다.
+                // 그러나 몇몇 어플은 이상하게도 IME_STARTCOMPOSITION으로 조합을 시작하지 않는다. (노트패드 등등)
                 if (lpCompStr->dwCompStrLen)
+                if (!IsWindow(lpUIExtra->uiDefComp.hWnd) ||
+                        !lpUIExtra->uiDefComp.bShow)
                 {
-                      CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+                    UINT mt;
+                    CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+
+                    mt = GetCaretBlinkTime();
+                    if (mt) {
+                        // Set Fake caret.
+                        SetTimer(hWnd, 1, mt, (TIMERPROC) caretTimerProc);
+                    }
                 }
                 ImmUnlockIMCC(lpIMC->hCompStr); // XXX
                 MoveCompWindow(lpUIExtra,lpIMC);
@@ -443,10 +464,15 @@ LPARAM lParam;
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
 
+            lpIMC = ImmLockIMC(hUICurIMC);
             //hangul_ic_init(&ic);
+            if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT)) {
+                KillTimer(hWnd, 1);
+            }
 
             HideCompWindow(lpUIExtra);
             GlobalUnlock(hUIExtra);
+            ImmUnlockIMC(hUICurIMC);
 
             break;
 
@@ -895,7 +921,19 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             break;
 
         case IMN_SETSTATUSWINDOWPOS:
+            break;
+
         case IMN_PRIVATE:
+            if (lParam == WM_UI_CARET) {
+                // Create Fake Caret
+                if (lpUIExtra) {
+                    int i;
+                    for (i = 0; i < MAXCOMPWND; i++) {
+                        if (IsWindow(lpUIExtra->uiComp[i].hWnd))
+                            DrawCompCaret(lpUIExtra->uiComp[i].hWnd);
+                    }
+                }
+            }
             break;
 
         default:
@@ -1378,6 +1416,28 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
         MyDebugPrint((TEXT("\tMainProc: VK_MENU and 0x%x\r\n"),lpmsg->lParam));
     }
 #endif
+
+    // XXX
+    // check SendMessage(hWnd, WM_TIMER, WM_IME_NOTIFY, WM_UI_CARET);
+    //
+    while (!(dwImeFlag & SAENARU_ONTHESPOT) &&
+            lpmsg->wParam == WM_IME_NOTIFY &&
+            lpmsg->message == WM_TIMER) {
+        HIMC hIMC;
+        LPINPUTCONTEXT lpIMC;
+        HWND hwnd = GetFocus();
+        MyDebugPrint((TEXT("\tWM_TIMER: wParam=%d, lParam=%d\r\n"),
+                    lpmsg->wParam, lpmsg->lParam));
+
+        hIMC = ImmGetContext(hwnd);
+        if (!hIMC) break;
+
+        lpIMC = ImmLockIMC(hIMC);
+        if (lpIMC)
+            PostMessage(lpIMC->hWnd, WM_IME_NOTIFY, IMN_PRIVATE, WM_UI_CARET);
+
+        break;
+    }
 
     // check soft Han/Eng toggle key.
     if ( dwOptionFlag & USE_SHIFT_SPACE && (dwToggleKey & 0xFF) == vKey ) {

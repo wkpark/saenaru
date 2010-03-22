@@ -143,6 +143,7 @@ typedef TCHAR             MYCHAR;
 #define WM_UI_CANDMOVE    (WM_USER+603)
 #define WM_UI_GUIDEMOVE   (WM_USER+604)
 #define WM_UI_STATEHIDE   (WM_USER+605)
+#define WM_UI_CARET       (WM_USER+606)
 
 /* Escape Functions */
 #define IME_ESC_PRI_GETDWORDTEST (IME_ESC_PRIVATE_FIRST + 0)
@@ -489,6 +490,8 @@ void PASCAL CreateCompWindow(HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpI
 void PASCAL MoveCompWindow(LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC);
 void PASCAL HideCompWindow(LPUIEXTRA lpUIExtra);
 void PASCAL SetFontCompWindow(LPUIEXTRA lpUIExtra);
+
+int PASCAL DrawCompCaret(HWND hCompWnd);
 
 /* uisoft.c      */
 void PASCAL ShowSoftKbd(HWND, int);
