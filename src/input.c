@@ -64,6 +64,8 @@ LPBYTE lpbKeyState;
             */
 
         default:
+            if (IsCTLPushed(lpbKeyState))
+                break;
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
                 MyDebugPrint((TEXT("Vkey: %x\r\n"), wVKey));
                 // This WM_IMEKEYDOWN has actual character code in itself.
