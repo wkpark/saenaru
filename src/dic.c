@@ -1968,7 +1968,10 @@ LPBYTE lpbKeyState;
                 OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN #2\r\n"));
             }
             if (!candOk) {
-                ConvHanja(hIMC,1,0);
+                if (IsConvertedCompStr(hIMC))
+                    ConvHanja(hIMC,1,0);
+                else
+                    ConvHanja(hIMC,0,0);
             }
             ImmUnlockIMC(hIMC);
             return TRUE;
