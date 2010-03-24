@@ -39,4 +39,4 @@
 도덕적 문제 등 모든 사항에 대해서 열린 한글 프로젝트와 프로젝트의 공헌자들은
 책임이 없습니다.
 
-$Saenaru: saenaru/setup/LICENSE.txt,v 1.6 2007/12/29 17:01:01 wkpark Exp $
+$Id$
