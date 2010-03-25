@@ -798,10 +798,12 @@ int PASCAL DrawCompCaret( HWND hCompWnd) {
                     InvertRect(hDC,&rc);
 
                     SelectObject(hDC,hbr);
+                    DeleteObject(hMybr);
 
-                    if (hFont && hOldFont)
+                    if (hOldFont)
                         SelectObject(hDC,hOldFont);
                     ReleaseDC(hCompWnd, hDC);
+                    DeleteDC(hDC);
                     ret = 1;
                 }
                 ImmUnlockIMCC(lpIMC->hCompStr);
@@ -906,9 +908,12 @@ end_pcw:
         }
         ImmUnlockIMC(hIMC);
     }
-    if (hFont && hOldFont)
+    if (hOldFont) {
         SelectObject(hDC,hOldFont);
+    }
     EndPaint(hCompWnd,&ps);
+
+    DeleteDC(hDC);
 }
 /**********************************************************************/
 /*                                                                    */
