@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/version.h,v 1.4 2007/12/29 16:50:50 wkpark Exp $
+ * $Id$
  */
 
 #define VER_MAJOR	 1
@@ -35,9 +35,9 @@
 #define VER_MINOR	 1
 #define VER_MINOR_STR	"1"
 
-#define VER_BUILD	 1300
-#define VER_BUILD_STR	"1300"
+#define VER_BUILD	 1982
+#define VER_BUILD_STR	"1982"
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
-#define VER_SNAPSHOT	"release 1.1.0-cvs"
+#define VER_SNAPSHOT	"release 1.1.0"
