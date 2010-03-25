@@ -403,8 +403,8 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
-            if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
-                CreateCompWindow(hWnd,lpUIExtra,lpIMC );
+            //if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
+            CreateCompWindow(hWnd,lpUIExtra,lpIMC );
 
             MyDebugPrint((TEXT("WM_IME_STARTCOMPOSITION\r\n")));
 
@@ -424,30 +424,32 @@ LPARAM lParam;
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
             // WM_IME_STARTCOMPOSITION 메시지가 전달되지 않는 경우
             if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
-                    /* (!(dwImeFlag & SAENARU_ONTHESPOT) ||
-                      (dwOptionFlag & HANGUL_JAMOS))) */
             {
                 LPCOMPOSITIONSTRING lpCompStr;
                 lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
 
-                // 아래의 내용은 IME_STARTCOMPOSITION에 들어가야 한다.
-                // 그러나 몇몇 어플은 이상하게도 IME_STARTCOMPOSITION으로 조합을 시작하지 않는다. (노트패드 등등)
-                if (lpCompStr->dwCompStrLen)
-                if (!IsWindow(lpUIExtra->uiDefComp.hWnd) ||
-                        !lpUIExtra->uiDefComp.bShow)
+                if (lpCompStr->dwCompStrLen &&
+                    (!IsWindow(lpUIExtra->uiDefComp.hWnd) || !lpUIExtra->uiDefComp.bShow) )
                 {
-                    UINT mt;
+                    // 아래의 내용은 IME_STARTCOMPOSITION에 들어가야 한다.
+                    // 그러나 몇몇 어플은 이상하게도 IME_STARTCOMPOSITION으로 조합을 시작하지 않는다. (노트패드 등등)
                     CreateCompWindow(hWnd,lpUIExtra,lpIMC );
-
-                    mt = GetCaretBlinkTime();
-                    if (mt) {
-                        // Set Fake caret.
-                        SetTimer(hWnd, 1, mt, (TIMERPROC) caretTimerProc);
-                    }
                 }
+
                 ImmUnlockIMCC(lpIMC->hCompStr); // XXX
-                MoveCompWindow(lpUIExtra,lpIMC);
             }
+
+            // Set Fake caret.
+            if (lpUIExtra->uiDefComp.pt.x != -1) {
+                UINT mt;
+
+                mt = GetCaretBlinkTime();
+                if (mt) {
+                    // Set Fake caret.
+                    SetTimer(hWnd, 1, mt, (TIMERPROC) caretTimerProc);
+                }
+            }
+            MoveCompWindow(lpUIExtra,lpIMC);
             //
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
             //MoveCandWindow(hWnd,lpIMC,lpUIExtra, FALSE); // NateOn flicking
@@ -833,8 +835,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
 
             lpUIExtra->hFont = CreateFontIndirect((LPLOGFONT)&lf);
             SetFontCompWindow(lpUIExtra);
-            if (!(dwImeFlag & SAENARU_ONTHESPOT))
-                MoveCompWindow(lpUIExtra,lpIMC);
+            MoveCompWindow(lpUIExtra,lpIMC);
 
             // lRet=1L; for fail
 
@@ -913,8 +914,7 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             break;
 
         case IMN_SETCOMPOSITIONWINDOW:
-            if (!(dwImeFlag & SAENARU_ONTHESPOT))
-                MoveCompWindow(lpUIExtra,lpIMC);
+            MoveCompWindow(lpUIExtra,lpIMC);
             MoveCandWindow(hWnd,lpIMC,lpUIExtra, TRUE);
             MyDebugPrint((TEXT("IMN_SETCOMPOSITIONWINDOW\n")));
 

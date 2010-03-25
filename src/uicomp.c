@@ -325,6 +325,11 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
     lpUIExtra->dwCompStyle = lpIMC->cfCompForm.dwStyle;
     MyDebugPrint((TEXT("MoveCompWindow dwStyle %x\r\n"), lpIMC->cfCompForm.dwStyle));
 
+    if (lpUIExtra->uiDefComp.pt.x == -1) {
+        // Not initialized CompWnd position.
+        return;
+    }
+
     if (lpIMC->cfCompForm.dwStyle)  // Style is not DEFAULT.
     {
         POINT ptSrc = lpIMC->cfCompForm.ptCurrentPos;
@@ -932,6 +937,9 @@ void PASCAL HideCompWindow(LPUIEXTRA lpUIExtra)
             lpUIExtra->uiComp[i].bShow = FALSE;
         }
     }
+    // HACK HACK
+    lpUIExtra->uiDefComp.pt.x = -1;
+    lpUIExtra->uiDefComp.pt.y = -1;
 }
 
 /**********************************************************************/
