@@ -2956,8 +2956,10 @@ LPBYTE lpbKeyState;
     lpCompStr->dwCompAttrLen = Mylstrlen(lpstr);
     lpCompStr->dwCompReadAttrLen = Mylstrlen(lpread);
 
+    /*
     if (lpCompStr->dwCompReadStrLen > 0)
         lpCompStr->dwCompReadStrLen--;
+    */
 
     /* ReadStr은 무엇이고, CompStr은 무엇인가 ?
      * ReadStr은 버퍼이고, CompStr은 그것을 해석한 결과를 저장하는 ?
@@ -2980,11 +2982,12 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.a
     {
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = cs;
-        //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
+        GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
         //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
-        if (dwImeFlag & SAENARU_ONTHESPOT)
+        if (dwImeFlag & SAENARU_ONTHESPOT) {
+	    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //한글 IME 2002,2003
             GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+	}
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
     }
     /*
@@ -3082,11 +3085,12 @@ ac_exit:
 #endif
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
-            //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
+            GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
-            if (dwImeFlag & SAENARU_ONTHESPOT)
+            if (dwImeFlag & SAENARU_ONTHESPOT) {
+		//GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // 한글 IME 2002,2003
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
+	    }
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
 	    if (ic.len > 1 && // 초성+중성 두글자 이상일 경우.
