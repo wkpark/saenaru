@@ -973,12 +973,14 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             }
         }
 #if !defined (NO_TSF)
+        /*
         if (fSelect) {
             if (InitLanguageBar ())
                 ActivateLanguageBar (TRUE) ;
         } else {
             ActivateLanguageBar (FALSE) ;
         }
+        */
 #endif
         ImmUnlockIMC(hIMC);
     }

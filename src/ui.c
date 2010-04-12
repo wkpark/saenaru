@@ -291,7 +291,9 @@ LPARAM lParam;
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
             //SetConsoleHookFunc();
-            InitLanguageBar();
+            if (InitLanguageBar()) {
+                ActivateLanguageBar(TRUE);
+            }
 
             break;
 
@@ -568,7 +570,7 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
-            //XXX ActivateLanguageBar(FALSE);
+            ActivateLanguageBar(FALSE);
             //XXX UninitLanguageBar();
             //UnsetConsoleHookFunc();
 
