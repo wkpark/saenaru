@@ -2487,6 +2487,79 @@ int hangul_del_prev(LPMYSTR lptr)
     return (int) (lpSave - lptr);
 }
 
+
+DWORD PASCAL checkHangulKey( hIMC, wParam, lParam, lpbKeyState)
+HIMC hIMC;
+WPARAM wParam;
+LPARAM lParam;
+LPBYTE lpbKeyState;
+{
+    WORD code = (WORD) HIWORD(wParam);
+    WORD scan = (WORD) (HIWORD(lParam) & 0xFF);
+    WORD ocode;
+
+    DWORD fdwConversion;
+    LPINPUTCONTEXT lpIMC;
+
+    DWORD hkey;
+    BOOL capital = lpbKeyState[VK_CAPITAL];
+
+    MyDebugPrint((TEXT("check scan= 0x%x, code= 0x%x\r\n"), scan, code));
+
+    lpIMC = ImmLockIMC(hIMC);
+    // Get ConvMode from IMC.
+    fdwConversion = lpIMC->fdwConversion;
+
+    ocode = code;
+
+    if (dwScanCodeBased) {
+	WORD mycode;
+	if (fdwConversion & IME_CMODE_NATIVE &&
+		scan >= 0x02 && scan <=0x35) {
+	    // code conversion based on ScanCode
+	    if (IsSHFTPushed(lpbKeyState)) {
+		mycode = scan2qwerty[scan - 0x02].code[1];
+	    } else {
+		mycode = scan2qwerty[scan - 0x02].code[0];
+	    }
+	    if (mycode)
+		hkey = code = mycode; // scan based conversion
+	    else
+		hkey = code;
+	} else {
+	    // use VK keycode.
+	    hkey = code;
+	}
+	MyDebugPrint((TEXT("check scancode based = 0x%x, code= 0x%x\r\n"), scan, code));
+    } else {
+	if (fdwConversion & IME_CMODE_NATIVE) {
+	    if (capital) {
+		WORD ch = code;
+		if (ch >= 'a' && ch <= 'z')
+		    code -= 'a' - 'A';
+		if (ch >= 'A' && ch <= 'Z')
+		    code += 'a' - 'A';
+	    }
+	    /* check dvorak layout */
+	    hkey= code = checkDvorak(code);
+	} else {
+	    hkey= code;
+	}
+    }
+
+    if (fdwConversion & IME_CMODE_NATIVE) {
+	hkey = keyToHangulKey( code );
+
+	if (dwScanCodeBased > 1 && hkey == code) {
+	    // there are no keymap entry.
+	    // use original VK codes.
+	    hkey = code = (WORD) HIWORD(wParam);
+	}
+    }
+    ImmUnlockIMC(hIMC);
+    return hkey;
+}
+
 void PASCAL hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState)
 HIMC hIMC;
 WPARAM wParam;

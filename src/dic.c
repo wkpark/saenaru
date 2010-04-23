@@ -1321,6 +1321,12 @@ LPBYTE lpbKeyState;
         LPCANDIDATEINFO lpCandInfo;
         LPCANDIDATELIST lpCandList;
         DWORD cand_style = dwCandStyle;
+        DWORD hkey, mycode;
+
+        hkey = checkHangulKey( hIMC, wParam, lParam ,lpbKeyState);
+        if (hkey >= 0x1100 && hkey <= 0x11ff) {
+            return FALSE;
+        }
 
         if ((wParam == VK_LEFT || wParam == VK_RIGHT) && (lpIMC = ImmLockIMC(hIMC)) ) {
             lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);

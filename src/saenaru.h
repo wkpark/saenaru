@@ -540,6 +540,7 @@ void PASCAL MakeAttrClause( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 
 /* hangul.c       */
+BOOL PASCAL checkHangulKey(HIMC,UINT,LPARAM,LPBYTE);
 void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
 WCHAR PASCAL keyToHangulKey(WCHAR);
 WORD PASCAL checkDvorak(WORD);
