@@ -64,8 +64,11 @@ LPBYTE lpbKeyState;
             */
 
         default:
-            if (IsCTLPushed(lpbKeyState))
-                break;
+            // check VK_HANJA or CTRL-Space
+            if (IsCTLPushed(lpbKeyState)) {
+                if ((wVKey != VK_HANJA && ((dwOptionFlag & USE_SHIFT_SPACE) && wVKey != VK_SPACE)))
+                    break;
+            }
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
                 MyDebugPrint((TEXT("Vkey: %x\r\n"), wVKey));
                 // This WM_IMEKEYDOWN has actual character code in itself.
