@@ -1326,6 +1326,9 @@ LPBYTE lpbKeyState;
         hkey = checkHangulKey( hIMC, wParam, lParam ,lpbKeyState);
         if (hkey >= 0x1100 && hkey <= 0x11ff) {
             return FALSE;
+        } else if (hkey >= VK_1 && hkey <= VK_9) {
+            // hanja selection key
+            wParam = hkey;
         }
 
         if ((wParam == VK_LEFT || wParam == VK_RIGHT) && (lpIMC = ImmLockIMC(hIMC)) ) {
