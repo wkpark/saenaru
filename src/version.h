@@ -40,4 +40,4 @@
 #define VER_PATCHLEVEL	     2
 #define VER_PATCHLEVEL_STR  "2"
 
-#define VER_SNAPSHOT	"CVS 1.1.1"
+#define VER_SNAPSHOT	"CVS 1.1.2"
