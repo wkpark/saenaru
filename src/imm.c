@@ -442,7 +442,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         case VK_HANJA:
             if ( lKeyData & 0x80000000 ) break;
 
-            if (!IsCompStr(hIMC) && IsCTLPushed(lpbKeyState)) {
+            if (!IsCompStr(hIMC) && IsSHFTPushed(lpbKeyState)) {
                 fOpen = ImmGetOpenStatus(hIMC);
                 if (!fOpen)
                     ImmSetOpenStatus(hIMC,TRUE);
