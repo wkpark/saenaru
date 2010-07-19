@@ -35,9 +35,9 @@
 #define VER_MINOR	 1
 #define VER_MINOR_STR	"1"
 
-#define VER_BUILD	 1982
-#define VER_BUILD_STR	"1982"
-#define VER_PATCHLEVEL	     0
-#define VER_PATCHLEVEL_STR  "0"
+#define VER_BUILD	 1990
+#define VER_BUILD_STR	"1990"
+#define VER_PATCHLEVEL	     2
+#define VER_PATCHLEVEL_STR  "2"
 
-#define VER_SNAPSHOT	"release 1.1.0"
+#define VER_SNAPSHOT	"CVS 1.1.1"
