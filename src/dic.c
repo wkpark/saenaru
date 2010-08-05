@@ -1385,6 +1385,18 @@ LPBYTE lpbKeyState;
             case VK_END:
                 next=100;
                 break;
+            case VK_NUMPAD0:
+            case VK_NUMPAD1:
+            case VK_NUMPAD2:
+            case VK_NUMPAD3:
+            case VK_NUMPAD4:
+            case VK_NUMPAD5:
+            case VK_NUMPAD6:
+            case VK_NUMPAD7:
+            case VK_NUMPAD8:
+            case VK_NUMPAD9:
+                // VK_NUMPADx to VK_x
+                wParam -= 0x30;
             case VK_1:
             case VK_2:
             case VK_3:
@@ -1398,6 +1410,10 @@ LPBYTE lpbKeyState;
                 break;
             case VK_ESCAPE:
                 select= -999; // XXX
+                break;
+            /* Ignore some toggle keys in the candidate window mode */
+            case VK_NUMLOCK:
+                return TRUE;
                 break;
             default:
                 break;
@@ -2153,6 +2169,10 @@ LPBYTE lpbKeyState;
                 return TRUE;
             }
             break;
+        /* MS IME compatible code - do not ignore some VK codes */
+        case VK_NUMLOCK:
+            return FALSE;
+            break;
         default:
             break;
     }
@@ -2160,7 +2180,7 @@ LPBYTE lpbKeyState;
     if (( VK_0 <= wParam && VK_9 >= wParam ) ||
         ( VK_A <= wParam && VK_Z >= wParam ) ||
         ( VK_RETURN == wParam || VK_SPACE == wParam ) ||
-        //( VK_NUMPAD0 <= wParam && VK_NUMPAD9 >= wParam ) ||
+        ( VK_NUMPAD0 <= wParam && VK_NUMPAD9 >= wParam ) ||
         ( VK_OEM_1 <= wParam && VK_OEM_9 >= wParam ) ||
         ( VK_MULTIPLY <= wParam && VK_DIVIDE >= wParam ))
     {
