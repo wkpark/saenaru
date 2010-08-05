@@ -424,7 +424,8 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         }
 
         // FIXME
-        if (vkey == VK_SPACE && vkToggle == VK_SPACE && dwImeFlag & USE_CTRL_SPACE && IsCTLPushed(lpbKeyState))
+        //if (vkey == VK_SPACE && vkToggle == VK_SPACE && dwImeFlag & USE_CTRL_SPACE && IsCTLPushed(lpbKeyState))
+        if (IsCompStr(hIMC) && vkey == VK_SPACE && vkToggle == VK_SPACE && IsCTLPushed(lpbKeyState))
             vkey = VK_HANJA;
     }
 
