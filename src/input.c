@@ -66,8 +66,12 @@ LPBYTE lpbKeyState;
         default:
             // check VK_HANJA or CTRL-Space
             if (IsCTLPushed(lpbKeyState)) {
-                if ((wVKey != VK_HANJA && ((dwOptionFlag & USE_SHIFT_SPACE) && wVKey != VK_SPACE)))
+                if (dwOptionFlag & USE_SHIFT_SPACE) {
+                    if ((wVKey != VK_HANJA && wVKey != VK_SPACE))
+                        break;
+                } else {
                     break;
+                }
             }
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
                 MyDebugPrint((TEXT("Vkey: %x\r\n"), wVKey));
