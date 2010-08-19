@@ -2691,7 +2691,7 @@ LPBYTE lpbKeyState;
 	// 후보창을 보여주면서 그와 동시에 글자를 계속 조합할 수 있도록.
 	lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
 	if (lpCandInfo) {
-	    // 후보창 정보를 가져온다. dwSelection != 0인 경우는 아직 한글이 이미 한자로 변환된 경우
+	    // 후보창 정보를 가져온다. dwSelection != 0인 경우는 한글이 이미 한자로 변환된 경우
 	    // 이 경우는 선택된 한자를 커밋하고 다시 한글을 입력받는 모드로
 	    lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
 	    if (lpCandList && lpCandList->dwSelection != 0) {
@@ -3094,6 +3094,9 @@ ac_exit:
 		(fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
 	    // 입력 즉시 후보 창 뜨게 하기.
+            ConvHanja(hIMC,0,0);
+	} else if (IsCandidate(lpIMC)) {
+	    // 이미 한자창이 떠있는 경우에도
             ConvHanja(hIMC,0,0);
 	}
     } else {

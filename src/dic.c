@@ -1715,7 +1715,7 @@ LPBYTE lpbKeyState;
 
         case VK_HANJA:
         case VK_F9:
-            hangul_ic_init(&ic);
+            //hangul_ic_init(&ic);
 
             lpIMC = ImmLockIMC(hIMC);
 
