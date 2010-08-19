@@ -177,7 +177,7 @@ CAPTION "새나루에 대해..."
 FONT 9, "굴림"
 LANGUAGE 0x12, 0x1
 BEGIN
-    LTEXT           "새나루 한글 입력기 버전 1.1.0",IDC_STATIC,61,36,98,8
+    LTEXT           "새나루 한글 입력기 버전 1.1.2",IDC_STATIC,61,36,98,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
     LTEXT           "장혜식, 박원규 만듦 2003-2010",IDC_STATIC,
 		     59,54,98,8
@@ -255,10 +255,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "새나루 한글 입력기\0"
             VALUE "CompanyName", "Open Hangul Project\0"
-            VALUE "FileDescription", "새나루 1.1.0\0"
+            VALUE "FileDescription", "새나루 " VER_MAJOR_STR "." VER_MINOR_STR "." VER_PATCHLEVEL_STR "\0"
             VALUE "FileVersion", VER_MAJOR_STR "." VER_MINOR_STR "\0"
             VALUE "InternalName", "SAENARU\0"
-            VALUE "LegalCopyright", "Copyright (C) 2003-2010 장혜식.\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003-2010 장혜식, 박원규.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "SAENARU.IME\0"
 #ifdef VER_SNAPSHOT
@@ -570,7 +570,7 @@ CAPTION "About Saenaru..."
 LANGUAGE 0x09, 0x01
 FONT 8, "MS Shell Dlg"
 {
-   LTEXT	"Saenaru Hangul Input Method ver 1.1.0", IDC_STATIC, 43,29,126,8 
+   LTEXT	"Saenaru Hangul Input Method ver 1.1.2", IDC_STATIC, 43,29,126,8 
    ICON		IDI_ABOUT, IDC_STATIC, 98,6,18,18 
    LTEXT	"Hye-Sik Chang, Won-Kyu Park 2003-2010", IDC_STATIC, 41,42,136,8 
    LTEXT 	"THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.", IDC_STATIC, 10,59,198,42 
