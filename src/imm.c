@@ -358,9 +358,9 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         // builtin support HANGUL, HANJA
         UINT vk = (UINT) (lKeyData & 0x00ff0000) >> 16;
         if (vk == 0xf2) { // VK_HANGUL
-            vKey = VK_HANGUL;
+            vKey = vkey = VK_HANGUL;
         } if (vk == 0xf1) { // VK_HANJA
-            vKey = VK_HANJA;
+            vKey = vkey = VK_HANJA;
         }
     }
 

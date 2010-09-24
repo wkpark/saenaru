@@ -64,6 +64,12 @@ LPBYTE lpbKeyState;
             */
 
         default:
+            if (wVKey == 0x00FF) {
+                WORD scan = (WORD) (HIWORD(lParam) & 0xFF);
+                if (scan == 0xF1)
+                    wVKey = VK_HANJA;
+                MyDebugPrint((TEXT("SCAN: %x\r\n"), scan));
+            }
             // check VK_HANJA or CTRL-Space
             if (IsCTLPushed(lpbKeyState)) {
                 if (dwOptionFlag & USE_SHIFT_SPACE) {
