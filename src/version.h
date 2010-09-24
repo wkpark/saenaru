@@ -35,9 +35,9 @@
 #define VER_MINOR	 1
 #define VER_MINOR_STR	"1"
 
-#define VER_BUILD	 1990
-#define VER_BUILD_STR	"1990"
+#define VER_BUILD	 2003
+#define VER_BUILD_STR	"2003"
 #define VER_PATCHLEVEL	     2
 #define VER_PATCHLEVEL_STR  "2"
 
-#define VER_SNAPSHOT	"CVS 1.1.2"
+#define VER_SNAPSHOT	"RC2 1.1.2"
