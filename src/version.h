@@ -40,4 +40,4 @@
 #define VER_PATCHLEVEL	     2
 #define VER_PATCHLEVEL_STR  "2"
 
-#define VER_SNAPSHOT	"RC2 1.1.2"
+#define VER_SNAPSHOT	"RC3 1.1.2"
