@@ -190,7 +190,7 @@ void PASCAL RevertText(HIMC hIMC)
         GnMsg.message = WM_IME_COMPOSITION;
         GnMsg.wParam = 0;
         GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+        //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
         ImmUnlockIMCC(lpIMC->hCompStr);
@@ -328,7 +328,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
                 szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
 
         //
-        // »çÀü¿¡¼­ ¹ß°ßµÇÁö ¾ÊÀ½. ÇÑÀÚ°¡ ¼¯¿©ÀÖ°Å³ª ÇÑÀÚ´Ü¾îÀÌ¸é ÀÌ°ÍÀ» ÇÑ±Û·Î º¯È¯ ½Ãµµ.
+        // ì‚¬ì „ì—ì„œ ë°œê²¬ë˜ì§€ ì•ŠìŒ. í•œìžê°€ ì„žì—¬ìžˆê±°ë‚˜ í•œìžë‹¨ì–´ì´ë©´ ì´ê²ƒì„ í•œê¸€ë¡œ ë³€í™˜ ì‹œë„.
         //
         while (nBufLen < 1 && Mylstrlen(lpT2) < 255) {
             MYCHAR han[256];
@@ -420,10 +420,10 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 
     if (nBufLen < 1)
     {
-        // »çÀü¿¡ ¿£Æ®¸®°¡ ¾ø´Ù.
+        // ì‚¬ì „ì— ì—”íŠ¸ë¦¬ê°€ ì—†ë‹¤.
         if (IsCandidate(lpIMC))
         {
-            // ÀÌ¹Ì ¿­¸° ÈÄº¸Ã¢ÀÌ ÀÖÀ¸¸é ´Ý´Â´Ù.
+            // ì´ë¯¸ ì—´ë¦° í›„ë³´ì°½ì´ ìžˆìœ¼ë©´ ë‹«ëŠ”ë‹¤.
             lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
             ClearCandidate(lpCandInfo);
             GnMsg.message = WM_IME_NOTIFY;
@@ -444,7 +444,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
                   Mylstrlen(GETLPCOMPREADSTR(lpCompStr)));
 
             GnMsg.message = WM_IME_COMPOSITION;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             if (lpCompStr->dwCompStrLen > 1 || isasc) {
                 GnMsg.wParam = 0;
@@ -520,7 +520,7 @@ set_compstr:
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = 0;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
                     MyDebugPrint((TEXT(" *** ConvHanja: GnMsg > 1\r\n")));
                 } else
@@ -529,7 +529,7 @@ set_compstr:
                     GnMsg.message = WM_IME_COMPOSITION;
                     GnMsg.wParam = cs;
                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+                    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
                     if (dwImeFlag & SAENARU_ONTHESPOT)
                         GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -589,8 +589,8 @@ set_compstr:
                 Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
 
                 if (fHanja && *lpmystr == *lpT2) {
-                    // ÇÑÀÚ¸¦ ÇÑ±Û·Î º¯È¯ÇÏ´Â °æ¿ì.
-                    // ÇÑÀÚ ÈÄº¸ ¸®½ºÆ®¿¡ ÇÑÀÚ°¡ ¹ß°ßµÇ¸é ÀÌ°ÍÀ» °¡¸®Å°µµ·Ï ÇÑ´Ù.
+                    // í•œìžë¥¼ í•œê¸€ë¡œ ë³€í™˜í•˜ëŠ” ê²½ìš°.
+                    // í•œìž í›„ë³´ ë¦¬ìŠ¤íŠ¸ì— í•œìžê°€ ë°œê²¬ë˜ë©´ ì´ê²ƒì„ ê°€ë¦¬í‚¤ë„ë¡ í•œë‹¤.
                     select = i + 1;
                     fHanja = 0;
                 }
@@ -660,7 +660,7 @@ set_compstr:
                 lpCandList->dwSelection = lpCandList->dwCount - 1;
         }
 
-        // ¸Ç ³¡ + 1ÀÌ¸é ¸Ç Ã³À½À¸·Î
+        // ë§¨ ë + 1ì´ë©´ ë§¨ ì²˜ìŒìœ¼ë¡œ
         if (lpCandList->dwSelection >= (DWORD)lpCandList->dwCount)
         {
             lpCandList->dwPageStart = 0;
@@ -755,7 +755,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         MyDebugPrint((TEXT(">>>>>>>> lpptr: %s:%d\r\n"), lpptr, dwCurPos));
         if ( is_combining_mark(*lpptr)) {
             LPMYSTR lpprev;
-            // combining mark°¡ ¹ß°ßµÇ¸é ¸ÕÀú Áö¿î´Ù.
+            // combining markê°€ ë°œê²¬ë˜ë©´ ë¨¼ì € ì§€ìš´ë‹¤.
             MyDebugPrint((TEXT(">> Delete Combining Mark: %s:%d\r\n"), lpptr, dwCurPos));
             lpprev = lpptr - 1;
             dwCurPos--;
@@ -769,7 +769,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
         } else if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
             // Delete jamos
             if (ic.len > 0) {
-                // Á¶ÇÕÁßÀÎ ±ÛÀÚ?
+                // ì¡°í•©ì¤‘ì¸ ê¸€ìž?
                 WCHAR last;
                 int ncs = 0;
 
@@ -786,7 +786,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                     if (ncs >= 1) {
                         cs = *(lpptr + ncs - 1);
                     } else {
-                        // Á¶ÇÕÁßÀÎ ±ÛÀÚ°¡ ¸ðµÎ Áö¿öÁü.
+                        // ì¡°í•©ì¤‘ì¸ ê¸€ìžê°€ ëª¨ë‘ ì§€ì›Œì§.
                         hangul_ic_init(&ic);
                         if (dwCurPos > 0) {
                             cs = *(lpptr-1);
@@ -799,8 +799,8 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                     MyDebugPrint((TEXT(">> Syllable Delete Han Char: len=%d, %s:%d\r\n"), ic.len, lpptr, dwCurPos));
                 } else {
                     LPMYSTR lpprev;
-                    // syllableÀÌ ¾Æ´Ô.
-                    // ¿¾ÇÑ±Û.
+                    // syllableì´ ì•„ë‹˜.
+                    // ì˜›í•œê¸€.
 
                     MyDebugPrint((TEXT(">> Pre BACKSPACE Delete Han Char: %s:%d\r\n"), lpptr, dwCurPos));
                     lpprev = lpptr;
@@ -809,10 +809,10 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                     dwCurPos-= ncs - 1;
                     MyDebugPrint((TEXT(">> Post BACKSPACE Delete Han Char: %s %d\r\n"), lpprev, ncs));
 
-                    lpptr -= ncs - 1; // ÀÌÀü ¹®ÀÚ À§Ä¡·Î.
+                    lpptr -= ncs - 1; // ì´ì „ ë¬¸ìž ìœ„ì¹˜ë¡œ.
                     MyDebugPrint((TEXT(">>> Get Delete Han Char: %s:%d\r\n"), lpptr, ncs));
 
-                    // ÀçÁ¶ÇÕµÈ ¹®ÀÚ¿­À» °¡Á®¿È.
+                    // ìž¬ì¡°í•©ëœ ë¬¸ìžì—´ì„ ê°€ì ¸ì˜´.
                     ncs = hangul_ic_get(&ic,0, lpptr);
                     if (ncs > 0) {
                         MyDebugPrint((TEXT(">>> Get result Han Char: %s : %d\r\n"), lpptr, ncs));
@@ -820,7 +820,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                         cs = *(lpptr - 1);
                         dwCurPos+= ncs - 1;
                     } else {
-                        // Á¶ÇÕÁßÀÎ ±ÛÀÚ°¡ ¸ðµÎ Áö¿öÁü.
+                        // ì¡°í•©ì¤‘ì¸ ê¸€ìžê°€ ëª¨ë‘ ì§€ì›Œì§.
                         hangul_ic_init(&ic);
                         dwCurPos--;
                     }
@@ -836,7 +836,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                     ic.last = last;
                 }
             } else {
-                // Á¶ÇÕÁßÀÎ ±ÛÀÚ°¡ ¸ðµÎ Áö¿öÁü.
+                // ì¡°í•©ì¤‘ì¸ ê¸€ìžê°€ ëª¨ë‘ ì§€ì›Œì§.
                 hangul_ic_init(&ic);
                 if (dwCurPos > 0) {
                     cs = *(lpptr-1);
@@ -850,11 +850,11 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             LPMYSTR lpprev;
             nChar = 0;
             /*
-             * Ã¹°¡³¡ Á¶ÇÕ ¿Ï·áµÈ ±ÛÀÚ°¡ ÀÖ´Â°¡?
-             * ¹ß°ßµÇ¸é Ã¹°¡³¡ Á¶ÇÕ ±ÛÀÚ¸¦ Áö¿öÁØ´Ù.
-             * ÀÌ¶§, L*V*T+¸¦ Ã£¾Æ¼­ ¸ðµÎ Áö¿î´Ù?
+             * ì²«ê°€ë ì¡°í•© ì™„ë£Œëœ ê¸€ìžê°€ ìžˆëŠ”ê°€?
+             * ë°œê²¬ë˜ë©´ ì²«ê°€ë ì¡°í•© ê¸€ìžë¥¼ ì§€ì›Œì¤€ë‹¤.
+             * ì´ë•Œ, L*V*T+ë¥¼ ì°¾ì•„ì„œ ëª¨ë‘ ì§€ìš´ë‹¤?
              */
-            // Áö¿ï °³¼ö¸¦ ¾òÀ½.
+            // ì§€ìš¸ ê°œìˆ˜ë¥¼ ì–»ìŒ.
             nChar = hangul_del_prev(lpptr);
 
             if (nChar == 0)
@@ -871,7 +871,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             {
                 //Mylstrcpy( lpptr, lpstr+dwCurPos );
                 dwCurPos -= nChar;
-                *(lpptr-nChar+1) = MYTEXT('\0'); // ¸¶Áö¸· ¹®ÀÚ Áö¿ò.
+                *(lpptr-nChar+1) = MYTEXT('\0'); // ë§ˆì§€ë§‰ ë¬¸ìž ì§€ì›€.
                 cs = *(lpptr-nChar);
             }
         }
@@ -926,7 +926,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = cs;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -949,7 +949,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+            //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
             if (dwImeFlag & SAENARU_ONTHESPOT)
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1013,7 +1013,7 @@ WORD code;
 
     if (!dwStrLen)
     {
-        // ¾øÀ¸¸é ÃÊ±âÈ­
+        // ì—†ìœ¼ë©´ ì´ˆê¸°í™”
         InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
         GnMsg.message = WM_IME_STARTCOMPOSITION;
@@ -1271,7 +1271,7 @@ SBCS_BETA:
     GnMsg.message = WM_IME_COMPOSITION;
     GnMsg.wParam = 0;
     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART | dwGCR;
-    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR | dwGCR; // ÇÑ±Û IME 2002,2003
+    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR | dwGCR; // í•œê¸€ IME 2002,2003
     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
 ac_exit:
@@ -1315,7 +1315,7 @@ LPBYTE lpbKeyState;
         wParam = VK_F9;
     }
 
-    // Candidate¹®ÀÚ ¼±ÅÃ
+    // Candidateë¬¸ìž ì„ íƒ
     if (IsConvertedCompStr(hIMC))
     {
         LPCANDIDATEINFO lpCandInfo;
@@ -1437,7 +1437,7 @@ LPBYTE lpbKeyState;
 
                 fdwConversion = lpIMC->fdwConversion;
 
-                // ÈÄº¸Ã¢ÀÌ ¿­·ÁÀÖ´Â °æ¿ì. ¾Æ·¡¸¦ ¿É¼ÇÀ¸·Î Ã³¸®ÇØ¾ß ÇÑ´Ù. XXX
+                // í›„ë³´ì°½ì´ ì—´ë ¤ìžˆëŠ” ê²½ìš°. ì•„ëž˜ë¥¼ ì˜µì…˜ìœ¼ë¡œ ì²˜ë¦¬í•´ì•¼ í•œë‹¤. XXX
                 if ((fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE))
                 {
@@ -1451,7 +1451,7 @@ LPBYTE lpbKeyState;
 
                     lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
 
-                    // ¼Ó¼ºÀ» ATTR_TARGET_CONVERTED¿¡¼­ ATTR_INPUTÀ¸·Î ¿ø»óº¹±Í.
+                    // ì†ì„±ì„ ATTR_TARGET_CONVERTEDì—ì„œ ATTR_INPUTìœ¼ë¡œ ì›ìƒë³µê·€.
                     lmemset(GETLPCOMPATTR(lpCompStr),ATTR_INPUT,
                         Mylstrlen(GETLPCOMPSTR(lpCompStr)));
                     lmemset(GETLPCOMPREADATTR(lpCompStr),ATTR_INPUT,
@@ -1459,7 +1459,7 @@ LPBYTE lpbKeyState;
 
                     lpCompStr->dwCompAttrLen = 0;
                     lpCompStr->dwCompReadAttrLen = 0;
-                    // ÀÌ»óÇÏ°Ôµµ CursorPos°¡ 0ÀÌ µÇ¾î ÀÖ´Ù. ÀÌ °ªÀ» ±âº»°ªÀ¸·Î ¿ø»óº¹±Í.
+                    // ì´ìƒí•˜ê²Œë„ CursorPosê°€ 0ì´ ë˜ì–´ ìžˆë‹¤. ì´ ê°’ì„ ê¸°ë³¸ê°’ìœ¼ë¡œ ì›ìƒë³µê·€.
                     lpCompStr->dwCursorPos = Mylstrlen(GETLPCOMPSTR(lpCompStr));
 
                     GnMsg.message = WM_IME_COMPOSITION;
@@ -1471,10 +1471,10 @@ LPBYTE lpbKeyState;
 
                     DeleteChar(hIMC,wParam);
 
-                    // ÈÄº¸Ã¢ÀÌ ¿­·ÁÀÖ´Âµ¥, Á¶ÇÕÁßÀÎ ÇÑ±ÛÀÌ ÃÊ¼º¸¸ ÀÖ´Â °æ¿ì
+                    // í›„ë³´ì°½ì´ ì—´ë ¤ìžˆëŠ”ë°, ì¡°í•©ì¤‘ì¸ í•œê¸€ì´ ì´ˆì„±ë§Œ ìžˆëŠ” ê²½ìš°
                     if (ic.len == 1 && IsCandidate(lpIMC)) {
                         LPCANDIDATEINFO lpCandInfo;
-                        // ¿­¸° Ã¢À» ´Ý¾ÆÁØ´Ù.
+                        // ì—´ë¦° ì°½ì„ ë‹«ì•„ì¤€ë‹¤.
                         lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
                         ClearCandidate(lpCandInfo);
                         ImmUnlockIMCC(lpIMC->hCandInfo);
@@ -1585,7 +1585,7 @@ LPBYTE lpbKeyState;
                                         InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
 #if 1
-                                        // ¿öµåÆÐµå¿Í M$ Explorer´Â ¹Ýµå½Ã WM_IME_STARTCOMPOSITIONÀ¸·Î ½ÃÀÛÇØ¾ß ÇÑ´Ù.
+                                        // ì›Œë“œíŒ¨ë“œì™€ M$ ExplorerëŠ” ë°˜ë“œì‹œ WM_IME_STARTCOMPOSITIONìœ¼ë¡œ ì‹œìž‘í•´ì•¼ í•œë‹¤.
                                         // 2006/10/09
                                         GnMsg.message = WM_IME_STARTCOMPOSITION;
                                         GnMsg.wParam = 0;
@@ -1650,7 +1650,7 @@ LPBYTE lpbKeyState;
                                         GnMsg.message = WM_IME_COMPOSITION;
                                         GnMsg.wParam = 0;
                                         //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //ÇÑ±Û IME 2002,2003
+                                        GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //í•œê¸€ IME 2002,2003
                                         //if (dwImeFlag & SAENARU_ONTHESPOT)
                                         //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                                         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
@@ -1661,8 +1661,8 @@ LPBYTE lpbKeyState;
 
                                     convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
                                     if (!convOk) {
-                                        // MS IE¿Í ¸ðÁú¶ó´Â ÀÌ ºÎºÐÀÌ µÚ¿¡ ¿Í¾ß ÇÑ´Ù. Áï, CompStrÀ¸ ¼¼ÆÃÇÑ ÈÄ¿¡
-                                        // ½ÃÀÛÇØ¾ß ÇÑ´Ù ?
+                                        // MS IEì™€ ëª¨ì§ˆë¼ëŠ” ì´ ë¶€ë¶„ì´ ë’¤ì— ì™€ì•¼ í•œë‹¤. ì¦‰, CompStrìœ¼ ì„¸íŒ…í•œ í›„ì—
+                                        // ì‹œìž‘í•´ì•¼ í•œë‹¤ ?
                                         OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
                                     } else {
                                         OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
@@ -1792,12 +1792,12 @@ LPBYTE lpbKeyState;
                             MyDebugPrint((TEXT(">>>>>>lpDump='%s'\n"),(LPMYSTR)lpDump));
                             MyDebugPrint((TEXT(">>>>>>lpTemp='%s'\n"),(LPMYSTR)lpTemp));
                             if (lpRS->dwCompStrLen > 0) {
-                                // ¼±ÅÃ¿µ¿ªÀÌ ÀÖ´Â °æ¿ì °­Á¦·Î ´Ü¾î/±ÛÀÚ¸¦ Á¾·á.
+                                // ì„ íƒì˜ì—­ì´ ìžˆëŠ” ê²½ìš° ê°•ì œë¡œ ë‹¨ì–´/ê¸€ìžë¥¼ ì¢…ë£Œ.
                                 // clause dictionary.
                                 *(LPMYSTR)(lpDump + lpRS->dwCompStrLen) = MYTEXT('\0');
                             }
-                            // MS¿öµå°°Àº °æ¿ì´Â Ä¿¼­ÀÚ¸®ÀÇ ¾ÕÂÊ¿¡ ÀÖ´Â ´Ü¾î¸¦ reconvertÇÑ´Ù.
-                            // ¹Ý¸é »õ³ª·ç´Â strtok()¸¦ »ç¿ëÇÏ¹Ç·Î Ä¿¼­ µÚÂÊ¿¡ ÀÖ´Â ´Ü¾î¸¦ reconvertÇÑ´Ù.
+                            // MSì›Œë“œê°™ì€ ê²½ìš°ëŠ” ì»¤ì„œìžë¦¬ì˜ ì•žìª½ì— ìžˆëŠ” ë‹¨ì–´ë¥¼ reconvertí•œë‹¤.
+                            // ë°˜ë©´ ìƒˆë‚˜ë£¨ëŠ” strtok()ë¥¼ ì‚¬ìš©í•˜ë¯€ë¡œ ì»¤ì„œ ë’¤ìª½ì— ìžˆëŠ” ë‹¨ì–´ë¥¼ reconvertí•œë‹¤.
                             lpToken = Mystrtok(lpDump, szSep);
                             if (lpToken == NULL) {
                                 MyDebugPrint((TEXT(">>>>>>lpToken == NULL\n")));
@@ -1844,7 +1844,7 @@ LPBYTE lpbKeyState;
                                     InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
 #if 1
-                                    // ¿öµåÆÐµå¿Í M$ Explorer´Â ¹Ýµå½Ã WM_IME_STARTCOMPOSITIONÀ¸·Î ½ÃÀÛÇØ¾ß ÇÑ´Ù.
+                                    // ì›Œë“œíŒ¨ë“œì™€ M$ ExplorerëŠ” ë°˜ë“œì‹œ WM_IME_STARTCOMPOSITIONìœ¼ë¡œ ì‹œìž‘í•´ì•¼ í•œë‹¤.
                                     // 2006/10/09
                                     GnMsg.message = WM_IME_STARTCOMPOSITION;
                                     GnMsg.wParam = 0;
@@ -1910,7 +1910,7 @@ LPBYTE lpbKeyState;
                                     GnMsg.message = WM_IME_COMPOSITION;
                                     GnMsg.wParam = 0;
                                     //GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //ÇÑ±Û IME 2002,2003
+                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //í•œê¸€ IME 2002,2003
                                     GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 #endif
         		        } else {
@@ -1919,8 +1919,8 @@ LPBYTE lpbKeyState;
                                 convOk = (BOOL) MyImmRequestMessage(hIMC, IMR_CONFIRMRECONVERTSTRING, (LPARAM)lpRS);
 #ifdef DEBUG
                                 if (!convOk) {
-                                    // MS IE¿Í ¸ðÁú¶ó´Â ÀÌ ºÎºÐÀÌ µÚ¿¡ ¿Í¾ß ÇÑ´Ù. Áï, CompStrÀ¸ ¼¼ÆÃÇÑ ÈÄ¿¡
-                                    // ½ÃÀÛÇØ¾ß ÇÑ´Ù ?
+                                    // MS IEì™€ ëª¨ì§ˆë¼ëŠ” ì´ ë¶€ë¶„ì´ ë’¤ì— ì™€ì•¼ í•œë‹¤. ì¦‰, CompStrìœ¼ ì„¸íŒ…í•œ í›„ì—
+                                    // ì‹œìž‘í•´ì•¼ í•œë‹¤ ?
                                     OutputDebugString(TEXT(" *** fail CONFIRM RECONVERT\r\n"));
                                 } else {
                                     OutputDebugString(TEXT(" *** success CONFIRM RECONVERT\r\n"));
@@ -1964,12 +1964,12 @@ LPBYTE lpbKeyState;
             }
 
             // XXX hack hack !! IME 2003 TSF mode compatibility
-            // M$ Word¿¡ »õ³ª·ç°¡ ºÙÁö ¾Ê¾Æ¼­ Spy++·Î ¸Þ½ÃÁö ÃßÀûÇØº»
-            // °á°ú, ÇÑÀÚÅ°°¡ ´­·ÁÁö¸é Comp¸ðµå¿¡¼­´Â VK_PROCESSKEY·Î
-            // µé¾î¿ÀÁö¸¸, Reconversion¸ðµå¿¡¼­´Â VK_PROCESSKEY¿Í ÇÔ²²
-            // WM_IME_KEYDOWNÀÌº¥Æ®µµ »ý±è. ±×·¡¼­ ÀÌ ÀÌº¥Æ®¸¦ Áý¾î³ÖÀ¸´Ï
-            // M$ Word¿¡¼­µµ Á¦´ë·Î ÀÛµ¿ÇÏ¿© ÇÑÀÚ »çÀüÀÌ ¶á´Ù.
-            // * InternetExplorer¿¡¼­µµ ReconversionÀÌ µÊ. IME 2003¿¡¼­´Â ¾ÈµÊ
+            // M$ Wordì— ìƒˆë‚˜ë£¨ê°€ ë¶™ì§€ ì•Šì•„ì„œ Spy++ë¡œ ë©”ì‹œì§€ ì¶”ì í•´ë³¸
+            // ê²°ê³¼, í•œìží‚¤ê°€ ëˆŒë ¤ì§€ë©´ Compëª¨ë“œì—ì„œëŠ” VK_PROCESSKEYë¡œ
+            // ë“¤ì–´ì˜¤ì§€ë§Œ, Reconversionëª¨ë“œì—ì„œëŠ” VK_PROCESSKEYì™€ í•¨ê»˜
+            // WM_IME_KEYDOWNì´ë²¤íŠ¸ë„ ìƒê¹€. ê·¸ëž˜ì„œ ì´ ì´ë²¤íŠ¸ë¥¼ ì§‘ì–´ë„£ìœ¼ë‹ˆ
+            // M$ Wordì—ì„œë„ ì œëŒ€ë¡œ ìž‘ë™í•˜ì—¬ í•œìž ì‚¬ì „ì´ ëœ¬ë‹¤.
+            // * InternetExplorerì—ì„œë„ Reconversionì´ ë¨. IME 2003ì—ì„œëŠ” ì•ˆë¨
             //
 
             if (!IsCompStr(hIMC)) {
@@ -1982,8 +1982,8 @@ LPBYTE lpbKeyState;
                 OutputDebugString(TEXT("DicKeydown: WM_IME_KEYDOWN\r\n"));
                 MyDebugPrint((TEXT("DicKeydown: candOk %d\r\n"),candOk));
             } else if (candOk) {
-                // ¾î¶² ¾îÇÃÀº ÀÚÃ¼ ³»ÀåµÈ candidate¸®½ºÆ®¸¦ ¾²°í, ¾î¶²°ÍÀº ±×·¸Áö ¾Ê´Ù.
-                // ±×·±µ¥ ÀÌ·¯ÇÑ µ¿ÀÛÀÌ ÀÏ°ü¼ºÀÌ ¾ø¾î¼­ ¾î¶² ¾îÇÃÀº Æ¯º°Ã³¸® ÇØ¾ß ÇÑ´Ù.
+                // ì–´ë–¤ ì–´í”Œì€ ìžì²´ ë‚´ìž¥ëœ candidateë¦¬ìŠ¤íŠ¸ë¥¼ ì“°ê³ , ì–´ë–¤ê²ƒì€ ê·¸ë ‡ì§€ ì•Šë‹¤.
+                // ê·¸ëŸ°ë° ì´ëŸ¬í•œ ë™ìž‘ì´ ì¼ê´€ì„±ì´ ì—†ì–´ì„œ ì–´ë–¤ ì–´í”Œì€ íŠ¹ë³„ì²˜ë¦¬ í•´ì•¼ í•œë‹¤.
                 // always generage WM_IME_KEYDOWN for VK_HANJA XXX
                 TRANSMSG GnMsg;
                 GnMsg.message = WM_IME_KEYDOWN;
@@ -2008,13 +2008,13 @@ LPBYTE lpbKeyState;
             fdwConversion = lpIMC->fdwConversion;
             ImmUnlockIMC(hIMC);
 
-            // ½ºÆäÀÌ½º¸¦ ÇÑÀÚ ÆäÀÌÁö ³Ñ±â´Â Å°·Î »ç¿ëÇÑ´Ù.
-            // ¿É¼ÇÀ¸·Î ÄÑ°í Å³ ¼ö ÀÖ°Ô.
+            // ìŠ¤íŽ˜ì´ìŠ¤ë¥¼ í•œìž íŽ˜ì´ì§€ ë„˜ê¸°ëŠ” í‚¤ë¡œ ì‚¬ìš©í•œë‹¤.
+            // ì˜µì…˜ìœ¼ë¡œ ì¼œê³  í‚¬ ìˆ˜ ìžˆê²Œ.
             if (dwOptionFlag & HANJA_CAND_WITH_SPACE &&
                     IsCompStr(hIMC) && IsCandidate(lpIMC) &&
                     (fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
-                hangul_ic_init(&ic); // ÀÌ °æ¿ì´Â ÇÑ±ÛÀ» ÃÊ±âÈ­ÇÔ.
+                hangul_ic_init(&ic); // ì´ ê²½ìš°ëŠ” í•œê¸€ì„ ì´ˆê¸°í™”í•¨.
                 ConvHanja(hIMC,1,0);
                 return TRUE;
             }
@@ -2113,15 +2113,15 @@ LPBYTE lpbKeyState;
                 // keybd_event( VK_RETURN, 0x0d, KEYEVENTF_KEYUP, 0);
             }
             ImmUnlockIMC(hIMC);
-            // spy++·Î ÇÑ±Û IME2002ÀÇ Çàµ¿À» »ìÆìº» °á°ú,
-            // CompStrÀÌ ÀÖÀ» °æ¿ì´Â RETURNÀ» Ä¡¸é Ã³À½ ÀÌº¥Æ®°¡ »ý°åÀ» ¶§ ÇÑ¹ø
-            // ±×¸®°í, CompStrÀ» commitÇÑ ÈÄ¿¡ ´Ù½Ã ÇÑ¹ø Å°ÀÌº¥Æ®°¡ »ý°å´Ù.
-            // strings·Î imekr61.ime¸¦ »ìÆìº» °á°ú keybd_event()¸¦ ¾²°í ÀÖ¾úÀ¸¸ç
-            // saenaru´Â ÀÌ ¹æ½ÄÀ» µû¶ú´Ù.
+            // spy++ë¡œ í•œê¸€ IME2002ì˜ í–‰ë™ì„ ì‚´íŽ´ë³¸ ê²°ê³¼,
+            // CompStrì´ ìžˆì„ ê²½ìš°ëŠ” RETURNì„ ì¹˜ë©´ ì²˜ìŒ ì´ë²¤íŠ¸ê°€ ìƒê²¼ì„ ë•Œ í•œë²ˆ
+            // ê·¸ë¦¬ê³ , CompStrì„ commití•œ í›„ì— ë‹¤ì‹œ í•œë²ˆ í‚¤ì´ë²¤íŠ¸ê°€ ìƒê²¼ë‹¤.
+            // stringsë¡œ imekr61.imeë¥¼ ì‚´íŽ´ë³¸ ê²°ê³¼ keybd_event()ë¥¼ ì“°ê³  ìžˆì—ˆìœ¼ë©°
+            // saenaruëŠ” ì´ ë°©ì‹ì„ ë”°ëžë‹¤.
             //
-            // °í°íÅ¸ÀÚ¸¦ ÅëÇØ ºÐ¼®ÇØº¸´Ï, WM_IME_KEYDOWNÀÌ ¸ÕÀú »ý°å´Ù.
-            // ±×·¡¼­ À§Ã³·³ GenerateMessage()¸¦ ÀÌ¿ëÇØº¸´Ï keybd_event¸¦ ¾²Áö
-            // ¾Ê¾Æµµ µÇ¾ú´Ù.
+            // ê³ ê³ íƒ€ìžë¥¼ í†µí•´ ë¶„ì„í•´ë³´ë‹ˆ, WM_IME_KEYDOWNì´ ë¨¼ì € ìƒê²¼ë‹¤.
+            // ê·¸ëž˜ì„œ ìœ„ì²˜ëŸ¼ GenerateMessage()ë¥¼ ì´ìš©í•´ë³´ë‹ˆ keybd_eventë¥¼ ì“°ì§€
+            // ì•Šì•„ë„ ë˜ì—ˆë‹¤.
             //
             hangul_ic_init(&ic);
             return TRUE;
@@ -2184,8 +2184,8 @@ LPBYTE lpbKeyState;
         ( VK_OEM_1 <= wParam && VK_OEM_9 >= wParam ) ||
         ( VK_MULTIPLY <= wParam && VK_DIVIDE >= wParam ))
     {
-        // RETURNÀº Åë°úµÇÁö ¾Ê°í, ¹Ù·Î À­ºÎºÐ¿¡¼­ Ã³¸®°¡ ³¡³­´Ù.
-        // ¸ðÁú¶ó¸¸ Àß ¸ø µ¿ÀÛÇÏÁö ¾Ê´Â´Ù¸é RETURNÅ°µµ Ã³¸®ÇÒ ¼ö ÀÖ´Ù.
+        // RETURNì€ í†µê³¼ë˜ì§€ ì•Šê³ , ë°”ë¡œ ìœ—ë¶€ë¶„ì—ì„œ ì²˜ë¦¬ê°€ ëë‚œë‹¤.
+        // ëª¨ì§ˆë¼ë§Œ ìž˜ ëª» ë™ìž‘í•˜ì§€ ì•ŠëŠ”ë‹¤ë©´ RETURNí‚¤ë„ ì²˜ë¦¬í•  ìˆ˜ ìžˆë‹¤.
         return( FALSE );
     }
     else {
@@ -2289,9 +2289,9 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
     if (fFlag)
     {
 #if 1
-        // ÇÑ±Û IME 2002´Â ÀÌ»óÇÏ°Ôµµ, ¸ÕÀú WM_IME_ENDCOMPOSITIONÀ» ¹ñ°í
-        // ±× ´ÙÀ½¿¡ WM_IME_COMPOSITIONÀ» ¹ñ´Â´Ù.
-        // ÀÌ·¸°Ô ÇØ¾ß¸¸ °í°íÅ¸ÀÚ¿¡¼­ Á¤»ó ÀÛµ¿À» ÇÑ´Ù.
+        // í•œê¸€ IME 2002ëŠ” ì´ìƒí•˜ê²Œë„, ë¨¼ì € WM_IME_ENDCOMPOSITIONì„ ë±‰ê³ 
+        // ê·¸ ë‹¤ìŒì— WM_IME_COMPOSITIONì„ ë±‰ëŠ”ë‹¤.
+        // ì´ë ‡ê²Œ í•´ì•¼ë§Œ ê³ ê³ íƒ€ìžì—ì„œ ì •ìƒ ìž‘ë™ì„ í•œë‹¤.
         GnMsg.message = WM_IME_ENDCOMPOSITION;
         GnMsg.wParam = 0;
         GnMsg.lParam = 0;
@@ -2583,7 +2583,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     lpReadBase = myBase;
     //
     // make a code range to match hangul words
-    // check ÀÚÀ¯(¤§) or ÀÚÀ¯(µµ)
+    // check ìžìœ (ã„·) or ìžìœ (ë„)
     //
     while (iFlag && olen > 1 && olen < 128) {
         MYCHAR last = *(lpRead + olen - 1);
@@ -2744,7 +2744,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             len = Mylstrlen(lpToken);
             if (*lpToken < 0x7f)
                 isasc=TRUE;
-            // ÇÑ ±ÛÀÚÀÌ¸é¼­ KSX1002 Áö¿øÀÌ ¾Æ´Ï¸é charset Ã¼Å©
+            // í•œ ê¸€ìžì´ë©´ì„œ KSX1002 ì§€ì›ì´ ì•„ë‹ˆë©´ charset ì²´í¬
             if (!isasc && len == 1 && !(dwOptionFlag & KSX1002_SUPPORT))
             {
                 WORD mb;
@@ -2757,11 +2757,11 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                     skip = TRUE;
                 }
             }
-            // ¶æÀÌ ÀÖÀ¸¸é
+            // ëœ»ì´ ìžˆìœ¼ë©´
             if ( !skip && lpTemp && Mylstrlen(lpTemp+1) > 1) {
                 *lpTemp = MYTEXT(':');
 
-                // ¶æÀÌ ±æ °æ¿ì´Â Àß¶ó³¿. FIXME
+                // ëœ»ì´ ê¸¸ ê²½ìš°ëŠ” ìž˜ë¼ëƒ„. FIXME
                 if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
                 // strip \r
@@ -2770,7 +2770,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
 
                 len = Mylstrlen(lpToken);
             }
-            // XXX ¶æÀÌ ±æ¾î¼­ ÀüÃ¼ Å©±â°¡ Ä¿Áö¸é ÀÔ·Â±â°¡ Á×´Â´Ù
+            // XXX ëœ»ì´ ê¸¸ì–´ì„œ ì „ì²´ í¬ê¸°ê°€ ì»¤ì§€ë©´ ìž…ë ¥ê¸°ê°€ ì£½ëŠ”ë‹¤
             if ( !skip && lpWrite != NULL && (dwBufLen - dwWritten - 2) < len) {
                 force = TRUE;
                 break;

@@ -39,9 +39,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-/*	Platform SDK ªËëîğíª¹ªëİ»İÂ¡£Platform SDK ªË include path
- *	ªò÷×ª¹ªÎª¬ÕŞª¤ªÎª«Üúª«¡£õó?ªìªĞ DDK ªËª³ªìªéªÎ header ªò
- *	Ô¤ª·ªÆª¯ªìªëªÈÕŞª¤ªÎªÀª¬¡£
+/*	Platform SDK ã«ä¾å­˜ã™ã‚‹éƒ¨åˆ†ã€‚Platform SDK ã« include path
+ *	ã‚’é€šã™ã®ãŒè‰¯ã„ã®ã‹å¦ã‹ã€‚å‡º?ã‚Œã° DDK ã«ã“ã‚Œã‚‰ã® header ã‚’
+ *	æ¸¡ã—ã¦ãã‚Œã‚‹ã¨è‰¯ã„ã®ã ãŒã€‚
  */
 //#include "c:\Program Files\Microsoft SDK\include\msctf.h"
 #include "msctf.h"
@@ -52,7 +52,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-#define LANGBAR_ITEM_DESC	L"È®ÀåÀÔ·Â±â" // max 32 chars
+#define LANGBAR_ITEM_DESC	L"í™•ì¥ì…ë ¥ê¸°" // max 32 chars
 
 #if 0
 #endif
@@ -197,9 +197,9 @@ CLangBarItemPadButton::GetStatus (
 	return	S_OK ;
 }
 
-/*	Button ªÎ tooltip ªòÚ÷ª¹¡£Ú÷ª¹ö·ªÏ SysAllocString ªËªèªÃªÆ
- *	ü¬ÜÁª·ª¿ÖÅæ´ªËßöª«ªìªëù±é©ª¬ª¢ªë¡£ª³ªìªò SysFreeString ª¹
- *	ªëªÎªÏ¡¢û¼ªÓõóª·ª¿ö°ªÎô¡ìòªÇª¢ªë¡£
+/*	Button ã® tooltip ã‚’è¿”ã™ã€‚è¿”ã™å€¤ã¯ SysAllocString ã«ã‚ˆã£ã¦
+ *	ç¢ºä¿ã—ãŸé ˜åŸŸã«æ›¸ã‹ã‚Œã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚ã“ã‚Œã‚’ SysFreeString ã™
+ *	ã‚‹ã®ã¯ã€å‘¼ã³å‡ºã—ãŸå´ã®è²¬ä»»ã§ã‚ã‚‹ã€‚
  */
 STDAPI
 CLangBarItemPadButton::GetTooltipString (

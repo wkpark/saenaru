@@ -75,8 +75,8 @@ LONG DllRelease(void)
 
 // {830DE831-E04D-40bb-8683-1E179A5F1A4F}
 /*
- *    ���� class id �� skimic.dll �����Ī��ƪ����Ϊ�����������ŪêƪϪ����ʪ�
- *    �誦����?���Ū� class id �˪Ī��ƪϡ�
+ *    この class id は skimic.dll の利用しているものだが、これを使ってはいけない
+ *    ようだ。?際に使う class id については…
  *
  */
 #if 0
@@ -84,8 +84,8 @@ const CLSID    c_clsidSaenaruTextService    = {
     0x830de831, 0xe04d, 0x40bb, { 0x86, 0x83, 0x1e, 0x17, 0x9a, 0x5f, 0x1a, 0x4f }
 };
 #endif
-/*    ���� IME �Ȫ���??����Ҫ� CLSID �����Ҫ�����驪�����誦����MS-IME2002 ��
- *    ?�Ѫ�?�Ϊ���ˡ�
+/*    この IME という??ンと同じ CLSID に設定する必要があるようだ。MS-IME2002 の
+ *    ?動を?照するに。
  */
 #if 1
 const CLSID c_clsidSaenaruTextService    = {
@@ -121,8 +121,8 @@ const GUID c_guidItemButtonPad = {
     0x4d970333, 0xcad0, 0x42d0, { 0xab, 0x1f, 0xa9, 0x31, 0x5b, 0x6c, 0xad, 0x38 }
 };
 
-/*    �Ҫ� button ��̸���몬��skimic.dll ���Ҫ���Ϊ��Ū��Ϊ������ʪ���Ъʪ��
- *    ���誦�����Ҫ��˪��ƪ���Ϊ��Ȫ������?���������ê�����
+/*    同じ button に見えるが、skimic.dll と同じものを使うのは避けなければならな
+ *    いようだ。同じにしているのだという先入?が失敗だった…。
  */
 #if 0
 const GUID    c_guidItemButtonCMode = {
@@ -135,7 +135,7 @@ const GUID    c_guidItemButtonIME    = {
 };
 #endif
 
-/*    ��???��??��� GUID����骯�Ϫ������������̽�Ҫ���?��
+/*    キ???ド??ンの GUID。恐らくはこの値で一意に決定する?。
  */
 #if 1
 const GUID c_guidKeyboardItemButton    = {
@@ -163,7 +163,7 @@ InitLanguageBar (void)
         
     DEBUGPRINTF ((TEXT ("Enter::InitLanguageBar\n")));
 
-    /* Logon ���˪� TSF �������󪵪ʪ���*/
+    /* Logon 時には TSF は呼び出さない。*/
 #if 1
     if (gfSaenaruSecure) {
         DEBUGPRINTF ((TEXT ("Leave::InitLanguageBar - security\n")));
@@ -304,7 +304,7 @@ UpdateLanguageBar (void)
 
     DEBUGPRINTFEX (100, (TEXT ("UpdateLanguageBar ()\n")));
 
-    /*    ?�ޫ쫸���ȫ��?�Ϊ���Ϊ��᪷���Ϊ��������� */
+    /*    ?回レジストリを?照するのは正しいのだろうか？ */
     fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
     fShowPadIcon = TRUE;
 #if 0
@@ -381,7 +381,7 @@ UpdateLanguageBar (void)
     return    fRetval;
 }
 
-/*    ���ޫ�?�˫�����?����ʥ/��𶪹�롣
+/*    言語バ?にアイテ?を追加/削除する。
  */
 void    PASCAL
 ActivateLanguageBar (
@@ -416,7 +416,7 @@ ActivateLanguageBar (
 
     DEBUGPRINTFEX (100, (TEXT ("ActivateLanguageBar (Select:%d)\n"), fSelect));
 
-    /*    ?�ޫ쫸���ȫ��?�Ϊ���Ϊ��᪷���Ϊ��������� */
+    /*    ?回レジストリを?照するのは正しいのだろうか？ */
     fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
     fShowPadIcon = FALSE;
     if (fSelect) {

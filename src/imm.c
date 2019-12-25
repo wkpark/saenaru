@@ -155,7 +155,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
 
                             lpDump=szBuf;
 
-                            // ³ëÆ®ÆÐµå¿¡¼­´Â ÀÌ»óÇÏ°Ô lpData°¡ Á¦´ë·Î ¼¼ÆÃÀÌ ¾ÈµÈ´Ù.
+                            // ë…¸íŠ¸íŒ¨ë“œì—ì„œëŠ” ì´ìƒí•˜ê²Œ lpDataê°€ ì œëŒ€ë¡œ ì„¸íŒ…ì´ ì•ˆëœë‹¤.
                             if (Mylstrlen(lpData) < 255) {
                                 const LPMYSTR szSep = MYTEXT(" \r\n\t");
                                 MyDebugPrint((TEXT("ImeEscape '%s':%d\n"),lpData, Mylstrlen(lpData)));
@@ -172,9 +172,9 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                         ImmUnlockIMCC (lpIMC->hCompStr);
                                     }
 #if 1
-                                    // ³ëÆ®ÆÐµå¿¡¼­ ÀÌ»óÇÏ°Ô ¾²·¹±â°ªÀÌ ºÙ´Â´Ù.
-                                    // ±×·¡¼­ WM_IME_ENDCOMPOSITION ¸Þ½ÃÁö¸¦ ³¯¸®´Ï
-                                    // Á¤»óÀûÀ¸·Î ÀÛµ¿
+                                    // ë…¸íŠ¸íŒ¨ë“œì—ì„œ ì´ìƒí•˜ê²Œ ì“°ë ˆê¸°ê°’ì´ ë¶™ëŠ”ë‹¤.
+                                    // ê·¸ëž˜ì„œ WM_IME_ENDCOMPOSITION ë©”ì‹œì§€ë¥¼ ë‚ ë¦¬ë‹ˆ
+                                    // ì •ìƒì ìœ¼ë¡œ ìž‘ë™
                                     GnMsg.message = WM_IME_ENDCOMPOSITION;
                                     GnMsg.wParam = 0;
                                     GnMsg.lParam = 0;
@@ -210,8 +210,8 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
 #if 1
-                                    // ImeEscape()¸¦ ¾µ ¶§
-                                    // M$ Explorer´Â ¹Ýµå½Ã WM_IME_STARTCOMPOSITIONÀ¸·Î ½ÃÀÛÇØ¾ß ÇÑ´Ù.
+                                    // ImeEscape()ë¥¼ ì“¸ ë•Œ
+                                    // M$ ExplorerëŠ” ë°˜ë“œì‹œ WM_IME_STARTCOMPOSITIONìœ¼ë¡œ ì‹œìž‘í•´ì•¼ í•œë‹¤.
                                     // 2006/10/18
                                     GnMsg.message = WM_IME_STARTCOMPOSITION;
                                     GnMsg.wParam = 0;
@@ -261,7 +261,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                     GnMsg.wParam = 0;
                                     //GnMsg.wParam = cs;
                                     GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
-                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //ÇÑ±Û IME 2002,2003
+                                    GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //í•œê¸€ IME 2002,2003
                                     //if (dwImeFlag & SAENARU_ONTHESPOT)
                                     //    GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
                                     GenerateMessage(hIMC, lpIMC, NULL,(LPTRANSMSG)&GnMsg);
@@ -951,9 +951,9 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
 
             if (!(lpIMC->fdwInit & INIT_CONVERSION))
             {
-                // ÇÑÀÚ Àü¿ë
+                // í•œìž ì „ìš©
                 //lpIMC->fdwConversion = IME_CMODE_ROMAN | IME_CMODE_FULLSHAPE | IME_CMODE_NATIVE;
-                // ½ÃÀÛºÎÅÍ ÇÑ±Û ??
+                // ì‹œìž‘ë¶€í„° í•œê¸€ ??
                 //lpIMC->fdwConversion = IME_CMODE_ROMAN | IME_CMODE_NATIVE;
                 lpIMC->fdwConversion = IME_CMODE_ROMAN;
                 lpIMC->fdwConversion &= ~IME_CMODE_NATIVE;
@@ -1096,10 +1096,10 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
                     MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
                     Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,dwRead / sizeof(TCHAR));
                     if (!Mylstrlen(lpRead)) {
-                        // °í°íÅ¸ÀÚÀÇ Çàµ¿À» ºÐ¼®ÇØ¼­ ¾òÀº °á·Ð:
-                        // lpRead°¡ Áö¿öÁö¸é ´Ù½Ã Á¶ÇÕ¿¡ µé¾î°¨.
-                        // ImeSetCompostionString()À» ¾²´Â ¾îÇÃÀÌ ¸¹Áö ¾Ê¾Æ¼­
-                        // ÀÌ Çàµ¿ÀÌ ¿Ã¹Ù¸¥ Çàµ¿ÀÎÁö ¾Ë ¼ö°¡ ¾ø´Ù ;p
+                        // ê³ ê³ íƒ€ìžì˜ í–‰ë™ì„ ë¶„ì„í•´ì„œ ì–»ì€ ê²°ë¡ :
+                        // lpReadê°€ ì§€ì›Œì§€ë©´ ë‹¤ì‹œ ì¡°í•©ì— ë“¤ì–´ê°.
+                        // ImeSetCompostionString()ì„ ì“°ëŠ” ì–´í”Œì´ ë§Žì§€ ì•Šì•„ì„œ
+                        // ì´ í–‰ë™ì´ ì˜¬ë°”ë¥¸ í–‰ë™ì¸ì§€ ì•Œ ìˆ˜ê°€ ì—†ë‹¤ ;p
                         hangul_ic_init(&ic);
                         InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     }

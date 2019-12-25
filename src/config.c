@@ -601,7 +601,7 @@ INT_PTR CALLBACK SelectToggleDlgProc(HWND hDlg, UINT message , WPARAM wParam, LP
                         if (ret != CB_ERR) {
                             if (ret == 29 || ret == 42 || ret == 54) {
                                 // Ctrl, Shift, RShift
-                                // ÀÌ Å°µéÀº selectÇÒ ¼ö ¾øµµ·Ï ÇÑ´Ù.
+                                // ì´ í‚¤ë“¤ì€ selectí•  ìˆ˜ ì—†ë„ë¡ í•œë‹¤.
                                 SendMessage(hwndRadio, CB_SETCURSEL, 0, 0);
                             }
                             //SendMessage(hwndRadio, CB_SETCURSEL, ret, 0);
@@ -741,7 +741,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
 
-                    // »ç¿ëÀÚ Å°º¸µå?
+                    // ì‚¬ìš©ì í‚¤ë³´ë“œ?
                     if ((hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER))) {
                         UINT ret;
                         ret = (UINT) SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);

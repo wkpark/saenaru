@@ -41,7 +41,7 @@
 /* StatusWndProc()                                                    */
 /* IME UI window procedure                                            */
 /**********************************************************************/
-// ╩Себц╒ : ╨╟╣╣юг ╩Себц╒юл ╦╦╣И╬НаЖ╧г╥н юл ╠Б╢ию╩ ╡╗╣п ╩Себ wkpark
+// Л┐│М┐°Л╟╫ : КЁ└К▐└Л²≤ Л┐│М┐°Л╟╫Л²╢ К╖▄К⌠╓Л√╢Л╖─К╞─К║° Л²╢ Й╦╟К┼╔Л²└ Й╨╪К▒■ Л┐│М┐° wkpark
 LRESULT CALLBACK StatusWndProc( hWnd, message, wParam, lParam )
 HWND hWnd;
 UINT message;
