@@ -1,0 +1,21 @@
+version: "{build}"
+branches:
+  only:
+    - master
+    - /v\d+\..+/
+    - /release.*/
+    - appveyor
+clone_depth: 100
+
+image: Visual Studio 2017
+
+platform:
+  - x64
+  - x86
+
+configuration:
+  - Debug
+  - Release
+
+matrix:
+  fast_finish: true
