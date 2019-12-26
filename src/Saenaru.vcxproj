@@ -1,0 +1,391 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="config.c" />
+    <ClCompile Include="data.c" />
+    <ClCompile Include="dic.c" />
+    <ClCompile Include="hangul.c" />
+    <ClCompile Include="hanjaidx.c" />
+    <ClCompile Include="saenaru.c" />
+    <ClCompile Include="reg.c" />
+    <ClCompile Include="imm.c" />
+    <ClCompile Include="immsec.c" />
+    <ClCompile Include="input.c" />
+    <ClCompile Include="process.c" />
+    <ClCompile Include="regword.c" />
+    <ClCompile Include="subs.c" />
+    <ClCompile Include="toascii.c" />
+    <ClCompile Include="ui.c" />
+    <ClCompile Include="uicand.c" />
+    <ClCompile Include="uicomp.c" />
+    <ClCompile Include="uiguide.c" />
+    <ClCompile Include="uistate.c" />
+    <ClCompile Include="tsf.cpp" />
+    <ClCompile Include="btnime.cpp" />
+    <ClCompile Include="btncmd.cpp" />
+    <ClCompile Include="btnpad.cpp" />
+    <ClCompile Include="btnhlp.cpp" />
+    <ClCompile Include="btnext.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="immsec.h" />
+    <ClInclude Include="indicml.h" />
+    <ClInclude Include="saenaru.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="tsf.h" />
+    <ClInclude Include="version.h" />
+    <ClInclude Include="vksub.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="saenaru.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="saenaru.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resource\general.ico" />
+    <Image Include="..\resource\saenaru.ico" />
+    <Image Include="..\resource\penindic.ico" />
+    <Image Include="..\resource\about.ico" />
+    <Image Include="..\resource\text\hankey.ico" />
+    <Image Include="..\resource\text\engkey.ico" />
+    <Image Include="..\resource\text\hanjakey.ico" />
+    <Image Include="..\resource\keyboard.ico" />
+    <Image Include="..\resource\half.ico" />
+    <Image Include="..\resource\full.ico" />
+    <Image Include="..\resource\imepad.ico" />
+    <Image Include="..\resource\2set.ico" />
+    <Image Include="..\resource\3set.ico" />
+    <Image Include="..\resource\status.bmp" />
+    <Image Include="..\resource\close.bmp" />
+    <Image Include="..\resource\check.bmp" />
+    <Image Include="..\resource\uncheck.bmp" />
+    <Image Include="..\resource\face.bmp" />
+    <Image Include="..\resource\hjmode.bmp" />
+    <Image Include="..\resource\hjcheck.bmp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6D22B5C5-2AA2-4F77-8ADA-80BCD53F4C5F}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <Configuration>Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">Win32</Platform>
+    <RootNamespace>Saenaru</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.ime</TargetExt>
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.ime</TargetExt>
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.ime</TargetExt>
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <TargetExt>.ime</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <TargetExt>.ime</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <TargetExt>.ime</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <TargetExt>.ime</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <TargetExt>.ime</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>vcruntime.lib;ucrt.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>vcruntimed.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>vcruntime.lib;ucrt.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>vcruntimed.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <WppEnabled>true</WppEnabled>
+      <WppRecorderEnabled>true</WppRecorderEnabled>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
+      <WppKernelMode>true</WppKernelMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <BaseAddress>0x00500000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <AdditionalDependencies>comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
