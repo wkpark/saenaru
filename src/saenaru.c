@@ -40,6 +40,7 @@ extern HANDLE hMutex;
 UINT    WM_MSIME_QUERYPOSITION;
 
 int
+PASCAL
 GetSaenaruDirectory(LPTSTR lpDest, int max)
 {
     static const TCHAR szIMEDir[] = TEXT("\\IME\\Saenaru");

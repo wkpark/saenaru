@@ -62,12 +62,12 @@ extern const GUID c_guidItemButtonPad ;
 
 /* prototypes */
 HIMC _GetCurrentHIMC(void);
-BOOL CreateItemButtonCMode(ITfLangBarItem** ppLangBarItem);
-BOOL CreateItemButtonIME(ITfLangBarItem** ppLangBarItem);
-BOOL CreateItemButtonShape(ITfLangBarItem** ppLangBarItem);
-BOOL CreateItemButtonPad(ITfLangBarItem** ppLangBarItem);
-BOOL CreateItemHelp(ITfSystemLangBarItemSink** ppLangBarItemSink);
-BOOL IsLangBarEnabled(VOID);
+BOOL PASCAL CreateItemButtonCMode(ITfLangBarItem** ppLangBarItem);
+BOOL PASCAL CreateItemButtonIME(ITfLangBarItem** ppLangBarItem);
+BOOL PASCAL CreateItemButtonShape(ITfLangBarItem** ppLangBarItem);
+BOOL PASCAL CreateItemButtonPad(ITfLangBarItem** ppLangBarItem);
+BOOL PASCAL CreateItemHelp(ITfSystemLangBarItemSink** ppLangBarItemSink);
+BOOL PASCAL IsLangBarEnabled(VOID);
 
 LONG DllAddRef(void);
 LONG DllRelease(void);

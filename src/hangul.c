@@ -3316,7 +3316,7 @@ void hangul_ic_push( HangulIC *ic, WCHAR ch )
     ic->last = ch;
 }
 
-WCHAR hangul_ic_pop( HangulIC *ic )
+WCHAR PASCAL hangul_ic_pop( HangulIC *ic )
 {
     if (ic->len <= 0)
 	return 0;
@@ -3324,7 +3324,7 @@ WCHAR hangul_ic_pop( HangulIC *ic )
     return ic->read[ic->len];
 }
 
-WCHAR hangul_ic_peek( HangulIC *ic )
+WCHAR PASCAL hangul_ic_peek( HangulIC *ic )
 {
     if (ic->len <= 0)
 	return 0;
