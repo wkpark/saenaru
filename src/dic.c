@@ -223,6 +223,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     WCHAR cs=0;
     LPMYSTR lpmystr, lpTemp;
     MYCHAR myBuf[256];
+    WCHAR *save;
     BOOL isasc=FALSE;
     UINT cand_mode = dwCandStyle;
     UINT word_mode = 0;
@@ -1764,6 +1765,7 @@ LPBYTE lpbKeyState;
                         //LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset);
                         //*(LPMYSTR)(lpDump + lpRS->dwStrLen) = MYTEXT('\0');
                         LPMYSTR lpDump= (LPMYSTR)(((LPSTR)lpRS) + lpRS->dwStrOffset + lpRS->dwCompStrOffset);
+                        WCHAR *save;
         
 #ifdef DEBUG
                         OutputDebugString(TEXT("IMR_RECONVERTSTRING\r\n"));
@@ -1798,7 +1800,7 @@ LPBYTE lpbKeyState;
                             }
                             // MS워드같은 경우는 커서자리의 앞쪽에 있는 단어를 reconvert한다.
                             // 반면 새나루는 strtok()를 사용하므로 커서 뒤쪽에 있는 단어를 reconvert한다.
-                            lpToken = Mystrtok(lpDump, szSep);
+                            lpToken = Mystrtok(lpDump, szSep, &save);
                             if (lpToken == NULL) {
                                 MyDebugPrint((TEXT(">>>>>>lpToken == NULL\n")));
                                 GlobalFree((HANDLE)lpRS);
@@ -2571,6 +2573,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     DWORD dwWritten = 0;
     MYCHAR  myBuf[4098];
     LPMYSTR lpDic, lpSection, lpTemp, lpTemp2;
+    WCHAR *save;
     MYCHAR  myBase[128];
     LPMYSTR lpReadBase;
     const LPMYSTR szSep = MYTEXT("\n");
@@ -2626,7 +2629,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     {
         *(LPMYSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
 
-        lpToken = Mystrtok(lpDic, szSep);
+        lpToken = Mystrtok(lpDic, szSep, &save);
         while (NULL != lpToken) {
             if (MYTEXT('[') == *lpToken)
             {
@@ -2661,9 +2664,9 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                     }
                 }
             }
-            lpToken = Mystrtok(NULL, szSep);
+            lpToken = Mystrtok(NULL, szSep, &save);
         }
-        lpToken = Mystrtok(NULL, MYTEXT(""));
+        lpToken = Mystrtok(NULL, MYTEXT(""), &save);
         llen = Mylstrlen(lpToken);
         if (llen > 0) {
             Mylstrcpy(lpDic, lpToken); // copy last
@@ -2690,7 +2693,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
 
         //MyDebugPrint((TEXT(">>>>lpDic=%d, lpNext=%d\n"), lpDic, lpNext));
 
-        lpToken = Mystrtok(lpDic, szSep);
+        lpToken = Mystrtok(lpDic, szSep, &save);
 
         while ((NULL != lpToken) &&
                 (lpWrite == NULL || (dwBufLen - dwWritten) > 1))
@@ -2793,7 +2796,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             else
                 lpNext2++; // point to next line
 
-            lpToken = Mystrtok(lpNext, szSep);
+            lpToken = Mystrtok(lpNext, szSep, &save);
             lpNext = lpNext2;
         }
 
@@ -2804,7 +2807,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         }
 
         if (lpToken != NULL) {
-            lpToken = Mystrtok(NULL, MYTEXT(""));
+            lpToken = Mystrtok(NULL, MYTEXT(""), &save);
             llen = Mylstrlen(lpToken);
             if (llen > 0) {
                 Mylstrcpy(lpDic, lpToken); // copy last

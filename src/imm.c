@@ -106,6 +106,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
     LRESULT lRet = FALSE;
     LPINPUTCONTEXT lpIMC;
     LPTRANSMSG lpTransMsg;
+    WCHAR *save;
     BOOL fOpen;
 
     ImeLog(LOGF_API, TEXT("ImeEscape"));
@@ -160,7 +161,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                 const LPMYSTR szSep = MYTEXT(" \r\n\t");
                                 MyDebugPrint((TEXT("ImeEscape '%s':%d\n"),lpData, Mylstrlen(lpData)));
 
-                                lpToken = Mystrtok(lpData, szSep);
+                                lpToken = Mystrtok(lpData, szSep, &save);
                                 if (lpToken == NULL) {
                                     TRANSMSG GnMsg;
                                     lRet = FALSE;
