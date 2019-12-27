@@ -383,7 +383,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             MyDebugPrint((TEXT("WinVer %x\n"),
             os.dwMajorVersion));
 
-            if (os.dwMajorVersion == 6) {
+            if (os.dwMajorVersion >= 6) {
                 ImmUnlockIMC(hIMC);
                 return FALSE;
             }
