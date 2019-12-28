@@ -35,7 +35,8 @@
 #include "saenaru.h"
 #include "prsht.h"
 #include "resource.h"
-#include "malloc.h"
+#define MEMALLOC(x)      LocalAlloc(LMEM_FIXED, x)
+#define MEMFREE(x)       LocalFree(x)
 
 #define MAX_PAGES 5
 
@@ -1270,7 +1271,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) malloc(sz);
+    kbuf=(LPTSTR) MEMALLOC(sz);
     //
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read keyboard registry\n")));
@@ -1352,7 +1353,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             _map[key - '!'] = (WCHAR)value;
         }
     }
-    free(kbuf);
+    MEMFREE(kbuf);
 
     if (keyboard_map != NULL)
         for (i=0;i<94;i++) keyboard_map[i]=_map[i];        
@@ -1424,7 +1425,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) malloc(sz);
+    kbuf=(LPTSTR) MEMALLOC(sz);
     //
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read compose map registry\n")));
@@ -1485,7 +1486,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
             id++;
 	}
     }
-    free(kbuf);
+    MEMFREE(kbuf);
     map_size=(UINT)id;
 
     //if (compose_map == NULL) {
