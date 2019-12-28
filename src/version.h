@@ -32,12 +32,12 @@
 
 #define VER_MAJOR	 1
 #define VER_MAJOR_STR	"1"
-#define VER_MINOR	 1
-#define VER_MINOR_STR	"1"
+#define VER_MINOR	 2
+#define VER_MINOR_STR	"2"
 
-#define VER_BUILD	 2003
-#define VER_BUILD_STR	"2003"
-#define VER_PATCHLEVEL	     2
-#define VER_PATCHLEVEL_STR  "2"
+#define VER_BUILD	 2010
+#define VER_BUILD_STR	"2010"
+#define VER_PATCHLEVEL	     0
+#define VER_PATCHLEVEL_STR  "0"
 
-#define VER_SNAPSHOT	"RC3 1.1.2"
+#define VER_SNAPSHOT	"1.2.0-GIT"

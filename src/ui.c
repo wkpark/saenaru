@@ -414,8 +414,8 @@ LPARAM lParam;
             ImmUnlockIMC(hUICurIMC);
             break;
             // Windows XP notepad bug ??
-            // ÇÑ±Û IMEÀÏ °æ¿ì STARTCOMPOSITION ¸Þ½ÃÁö°¡ Á¦´ë·Î Àü´ÞµÇÁö
-            // ¾Ê´Â´Ù.
+            // í•œê¸€ IMEì¼ ê²½ìš° STARTCOMPOSITION ë©”ì‹œì§€ê°€ ì œëŒ€ë¡œ ì „ë‹¬ë˜ì§€
+            // ì•ŠëŠ”ë‹¤.
 
         case WM_IME_COMPOSITION:
             //
@@ -424,7 +424,7 @@ LPARAM lParam;
             lpIMC = ImmLockIMC(hUICurIMC);
             hUIExtra = (HGLOBAL)GetWindowLongPtr(hWnd,IMMGWLP_PRIVATE);
             lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra);
-            // WM_IME_STARTCOMPOSITION ¸Þ½ÃÁö°¡ Àü´ÞµÇÁö ¾Ê´Â °æ¿ì
+            // WM_IME_STARTCOMPOSITION ë©”ì‹œì§€ê°€ ì „ë‹¬ë˜ì§€ ì•ŠëŠ” ê²½ìš°
             if (lpIMC && !(dwImeFlag & SAENARU_ONTHESPOT))
             {
                 LPCOMPOSITIONSTRING lpCompStr;
@@ -433,8 +433,8 @@ LPARAM lParam;
                 if (lpCompStr->dwCompStrLen &&
                     (!IsWindow(lpUIExtra->uiDefComp.hWnd) || !lpUIExtra->uiDefComp.bShow) )
                 {
-                    // ¾Æ·¡ÀÇ ³»¿ëÀº IME_STARTCOMPOSITION¿¡ µé¾î°¡¾ß ÇÑ´Ù.
-                    // ±×·¯³ª ¸î¸î ¾îÇÃÀº ÀÌ»óÇÏ°Ôµµ IME_STARTCOMPOSITIONÀ¸·Î Á¶ÇÕÀ» ½ÃÀÛÇÏÁö ¾Ê´Â´Ù. (³ëÆ®ÆÐµå µîµî)
+                    // ì•„ëž˜ì˜ ë‚´ìš©ì€ IME_STARTCOMPOSITIONì— ë“¤ì–´ê°€ì•¼ í•œë‹¤.
+                    // ê·¸ëŸ¬ë‚˜ ëª‡ëª‡ ì–´í”Œì€ ì´ìƒí•˜ê²Œë„ IME_STARTCOMPOSITIONìœ¼ë¡œ ì¡°í•©ì„ ì‹œìž‘í•˜ì§€ ì•ŠëŠ”ë‹¤. (ë…¸íŠ¸íŒ¨ë“œ ë“±ë“±)
                     CreateCompWindow(hWnd,lpUIExtra,lpIMC );
                 }
 

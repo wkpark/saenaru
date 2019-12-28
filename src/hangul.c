@@ -569,120 +569,120 @@ static const WCHAR table[][2] = {
     { 0,      0x1110 }, /* jong thieuth       = cho  thieuth              */
     { 0,      0x1111 }, /* jong phieuph       = cho  phieuph              */
     { 0,      0x1112 }, /* jong hieuh         = cho  hieuh                */
-    { 0x11a8, 0x1105 }, /* jong ¤¡¤©          = jong kiyeok + cho ¤©  */
-    { 0x11aa, 0x1100 }, /* jong ¤¡¤µ¤¡	      = jong kiyeok-sios + cho kiyeok  */
-    { 0x11ab, 0x1100 }, /* jong ¤¤¤¡          = jong ¤¤ + cho ¤¡ */
-    { 0x11ab, 0x1103 }, /* jong ¤¤¤§          = jong ¤¤ + cho ¤§ */
-    { 0x11ab, 0x1109 }, /* jong ¤¤¤µ          = jong ¤¤ + cho ¤µ */
-    { 0x11ab, 0x1140 }, /* jong ¤¤¤ï          = jong ¤¤ + cho ¤ï */
-    { 0x11ab, 0x1110 }, /* jong ¤¤¤¼          = jong ¤¤ + cho ¤¼ */
-    { 0x11ae, 0x1100 }, /* jong ¤§¤¡          = jong ¤§ + cho ¤¡ */
-    { 0x11ae, 0x1105 }, /* jong ¤§¤©          = jong ¤§ + cho ¤© */
-    { 0x11b0, 0x1109 }, /* jong ¤©¤¡¤µ        = jong ¤©¤¡ + cho ¤µ */
-    { 0x11af, 0x1102 }, /* jong ¤©¤¤          = jong ¤© + cho ¤¤ */
-    { 0x11af, 0x1103 }, /* jong ¤©¤§          = jong ¤© + cho ¤§ */
-    { 0x11ce, 0x1112 }, /* jong ¤©¤§¤¾        = jong ¤©¤§ + cho ¤¾ */
-    { 0x11af, 0x1105 }, /* jong ¤©¤©          = jong ¤© + cho ¤© */
-    { 0x11b1, 0x1100 }, /* jong ¤©¤±¤¡        = jong ¤« + cho ¤¡ */
-    { 0x11b1, 0x1109 }, /* jong ¤©¤±¤µ        = jong ¤« + cho ¤µ */
-    { 0x11b2, 0x1109 }, /* jong ¤©¤²¤µ        = jong ¤¬ + cho ¤µ */
-    { 0x11b2, 0x1112 }, /* jong ¤©¤²¤¾        = jong ¤¬ + cho ¤¾ */
-    { 0x11b2, 0x110b }, /* jong ¤©¤è          = jong ¤¬ + cho ¤· */
-    { 0x11b3, 0x1109 }, /* jong ¤©¤µ¤µ        = jong ¤­ + cho ¤µ */
-    { 0x11af, 0x1140 }, /* jong ¤©¤ï          = jong ¤© + cho ¤ï */
-    { 0x11af, 0x110f }, /* jong ¤©¤»          = jong ¤© + cho ¤» */
-    { 0x11af, 0x1159 }, /* jong ¤©¤ö          = jong ¤© + cho ¤ö */
-    { 0x11b7, 0x1100 }, /* jong ¤±¤¡          = jong ¤± + cho ¤¡ */
-    { 0x11b7, 0x1105 }, /* jong ¤±¤©          = jong ¤± + cho ¤© */
-    { 0x11b7, 0x1107 }, /* jong ¤±¤²          = jong ¤± + cho ¤² */
-    { 0x11b7, 0x1109 }, /* jong ¤±¤µ          = jong ¤± + cho ¤µ */
-    { 0x11dd, 0x1109 }, /* jong ¤±¤µ¤µ        = jong ¤±¤µ + cho ¤µ */
-    { 0x11b7, 0x1140 }, /* jong ¤±¤ï          = jong ¤± + cho ¤ï */
-    { 0x11b7, 0x110e }, /* jong ¤±¤º          = jong ¤± + cho ¤º */
-    { 0x11b7, 0x1112 }, /* jong ¤±¤¾          = jong ¤± + cho ¤¾ */
-    { 0x11b7, 0x110b }, /* jong ¤á            = jong ¤± + cho ¤· */
-    { 0x11b8, 0x1105 }, /* jong ¤²¤©          = jong ¤² + cho ¤© */
-    { 0x11b8, 0x1111 }, /* jong ¤²¤½          = jong ¤² + cho ¤½ */
-    { 0x11b8, 0x1112 }, /* jong ¤²¤¾          = jong ¤² + cho ¤¾ */
-    { 0x11b8, 0x110b }, /* jong ¤è            = jong ¤² + cho ¤· */
-    { 0x11ba, 0x1100 }, /* jong ¤µ¤¡          = jong ¤µ + cho ¤¡ */
-    { 0x11ba, 0x1103 }, /* jong ¤µ¤§          = jong ¤µ + cho ¤§ */
-    { 0x11ba, 0x1105 }, /* jong ¤µ¤©          = jong ¤µ + cho ¤© */
-    { 0x11ba, 0x1107 }, /* jong ¤µ¤²          = jong ¤µ + cho ¤² */
-    { 0,      0x1140 }, /* jong ¤ï            = cho ¤ï */
-    { 0x11bc, 0x1100 }, /* jong ¤·¤¡          = jong ¤· + cho ¤¡ */
-    { 0x11ec, 0x1100 }, /* jong ¤·¤¢          = jong ¤·¤¡ + cho ¤¡ */
-    { 0x11bc, 0x110b }, /* jong ¤·¤·          = jong ¤· + cho ¤· */
-    { 0x11bc, 0x110f }, /* jong ¤·¤»          = jong ¤· + cho ¤» */
-    { 0,      0x110b }, /* jong ¤ñ            = cho ¤· */
-    { 0x11bc, 0x1109 }, /* jong ¤·¤µ          = jong ¤· + cho ¤µ */
-    { 0x11bc, 0x1140 }, /* jong ¤·¤ï          = jong ¤· + cho ¤ï */
-    { 0x11c1, 0x1107 }, /* jong ¤½¤²          = jong ¤½ + cho ¤² */
-    { 0x11c1, 0x110b }, /* jong ¤ô            = jong ¤½ + cho ¤· */
-    { 0x11c2, 0x1102 }, /* jong ¤¾¤¤          = jong ¤¾ + cho ¤¤ */
-    { 0x11c2, 0x1105 }, /* jong ¤¾¤©          = jong ¤¾ + cho ¤© */
-    { 0x11c2, 0x1106 }, /* jong ¤¾¤±          = jong ¤¾ + cho ¤± */
-    { 0x11c2, 0x1107 }, /* jong ¤¾¤²          = jong ¤¾ + cho ¤² */
-    { 0,      0x1159 }, /* jong ¤ö            = cho ¤ö */
-    { 0x11a8, 0x1102 }, /* jong ¤¡¤¤          = jong ¤¡ + cho ¤¤ */
-    { 0x11a8, 0x1107 }, /* jong ¤¡¤²          = jong ¤¡ + cho ¤² */
-    { 0x11a8, 0x110e }, /* jong ¤¡¤º          = jong ¤¡ + cho ¤º */
-    { 0x11a8, 0x110f }, /* jong ¤¡¤»          = jong ¤¡ + cho ¤» */
-    { 0x11a8, 0x1112 }, /* jong ¤¡¤¾          = jong ¤¡ + cho ¤¾ */
-    { 0x11ab, 0x1102 }  /* jong ¤¤¤¤          = jong ¤¤ + cho ¤¤ */
+    { 0x11a8, 0x1105 }, /* jong ã„±ã„¹          = jong kiyeok + cho ã„¹  */
+    { 0x11aa, 0x1100 }, /* jong ã„±ã……ã„±	      = jong kiyeok-sios + cho kiyeok  */
+    { 0x11ab, 0x1100 }, /* jong ã„´ã„±          = jong ã„´ + cho ã„± */
+    { 0x11ab, 0x1103 }, /* jong ã„´ã„·          = jong ã„´ + cho ã„· */
+    { 0x11ab, 0x1109 }, /* jong ã„´ã……          = jong ã„´ + cho ã…… */
+    { 0x11ab, 0x1140 }, /* jong ã„´ã…¿          = jong ã„´ + cho ã…¿ */
+    { 0x11ab, 0x1110 }, /* jong ã„´ã…Œ          = jong ã„´ + cho ã…Œ */
+    { 0x11ae, 0x1100 }, /* jong ã„·ã„±          = jong ã„· + cho ã„± */
+    { 0x11ae, 0x1105 }, /* jong ã„·ã„¹          = jong ã„· + cho ã„¹ */
+    { 0x11b0, 0x1109 }, /* jong ã„¹ã„±ã……        = jong ã„¹ã„± + cho ã…… */
+    { 0x11af, 0x1102 }, /* jong ã„¹ã„´          = jong ã„¹ + cho ã„´ */
+    { 0x11af, 0x1103 }, /* jong ã„¹ã„·          = jong ã„¹ + cho ã„· */
+    { 0x11ce, 0x1112 }, /* jong ã„¹ã„·ã…        = jong ã„¹ã„· + cho ã… */
+    { 0x11af, 0x1105 }, /* jong ã„¹ã„¹          = jong ã„¹ + cho ã„¹ */
+    { 0x11b1, 0x1100 }, /* jong ã„¹ã…ã„±        = jong ã„» + cho ã„± */
+    { 0x11b1, 0x1109 }, /* jong ã„¹ã…ã……        = jong ã„» + cho ã…… */
+    { 0x11b2, 0x1109 }, /* jong ã„¹ã…‚ã……        = jong ã„¼ + cho ã…… */
+    { 0x11b2, 0x1112 }, /* jong ã„¹ã…‚ã…        = jong ã„¼ + cho ã… */
+    { 0x11b2, 0x110b }, /* jong ã„¹ã…¸          = jong ã„¼ + cho ã…‡ */
+    { 0x11b3, 0x1109 }, /* jong ã„¹ã……ã……        = jong ã„½ + cho ã…… */
+    { 0x11af, 0x1140 }, /* jong ã„¹ã…¿          = jong ã„¹ + cho ã…¿ */
+    { 0x11af, 0x110f }, /* jong ã„¹ã…‹          = jong ã„¹ + cho ã…‹ */
+    { 0x11af, 0x1159 }, /* jong ã„¹ã††          = jong ã„¹ + cho ã†† */
+    { 0x11b7, 0x1100 }, /* jong ã…ã„±          = jong ã… + cho ã„± */
+    { 0x11b7, 0x1105 }, /* jong ã…ã„¹          = jong ã… + cho ã„¹ */
+    { 0x11b7, 0x1107 }, /* jong ã…ã…‚          = jong ã… + cho ã…‚ */
+    { 0x11b7, 0x1109 }, /* jong ã…ã……          = jong ã… + cho ã…… */
+    { 0x11dd, 0x1109 }, /* jong ã…ã……ã……        = jong ã…ã…… + cho ã…… */
+    { 0x11b7, 0x1140 }, /* jong ã…ã…¿          = jong ã… + cho ã…¿ */
+    { 0x11b7, 0x110e }, /* jong ã…ã…Š          = jong ã… + cho ã…Š */
+    { 0x11b7, 0x1112 }, /* jong ã…ã…          = jong ã… + cho ã… */
+    { 0x11b7, 0x110b }, /* jong ã…±            = jong ã… + cho ã…‡ */
+    { 0x11b8, 0x1105 }, /* jong ã…‚ã„¹          = jong ã…‚ + cho ã„¹ */
+    { 0x11b8, 0x1111 }, /* jong ã…‚ã…          = jong ã…‚ + cho ã… */
+    { 0x11b8, 0x1112 }, /* jong ã…‚ã…          = jong ã…‚ + cho ã… */
+    { 0x11b8, 0x110b }, /* jong ã…¸            = jong ã…‚ + cho ã…‡ */
+    { 0x11ba, 0x1100 }, /* jong ã……ã„±          = jong ã…… + cho ã„± */
+    { 0x11ba, 0x1103 }, /* jong ã……ã„·          = jong ã…… + cho ã„· */
+    { 0x11ba, 0x1105 }, /* jong ã……ã„¹          = jong ã…… + cho ã„¹ */
+    { 0x11ba, 0x1107 }, /* jong ã……ã…‚          = jong ã…… + cho ã…‚ */
+    { 0,      0x1140 }, /* jong ã…¿            = cho ã…¿ */
+    { 0x11bc, 0x1100 }, /* jong ã…‡ã„±          = jong ã…‡ + cho ã„± */
+    { 0x11ec, 0x1100 }, /* jong ã…‡ã„²          = jong ã…‡ã„± + cho ã„± */
+    { 0x11bc, 0x110b }, /* jong ã…‡ã…‡          = jong ã…‡ + cho ã…‡ */
+    { 0x11bc, 0x110f }, /* jong ã…‡ã…‹          = jong ã…‡ + cho ã…‹ */
+    { 0,      0x110b }, /* jong ã†            = cho ã…‡ */
+    { 0x11bc, 0x1109 }, /* jong ã…‡ã……          = jong ã…‡ + cho ã…… */
+    { 0x11bc, 0x1140 }, /* jong ã…‡ã…¿          = jong ã…‡ + cho ã…¿ */
+    { 0x11c1, 0x1107 }, /* jong ã…ã…‚          = jong ã… + cho ã…‚ */
+    { 0x11c1, 0x110b }, /* jong ã†„            = jong ã… + cho ã…‡ */
+    { 0x11c2, 0x1102 }, /* jong ã…ã„´          = jong ã… + cho ã„´ */
+    { 0x11c2, 0x1105 }, /* jong ã…ã„¹          = jong ã… + cho ã„¹ */
+    { 0x11c2, 0x1106 }, /* jong ã…ã…          = jong ã… + cho ã… */
+    { 0x11c2, 0x1107 }, /* jong ã…ã…‚          = jong ã… + cho ã…‚ */
+    { 0,      0x1159 }, /* jong ã††            = cho ã†† */
+    { 0x11a8, 0x1102 }, /* jong ã„±ã„´          = jong ã„± + cho ã„´ */
+    { 0x11a8, 0x1107 }, /* jong ã„±ã…‚          = jong ã„± + cho ã…‚ */
+    { 0x11a8, 0x110e }, /* jong ã„±ã…Š          = jong ã„± + cho ã…Š */
+    { 0x11a8, 0x110f }, /* jong ã„±ã…‹          = jong ã„± + cho ã…‹ */
+    { 0x11a8, 0x1112 }, /* jong ã„±ã…          = jong ã„± + cho ã… */
+    { 0x11ab, 0x1102 }  /* jong ã„´ã„´          = jong ã„´ + cho ã„´ */
 };
 
 static const WCHAR table_ext_B[][2] = {
-    { 0x11ab, 0x1105 }, /* jong ¤¤¤©          = jong ¤¤ + cho ¤© */
-    { 0x11ab, 0x110e }, /* jong ¤¤¤º          = jong ¤¤ + cho ¤º */
-    { 0x11ae, 0x1103 }, /* jong ¤¨            = jong ¤§ + cho ¤§ */
-    { 0xd7cd, 0x1107 }, /* jong ¤¨¤²          = jong ¤¨ + cho ¤² */
-    { 0x11ae, 0x11b8 }, /* jong ¤§¤²          = jong ¤§ + cho ¤² */
-    { 0x11ae, 0x11ba }, /* jong ¤§¤µ          = jong ¤§ + cho ¤µ */
-    { 0xd7d0, 0x1100 }, /* jong ¤§¤µ¤¡        = jong ¤§¤µ + cho ¤¡ */
-    { 0x11ae, 0x110c }, /* jong ¤§¤¸          = jong ¤§ + cho ¤¸ */
-    { 0x11ae, 0x110e }, /* jong ¤§¤º          = jong ¤§ + cho ¤º */
-    { 0x11ae, 0x11c0 }, /* jong ¤§¤¼          = jong ¤§ + cho ¤¼ */
+    { 0x11ab, 0x1105 }, /* jong ã„´ã„¹          = jong ã„´ + cho ã„¹ */
+    { 0x11ab, 0x110e }, /* jong ã„´ã…Š          = jong ã„´ + cho ã…Š */
+    { 0x11ae, 0x1103 }, /* jong ã„¸            = jong ã„· + cho ã„· */
+    { 0xd7cd, 0x1107 }, /* jong ã„¸ã…‚          = jong ã„¸ + cho ã…‚ */
+    { 0x11ae, 0x11b8 }, /* jong ã„·ã…‚          = jong ã„· + cho ã…‚ */
+    { 0x11ae, 0x11ba }, /* jong ã„·ã……          = jong ã„· + cho ã…… */
+    { 0xd7d0, 0x1100 }, /* jong ã„·ã……ã„±        = jong ã„·ã…… + cho ã„± */
+    { 0x11ae, 0x110c }, /* jong ã„·ã…ˆ          = jong ã„· + cho ã…ˆ */
+    { 0x11ae, 0x110e }, /* jong ã„·ã…Š          = jong ã„· + cho ã…Š */
+    { 0x11ae, 0x11c0 }, /* jong ã„·ã…Œ          = jong ã„· + cho ã…Œ */
 
-    { 0x11ae, 0x1100 }, /* jong ¤ª¤¡          = jong ¤ª + cho ¤¡ */
-    { 0x11ae, 0x1112 }, /* jong ¤ª¤¾          = jong ¤ª + cho ¤¾ */
-    { 0x11d0, 0x110f }, /* jong ¤©¤©¤»        = jong ¤©¤© + cho ¤» */
-    { 0x11b1, 0x1112 }, /* jong ¤©¤±¤¾        = jong ¤« + cho ¤¾ */
-    { 0x11b2, 0x1103 }, /* jong ¤©¤²¤§        = jong ¤¬ + cho ¤§ */
-    { 0x11b2, 0x1111 }, /* jong ¤©¤²¤½        = jong ¤¬ + cho ¤½ */
-    { 0x11af, 0x114c }, /* jong ¤©¤ñ          = jong ¤© + cho ¤ñ */
-    { 0x11d9, 0x1112 }, /* jong ¤İ¤¾          = jong ¤İ + cho ¤¾ */
-    { 0x11af, 0x110b }, /* jong ¤©¤·          = jong ¤© + cho ¤· */
-    { 0x11b7, 0x1102 }, /* jong ¤±¤¤          = jong ¤± + cho ¤¤ */
-    { 0xd7de, 0x1102 }, /* jong ¤±¤¤¤¤        = jong ¤±¤¤ + cho ¤¤ */
-    { 0x11b7, 0x1106 }, /* jong ¤±¤±          = jong ¤± + cho ¤± */
-    { 0x11b7, 0x1109 }, /* jong ¤±¤´          = jong ¤±¤² + cho ¤µ */
-    { 0x11b7, 0x110c }, /* jong ¤±¤¸          = jong ¤± + cho ¤¸ */
-    { 0x11b8, 0x1103 }, /* jong ¤²¤§          = jong ¤² + cho ¤§ */
-    { 0x11b8, 0x1111 }, /* jong ¤²¤¯          = jong ¤²¤© + cho ¤½ */
-    { 0x11b8, 0x1106 }, /* jong ¤²¤±          = jong ¤² + cho ¤± */
-    { 0x11b8, 0x1107 }, /* jong ¤³            = jong ¤² + cho ¤² */
-    { 0x11b9, 0x1103 }, /* jong ¤´¤§          = jong ¤´ + cho ¤§ */
-    { 0x11b8, 0x110c }, /* jong ¤²¤¸          = jong ¤² + cho ¤¸ */
-    { 0x11b8, 0x110e }, /* jong ¤²¤º          = jong ¤² + cho ¤º */
-    { 0x11ba, 0x1106 }, /* jong ¤µ¤±          = jong ¤µ + cho ¤± */
-    { 0x11ba, 0x110b }, /* jong ¤µ¤è          = jong ¤µ¤² + cho ¤· */
-    { 0x11bb, 0x1100 }, /* jong ¤¶¤¡          = jong ¤¶ + cho ¤¡ */
-    { 0x11bb, 0x1103 }, /* jong ¤¶¤§          = jong ¤¶ + cho ¤§ */
-    { 0x11ba, 0x1140 }, /* jong ¤µ¤ï          = jong ¤µ + cho ¤ï */
-    { 0x11ba, 0x110c }, /* jong ¤µ¤¸          = jong ¤µ + cho ¤¸ */
-    { 0x11ba, 0x110e }, /* jong ¤µ¤º          = jong ¤µ + cho ¤º */
-    { 0x11ba, 0x1110 }, /* jong ¤µ¤¼          = jong ¤µ + cho ¤¼ */
-    { 0x11ba, 0x1112 }, /* jong ¤µ¤¾          = jong ¤µ + cho ¤¾ */
-    { 0x11eb, 0x1107 }, /* jong ¤ï¤²          = jong ¤ï + cho ¤² */
-    { 0x11eb, 0x110b }, /* jong ¤ï¤è          = jong ¤ï¤² + cho ¤· */
-    { 0x11f0, 0x1106 }, /* jong ¤ñ¤±          = jong ¤ñ + cho ¤± */
-    { 0x11f0, 0x1112 }, /* jong ¤ñ¤¾          = jong ¤ñ + cho ¤¾ */
-    { 0x11bd, 0x1107 }, /* jong ¤¸¤²          = jong ¤¸ + cho ¤² */
-    { 0xd7f7, 0x1107 }, /* jong ¤¸¤³          = jong ¤¸¤² + cho ¤² */
-    { 0x11bd, 0x110c }, /* jong ¤¸¤¸          = jong ¤¸ + cho ¤¸ */
-    { 0x11c1, 0x1109 }, /* jong ¤½¤µ          = jong ¤½ + cho ¤µ */
-    { 0x11c1, 0x1110 }, /* jong ¤½¤¼          = jong ¤½ + cho ¤¼ */
+    { 0x11ae, 0x1100 }, /* jong ã„ºã„±          = jong ã„º + cho ã„± */
+    { 0x11ae, 0x1112 }, /* jong ã„ºã…          = jong ã„º + cho ã… */
+    { 0x11d0, 0x110f }, /* jong ã„¹ã„¹ã…‹        = jong ã„¹ã„¹ + cho ã…‹ */
+    { 0x11b1, 0x1112 }, /* jong ã„¹ã…ã…        = jong ã„» + cho ã… */
+    { 0x11b2, 0x1103 }, /* jong ã„¹ã…‚ã„·        = jong ã„¼ + cho ã„· */
+    { 0x11b2, 0x1111 }, /* jong ã„¹ã…‚ã…        = jong ã„¼ + cho ã… */
+    { 0x11af, 0x114c }, /* jong ã„¹ã†          = jong ã„¹ + cho ã† */
+    { 0x11d9, 0x1112 }, /* jong ã…­ã…          = jong ã…­ + cho ã… */
+    { 0x11af, 0x110b }, /* jong ã„¹ã…‡          = jong ã„¹ + cho ã…‡ */
+    { 0x11b7, 0x1102 }, /* jong ã…ã„´          = jong ã… + cho ã„´ */
+    { 0xd7de, 0x1102 }, /* jong ã…ã„´ã„´        = jong ã…ã„´ + cho ã„´ */
+    { 0x11b7, 0x1106 }, /* jong ã…ã…          = jong ã… + cho ã… */
+    { 0x11b7, 0x1109 }, /* jong ã…ã…„          = jong ã…ã…‚ + cho ã…… */
+    { 0x11b7, 0x110c }, /* jong ã…ã…ˆ          = jong ã… + cho ã…ˆ */
+    { 0x11b8, 0x1103 }, /* jong ã…‚ã„·          = jong ã…‚ + cho ã„· */
+    { 0x11b8, 0x1111 }, /* jong ã…‚ã„¿          = jong ã…‚ã„¹ + cho ã… */
+    { 0x11b8, 0x1106 }, /* jong ã…‚ã…          = jong ã…‚ + cho ã… */
+    { 0x11b8, 0x1107 }, /* jong ã…ƒ            = jong ã…‚ + cho ã…‚ */
+    { 0x11b9, 0x1103 }, /* jong ã…„ã„·          = jong ã…„ + cho ã„· */
+    { 0x11b8, 0x110c }, /* jong ã…‚ã…ˆ          = jong ã…‚ + cho ã…ˆ */
+    { 0x11b8, 0x110e }, /* jong ã…‚ã…Š          = jong ã…‚ + cho ã…Š */
+    { 0x11ba, 0x1106 }, /* jong ã……ã…          = jong ã…… + cho ã… */
+    { 0x11ba, 0x110b }, /* jong ã……ã…¸          = jong ã……ã…‚ + cho ã…‡ */
+    { 0x11bb, 0x1100 }, /* jong ã…†ã„±          = jong ã…† + cho ã„± */
+    { 0x11bb, 0x1103 }, /* jong ã…†ã„·          = jong ã…† + cho ã„· */
+    { 0x11ba, 0x1140 }, /* jong ã……ã…¿          = jong ã…… + cho ã…¿ */
+    { 0x11ba, 0x110c }, /* jong ã……ã…ˆ          = jong ã…… + cho ã…ˆ */
+    { 0x11ba, 0x110e }, /* jong ã……ã…Š          = jong ã…… + cho ã…Š */
+    { 0x11ba, 0x1110 }, /* jong ã……ã…Œ          = jong ã…… + cho ã…Œ */
+    { 0x11ba, 0x1112 }, /* jong ã……ã…          = jong ã…… + cho ã… */
+    { 0x11eb, 0x1107 }, /* jong ã…¿ã…‚          = jong ã…¿ + cho ã…‚ */
+    { 0x11eb, 0x110b }, /* jong ã…¿ã…¸          = jong ã…¿ã…‚ + cho ã…‡ */
+    { 0x11f0, 0x1106 }, /* jong ã†ã…          = jong ã† + cho ã… */
+    { 0x11f0, 0x1112 }, /* jong ã†ã…          = jong ã† + cho ã… */
+    { 0x11bd, 0x1107 }, /* jong ã…ˆã…‚          = jong ã…ˆ + cho ã…‚ */
+    { 0xd7f7, 0x1107 }, /* jong ã…ˆã…ƒ          = jong ã…ˆã…‚ + cho ã…‚ */
+    { 0x11bd, 0x110c }, /* jong ã…ˆã…ˆ          = jong ã…ˆ + cho ã…ˆ */
+    { 0x11c1, 0x1109 }, /* jong ã…ã……          = jong ã… + cho ã…… */
+    { 0x11c1, 0x1110 }, /* jong ã…ã…Œ          = jong ã… + cho ã…Œ */
 };
 
     *jong  = 0;
@@ -869,12 +869,12 @@ hangul_jamo_to_syllable(WCHAR choseong, WCHAR jungseong, WCHAR jongseong)
 
 /**
  * @ingroup hangulctype
- * @brief ÇÑ±Û À½Àı ÀÎÁö È®ÀÎ
- * @param c UCS4 ÄÚµå °ª
- * @return @a c°¡ ÇÑ±Û À½Àı ÄÚµåÀÌ¸é true, ±× ¿Ü¿¡´Â false
+ * @brief í•œê¸€ ìŒì ˆ ì¸ì§€ í™•ì¸
+ * @param c UCS4 ì½”ë“œ ê°’
+ * @return @a cê°€ í•œê¸€ ìŒì ˆ ì½”ë“œì´ë©´ true, ê·¸ ì™¸ì—ëŠ” false
  *
- * ÀÌ ÇÔ¼ö´Â @a c·Î ÁÖ¾îÁø UCS4 ÄÚµå°¡ Çö´ë ÇÑ±Û À½Àı¿¡ ÇØ´çÇÏ´ÂÁö
- * È®ÀÎÇÑ´Ù.
+ * ì´ í•¨ìˆ˜ëŠ” @a cë¡œ ì£¼ì–´ì§„ UCS4 ì½”ë“œê°€ í˜„ëŒ€ í•œê¸€ ìŒì ˆì— í•´ë‹¹í•˜ëŠ”ì§€
+ * í™•ì¸í•œë‹¤.
  */
 BOOL
 hangul_is_syllable(WCHAR c)
@@ -890,16 +890,16 @@ hangul_is_cjamo(WCHAR c)
 
 /**
  * @ingroup hangulctype
- * @brief À½ÀıÀ» ÀÚ¸ğ·Î ºĞÇØ
- * @param syllable ºĞÇØÇÒ À½Àı
- * @retval choseong À½Àı¿¡¼­ ÃÊ¼º ºÎºĞÀÇ ÄÚµå
- * @retval jungseong À½Àı¿¡¼­ Áß¼º ºÎºĞÀÇ ÄÚµå
- * @retval jongseong À½Àı¿¡¼­ Á¾¼º ºÎºĞÀÇ ÄÚµå, Á¾¼ºÀÌ ¾øÀ¸¸é 0À» ¹İÈ¯ÇÑ´Ù
- * @return ¾øÀ½
+ * @brief ìŒì ˆì„ ìëª¨ë¡œ ë¶„í•´
+ * @param syllable ë¶„í•´í•  ìŒì ˆ
+ * @retval choseong ìŒì ˆì—ì„œ ì´ˆì„± ë¶€ë¶„ì˜ ì½”ë“œ
+ * @retval jungseong ìŒì ˆì—ì„œ ì¤‘ì„± ë¶€ë¶„ì˜ ì½”ë“œ
+ * @retval jongseong ìŒì ˆì—ì„œ ì¢…ì„± ë¶€ë¶„ì˜ ì½”ë“œ, ì¢…ì„±ì´ ì—†ìœ¼ë©´ 0ì„ ë°˜í™˜í•œë‹¤
+ * @return ì—†ìŒ
  *
- * ÀÌ ÇÔ¼ö´Â @a syllable ·Î ÁÖ¾îÁø À½Àı ÄÚµå¸¦ ºĞÇØÇÏ¿© ÀÚ¸ğ ÄÚµå¸¦ ¹İÈ¯ÇÑ´Ù.
- * ¹İÈ¯ÇÏ´Â °ªÀº @a choseong, @a jungseong, @a jongseong ÀÇ Æ÷ÀÎÅÍ¿¡ ´ëÀÔÇÏ¿©
- * ¸®ÅÏÇÑ´Ù. Á¾¼ºÀÌ ¾ø´Â À½ÀıÀÎ °æ¿ì¿¡´Â @a jongseong ¿¡ 0À» ¹İÈ¯ÇÑ´Ù.
+ * ì´ í•¨ìˆ˜ëŠ” @a syllable ë¡œ ì£¼ì–´ì§„ ìŒì ˆ ì½”ë“œë¥¼ ë¶„í•´í•˜ì—¬ ìëª¨ ì½”ë“œë¥¼ ë°˜í™˜í•œë‹¤.
+ * ë°˜í™˜í•˜ëŠ” ê°’ì€ @a choseong, @a jungseong, @a jongseong ì˜ í¬ì¸í„°ì— ëŒ€ì…í•˜ì—¬
+ * ë¦¬í„´í•œë‹¤. ì¢…ì„±ì´ ì—†ëŠ” ìŒì ˆì¸ ê²½ìš°ì—ëŠ” @a jongseong ì— 0ì„ ë°˜í™˜í•œë‹¤.
  */
 void PASCAL
 hangul_syllable_to_jamo(WCHAR syllable,
@@ -2283,7 +2283,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_NK_2BUL:
             atype=
-             load_keyboard_map_from_reg(TEXT("ºÏÇÑ µÎ¹ú½Ä"),0,keyboard_table_user);
+             load_keyboard_map_from_reg(TEXT("ë¶í•œ ë‘ë²Œì‹"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2295,7 +2295,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_YET2BUL:
             atype=
-	     load_keyboard_map_from_reg(TEXT("¿¾ÇÑ±Û µÎ¹ú"),0,keyboard_table_user);
+	     load_keyboard_map_from_reg(TEXT("ì˜›í•œê¸€ ë‘ë²Œ"),0,keyboard_table_user);
 	    if (atype)
 	        keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2307,7 +2307,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_YET3BUL:
             atype=
-             load_keyboard_map_from_reg(TEXT("¿¾ÇÑ±Û ¼¼¹ú"),0,keyboard_table_user);
+             load_keyboard_map_from_reg(TEXT("ì˜›í•œê¸€ ì„¸ë²Œ"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2319,7 +2319,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_NEW2BUL:
             atype=
-	     load_keyboard_map_from_reg(TEXT("»õµÎ¹ú"),0,keyboard_table_user);
+	     load_keyboard_map_from_reg(TEXT("ìƒˆë‘ë²Œ"),0,keyboard_table_user);
 	    if (atype)
 	        keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2331,7 +2331,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_NEW3BUL:
             atype=
-             load_keyboard_map_from_reg(TEXT("»õ¼¼¹ú"),0,keyboard_table_user);
+             load_keyboard_map_from_reg(TEXT("ìƒˆì„¸ë²Œ"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2343,7 +2343,7 @@ int PASCAL set_keyboard(UINT type)
 	    break;
 	case LAYOUT_AHNMATAE:
             atype=
-             load_keyboard_map_from_reg(TEXT("¾È¸¶ÅÂ"),0,keyboard_table_user);
+             load_keyboard_map_from_reg(TEXT("ì•ˆë§ˆíƒœ"),0,keyboard_table_user);
 	    if (atype)
                 keyboard_table=keyboard_table_user;
 	    if (atype & 0xff00) {
@@ -2644,7 +2644,7 @@ LPBYTE lpbKeyState;
 #ifndef USE_NO_WM_CHAR
     if ( (!hkey || (hkey >= TEXT('!') && hkey <= TEXT('~')) )
 	    && !IsCompStr(hIMC)) {
-	// ÀÌ °æ¿ì ¸¶Áö¸· ÀÔ·Â¹ŞÀº ascii¹®ÀÚ¸¦ ±×´ë·Î ³»¹ñ´Â´Ù.
+	// ì´ ê²½ìš° ë§ˆì§€ë§‰ ì…ë ¥ë°›ì€ asciië¬¸ìë¥¼ ê·¸ëŒ€ë¡œ ë‚´ë±‰ëŠ”ë‹¤.
 	PostMessage(lpIMC->hWnd,WM_CHAR,hkey,lParam);
 
         ImmUnlockIMC(hIMC);
@@ -2672,7 +2672,7 @@ LPBYTE lpbKeyState;
 
     if (!dwStrLen)
     {
-        // ÃÊ±âÈ­
+        // ì´ˆê¸°í™”
         InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
         GnMsg.message = WM_IME_STARTCOMPOSITION;
@@ -2688,11 +2688,11 @@ LPBYTE lpbKeyState;
 	LPCANDIDATEINFO lpCandInfo;
 	LPCANDIDATELIST lpCandList;
 
-	// ÈÄº¸Ã¢À» º¸¿©ÁÖ¸é¼­ ±×¿Í µ¿½Ã¿¡ ±ÛÀÚ¸¦ °è¼Ó Á¶ÇÕÇÒ ¼ö ÀÖµµ·Ï.
+	// í›„ë³´ì°½ì„ ë³´ì—¬ì£¼ë©´ì„œ ê·¸ì™€ ë™ì‹œì— ê¸€ìë¥¼ ê³„ì† ì¡°í•©í•  ìˆ˜ ìˆë„ë¡.
 	lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
 	if (lpCandInfo) {
-	    // ÈÄº¸Ã¢ Á¤º¸¸¦ °¡Á®¿Â´Ù. dwSelection != 0ÀÎ °æ¿ì´Â ÇÑ±ÛÀÌ ÀÌ¹Ì ÇÑÀÚ·Î º¯È¯µÈ °æ¿ì
-	    // ÀÌ °æ¿ì´Â ¼±ÅÃµÈ ÇÑÀÚ¸¦ Ä¿¹ÔÇÏ°í ´Ù½Ã ÇÑ±ÛÀ» ÀÔ·Â¹Ş´Â ¸ğµå·Î
+	    // í›„ë³´ì°½ ì •ë³´ë¥¼ ê°€ì ¸ì˜¨ë‹¤. dwSelection != 0ì¸ ê²½ìš°ëŠ” í•œê¸€ì´ ì´ë¯¸ í•œìë¡œ ë³€í™˜ëœ ê²½ìš°
+	    // ì´ ê²½ìš°ëŠ” ì„ íƒëœ í•œìë¥¼ ì»¤ë°‹í•˜ê³  ë‹¤ì‹œ í•œê¸€ì„ ì…ë ¥ë°›ëŠ” ëª¨ë“œë¡œ
 	    lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
 	    if (lpCandList && lpCandList->dwSelection != 0) {
 		// converted.
@@ -2777,7 +2777,7 @@ LPBYTE lpbKeyState;
 
             MyDebugPrint((TEXT("input jamo: %x\r\n"), hkey));
 
-	    // Combining Mark°¡ ÀÖ´Â°æ¿ì - combining mark¸¦ ÀúÀåÇØµĞ´Ù.
+	    // Combining Markê°€ ìˆëŠ”ê²½ìš° - combining markë¥¼ ì €ì¥í•´ë‘”ë‹¤.
 	    if (IsCompStr(hIMC) && is_combining_mark(*(lpstr - 1))) {
 		UINT i = 0;
 		MYCHAR	m;
@@ -2812,10 +2812,10 @@ LPBYTE lpbKeyState;
 		if (ncs == 1 && ic.syllable) { // syllable
 		    MYCHAR c = *(lpstr - 1);
 		    if (hangul_is_syllable(c) || hangul_is_cjamo(c)) {
-			// syllableÀÌ°Å³ª compatible jamoÀÌ¸é
+			// syllableì´ê±°ë‚˜ compatible jamoì´ë©´
 			*(lpstr - 1) = cs;
 		    } else if (hangul_is_choseong(c) || hangul_is_jungseong(c) || hangul_is_jongseong(c)) {
-			    // ±×·¸Áö ¾Ê°í Ã¹°¡³¡ ÀÚ¸ğÀÎ °æ¿ì.
+			    // ê·¸ë ‡ì§€ ì•Šê³  ì²«ê°€ë ìëª¨ì¸ ê²½ìš°.
 			    int n = 0;
 			    LPWSTR lpstrprev = lpstr - 1;
 			    n = hangul_del_prev(lpstrprev);
@@ -2829,13 +2829,13 @@ LPBYTE lpbKeyState;
 			    lpCompStr->dwCursorPos++;
 			    *lpstr = MYTEXT('\0');
 		    } else {
-			// ±×¹Û¿¡
+			// ê·¸ë°–ì—
 			*(lpstr - 1) = cs;
 		    }
-		} else if (ncs > 0) { // ¿¾ÇÑ±Û XXX
+		} else if (ncs > 0) { // ì˜›í•œê¸€ XXX
 		    /*
                     lpprev = MyHanCharPrev( lpchText, lpstr );
-		    MyDebugPrint((TEXT(" * ÇÑ±Û ¾Õ±ÛÀÚ: %s - %d\r\n"), lpprev, (lpstr - lpprev)));
+		    MyDebugPrint((TEXT(" * í•œê¸€ ì•ê¸€ì: %s - %d\r\n"), lpprev, (lpstr - lpprev)));
 		    */
 
 		    // for automata2 XXX
@@ -2844,15 +2844,15 @@ LPBYTE lpbKeyState;
 			lpCompStr->dwCursorPos--;
 			lpstr--;
 		    } else {
-			// lpstr (compStr)À» lcs·Î ¸ğµÎ ´ëÃ¼ÇØ¾ß ÇÑ´Ù.
-			// ´ÙÀ½°ú °°ÀÌ Æí¹ıÀûÀ¸·Î ÇÒ ¼öµµ ÀÖ´Ù.
+			// lpstr (compStr)ì„ lcsë¡œ ëª¨ë‘ ëŒ€ì²´í•´ì•¼ í•œë‹¤.
+			// ë‹¤ìŒê³¼ ê°™ì´ í¸ë²•ì ìœ¼ë¡œ í•  ìˆ˜ë„ ìˆë‹¤.
 			*(lpstr - 1) = lcs[ncs - 1];
 		    }
 
-		    MyDebugPrint((TEXT(" * ¿¾ÇÑ±Û: %s\r\n"), lcs));
+		    MyDebugPrint((TEXT(" * ì˜›í•œê¸€: %s\r\n"), lcs));
 		}
 
-		// combining mark¸¦ µÇµ¹¸°´Ù.
+		// combining markë¥¼ ë˜ëŒë¦°ë‹¤.
 		if (nmark > 0) {
 		    UINT i = 0;
 		    for (i = 0; i < nmark; i++) {
@@ -2884,24 +2884,24 @@ LPBYTE lpbKeyState;
 	    }
 
 	    if (ret <= 0) {
-		// Á¶ÇÕÁß
+		// ì¡°í•©ì¤‘
 		int ncs;
 		ncs = hangul_ic_get(&ic, 0, lcs);
 		if (ncs > 0)
-		    cs = lcs[ncs - 1]; // XXX ¸¶Áö¸· ÀÔ·Â ¹®ÀÚ·Î
-		MyDebugPrint((TEXT(" * Á¶ÇÕÁß: %d, %s, syl=%d\r\n"), ncs, lcs,ic.syllable));
+		    cs = lcs[ncs - 1]; // XXX ë§ˆì§€ë§‰ ì…ë ¥ ë¬¸ìë¡œ
+		MyDebugPrint((TEXT(" * ì¡°í•©ì¤‘: %d, %s, syl=%d\r\n"), ncs, lcs,ic.syllable));
 
 		if (ncs) {
 		    if (ncs == 1 && ic.syllable) {
 			// composable with compatability jamo
 			MYCHAR c = *(lpstr - 1);
-			// syllableÀÌ°Å³ª compatible jamoÀÌ¸é
+			// syllableì´ê±°ë‚˜ compatible jamoì´ë©´
 			if (hangul_is_syllable(c) || hangul_is_cjamo(c)) {
 			    *(lpstr - 1) = cs;
 			} else if (hangul_is_choseong(c) ||
 				hangul_is_jungseong(c) ||
 				hangul_is_jongseong(c)) {
-			    // ±×·¸Áö ¾Ê°í Ã¹°¡³¡ ÀÚ¸ğÀÎ °æ¿ì.
+			    // ê·¸ë ‡ì§€ ì•Šê³  ì²«ê°€ë ìëª¨ì¸ ê²½ìš°.
 			    int n = 0;
 			    LPWSTR lpstrprev = lpstr - 1;
 			    n = hangul_del_prev(lpstrprev);
@@ -2914,7 +2914,7 @@ LPBYTE lpbKeyState;
 			    lpCompStr->dwCursorPos++;
 
 			} else {
-			    // ±×¹Û¿¡.
+			    // ê·¸ë°–ì—.
 			    *(lpstr - 1) = cs;
 			}
 		    } else {
@@ -2932,7 +2932,7 @@ LPBYTE lpbKeyState;
 			}
 		    }
 		}
-		// combining mark¸¦ µÇµ¹¸°´Ù.
+		// combining markë¥¼ ë˜ëŒë¦°ë‹¤.
 		if (nmark > 0) {
 		    UINT i = 0;
 		    for (i = 0; i < nmark; i++) {
@@ -2943,7 +2943,7 @@ LPBYTE lpbKeyState;
 		    nmark = 0;
 		}
 	    } else {
-		// combining mark¸¦ µÇµ¹¸°´Ù.
+		// combining markë¥¼ ë˜ëŒë¦°ë‹¤.
 		if (nmark > 0) {
 		    UINT i = 0;
 		    for (i = 0; i < nmark; i++) {
@@ -2954,7 +2954,7 @@ LPBYTE lpbKeyState;
 		    nmark = 0;
 		}
 
-		// »õÁ¶ÇÕ
+		// ìƒˆì¡°í•©
 		// new hangul composition
 		ncs = hangul_ic_get(&ic,0,lcs);
 		cs = lcs[0];
@@ -2998,8 +2998,8 @@ LPBYTE lpbKeyState;
         hangul_ic_init(&ic);
 
 	// if (code == 0xd) code = '\n';
-	// ÀÌ ¹æ½ÄÀ¸·Î ¸®ÅÏÅ°¸¦ ¾²¸é ¸ğÁú¶ó, vim µîµî¿¡¼­ ¸ğµÎ µÇ¾úÀ¸³ª,
-	// ¸ğÁú¶ó¿¡¼­¸¸ Á¦´ë·Î µÇÁö ¾Ê´Â ¹®Á¦·Î ÀÎÇÏ¿© keybd_event()¸¦ ½è´Ù.
+	// ì´ ë°©ì‹ìœ¼ë¡œ ë¦¬í„´í‚¤ë¥¼ ì“°ë©´ ëª¨ì§ˆë¼, vim ë“±ë“±ì—ì„œ ëª¨ë‘ ë˜ì—ˆìœ¼ë‚˜,
+	// ëª¨ì§ˆë¼ì—ì„œë§Œ ì œëŒ€ë¡œ ë˜ì§€ ì•ŠëŠ” ë¬¸ì œë¡œ ì¸í•˜ì—¬ keybd_event()ë¥¼ ì¼ë‹¤.
         *lpstr++ = (BYTE)code;
         lpCompStr->dwCursorPos++;
 #endif
@@ -3034,8 +3034,8 @@ LPBYTE lpbKeyState;
         lpCompStr->dwCompReadStrLen--;
     */
 
-    /* ReadStrÀº ¹«¾ùÀÌ°í, CompStrÀº ¹«¾ùÀÎ°¡ ?
-     * ReadStrÀº ¹öÆÛÀÌ°í, CompStrÀº ±×°ÍÀ» ÇØ¼®ÇÑ °á°ú¸¦ ÀúÀåÇÏ´Â ?
+    /* ReadStrì€ ë¬´ì—‡ì´ê³ , CompStrì€ ë¬´ì—‡ì¸ê°€ ?
+     * ReadStrì€ ë²„í¼ì´ê³ , CompStrì€ ê·¸ê²ƒì„ í•´ì„í•œ ê²°ê³¼ë¥¼ ì €ì¥í•˜ëŠ” ?
      */
 
     //
@@ -3048,7 +3048,7 @@ LPBYTE lpbKeyState;
 
     /*
 http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.asp
-     wParamÀº DBCS°ª È¤Àº unicode°ªÀÌ´Ù.
+     wParamì€ DBCSê°’ í˜¹ì€ unicodeê°’ì´ë‹¤.
      */
 
     if (dwGCR != GCS_RESULTALL && lpCompStr->dwCompStrLen)
@@ -3058,45 +3058,45 @@ http://msdn.microsoft.com/library/default.asp?url=/library/en-us/intl/ime_88q6.a
         GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
         //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
         if (dwImeFlag & SAENARU_ONTHESPOT) {
-	    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //ÇÑ±Û IME 2002,2003
+	    //GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; //í•œê¸€ IME 2002,2003
             GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
 	}
         GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
     }
     /*
-     * ÇÑ±Û IME 2002´Â CS_INSERTCHAR | CS_NOMOVECARET ¸¦ ¾´´Ù.
+     * í•œê¸€ IME 2002ëŠ” CS_INSERTCHAR | CS_NOMOVECARET ë¥¼ ì“´ë‹¤.
      */
     /*
-     * GenerateMessage()¸¦ ÇÒ ¶§, COMPSTRÀ» ÇÑ ÈÄ¿¡ RESULTSTRÀ» ÇØ¾ß ÇÑ´Ù.
-     * Áï, ¼ø¼­¸¦ ÁöÄÑ¾ß ÇÑ´Ù.
-     * ¿öµåÆĞµå´Â GCS_RESULTSTR | GCS_COMPSTRÀº µÇÁö¸¸, ¼ø¼­¸¦ µÚ¹Ù²Ù¸é
-     * ¾ÈµÈ´Ù. ±×·±µ¥ ÀÌ °æ¿ì´Â ¸ğÁú¶ó°¡ ¾ÈµÈ´Ù. -_-;;
+     * GenerateMessage()ë¥¼ í•  ë•Œ, COMPSTRì„ í•œ í›„ì— RESULTSTRì„ í•´ì•¼ í•œë‹¤.
+     * ì¦‰, ìˆœì„œë¥¼ ì§€ì¼œì•¼ í•œë‹¤.
+     * ì›Œë“œíŒ¨ë“œëŠ” GCS_RESULTSTR | GCS_COMPSTRì€ ë˜ì§€ë§Œ, ìˆœì„œë¥¼ ë’¤ë°”ê¾¸ë©´
+     * ì•ˆëœë‹¤. ê·¸ëŸ°ë° ì´ ê²½ìš°ëŠ” ëª¨ì§ˆë¼ê°€ ì•ˆëœë‹¤. -_-;;
      * 
-     * ¼ø¼­¸¦ ÁöÅ°Áö ¾Ê¾Æµµ µÇ´Â ¾îÇÃÀº "³ëÆ®ÆĞµå"Á¤µµ »Ó ?
+     * ìˆœì„œë¥¼ ì§€í‚¤ì§€ ì•Šì•„ë„ ë˜ëŠ” ì–´í”Œì€ "ë…¸íŠ¸íŒ¨ë“œ"ì •ë„ ë¿ ?
      * 
-     * ÀÌ ¼ø¼­¸¦ ÁöÅ°Áö ¾ÊÀ¸¸é, COMPSTRÀÌ µÇ°í RESULTSTRÀ¸·Î µ¤¾î½áÁ®¼­
-     * ¿ø·¡ º¸¿©¾ß ÇÒ ¹®ÀÚ°¡ º¸ÀÌÁö ¾Ê´Â °á°ú°¡ ÃÊ·¡ÇÑ´Ù.
+     * ì´ ìˆœì„œë¥¼ ì§€í‚¤ì§€ ì•Šìœ¼ë©´, COMPSTRì´ ë˜ê³  RESULTSTRìœ¼ë¡œ ë®ì–´ì¨ì ¸ì„œ
+     * ì›ë˜ ë³´ì—¬ì•¼ í•  ë¬¸ìê°€ ë³´ì´ì§€ ì•ŠëŠ” ê²°ê³¼ê°€ ì´ˆë˜í•œë‹¤.
      *
      */
 
 ac_exit:
     //
-    // RESULTSTRÀÌ ÀÖ°í, CompStr¿¡ ³²Àº ¹®ÀÚ°¡ ÇÑ±Û ÀÌ¿ÜÀÇ ¹®ÀÚÀÌ¸é
-    // CompStrÀ» commit, RESULTSTRÀ» commit.
+    // RESULTSTRì´ ìˆê³ , CompStrì— ë‚¨ì€ ë¬¸ìê°€ í•œê¸€ ì´ì™¸ì˜ ë¬¸ìì´ë©´
+    // CompStrì„ commit, RESULTSTRì„ commit.
     // 
-    // RESULTSTRÀÌ ¾ø°í, CompStrÀÌ ÇÑ±Û ÀÌ¿ÜÀÇ ¹®ÀÚÀÌ¸é ÀüÃ¼¸¦ commit
+    // RESULTSTRì´ ì—†ê³ , CompStrì´ í•œê¸€ ì´ì™¸ì˜ ë¬¸ìì´ë©´ ì „ì²´ë¥¼ commit
     //
     if ( dwGCR != GCS_RESULTALL ) {
 	if (!cs) {
             MakeResultString(hIMC,TRUE);
-	} else if ((lpCompStr->dwCompStrLen > 1 || ic.len > 1) && // ÃÊ¼º+Áß¼º µÎ±ÛÀÚ ÀÌ»óÀÏ °æ¿ì.
+	} else if ((lpCompStr->dwCompStrLen > 1 || ic.len > 1) && // ì´ˆì„±+ì¤‘ì„± ë‘ê¸€ì ì´ìƒì¼ ê²½ìš°.
 		IsCompStr(hIMC) &&
 		(fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
-	    // ÀÔ·Â Áï½Ã ÈÄº¸ Ã¢ ¶ß°Ô ÇÏ±â.
+	    // ì…ë ¥ ì¦‰ì‹œ í›„ë³´ ì°½ ëœ¨ê²Œ í•˜ê¸°.
             ConvHanja(hIMC,0,0);
 	} else if (IsCandidate(lpIMC)) {
-	    // ÀÌ¹Ì ÇÑÀÚÃ¢ÀÌ ¶°ÀÖ´Â °æ¿ì¿¡µµ
+	    // ì´ë¯¸ í•œìì°½ì´ ë– ìˆëŠ” ê²½ìš°ì—ë„
             ConvHanja(hIMC,0,0);
 	}
     } else {
@@ -3137,20 +3137,20 @@ ac_exit:
 
 	if (!lpCompStr->dwCompStrLen)
 	{
-            // °í°íÅ¸ÀÚ, ¿öµåÆĞµå¿¡¼­ Á¦´ë·Î µ¿ÀÛÇÏµµ·Ï ¼öÁ¤
+            // ê³ ê³ íƒ€ì, ì›Œë“œíŒ¨ë“œì—ì„œ ì œëŒ€ë¡œ ë™ì‘í•˜ë„ë¡ ìˆ˜ì •
             GnMsg.message = WM_IME_ENDCOMPOSITION;
             GnMsg.wParam = 0;
             GnMsg.lParam = 0;
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
-	    // ÇÑ±Û·Î ÀÌ·ç¾îÁø CompStrÀÌ ¾ø´Ù´Â °ÍÀº, ¸¶Áö¸·
-	    // ÀÔ·ÂµÈ ¹®ÀÚ°¡ ÇÑ±Û ÀÚ¼Ò°¡ ¾Æ´Ñ °æ¿ì
-	    // ÀÌ °æ¿ì ¸¶Áö¸· ÀÔ·Â¹ŞÀº ascii¹®ÀÚ¸¦ ±×´ë·Î ³»¹ñ´Â´Ù.
+	    // í•œê¸€ë¡œ ì´ë£¨ì–´ì§„ CompStrì´ ì—†ë‹¤ëŠ” ê²ƒì€, ë§ˆì§€ë§‰
+	    // ì…ë ¥ëœ ë¬¸ìê°€ í•œê¸€ ìì†Œê°€ ì•„ë‹Œ ê²½ìš°
+	    // ì´ ê²½ìš° ë§ˆì§€ë§‰ ì…ë ¥ë°›ì€ asciië¬¸ìë¥¼ ê·¸ëŒ€ë¡œ ë‚´ë±‰ëŠ”ë‹¤.
 	    //PostMessage(lpIMC->hWnd,WM_CHAR,code,lParam);
 	} else {
 #if 0
-            // °í°íÅ¸ÀÚ, ¿öµåÆĞµå¿¡¼­ Á¦´ë·Î µ¿ÀÛÇÏµµ·Ï ¼öÁ¤
-	    // ÀÌ ºÎºĞÀ» *ºñÈ°¼º* ½ÃÄÑ¾ß Á¦´ë·Î ÀÛµ¿ÇÑ´Ù.
+            // ê³ ê³ íƒ€ì, ì›Œë“œíŒ¨ë“œì—ì„œ ì œëŒ€ë¡œ ë™ì‘í•˜ë„ë¡ ìˆ˜ì •
+	    // ì´ ë¶€ë¶„ì„ *ë¹„í™œì„±* ì‹œì¼œì•¼ ì œëŒ€ë¡œ ì‘ë™í•œë‹¤.
 	    //
 	    // EditPlus 2.21 (330), WordPad
 	    //
@@ -3164,17 +3164,17 @@ ac_exit:
             GnMsg.lParam = GCS_COMPALL | GCS_CURSORPOS | GCS_DELTASTART;
             //if ((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS))
             if (dwImeFlag & SAENARU_ONTHESPOT) {
-		//GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // ÇÑ±Û IME 2002,2003
+		//GnMsg.lParam = GCS_COMPSTR | GCS_COMPATTR; // í•œê¸€ IME 2002,2003
                 GnMsg.lParam |= CS_INSERTCHAR | CS_NOMOVECARET;
 	    }
             GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
-	    if (ic.len > 1 && // ÃÊ¼º+Áß¼º µÎ±ÛÀÚ ÀÌ»óÀÏ °æ¿ì.
+	    if (ic.len > 1 && // ì´ˆì„±+ì¤‘ì„± ë‘ê¸€ì ì´ìƒì¼ ê²½ìš°.
 		IsCompStr(hIMC) &&
 		(fdwConversion & IME_CMODE_HANJACONVERT) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
 
-		// ÀÔ·Â Áï½Ã ÈÄº¸ Ã¢ ¶ß°Ô ÇÏ±â.
+		// ì…ë ¥ ì¦‰ì‹œ í›„ë³´ ì°½ ëœ¨ê²Œ í•˜ê¸°.
                 ConvHanja(hIMC,0,0);
 	    }
 	}
@@ -3296,7 +3296,7 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 	if (mode == 1)
 	    hangul_ic_init(ic);
 
-	// °³¼ö ¸®ÅÏ
+	// ê°œìˆ˜ ë¦¬í„´
 	return j;
     }
 
@@ -3305,7 +3305,7 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 
     lcs[0] = code;
     lcs[1] = MYTEXT('\0');
-    return 1; // syllableÀÏ °æ¿ì.
+    return 1; // syllableì¼ ê²½ìš°.
 }
 
 void hangul_ic_push( HangulIC *ic, WCHAR ch )
@@ -3316,7 +3316,7 @@ void hangul_ic_push( HangulIC *ic, WCHAR ch )
     ic->last = ch;
 }
 
-WCHAR hangul_ic_pop( HangulIC *ic )
+WCHAR PASCAL hangul_ic_pop( HangulIC *ic )
 {
     if (ic->len <= 0)
 	return 0;
@@ -3324,7 +3324,7 @@ WCHAR hangul_ic_pop( HangulIC *ic )
     return ic->read[ic->len];
 }
 
-WCHAR hangul_ic_peek( HangulIC *ic )
+WCHAR PASCAL hangul_ic_peek( HangulIC *ic )
 {
     if (ic->len <= 0)
 	return 0;
@@ -3370,10 +3370,10 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             MyDebugPrint((TEXT("cho code: %x\r\n"), jamo));
             switch(kind) {
             case 1:
-                // ÃÊ¼º+ÃÊ¼ºÀº µÎ¹ú½ÄÀÇ À©µµ¿ì ±âº» ¿ÀÅä¸¶Å¸¿¡¼­ ¿ø·¡ Áö¿øÇÏÁö ¾Ê´Â´Ù.
-                // ±×·¯³ª, ³ªºñ°¡ Áö¿øÇÏ¹Ç·Î Áö¿øÇÑ´Ù :)
+                // ì´ˆì„±+ì´ˆì„±ì€ ë‘ë²Œì‹ì˜ ìœˆë„ìš° ê¸°ë³¸ ì˜¤í† ë§ˆíƒ€ì—ì„œ ì›ë˜ ì§€ì›í•˜ì§€ ì•ŠëŠ”ë‹¤.
+                // ê·¸ëŸ¬ë‚˜, ë‚˜ë¹„ê°€ ì§€ì›í•˜ë¯€ë¡œ ì§€ì›í•œë‹¤ :)
                 comb = hangul_compose(ic->cho, jamo);
-		// µ¿½ÃÄ¡±âÀÏ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ ÃÊ+ÃÊ Á¶ÇÕ
+		// ë™ì‹œì¹˜ê¸°ì¼ ê²½ìš°ëŠ” ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì´ˆ+ì´ˆ ì¡°í•©
 		if ( ctyping && !comb)
 		    comb = hangul_compose(jamo,ic->cho);
 
@@ -3386,14 +3386,14 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 
 		        //if (!hangul_jamo_to_syllable(ic->cho, 0x1161,0)) {
 		        if (hangul_jamo_to_cjamo(ic->cho) == ic->cho) {
-		 	    // ¿¾ÇÑ±ÛÀÌ¸é ¿Ï¼ºÇü À½Àı·Î ¸¸µéÁö ¸øÇÔ.
+		 	    // ì˜›í•œê¸€ì´ë©´ ì™„ì„±í˜• ìŒì ˆë¡œ ë§Œë“¤ì§€ ëª»í•¨.
 			    ic->syllable=FALSE;
 		        }
 
                         return 0;
 	  	    } else if ( hangul_is_jongseong(comb) ) {
-		        // ÃÊ+ÃÊ -> Á¾¼ºÀÌ µÇ´Â °æ¿ì
-		        // IME 2002¿¡¼­ Áö¿øÇÏ¹Ç·Î
+		        // ì´ˆ+ì´ˆ -> ì¢…ì„±ì´ ë˜ëŠ” ê²½ìš°
+		        // IME 2002ì—ì„œ ì§€ì›í•˜ë¯€ë¡œ
                         ic->jong=comb;
                         ic->cho=0;
                         hangul_ic_pop(ic);
@@ -3403,7 +3403,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                         return 0;
 		    }
                 }
-                // ÃÊ¼ºÀ» composeÇÒ ¼ö ¾ø´Ù.
+                // ì´ˆì„±ì„ composeí•  ìˆ˜ ì—†ë‹¤.
                 *ncs = hangul_ic_commit(ic, lcs);
 
                 ic->cho=jamo;
@@ -3411,21 +3411,21 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 ic->laststate=1;
                 return -1;
                 break;
-            case 2: // ÃÊ¼º+Áß¼º
+            case 2: // ì´ˆì„±+ì¤‘ì„±
                 if (hangul_jamo_to_syllable(ic->cho,jamo,0)) {
 		    ic->jung=jamo;
 		    hangul_ic_push(ic,jamo);
 		    ic->laststate=2;
 		    return 0;
                 } else if (dwOptionFlag & HANGUL_JAMOS) {
-		    // ¿¾ÇÑ±Û Á¶ÇÕ.
+		    // ì˜›í•œê¸€ ì¡°í•©.
 		    ic->jung=jamo;
 		    hangul_ic_push(ic,jamo);
 		    ic->laststate=2;
                     ic->syllable=FALSE;
 		    return -2;
 		} else {
-                    // Çã¶ôµÇÁö ¾Ê´Â Á¶ÇÕ.
+                    // í—ˆë½ë˜ì§€ ì•ŠëŠ” ì¡°í•©.
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->jung=jamo;
@@ -3434,10 +3434,10 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 break;
-            default: // ÃÊ¼º+Á¾¼º
-                // µÎ¹ú½Ä ¿ÀÅä¸¶Å¸´Â Á¾¼ºÃ³¸®°¡ ÇÊ¿ä ¾ø´Ù.
-                // ±×·¯³ª, ¼¼¹ú½Ä¿¡¼­ µÎ¹ú½Ä ¿ÀÅä¸¶Å¸¸¦ ¾²±â
-                // À§ÇØ¼­ Á¾¼º Ã³¸®¸¦ ³Ö´Â´Ù.
+            default: // ì´ˆì„±+ì¢…ì„±
+                // ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ëŠ” ì¢…ì„±ì²˜ë¦¬ê°€ í•„ìš” ì—†ë‹¤.
+                // ê·¸ëŸ¬ë‚˜, ì„¸ë²Œì‹ì—ì„œ ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ë¥¼ ì“°ê¸°
+                // ìœ„í•´ì„œ ì¢…ì„± ì²˜ë¦¬ë¥¼ ë„£ëŠ”ë‹¤.
                 *ncs = hangul_ic_commit(ic, lcs);
 
                 ic->jong=jamo;
@@ -3449,15 +3449,15 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             }
 	} else if (ic->laststate == 2) {
             switch(kind) {
-            case 1: // TODO Áß¼º + ÃÊ¼º
-                // ÃÊ¼ºÀÌ ¾øÀ» °æ¿ì : ³ªºñ¿¡¼­´Â Áß¼º+ÃÊ¼ºÀ» ±³Á¤ÇÑ´Ù.
+            case 1: // TODO ì¤‘ì„± + ì´ˆì„±
+                // ì´ˆì„±ì´ ì—†ì„ ê²½ìš° : ë‚˜ë¹„ì—ì„œëŠ” ì¤‘ì„±+ì´ˆì„±ì„ êµì •í•œë‹¤.
                 if (!ic->cho &&
                    ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
 		    int commit = FALSE;
-			// ÀÔ·Â ¼ø¼­ ±³Á¤.
-			// µû¶ó¼­, ¤¿,¤© ¸¦ Â÷·Ê·Î ÀÔ·ÂÇÏ¸é "¶ó"°¡ µÈ´Ù.
-			// ¿©±â¼­ backspace¸¦ ´©¸£¸é "¤¿"°¡ Áö¿öÁö°Ô µÈ´Ù.
-			// FIXME "¤¿"°¡ Áö¿öÁö´Â °ÍÀÌ ¿ÇÀº°¡? "¤©"ÀÌ Áö¿öÁö´Â °Ô ¸Â³ª?
+			// ì…ë ¥ ìˆœì„œ êµì •.
+			// ë”°ë¼ì„œ, ã…,ã„¹ ë¥¼ ì°¨ë¡€ë¡œ ì…ë ¥í•˜ë©´ "ë¼"ê°€ ëœë‹¤.
+			// ì—¬ê¸°ì„œ backspaceë¥¼ ëˆ„ë¥´ë©´ "ã…"ê°€ ì§€ì›Œì§€ê²Œ ëœë‹¤.
+			// FIXME "ã…"ê°€ ì§€ì›Œì§€ëŠ” ê²ƒì´ ì˜³ì€ê°€? "ã„¹"ì´ ì§€ì›Œì§€ëŠ” ê²Œ ë§ë‚˜?
 		    if (!hangul_jamo_to_syllable(jamo,ic->jung,0)) {
 			if (dwOptionFlag & HANGUL_JAMOS) {
 			    ic->syllable = FALSE;
@@ -3481,7 +3481,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=2;
 		    return 0;	
                 }
-                // ÃÊ¼ºÀ» Á¾¼ºÀ¸·Î ¹Ù²Ù°í,
+                // ì´ˆì„±ì„ ì¢…ì„±ìœ¼ë¡œ ë°”ê¾¸ê³ ,
                 jong = hangul_choseong_to_jongseong_full(jamo);
                 if (jong && hangul_jamo_to_syllable(ic->cho,ic->jung,jong)) {
                     ic->jong=jong;
@@ -3489,14 +3489,14 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=3;
                     return 0;
                 } else if (jong && dwOptionFlag & HANGUL_JAMOS) {
-		    // ¿¾ÇÑ±Û
+		    // ì˜›í•œê¸€
                     ic->jong=jong;
                     hangul_ic_push(ic,jong);
                     ic->laststate=3;
 		    ic->syllable=FALSE;
                     return 0;
                 } else {
-		    // Á¾¼º ¾Æ´Ô
+		    // ì¢…ì„± ì•„ë‹˜
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->cho=jamo;
@@ -3505,9 +3505,9 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 break;
-            case 2: // Áß¼º + Áß¼º
+            case 2: // ì¤‘ì„± + ì¤‘ì„±
                 comb = hangul_compose(ic->jung, jamo);
-		// µ¿½ÃÄ¡±âÀÏ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ Áß+Áß Á¶ÇÕ
+		// ë™ì‹œì¹˜ê¸°ì¼ ê²½ìš°ëŠ” ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì¤‘+ì¤‘ ì¡°í•©
 		if ( !comb && ctyping && !hangul_is_jungseong(comb))
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( comb && hangul_is_jungseong(comb) ) {
@@ -3524,16 +3524,16 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    } else if (ic->cho && hangul_jamo_to_syllable(ic->cho,comb,0)) {
 			return 0;
 		    } else {
-			// ¿¾ÇÑ±ÛÀÌ¸é ¿Ï¼ºÇü À½Àı ¾Æ´Ô.
+			// ì˜›í•œê¸€ì´ë©´ ì™„ì„±í˜• ìŒì ˆ ì•„ë‹˜.
 			// XXX
 			ic->syllable=FALSE;
 			return -1;
 		    }
                 } else {
-                    // XXX ÀÚÀ½À» ¿¬´Ş¾Æ ´©¸£´Â °æ¿ì´Â ¸¹À¸³ª,¸ğÀ½À» ¿¬´Ş¾Æ
-                    // ´©¸£´Â °æ¿ì´Â µå¹°´Ù.
-		    // ¤Ğ¤Ğ µîµî.
-                    // 1. ¿ø·¡ ÀÖ´ø Á¾¼ºÀ» ´ëÄ¡ÇÏ°Ô ÇÏ´Â°¡ ?
+                    // XXX ììŒì„ ì—°ë‹¬ì•„ ëˆ„ë¥´ëŠ” ê²½ìš°ëŠ” ë§ìœ¼ë‚˜,ëª¨ìŒì„ ì—°ë‹¬ì•„
+                    // ëˆ„ë¥´ëŠ” ê²½ìš°ëŠ” ë“œë¬¼ë‹¤.
+		    // ã… ã…  ë“±ë“±.
+                    // 1. ì›ë˜ ìˆë˜ ì¢…ì„±ì„ ëŒ€ì¹˜í•˜ê²Œ í•˜ëŠ”ê°€ ?
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->jung=jamo;
@@ -3541,23 +3541,23 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=2;
                     return -1;
 #if 0			
-                    // 2. ±×³É ¿¬´Ş¾Æ ´©¸£°Ô ÇÏ´Â°¡ ?
+                    // 2. ê·¸ëƒ¥ ì—°ë‹¬ì•„ ëˆ„ë¥´ê²Œ í•˜ëŠ”ê°€ ?
                     ic->last=0;
                     return -1;
 #endif
                 }
                 break;
-            default: // Áß¼º + Á¾¼º
-                // µÎ¹ú½Ä ¿ÀÅä¸¶Å¸´Â Á¾¼ºÃ³¸®°¡ ÇÊ¿ä ¾ø´Ù.
-                // ±×·¯³ª, ¼¼¹ú½Ä¿¡¼­ µÎ¹ú½Ä ¿ÀÅä¸¶Å¸¸¦ ¾²±â
-                // À§ÇØ¼­ Á¾¼º Ã³¸®¸¦ ³Ö´Â´Ù.
+            default: // ì¤‘ì„± + ì¢…ì„±
+                // ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ëŠ” ì¢…ì„±ì²˜ë¦¬ê°€ í•„ìš” ì—†ë‹¤.
+                // ê·¸ëŸ¬ë‚˜, ì„¸ë²Œì‹ì—ì„œ ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ë¥¼ ì“°ê¸°
+                // ìœ„í•´ì„œ ì¢…ì„± ì²˜ë¦¬ë¥¼ ë„£ëŠ”ë‹¤.
                 if (hangul_jamo_to_syllable(ic->cho,ic->jung,jamo)) {
                     ic->jong=jamo;
                     hangul_ic_push(ic,jamo);
                     ic->laststate=3;
                     return 0;
                 } else if (dwOptionFlag & HANGUL_JAMOS) {
-		    // ¿¾ÇÑ±Û Á¶ÇÕ.
+		    // ì˜›í•œê¸€ ì¡°í•©.
                     ic->jong=jamo;
                     hangul_ic_push(ic,jamo);
                     ic->laststate=3;
@@ -3574,13 +3574,13 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 break;
             }
 	} else if (ic->laststate == 3) {
-            // Á¾¼º
+            // ì¢…ì„±
             switch(kind) {
-            case 1: // ÃÊ¼ºÀ» Á¾¼ºÀ¸·Î ¹Ù²ã¼­
+            case 1: // ì´ˆì„±ì„ ì¢…ì„±ìœ¼ë¡œ ë°”ê¿”ì„œ
 		cho = jamo;
                 jong = hangul_choseong_to_jongseong_full(jamo);
                 comb = hangul_compose(ic->jong, jong);
-		// µ¿½ÃÄ¡±âÀÏ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ Á¾+Á¾ Á¶ÇÕ
+		// ë™ì‹œì¹˜ê¸°ì¼ ê²½ìš°ëŠ” ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì¢…+ì¢… ì¡°í•©
 		if ( ctyping && !hangul_is_jongseong(comb))
 		    comb = hangul_compose(jong,ic->jong);
                 if ( comb && hangul_is_jongseong(comb) )
@@ -3602,15 +3602,15 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 hangul_jongseong_dicompose(ic->jong, &tmp, &tmp2);
 		if (tmp && tmp2) {
 		    jong= tmp;
-		    // ½ÖÃÊ¼º¿¡ ´ëÇÑ Æ¯º°Ã³¸®
+		    // ìŒì´ˆì„±ì— ëŒ€í•œ íŠ¹ë³„ì²˜ë¦¬
 		    last=ic->last;
 		    if ( hangul_is_jongseong(ic->last) )
 			last = hangul_jongseong_to_choseong(ic->last);
-		    // ¤¶ ¤¹Àº ¾µ ¼ö ¾ø´Ù. ¤¶Àº Á¾¼ºÀ¸·Î ¸¹ÀÌ ¾²ÀÌ°í
-		    // ¤¹Àº ¾ÉÁö ... µîµî ¶§¹®¿¡ Á¦¿Ü
+		    // ã…† ã…‰ì€ ì“¸ ìˆ˜ ì—†ë‹¤. ã…†ì€ ì¢…ì„±ìœ¼ë¡œ ë§ì´ ì“°ì´ê³ 
+		    // ã…‰ì€ ì•‰ì§€ ... ë“±ë“± ë•Œë¬¸ì— ì œì™¸
 		    if (jong != 0x11af && last == jamo &&
 			(jamo == 0x1100 || jamo == 0x1103 ||
-			 jamo == 0x1107 )) // ¤¢ ¤¨ ¤³
+			 jamo == 0x1107 )) // ã„² ã„¸ ã…ƒ
 		    {
 			ic->jong=jong;
 			jamo= hangul_compose(last,last); // make ssang cho
@@ -3622,18 +3622,18 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    MyDebugPrint((TEXT("ssang cho ?: %x\r\n"), comb));
 		    if (comb &&
 			    comb == 0x1101 || comb == 0x1104 ||
-			    comb == 0x1108 || comb == 0x110a || comb == 0x110d) // ¤¢ ¤¨ ¤³ ¤¶ ¤¹
+			    comb == 0x1108 || comb == 0x110a || comb == 0x110d) // ã„² ã„¸ ã…ƒ ã…† ã…‰
 		    {
-			ic->jong = 0; //¸¶Áö¸· Á¾¼ºÀ» Áö¿î´Ù.
-			cho= comb; // ½ÖÃÊ¼ºÀ¸·Î ´ëÄ¡
-			// Ã¹°¡³¡ ÀÔ·ÂÀÇ °æ¿ì µÎ¹ú½ÄÀ¸·Î´Â Ã³¸®ÇÏ±â °ï¶õÇÏ´Ù.
-			// 1) Á¾¼º Á¶ÇÕµµ ½±°Ô °¡´ÉÇÏ°Ô ÇÏµÇ, È­»ìÇ¥ ->Å°¸¦ Á¶ÇÕÀ» ³¡³»´Â Å°·Î »ı°¢ÇÏ°Ô²û
-			// 2) Á¾¼ºÀ» ´©¸¦¶§ ¹İµå½Ã shift¸¦ ¾²°Ô²û.
-			// 3) shift¸¦ ´©¸£°í ÀÚÀ½À» Ä¡¸é ÃÊ¼ºÀ¸·Î ÀÎ½ÄÇÏ°Ô²û.
+			ic->jong = 0; //ë§ˆì§€ë§‰ ì¢…ì„±ì„ ì§€ìš´ë‹¤.
+			cho= comb; // ìŒì´ˆì„±ìœ¼ë¡œ ëŒ€ì¹˜
+			// ì²«ê°€ë ì…ë ¥ì˜ ê²½ìš° ë‘ë²Œì‹ìœ¼ë¡œëŠ” ì²˜ë¦¬í•˜ê¸° ê³¤ë€í•˜ë‹¤.
+			// 1) ì¢…ì„± ì¡°í•©ë„ ì‰½ê²Œ ê°€ëŠ¥í•˜ê²Œ í•˜ë˜, í™”ì‚´í‘œ ->í‚¤ë¥¼ ì¡°í•©ì„ ëë‚´ëŠ” í‚¤ë¡œ ìƒê°í•˜ê²Œë”
+			// 2) ì¢…ì„±ì„ ëˆ„ë¥¼ë•Œ ë°˜ë“œì‹œ shiftë¥¼ ì“°ê²Œë”.
+			// 3) shiftë¥¼ ëˆ„ë¥´ê³  ììŒì„ ì¹˜ë©´ ì´ˆì„±ìœ¼ë¡œ ì¸ì‹í•˜ê²Œë”.
 		    }
 		}
                 {
-                    // ÃÊ¼ºÀ» composeÇÒ ¼ö ¾ø´Ù.
+                    // ì´ˆì„±ì„ composeí•  ìˆ˜ ì—†ë‹¤.
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->cho=cho;
@@ -3642,7 +3642,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 break;
-            case 2: // Á¾¼º + Áß¼º
+            case 2: // ì¢…ì„± + ì¤‘ì„±
 		if (!ic->jung && ctyping) {
 		    // XXX
 		    jong = ic->last;
@@ -3673,11 +3673,11 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    hangul_ic_pop(ic);
 		    hangul_ic_push(ic,ic->jong);
 		} else {
-		    // ºĞÇØµÇÁö ¾ÊÀ¸¸é ´ÜÁ¾¼ºÀÇ °æ¿ì
-		    // Á¾¼º + Áß¼º: ¸¶Áö¸· Á¾¼ºÀ» ÃÊ¼ºÀ¸·Î ¹Ù²Ù°í Àá½Ã ÀúÀå
+		    // ë¶„í•´ë˜ì§€ ì•Šìœ¼ë©´ ë‹¨ì¢…ì„±ì˜ ê²½ìš°
+		    // ì¢…ì„± + ì¤‘ì„±: ë§ˆì§€ë§‰ ì¢…ì„±ì„ ì´ˆì„±ìœ¼ë¡œ ë°”ê¾¸ê³  ì ì‹œ ì €ì¥
 		    cho = hangul_jongseong_to_choseong(ic->jong);
 		    if (cho)
-			ic->jong = 0; //Á¾¼ºÀ» Áö¿î´Ù.
+			ic->jong = 0; //ì¢…ì„±ì„ ì§€ìš´ë‹¤.
 		    hangul_ic_pop(ic);
                 }
 
@@ -3688,14 +3688,14 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		hangul_ic_push(ic,cho);
 		hangul_ic_push(ic,jamo);
 		ic->laststate = 2;
-		return -1; // ¾ÕÀÇ ÃÊ+Áß µÎ°³¸¦ commit
+		return -1; // ì•ì˜ ì´ˆ+ì¤‘ ë‘ê°œë¥¼ commit
                 break;
-            default: // Á¾¼º + Á¾¼º
-                // µÎ¹ú½Ä ¿ÀÅä¸¶Å¸´Â Á¾¼ºÃ³¸®°¡ ÇÊ¿ä ¾ø´Ù.
-                // ±×·¯³ª, ¼¼¹ú½Ä¿¡¼­ µÎ¹ú½Ä ¿ÀÅä¸¶Å¸¸¦ ¾²±â
-                // À§ÇØ¼­ Á¾¼º Ã³¸®¸¦ ³Ö´Â´Ù.
+            default: // ì¢…ì„± + ì¢…ì„±
+                // ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ëŠ” ì¢…ì„±ì²˜ë¦¬ê°€ í•„ìš” ì—†ë‹¤.
+                // ê·¸ëŸ¬ë‚˜, ì„¸ë²Œì‹ì—ì„œ ë‘ë²Œì‹ ì˜¤í† ë§ˆíƒ€ë¥¼ ì“°ê¸°
+                // ìœ„í•´ì„œ ì¢…ì„± ì²˜ë¦¬ë¥¼ ë„£ëŠ”ë‹¤.
                 comb = hangul_compose(ic->jong, jamo);
-		// µ¿½ÃÄ¡±âÀÏ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ Á¾+Á¾ Á¶ÇÕ
+		// ë™ì‹œì¹˜ê¸°ì¼ ê²½ìš°ëŠ” ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì¢…+ì¢… ì¡°í•©
 		if ( ctyping && !comb)
 		    comb = hangul_compose(jamo,ic->jong);
                 if ( comb )
@@ -3709,7 +3709,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                         ic->laststate=3;
                         return 0;
                     }
-		    // Á¾+Á¾
+		    // ì¢…+ì¢…
                     ic->jong=comb;
                     hangul_ic_pop(ic);
                     hangul_ic_push(ic,comb);
@@ -3728,7 +3728,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 break;
             }
 	}
-    } else { // ic°¡ ÃÊ±âÈ­µÇ¾î ÀÖ´Ù.
+    } else { // icê°€ ì´ˆê¸°í™”ë˜ì–´ ìˆë‹¤.
         switch (kind) {
         case 1:
             MyDebugPrint((TEXT("single cho automata: %x\r\n"), jamo));
@@ -3772,7 +3772,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
     else if (jamo >= 0x11a8 && jamo <= 0x11ff) kind=3;
     else return -1;
 
-    // µ¿½ÃÄ¡±âÀÌ°í, ¿¬Å¸°¡ ¾Æ´Ï°í, key_down ÀÌº¥Æ®ÀÎ °æ¿ì
+    // ë™ì‹œì¹˜ê¸°ì´ê³ , ì—°íƒ€ê°€ ì•„ë‹ˆê³ , key_down ì´ë²¤íŠ¸ì¸ ê²½ìš°
     ctyping = (dwOptionFlag & CONCURRENT_TYPING) && (ic->last != jamo) &&
               (GetKeyState(ic->lastvkey) & 0x80000000);
 
@@ -3783,10 +3783,10 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
             MyDebugPrint((TEXT("cho code: %x\r\n"), jamo));
             switch(kind) {
             case 1:
-                // ÃÊ¼º+ÃÊ¼º
+                // ì´ˆì„±+ì´ˆì„±
                 comb = hangul_compose(ic->cho, jamo);
 
-		// comb°¡ ¾ÈµÇ°í µ¿½ÃÄ¡±âÀÎ °æ¿ì´Â ¼ø¼­¸¦ ¹Ù²ã¼­ Á¶ÇÕ
+		// combê°€ ì•ˆë˜ê³  ë™ì‹œì¹˜ê¸°ì¸ ê²½ìš°ëŠ” ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì¡°í•©
 		if ( !comb && ctyping )
 		    comb = hangul_compose(jamo, ic->cho);
 
@@ -3799,13 +3799,13 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=1;
 
  		    if (!hangul_jamo_to_syllable(ic->cho,0x1161,0)) {
-			// ¿¾ÇÑ±ÛÀÌ¸é ¿Ï¼ºÇü À½Àı·Î ¸¸µéÁö ¸øÇÔ.
+			// ì˜›í•œê¸€ì´ë©´ ì™„ì„±í˜• ìŒì ˆë¡œ ë§Œë“¤ì§€ ëª»í•¨.
 			ic->syllable=FALSE;
 		    }
 
                     return 0;
                 }
-                // ÃÊ¼ºÀ» composeÇÒ ¼ö ¾ø´Ù.
+                // ì´ˆì„±ì„ composeí•  ìˆ˜ ì—†ë‹¤.
                 *ncs = hangul_ic_commit(ic, lcs);
 
                 ic->cho=jamo;
@@ -3813,21 +3813,21 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 ic->laststate=1;
                 return -1;
                 break;
-            case 2: // ÃÊ¼º+Áß¼º
+            case 2: // ì´ˆì„±+ì¤‘ì„±
                 if (hangul_jamo_to_syllable(ic->cho,jamo,0)) {
 		    ic->jung=jamo;
 		    hangul_ic_push(ic,jamo);
 		    ic->laststate=2;
 		    return 0;
 		} else if (dwOptionFlag & HANGUL_JAMOS) {
-		    // ¿¾ÇÑ±Û Á¶ÇÕ.
+		    // ì˜›í•œê¸€ ì¡°í•©.
 		    ic->jung=jamo;
 		    hangul_ic_push(ic,jamo);
 		    ic->laststate=2;
                     ic->syllable=FALSE;
 		    return -2;
 		} else {
-                    // Çã¶ôµÇÁö ¾Ê´Â Á¶ÇÕ.
+                    // í—ˆë½ë˜ì§€ ì•ŠëŠ” ì¡°í•©.
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->jung=jamo;
@@ -3837,7 +3837,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 }
 
                 break;
-            default: // ÃÊ¼º+Á¾¼º
+            default: // ì´ˆì„±+ì¢…ì„±
                 if ( !ic->jong && 
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     ic->jong=jamo;
@@ -3850,7 +3850,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 ic->jong=jamo;
                 hangul_ic_push(ic,jamo);
                 ic->laststate=3;
-		//ic->syllable=FALSE; // XXX ÃÊ¼º+[ ]+Á¾¼ºÀÇ °æ¿ì. syllableÀÌ °¡´ÉÇÑÁö ÆÇº°ÇØ¾ß ÇÔ. FIXME
+		//ic->syllable=FALSE; // XXX ì´ˆì„±+[ ]+ì¢…ì„±ì˜ ê²½ìš°. syllableì´ ê°€ëŠ¥í•œì§€ íŒë³„í•´ì•¼ í•¨. FIXME
                 return -1;
                 break;
             }
@@ -3858,13 +3858,13 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 	else if (ic->laststate == 2)
 	{
             switch(kind) {
-            case 1: // Áß¼º + ÃÊ¼º
-                // ÃÊ¼ºÀÌ ¾øÀ» °æ¿ì : ³ªºñ¿¡¼­´Â Áß¼º+ÃÊ¼ºÀ» ±³Á¤ÇÑ´Ù.
+            case 1: // ì¤‘ì„± + ì´ˆì„±
+                // ì´ˆì„±ì´ ì—†ì„ ê²½ìš° : ë‚˜ë¹„ì—ì„œëŠ” ì¤‘ì„±+ì´ˆì„±ì„ êµì •í•œë‹¤.
                 if (!ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
-			// ÀÔ·Â¼ø¼­ ±³Á¤.
-			// ¤¿ + ¤© ÀÔ·Â => ¶ó.
-			// ¿©±â¼­ backspace¸¦ ´©¸£¸é ¤©ÀÌ Áö¿öÁ®¾ß ÇÏ´Â°¡? ¤¿°¡ Áö¿öÁ®¾ß ÇÏ´Â°¡?
+			// ì…ë ¥ìˆœì„œ êµì •.
+			// ã… + ã„¹ ì…ë ¥ => ë¼.
+			// ì—¬ê¸°ì„œ backspaceë¥¼ ëˆ„ë¥´ë©´ ã„¹ì´ ì§€ì›Œì ¸ì•¼ í•˜ëŠ”ê°€? ã…ê°€ ì§€ì›Œì ¸ì•¼ í•˜ëŠ”ê°€?
 			// FIXME
                     ic->cho=jamo;
                     hangul_ic_pop(ic);
@@ -3875,8 +3875,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return 0;
                 }
 //#ifdef USE_CONCURRENT_TYPING
-                // Áß¼ºÀÌ °è¼Ó ´­·ÁÁø Ã¤·Î ÀÖ°í
-                // ÃÊ¼ºÀÌ ÀÔ·ÂµÈ °ÍÀÌ¶ó¸é 
+                // ì¤‘ì„±ì´ ê³„ì† ëˆŒë ¤ì§„ ì±„ë¡œ ìˆê³ 
+                // ì´ˆì„±ì´ ì…ë ¥ëœ ê²ƒì´ë¼ë©´ 
                 else if (ic->cho && ctyping) {
                     MyDebugPrint((TEXT("CONJ cho !!: %x\r\n"), jamo));
                     if (ic->jung != ic->last) {
@@ -3885,14 +3885,14 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			hangul_jungseong_dicompose(comb, &j1, &j2);
 
 			if (j1 && j2 && ic->last0 == j1 && ic->last == j2) {
-			    // Áß¼ºÀÌ ºĞÇØµÇ°í last0 == j1, last == j2°¡ ¸Â´Â °æ¿ì.
+			    // ì¤‘ì„±ì´ ë¶„í•´ë˜ê³  last0 == j1, last == j2ê°€ ë§ëŠ” ê²½ìš°.
 			    hangul_ic_pop(ic);
 			    hangul_ic_push(ic,j1);
 			    ic->jung = j1;
 			    jung = j2;
 			} else if (hangul_is_jungseong(ic->last0)) {
-			    // Áß¼ºÀ» ºĞÇØÇÒ ¼ö ¾ø´Â °æ¿ì: ¤Ì+¤Ì=¤Ğ
-			    // last0, last ¹öÆÛ¸¦ ±Ù°Å·Î µÇµ¹¸².
+			    // ì¤‘ì„±ì„ ë¶„í•´í•  ìˆ˜ ì—†ëŠ” ê²½ìš°: ã…œ+ã…œ=ã… 
+			    // last0, last ë²„í¼ë¥¼ ê·¼ê±°ë¡œ ë˜ëŒë¦¼.
 			    j1 = ic->last0;
 			    j2 = ic->last;
 			    hangul_ic_pop(ic);
@@ -3924,9 +3924,9 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 break;
-            case 2: // Áß¼º + Áß¼º
+            case 2: // ì¤‘ì„± + ì¤‘ì„±
                 comb = hangul_compose(ic->jung, jamo);
-		// µ¿½ÃÄ¡±âÀÏ °æ¿ì ¼ø¼­¸¦ ¹Ù²ã¼­ Á¶ÇÕ
+		// ë™ì‹œì¹˜ê¸°ì¼ ê²½ìš° ìˆœì„œë¥¼ ë°”ê¿”ì„œ ì¡°í•©
 		if (ctyping && !comb )
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( hangul_is_jungseong(comb) ) {
@@ -3939,16 +3939,16 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    if (hangul_jamo_to_syllable(ic->cho,comb,0)) {
 			return 0;
 		    } else {
-			// ¿¾ÇÑ±ÛÀÌ¸é ¿Ï¼ºÇü À½Àı ¾Æ´Ô.
+			// ì˜›í•œê¸€ì´ë©´ ì™„ì„±í˜• ìŒì ˆ ì•„ë‹˜.
 			// XXX
 			ic->syllable=FALSE;
 			return -1;
 		    }
                     return 0;
                 } else {
-                    // XXX ÀÚÀ½À» ¿¬´Ş¾Æ ´©¸£´Â °æ¿ì´Â ¸¹À¸³ª,¸ğÀ½À» ¿¬´Ş¾Æ
-                    // ´©¸£´Â °æ¿ì´Â µå¹°´Ù.
-                    // 1. ¿ø·¡ ÀÖ´ø Á¾¼ºÀ» ´ëÄ¡ÇÏ°Ô ÇÏ´Â°¡ ?
+                    // XXX ììŒì„ ì—°ë‹¬ì•„ ëˆ„ë¥´ëŠ” ê²½ìš°ëŠ” ë§ìœ¼ë‚˜,ëª¨ìŒì„ ì—°ë‹¬ì•„
+                    // ëˆ„ë¥´ëŠ” ê²½ìš°ëŠ” ë“œë¬¼ë‹¤.
+                    // 1. ì›ë˜ ìˆë˜ ì¢…ì„±ì„ ëŒ€ì¹˜í•˜ê²Œ í•˜ëŠ”ê°€ ?
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->jung=jamo;
@@ -3956,17 +3956,17 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=2;
                     return -1;
 #if 0			
-                    // 2. ±×³É ¿¬´Ş¾Æ ´©¸£°Ô ÇÏ´Â°¡ ?
+                    // 2. ê·¸ëƒ¥ ì—°ë‹¬ì•„ ëˆ„ë¥´ê²Œ í•˜ëŠ”ê°€ ?
                     ic->last=0;
                     return -1;
 #endif
                 }
                 break;
-            default: // Áß¼º + Á¾¼º
+            default: // ì¤‘ì„± + ì¢…ì„±
 #if 0
                 if (ic->cho && !ic->jong && ctyping) {
-		    // Áß¼ºÀÌ °è¼Ó ´­·ÁÁø Ã¤·Î ÀÖ°í
-		    // Á¾¼ºÀÌ ÀÔ·ÂµÈ °ÍÀÌ¸ç, Áß¼ºÀÌ ³ª´©¾îÁú ¼ö ÀÖ´Â °æ¿ì
+		    // ì¤‘ì„±ì´ ê³„ì† ëˆŒë ¤ì§„ ì±„ë¡œ ìˆê³ 
+		    // ì¢…ì„±ì´ ì…ë ¥ëœ ê²ƒì´ë©°, ì¤‘ì„±ì´ ë‚˜ëˆ„ì–´ì§ˆ ìˆ˜ ìˆëŠ” ê²½ìš°
                     if (ic->jung != ic->last) {
                         WCHAR j1,j2;
                         comb = ic->jung;
@@ -3994,7 +3994,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     ic->laststate=3;
                     return 0;
                 } else if (dwOptionFlag & HANGUL_JAMOS) {
-		    // ¿¾ÇÑ±Û Á¶ÇÕ.
+		    // ì˜›í•œê¸€ ì¡°í•©.
                     ic->jong=jamo;
                     hangul_ic_push(ic,jamo);
                     ic->laststate=3;
@@ -4002,8 +4002,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return 0;
                 }
 #if 1
-		// ÃÊ¼º°ú Á¾¼ºÀÌ ¾ø´Â »óÅÂ¿¡¼­,
-		// Áß¼º + Á¾¼ºÀÎ °æ¿ì.
+		// ì´ˆì„±ê³¼ ì¢…ì„±ì´ ì—†ëŠ” ìƒíƒœì—ì„œ,
+		// ì¤‘ì„± + ì¢…ì„±ì¸ ê²½ìš°.
                 else if (!ic->jong && !ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     ic->jong=jamo;
@@ -4025,9 +4025,9 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 	}
 	else if (ic->laststate == 3)
 	{
-            // Á¾¼º
+            // ì¢…ì„±
             switch(kind) {
-            case 1: // Á¾¼º + ÃÊ¼º
+            case 1: // ì¢…ì„± + ì´ˆì„±
                 if (!ic->cho &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     if (!hangul_jamo_to_syllable(jamo,ic->jung ? ic->jung:0x1161,ic->jong)) {
@@ -4052,14 +4052,14 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    ic->laststate=1;
 		    return -1;
                 }
-                // Á¾¼ºÀÌ °è¼Ó ´­·ÁÁø Ã¤·Î ÀÖ°í
-                // ÃÊ¼ºÀÌ ÀÔ·ÂµÈ °ÍÀÌ¶ó¸é 
+                // ì¢…ì„±ì´ ê³„ì† ëˆŒë ¤ì§„ ì±„ë¡œ ìˆê³ 
+                // ì´ˆì„±ì´ ì…ë ¥ëœ ê²ƒì´ë¼ë©´ 
                 else if (!ic->cho && hangul_is_jongseong(ic->last) && ctyping) {
 		    if (ic->jong != ic->last) {
 			WCHAR j1,j2;
 			MyDebugPrint((TEXT("CON cho !!: %x\r\n"), jamo));
-			// ¸¶Áö¸· ´­·ÁÁ³´ø Á¾¼ºÀ» ºĞÇØÇÏ¿©, ÇÑ°³´Â ¾Õ¿¡
-			// ³ª¸ÓÁö ÇÑ°³´Â µÚÀÇ À½Àı¿¡ ºÙÀÎ´Ù.
+			// ë§ˆì§€ë§‰ ëˆŒë ¤ì¡Œë˜ ì¢…ì„±ì„ ë¶„í•´í•˜ì—¬, í•œê°œëŠ” ì•ì—
+			// ë‚˜ë¨¸ì§€ í•œê°œëŠ” ë’¤ì˜ ìŒì ˆì— ë¶™ì¸ë‹¤.
 			hangul_jongseong_dicompose(ic->jong, &j1, &j2);
 
 			if (j1 && j2) {
@@ -4091,7 +4091,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 {
-                    // composeÇÒ ¼ö ¾ø´Ù.
+                    // composeí•  ìˆ˜ ì—†ë‹¤.
                     *ncs = hangul_ic_commit(ic, lcs);
 
                     ic->cho=jamo;
@@ -4100,7 +4100,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     return -1;
                 }
                 break;
-            case 2: // Á¾¼º + Áß¼º
+            case 2: // ì¢…ì„± + ì¤‘ì„±
                 if (!ic->jung &&
                     ( (dwOptionFlag & COMPOSITE_TYPING) || ctyping ) ) {
                     if (!hangul_jamo_to_syllable(ic->cho ? ic->cho:0x110b,jamo,ic->jong)) {
@@ -4125,18 +4125,18 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    ic->laststate=2;
 		    return -1;
                 }
-                // Á¾¼ºÀÌ °è¼Ó ´­·ÁÁø Ã¤·Î ÀÖ°í
-                // Áß¼ºÀÌ ÀÔ·ÂµÈ °ÍÀÌ¶ó¸é 
+                // ì¢…ì„±ì´ ê³„ì† ëˆŒë ¤ì§„ ì±„ë¡œ ìˆê³ 
+                // ì¤‘ì„±ì´ ì…ë ¥ëœ ê²ƒì´ë¼ë©´ 
                 else if (ic->jung && hangul_is_jongseong(ic->last) && ctyping) {
                     MyDebugPrint((TEXT("CON jung !!: %x\r\n"), jamo));
                     jong = ic->jong;
 
 		    if (ic->jong != ic->last) {
                         WCHAR j1,j2;
-			// ¸¶Áö¸· ´­·ÁÁ³´ø Á¾¼ºÀ» ºĞÇØÇÏ¿©, ÇÑ°³´Â ¾Õ¿¡
-			// ³ª¸ÓÁö ÇÑ°³´Â µÚÀÇ À½Àı¿¡ ºÙÀÎ´Ù.
+			// ë§ˆì§€ë§‰ ëˆŒë ¤ì¡Œë˜ ì¢…ì„±ì„ ë¶„í•´í•˜ì—¬, í•œê°œëŠ” ì•ì—
+			// ë‚˜ë¨¸ì§€ í•œê°œëŠ” ë’¤ì˜ ìŒì ˆì— ë¶™ì¸ë‹¤.
 			hangul_jongseong_dicompose(ic->jong, &j1, &j2);
-			// °ãÁ¾¼ºÀ» Á¾¼º+Á¾¼ºÀ¸·Î ºĞÇØÇÏ´Â ·çÆ¾ ÇÊ¿ä ?
+			// ê²¹ì¢…ì„±ì„ ì¢…ì„±+ì¢…ì„±ìœ¼ë¡œ ë¶„í•´í•˜ëŠ” ë£¨í‹´ í•„ìš” ?
 			// hangul_jongseong_discompose2()?
 
 			if (j1 && j2) {
@@ -4155,8 +4155,8 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			}
 		    }
 
-		    // ¸¶Áö¸· ´­·È´ø Á¾¼ºÀ» ¾Õ À½Àı¿¡ ºÙÀÌÁö ¾Ê°í
-		    // µŞ À½Àı¿¡ ºÙÀÎ´Ù.
+		    // ë§ˆì§€ë§‰ ëˆŒë ¸ë˜ ì¢…ì„±ì„ ì• ìŒì ˆì— ë¶™ì´ì§€ ì•Šê³ 
+		    // ë’· ìŒì ˆì— ë¶™ì¸ë‹¤.
                     hangul_ic_pop(ic);
                     ic->jong = 0;
                     *ncs = hangul_ic_commit(ic, lcs);
@@ -4173,9 +4173,9 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 ic->jung = jamo;
                 hangul_ic_push(ic,jamo);
                 ic->laststate = 2;
-                return -1; // ¾ÕÀÇ ÃÊ+Áß µÎ°³¸¦ commit
+                return -1; // ì•ì˜ ì´ˆ+ì¤‘ ë‘ê°œë¥¼ commit
                 break;
-            default: // Á¾¼º + Á¾¼º
+            default: // ì¢…ì„± + ì¢…ì„±
 		comb = 0;
 		if (hangul_is_jongseong(ic->last))
 		    comb = hangul_compose(ic->jong, jamo);
@@ -4207,7 +4207,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 	        break;
             }
 	}
-    } else { // ic°¡ ÃÊ±âÈ­µÇ¾î ÀÖ´Ù.
+    } else { // icê°€ ì´ˆê¸°í™”ë˜ì–´ ìˆë‹¤.
         switch (kind) {
         case 1:
             MyDebugPrint((TEXT("single cho automata: %x\r\n"), jamo));

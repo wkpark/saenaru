@@ -1,0 +1,49 @@
+version: "{build}"
+branches:
+  only:
+    - master
+    - /v\d+\..+/
+    - /release.*/
+    - appveyor
+clone_depth: 100
+
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+configuration:
+  - Release
+
+matrix:
+  fast_finish: true
+
+for:
+-
+  build_script:
+   - msbuild Saenaru.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+   - msbuild Saenaru.sln -p:platform=x86 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+after_build:
+  - set PATH=C:\Program Files (x86)\NSIS\;%PATH%
+  - cd setup
+  - makensis.exe /DOUTPUTFILE=Saenaru-$(appveyor_build_version).exe saenaru.nsi
+
+artifacts:
+  - path: setup/Saenaru-*.exe
+    name: saenaru
+
+deploy:
+  # Create GitHub release, also set the release name and description.
+  provider: GitHub
+  tag: $(appveyor_repo_tag_name)
+  release: "$(project_name) $(project_version)"
+  description: ""
+  force_update: true  # Force update in case Travis CI created the release before.
+  prerelease: $(project_version_is_prerelease)
+  draft: false
+  artifact: saenaru
+  auth_token:
+    secure: c/xeb8SWqrADeN+EXjJApIVIElDs/ro/tlIDGnNjZXhru7HP5zVKFlwSLTU3zqRf
+  on:
+    appveyor_repo_tag: true

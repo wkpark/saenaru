@@ -231,7 +231,7 @@ GetRegStringValue (
     DWORD    dwRegType, dwData, dwDataSize, dwRet ;
     TCHAR    szRegInfoPath [MAX_PATH] ;
     dwData        = 0 ;
-    /* ƒŒƒWƒXƒgƒŠ‚ÌŒŸõƒpƒX‚ğİ’è‚·‚éB*/
+    /* ãƒ¬ã‚¸ã‚¹ãƒˆãƒªã®æ¤œç´¢ãƒ‘ã‚¹ã‚’è¨­å®šã™ã‚‹ã€‚*/
     lstrcpy (szRegInfoPath, g_szRegInfoPath) ;
     if (lpszSubKey)
         lstrcat (szRegInfoPath, lpszSubKey) ;
@@ -258,14 +258,14 @@ SetRegStringValue (
     DWORD    dwDisposition ;
     DWORD    dwDataSize, dwRet ;
     TCHAR    szRegInfoPath [MAX_PATH] ;
-    /* ƒŒƒWƒXƒgƒŠ‚ÌƒpƒX‚ğİ’è‚·‚éB*/
+    /* ãƒ¬ã‚¸ã‚¹ãƒˆãƒªã®ãƒ‘ã‚¹ã‚’è¨­å®šã™ã‚‹ã€‚*/
     lstrcpy (szRegInfoPath, g_szRegInfoPath) ;
     if (lpszSubKey)
         lstrcat (szRegInfoPath, lpszSubKey) ;
-    /* ƒŒƒWƒXƒgƒŠ‚ğŠJ‚­B–³‚¯‚ê‚Îì¬‚·‚éB*/
+    /* ãƒ¬ã‚¸ã‚¹ãƒˆãƒªã‚’é–‹ãã€‚ç„¡ã‘ã‚Œã°ä½œæˆã™ã‚‹ã€‚*/
     if (RegCreateKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, 0, REG_OPTION_NON_VOLATILE, KEY_WRITE, 0, &hKey, &dwDisposition) != ERROR_SUCCESS)
         return    FALSE ;
-    /* ’l‚ğİ’è‚·‚éB*/
+    /* å€¤ã‚’è¨­å®šã™ã‚‹ã€‚*/
     dwRet    = RegSetValueEx (hKey, lpszKey, 0, REG_SZ, (CONST BYTE *)lpString, lstrlen (lpString) * sizeof (TCHAR)) ;
     RegCloseKey (hKey) ;
     return    (dwRet == ERROR_SUCCESS) ;

@@ -30,7 +30,7 @@
  */
 
 #if !defined (NO_TSF)
-/*    LanguageBar ªÎ¡¸ìýÕôÛ°ãÒ£¿¡¹??«óªòÞÉªë¡£
+/*    LanguageBar ã®ã€Œå…¥åŠ›æ–¹å¼ï¼Ÿã€??ãƒ³ã‚’å¸ã‚‹ã€‚
  */
 #include "windows.h"
 #include "tchar.h"
@@ -40,9 +40,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-/*    Platform SDK ªËëîðíª¹ªëÝ»ÝÂ¡£Platform SDK ªË include path
- *    ªò÷×ª¹ªÎª¬ÕÞª¤ªÎª«Üúª«¡£õó?ªìªÐ DDK ªËª³ªìªéªÎ header ªò
- *    Ô¤ª·ªÆª¯ªìªëªÈÕÞª¤ªÎªÀª¬¡£
+/*    Platform SDK ã«ä¾å­˜ã™ã‚‹éƒ¨åˆ†ã€‚Platform SDK ã« include path
+ *    ã‚’é€šã™ã®ãŒè‰¯ã„ã®ã‹å¦ã‹ã€‚å‡º?ã‚Œã° DDK ã«ã“ã‚Œã‚‰ã® header ã‚’
+ *    æ¸¡ã—ã¦ãã‚Œã‚‹ã¨è‰¯ã„ã®ã ãŒã€‚
  */
 //#include "c:\Program Files\Microsoft SDK\include\msctf.h"
 #include "msctf.h"
@@ -53,7 +53,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-//#define LANGBAR_ITEM_DESC    L"±Û¼è/ÀÔ·Â±â ¼³Á¤" // max 32 chars!
+//#define LANGBAR_ITEM_DESC    L"ê¸€ì‡ /ìž…ë ¥ê¸° ì„¤ì •" // max 32 chars!
 #define SAENARU_LANGBARITEMSINK_COOKIE    0x0fab0fac
 
 static void  _Menu_Help (UINT);
@@ -86,21 +86,21 @@ typedef struct {
 
 static const TSFLBMENUINFOEX c_rgMenuItems[] = {
 #if 0
-//  { L"µµ¿ò¸»(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
-    { L"È¯°æ¼³Á¤(&R)", _MenuItem_GetNormalFlag, _Menu_Property },
-//  { L"Àç¼³Á¤(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
+//  { L"ë„ì›€ë§(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
+    { L"í™˜ê²½ì„¤ì •(&R)", _MenuItem_GetNormalFlag, _Menu_Property },
+//  { L"ìž¬ì„¤ì •(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
     { NULL, NULL, NULL },
-    { L"µåº¸¶ô(&V)",   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
-    { L"ESC ¿µ¹®ÀüÈ¯(&E)", _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
-    { L"´Ü¾î´ÜÀ§ ÆíÁý(&W)", _MenuItem_GetToggleOnTheSpotFlag,_Menu_ToggleOnTheSpot },
+    { L"ë“œë³´ë½(&V)",   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
+    { L"ESC ì˜ë¬¸ì „í™˜(&E)", _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
+    { L"ë‹¨ì–´ë‹¨ìœ„ íŽ¸ì§‘(&W)", _MenuItem_GetToggleOnTheSpotFlag,_Menu_ToggleOnTheSpot },
     { NULL, NULL, NULL },
-    { L"Å°º¸µå º¸±â",  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
+    { L"í‚¤ë³´ë“œ ë³´ê¸°",  _MenuItem_GetToggleKeyboardFlag, _Menu_ToggleShowKeyboard },
     { NULL, NULL, NULL },
-    { L"Ãë¼Ò", NULL, NULL }
+    { L"ì·¨ì†Œ", NULL, NULL }
 #endif
-//  { L"µµ¿ò¸»(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
+//  { L"ë„ì›€ë§(&H)",   _MenuItem_GetNormalFlag, _Menu_Help },
     { IDS_MENU_ENV, _MenuItem_GetNormalFlag, _Menu_Property },
-//  { L"Àç¼³Á¤(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
+//  { L"ìž¬ì„¤ì •(&C)",   _MenuItem_GetNormalFlag, _Menu_Reconversion },
     { NULL, NULL, NULL },
     { IDS_MENU_DVORAK,   _MenuItem_GetToggleDvorakFlag,   _Menu_ToggleDvorak },
     { IDS_MENU_ESC_ASCII, _MenuItem_GetToggleEscEngFlag, _Menu_ToggleEscEng },
@@ -120,15 +120,15 @@ typedef struct {
 
 static const TSFLBKEYBOARDINFOEX c_rgKeyboardItems[]= {
 #if 0
-    { L"µÎ¹ú½Ä(&2)",        NULL },
-    { L"¼¼¹ú½Ä(&3)",        NULL },
-    { L"¼¼¹ú½Ä390(&9)",     NULL },
-    { L"»õµÎ¹ú(&D)",        NULL },
-    { L"»õ¼¼¹ú(&S)",        NULL },
-    { L"¾È¸¶ÅÂ(&A)",        NULL },
-    { L"¼¼¹ú½Ä ¼ø¾Æ·¡(&N)", NULL },
-    { L"»ç¿ëÀÚ ÀÚÆÇ(&U)",   TF_LBMENUF_SUBMENU },
-    { L"»ç¿ëÀÚ Á¶ÇÕ(&C)",   TF_LBMENUF_SUBMENU },
+    { L"ë‘ë²Œì‹(&2)",        NULL },
+    { L"ì„¸ë²Œì‹(&3)",        NULL },
+    { L"ì„¸ë²Œì‹390(&9)",     NULL },
+    { L"ìƒˆë‘ë²Œ(&D)",        NULL },
+    { L"ìƒˆì„¸ë²Œ(&S)",        NULL },
+    { L"ì•ˆë§ˆíƒœ(&A)",        NULL },
+    { L"ì„¸ë²Œì‹ ìˆœì•„ëž˜(&N)", NULL },
+    { L"ì‚¬ìš©ìž ìžíŒ(&U)",   TF_LBMENUF_SUBMENU },
+    { L"ì‚¬ìš©ìž ì¡°í•©(&C)",   TF_LBMENUF_SUBMENU },
 #endif
     { IDS_MENU_OLD2BUL  ,   NULL },
     { IDS_MENU_3FIN     ,   NULL },
@@ -154,8 +154,8 @@ enum {
     MENU_ITEM_INDEX_3FIN,
 };
 
-/*    ¡¦??«óªÎ?ªÀª± class ª¬ù±é©ªÀªÈÍÅª¨ªëªÎª¬ÕÞªµª½ª¦ªÀ¡£
- *    ý­ª«ªéõÚÊ¥ª·ªÊª¤ªÈª¤ª±ªÊª¤ª«ªÊ¡£
+/*    â€¦??ãƒ³ã®?ã ã‘ class ãŒå¿…è¦ã ã¨è€ƒãˆã‚‹ã®ãŒè‰¯ã•ãã†ã ã€‚
+ *    å¾Œã‹ã‚‰è¿½åŠ ã—ãªã„ã¨ã„ã‘ãªã„ã‹ãªã€‚
  */
 class CLangBarItemImeButton : public ITfLangBarItemButton,
                              public ITfSource
@@ -297,9 +297,9 @@ CLangBarItemImeButton::GetStatus (
     return S_OK;
 }
 
-/*    Button ªÎ tooltip ªòÚ÷ª¹¡£Ú÷ª¹ö·ªÏ SysAllocString ªËªèªÃªÆ
- *    ü¬ÜÁª·ª¿ÖÅæ´ªËßöª«ªìªëù±é©ª¬ª¢ªë¡£ª³ªìªò SysFreeString ª¹
- *    ªëªÎªÏ¡¢û¼ªÓõóª·ª¿ö°ªÎô¡ìòªÇª¢ªë¡£
+/*    Button ã® tooltip ã‚’è¿”ã™ã€‚è¿”ã™å€¤ã¯ SysAllocString ã«ã‚ˆã£ã¦
+ *    ç¢ºä¿ã—ãŸé ˜åŸŸã«æ›¸ã‹ã‚Œã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚ã“ã‚Œã‚’ SysFreeString ã™
+ *    ã‚‹ã®ã¯ã€å‘¼ã³å‡ºã—ãŸå´ã®è²¬ä»»ã§ã‚ã‚‹ã€‚
  */
 STDAPI
 CLangBarItemImeButton::GetTooltipString (
@@ -314,13 +314,13 @@ CLangBarItemImeButton::GetTooltipString (
 
 /*    ITfLangBarItemButton::OnClick
  *
- *    ª³ªÎ method ªÏ«æ?«¶ª¬åëåÞ«Ð?ªÎ TF_LBI_STYLE_BTN_BUTTON ªÞª¿
- *    ªÏ TF_LBI_STYLE_BTN_TOGGLE «¹?«¤«ëªòò¥ªÃªÆª¤ªë??«óªÎß¾ªÇ?
- *    «¦«¹ªò«¯«ê«Ã«¯ª·ª¿ãÁªËû¼ªÓõóªµªìªë¡£
- *    ªâª·??«ó item ª¬ TF_LBI_STYLE_BTN_BUTTON «¹?«¤«ëªòò¥ª¿ªÊª¤
- *    ªÎªÊªé¡¢ª³ªÎ method ÞÅªïªìªÊª¤¡£
+ *    ã“ã® method ã¯ãƒ¦?ã‚¶ãŒè¨€èªžãƒ?ã® TF_LBI_STYLE_BTN_BUTTON ã¾ãŸ
+ *    ã¯ TF_LBI_STYLE_BTN_TOGGLE ã‚¹?ã‚¤ãƒ«ã‚’æŒã£ã¦ã„ã‚‹??ãƒ³ã®ä¸Šã§?
+ *    ã‚¦ã‚¹ã‚’ã‚¯ãƒªãƒƒã‚¯ã—ãŸæ™‚ã«å‘¼ã³å‡ºã•ã‚Œã‚‹ã€‚
+ *    ã‚‚ã—??ãƒ³ item ãŒ TF_LBI_STYLE_BTN_BUTTON ã‚¹?ã‚¤ãƒ«ã‚’æŒãŸãªã„
+ *    ã®ãªã‚‰ã€ã“ã® method ä½¿ã‚ã‚Œãªã„ã€‚
  *(*)
- *    ÐÑªÎ?üÏªÇªÏ÷åªËù¼ªâª¹ªëù±é©ªÏªÊª¤ªÎªÇ¡¢S_OK ªò?Ú÷ª¹¡£
+ *    ä»Šã®?æ³ã§ã¯ç‰¹ã«ä½•ã‚‚ã™ã‚‹å¿…è¦ã¯ãªã„ã®ã§ã€S_OK ã‚’?è¿”ã™ã€‚
  */
 STDAPI
 CLangBarItemImeButton::OnClick (
@@ -333,9 +333,9 @@ CLangBarItemImeButton::OnClick (
 
 /*    ITfLangBarItemButton::InitMenu
  *
- *    ª³ªÎ method ªÏ TF_LBI_STYLE_BTN_MENU «¹?«¤«ëªòò¥ªÃª¿åëåÞ«Ð?ªÎ??«ó
- *    ªòåëåÞ«Ð?ª¬??«óªË?ª·ªÆ?ãÆª¹ªë menu item ªòõÚÊ¥ª·ªÆêó?ªËª¹ªëª¿ªá
- *    ªËû¼ªÓõóªµªìªë¡£
+ *    ã“ã® method ã¯ TF_LBI_STYLE_BTN_MENU ã‚¹?ã‚¤ãƒ«ã‚’æŒã£ãŸè¨€èªžãƒ?ã®??ãƒ³
+ *    ã‚’è¨€èªžãƒ?ãŒ??ãƒ³ã«?ã—ã¦?ç¤ºã™ã‚‹ menu item ã‚’è¿½åŠ ã—ã¦æœ‰?ã«ã™ã‚‹ãŸã‚
+ *    ã«å‘¼ã³å‡ºã•ã‚Œã‚‹ã€‚
  */
 STDAPI
 CLangBarItemImeButton::InitMenu (
@@ -678,7 +678,7 @@ CreateItemButtonIME (
 void
 _Menu_Help (UINT wID)
 {
-    /*    ª¦?ªó¡¢HELP ªÏíÂªÃªÆªÊª¤¡¦¡£*/
+    /*    ã†?ã‚“ã€HELP ã¯ä½œã£ã¦ãªã„â€¦ã€‚*/
     return;
 }
 
@@ -721,7 +721,7 @@ _Menu_Reconversion (UINT wID)
             if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR))
                 goto    pass_1;
 
-            /*    ?üµ«â?«Éªò?ð¤îÜªË?Ù£ìýÕô«â?«ÉªËàâïÒª¹ªë¡£*/
+            /*    ?æ›ãƒ¢?ãƒ‰ã‚’?åˆ¶çš„ã«?åå…¥åŠ›ãƒ¢?ãƒ‰ã«è¨­å®šã™ã‚‹ã€‚*/
             lpCompStr    = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr);
             if (lpCompStr != NULL) {
                 //SKKSetReconvertStr (hIMC, lpIMC, lpCompStr, lpRS, TRUE); // ?

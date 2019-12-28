@@ -62,7 +62,7 @@ LPARAM lParam;
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
 #if 1
-//        CompÃ¢Àº ¿òÁ÷ÀÏ ÇÊ¿ä°¡ ¾ø´Â Ã¢ÀÌ´Ù. 
+//        Compì°½ì€ ì›€ì§ì¼ í•„ìš”ê°€ ì—†ëŠ” ì°½ì´ë‹¤. 
             DragUI(hWnd,message,wParam,lParam);
             if ((message == WM_SETCURSOR) &&
                 (HIWORD(lParam) != WM_LBUTTONDOWN) &&
@@ -123,10 +123,10 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpUIExtra->uiComp[i].bShow = FALSE;
     }
 
-    // ÀÏºÎ ¾îÇÃÀº CompWindowÀÇ ±Û²Ã°ú Å©±â ¹× À§Ä¡¸¦ Á¦´ë·Î ¼³Á¤ÇÏÁö ¸øÇÑ´Ù.
-    // EditPlus°¡ ´ëÇ¥ÀûÀÎ ¿¹.
-    // ±×·±µ¥ ÀÌ °æ¿ì¿¡ ÀÏº»¾î ÀÔ·Â±â¿¡¼­´Â ¸ðµÎ Á¦´ë·Î ³ª¿Â´Ù;;;;
-    // SPY++·Î ÃßÀûÇØºÁµµ º°·Î ´Ù¸¥ °ÍÀº ¾ø´Â µí.
+    // ì¼ë¶€ ì–´í”Œì€ CompWindowì˜ ê¸€ê¼´ê³¼ í¬ê¸° ë° ìœ„ì¹˜ë¥¼ ì œëŒ€ë¡œ ì„¤ì •í•˜ì§€ ëª»í•œë‹¤.
+    // EditPlusê°€ ëŒ€í‘œì ì¸ ì˜ˆ.
+    // ê·¸ëŸ°ë° ì´ ê²½ìš°ì— ì¼ë³¸ì–´ ìž…ë ¥ê¸°ì—ì„œëŠ” ëª¨ë‘ ì œëŒ€ë¡œ ë‚˜ì˜¨ë‹¤;;;;
+    // SPY++ë¡œ ì¶”ì í•´ë´ë„ ë³„ë¡œ ë‹¤ë¥¸ ê²ƒì€ ì—†ëŠ” ë“¯.
     if (lpIMC && lpIMC->fdwInit & INIT_LOGFONT) {
         LOGFONT fon;
         UINT ret = 0;
@@ -145,8 +145,8 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
     }
 
     /*
-     * EditPlus´Â ÀÌ»óÇÏ°Ôµµ CFS_CANDIDATEPOS¸¸ ¼¼ÆÃÀÌ µÇ¾îÀÖ´Ù.
-     * ¹¹°¡ Àß¸øÀÌ ÀÖ´Â°É±î?
+     * EditPlusëŠ” ì´ìƒí•˜ê²Œë„ CFS_CANDIDATEPOSë§Œ ì„¸íŒ…ì´ ë˜ì–´ìžˆë‹¤.
+     * ë­ê°€ ìž˜ëª»ì´ ìžˆëŠ”ê±¸ê¹Œ?
      */
     if (lpIMC && lpIMC->fdwInit & INIT_COMPFORM) { // XXX
         POINT pt;
@@ -178,22 +178,22 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
         lpCP = (LPIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
         lpCP->dwSize = dwSize;
  
-        // ¿öµåÆÐµå °°Àº °æ¿ì´Â IMR_QUERYCHARPOSITIONÀ» Áö¿øÇÑ´Ù.
+        // ì›Œë“œíŒ¨ë“œ ê°™ì€ ê²½ìš°ëŠ” IMR_QUERYCHARPOSITIONì„ ì§€ì›í•œë‹¤.
         if (ret = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
             rc.left = lpCP->pt.x;
             rc.bottom = lpCP->pt.y;
             MyDebugPrint((TEXT("IMR Comp pt.x :%d\n"),rc.left));
 
         } else if (GetCaretPos(&pt)) {
-            // GetCaretPos()·Î °¡Á®¿À±â ½Ãµµ.
-            // EditPlus¿Í °°Àº °æ¿ì.
+            // GetCaretPos()ë¡œ ê°€ì ¸ì˜¤ê¸° ì‹œë„.
+            // EditPlusì™€ ê°™ì€ ê²½ìš°.
             MyDebugPrint((TEXT(" ***** GetCaretPos INIT\n")));
             ClientToScreen(lpIMC->hWnd, &pt);
             MyDebugPrint((TEXT(" ***** S %dx%d INIT\n"), pt.x, pt.y));
             rc.left = pt.x;
             rc.bottom = pt.y;
         } else {
-            // ¾øÀ¸¸é Root window ½ºÅ¸ÀÏ
+            // ì—†ìœ¼ë©´ Root window ìŠ¤íƒ€ì¼
             GetWindowRect(lpIMC->hWnd,&rc);
             MyDebugPrint((TEXT("*** Fail to IMR QUERYPOS Root Comp pt.x :%d\n"),rc.left));
         }
@@ -206,7 +206,7 @@ void PASCAL CreateCompWindow( HWND hUIWnd, LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lp
     }
 
     // Root window style XXX
-    // skkime¿¡¼­ ÀÌ°ÍÀÌ rootwindow styleÀÌ¶ó°í ³ª¿ÍÀÖ´Ù.
+    // skkimeì—ì„œ ì´ê²ƒì´ rootwindow styleì´ë¼ê³  ë‚˜ì™€ìžˆë‹¤.
     if (!IsWindow(lpUIExtra->uiDefComp.hWnd))
     {
 #if 0
@@ -564,7 +564,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
                 lpCP->dwSize = dwSize;
  
-                // ¿öµåÆÐµå °°Àº °æ¿ì´Â IMR_QUERYCHARPOSITIONÀ» Áö¿øÇÑ´Ù.
+                // ì›Œë“œíŒ¨ë“œ ê°™ì€ ê²½ìš°ëŠ” IMR_QUERYCHARPOSITIONì„ ì§€ì›í•œë‹¤.
                 if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
                     rc.left = lpCP->pt.x;
                     rc.bottom = lpCP->pt.y;
@@ -581,14 +581,14 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                         POINT pt;
                         // XXX
                         if (GetCaretPos(&pt)) {
-                            // GetCaretPos()°¡ ÀÛµ¿µÇ¸é,
+                            // GetCaretPos()ê°€ ìž‘ë™ë˜ë©´,
                             MyDebugPrint((TEXT(" ***** GetCaretPos INIT\n")));
                             ClientToScreen(lpIMC->hWnd, &pt);
                             MyDebugPrint((TEXT(" ***** S %dx%d INIT\n"), pt.x, pt.y));
                             rc.left = pt.x;
                             rc.bottom = pt.y;
                         } else if (lpUIExtra->uiDefComp.pt.x != -1) {
-                            // °ªÀÌ ÀÌ¹Ì ¼¼ÆÃµÇ¾î ÀÖ´Â °æ¿ì.
+                            // ê°’ì´ ì´ë¯¸ ì„¸íŒ…ë˜ì–´ ìžˆëŠ” ê²½ìš°.
                             pt.x = lpIMC->cfCompForm.ptCurrentPos.x;
                             pt.y = lpIMC->cfCompForm.ptCurrentPos.y;
                             ClientToScreen(lpIMC->hWnd, &pt);
@@ -601,7 +601,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                             rc.left = lpUIExtra->uiDefComp.pt.x;
                             rc.bottom = lpUIExtra->uiDefComp.pt.y;
                         } else {
-                            // ÀÌµµÀúµµ ¾ÈµÇ¸é root window ½ºÅ¸ÀÏ.
+                            // ì´ë„ì €ë„ ì•ˆë˜ë©´ root window ìŠ¤íƒ€ì¼.
                             MyDebugPrint((TEXT("*** Fail to get QUERYCHARPOS\r\n")));
                             GetWindowRect(lpIMC->hWnd,&rc);
                         }
@@ -622,7 +622,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_SHOWNOACTIVATE);
                 lpUIExtra->uiDefComp.bShow = TRUE;
             } else {
-                // comp strÀÌ ¾øÀ» °æ¿ì´Â °¨Ãá´Ù.
+                // comp strì´ ì—†ì„ ê²½ìš°ëŠ” ê°ì¶˜ë‹¤.
                 ShowWindow(lpUIExtra->uiDefComp.hWnd, SW_HIDE);
                 lpUIExtra->uiDefComp.bShow = FALSE;
             }
@@ -786,10 +786,10 @@ int PASCAL DrawCompCaret( HWND hCompWnd) {
 
                     hMybr = CreateSolidBrush(RGB(255, 255, 255));
                     hbr = SelectObject(hDC,hMybr);
-                    if (ic.len > 0) { // ÇÑ±Û Á¶ÇÕÁß.
+                    if (ic.len > 0) { // í•œê¸€ ì¡°í•©ì¤‘.
                         GetTextExtentPoint(hDC, lpEnd, 1,&sz);
                         rc.left = rc.right - sz.cx;
-                    } else { // Á¶ÇÕÁß ¾Æ´Ô.
+                    } else { // ì¡°í•©ì¤‘ ì•„ë‹˜.
                         rc.left = rc.right - 2;
                         //InvalidateRect(hCompWnd,NULL,FALSE); // FIXME
                     }
@@ -862,9 +862,9 @@ void PASCAL PaintCompWindow( HWND hCompWnd)
                 SetBkMode(hDC,TRANSPARENT);
                 if (lpIMC->cfCompForm.dwStyle)
                 {
-                    // ÀÌ°÷ÀÇ »öÀ» Á¶ÀýÇÏ¸é
-                    // ÇÑ±ÛÀ» Á¦´ë·Î Áö¿øÇÏÁö ¾Ê´Â ¾îÇÃ¿¡¼­
-                    // Á» ´õ ±ò²ûÇÑ ÇÑ±Û Ãâ·ÂÀ» Áö¿øÇÒ ¼ö ÀÖÀ» °ÍÀÌ´Ù.
+                    // ì´ê³³ì˜ ìƒ‰ì„ ì¡°ì ˆí•˜ë©´
+                    // í•œê¸€ì„ ì œëŒ€ë¡œ ì§€ì›í•˜ì§€ ì•ŠëŠ” ì–´í”Œì—ì„œ
+                    // ì¢€ ë” ê¹”ë”í•œ í•œê¸€ ì¶œë ¥ì„ ì§€ì›í•  ìˆ˜ ìžˆì„ ê²ƒì´ë‹¤.
                     HDC hPDC;
 #if 0
                     // normal white background color

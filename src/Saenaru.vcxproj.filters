@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Driver Files">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="saenaru.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="immsec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="indicml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tsf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vksub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="saenaru.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="data.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hangul.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hanjaidx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="reg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="immsec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="process.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regword.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="subs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="toascii.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uicand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uicomp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uiguide.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uistate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tsf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="btnime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="btncmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="btnpad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="btnhlp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="btnext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="saenaru.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resource\general.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\saenaru.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\penindic.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\about.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\text\hankey.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\text\engkey.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\text\hanjakey.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\keyboard.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\half.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\full.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\imepad.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\2set.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\3set.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\status.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\close.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\check.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\uncheck.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\face.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\hjmode.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\hjcheck.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="saenaru.def">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

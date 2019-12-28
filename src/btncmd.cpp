@@ -30,7 +30,7 @@
  */
 
 #if !defined (NO_TSF)
-/*	LanguageBar ªΞ΅ΈμύΥτ«β?«Ι΅Ή??«σªςήΙªλ΅£
+/*	LanguageBar γ®γ€ε…¥ε›γƒΆ?γƒ‰γ€??γƒ³γ‚’εΈγ‚‹γ€‚
  */
 #include "windows.h"
 #include "tchar.h"
@@ -41,9 +41,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-/*	Platform SDK ªΛλξπνªΉªλέ»έΒ΅£Platform SDK ªΛ include path
- *	ªςχΧªΉªΞª¬Υήª¤ªΞª«άϊª«΅£υσ?ªμªΠ DDK ªΛª³ªμªιªΞ header ªς
- *	Τ¤ª·ªΖª―ªμªλªΘΥήª¤ªΞªΐª¬΅£
+/*	Platform SDK γ«δΎε­γ™γ‚‹ιƒ¨ε†γ€‚Platform SDK γ« include path
+ *	γ‚’ι€γ™γ®γθ‰―γ„γ®γ‹ε¦γ‹γ€‚ε‡Ί?γ‚γ° DDK γ«γ“γ‚γ‚‰γ® header γ‚’
+ *	ζΈ΅γ—γ¦γγ‚γ‚‹γ¨θ‰―γ„γ®γ γγ€‚
  */
 //#include "c:\Program Files\Microsoft SDK\include\msctf.h"
 #include "msctf.h"
@@ -54,7 +54,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-//#define LANGBAR_ITEM_DESC	L"ΐΤ·ΒΉζ½Δ" // max 32 chars
+//#define LANGBAR_ITEM_DESC	L"μ…λ ¥λ°©μ‹" // max 32 chars
 
 static	void	_Menu_ToHangul (void) ;
 static	void	_Menu_ToHanja  (void) ;
@@ -64,11 +64,11 @@ static	int	_GetConversionMode (HIMC hIMC) ;
 
 static	const TSFLBMENUINFO	c_rgMenuItems []	= {
 #if 0
-	{ L"ΗΡ±Ϋ",	_Menu_ToHangul },
-	{ L"ΏµΉ®",	_Menu_ToAscII },
-	{ L"ΗΡΐΪ",	_Menu_ToHanja },
+	{ L"ν•κΈ€",	_Menu_ToHangul },
+	{ L"μλ¬Έ",	_Menu_ToAscII },
+	{ L"ν•μ",	_Menu_ToHanja },
 	{ NULL,		NULL },
-	{ L"ΓλΌÒ",	NULL }
+	{ L"μ·¨μ†",	NULL }
 #endif
 	{ IDS_MENU_HANGUL,	_Menu_ToHangul },
 	{ IDS_MENU_ASCII,	_Menu_ToAscII },
@@ -233,9 +233,9 @@ CLangBarItemCModeButton::GetStatus (
 	return	S_OK ;
 }
 
-/*	Button ªΞ tooltip ªςΪχªΉ΅£ΪχªΉφ·ªΟ SysAllocString ªΛªθªΓªΖ
- *	ό¬άΑª·ªΏΦΕζ΄ªΛίφª«ªμªλω±ι©ª¬ªΆªλ΅£ª³ªμªς SysFreeString ªΉ
- *	ªλªΞªΟ΅ΆϋΌªΣυσª·ªΏφ°ªΞτ΅μςªΗªΆªλ΅£
+/*	Button γ® tooltip γ‚’θΏ”γ™γ€‚θΏ”γ™ε€¤γ― SysAllocString γ«γ‚γ£γ¦
+ *	ηΆΊδΏγ—γι εγ«ζ›Έγ‹γ‚γ‚‹εΏ…θ¦γγ‚γ‚‹γ€‚γ“γ‚γ‚’ SysFreeString γ™
+ *	γ‚‹γ®γ―γ€ε‘Όγ³ε‡Ίγ—γε΄γ®θ²¬δ»»γ§γ‚γ‚‹γ€‚
  */
 STDAPI
 CLangBarItemCModeButton::GetTooltipString (
@@ -271,13 +271,13 @@ CLangBarItemCModeButton::GetTooltipString (
 
 /*	ITfLangBarItemButton::OnClick
  *
- *	ª³ªΞ method ªΟ«ζ?«¶ª¬ελεή«Π?ªΞ TF_LBI_STYLE_BTN_BUTTON ªήªΏ
- *	ªΟ TF_LBI_STYLE_BTN_TOGGLE «Ή?«¤«λªςς¥ªΓªΖª¤ªλ??«σªΞίΎªΗ?
- *	«¦«Ήªς«―«κ«Γ«―ª·ªΏγΑªΛϋΌªΣυσªµªμªλ΅£
- *	ªβª·??«σ item ª¬ TF_LBI_STYLE_BTN_BUTTON «Ή?«¤«λªςς¥ªΏªΚª¤
- *	ªΞªΚªι΅Άª³ªΞ method ήΕªοªμªΚª¤΅£
+ *	γ“γ® method γ―γƒ¦?γ‚¶γθ¨€θªγƒ?γ® TF_LBI_STYLE_BTN_BUTTON γΎγ
+ *	γ― TF_LBI_STYLE_BTN_TOGGLE γ‚Ή?γ‚¤γƒ«γ‚’ζγ£γ¦γ„γ‚‹??γƒ³γ®δΈγ§?
+ *	γ‚¦γ‚Ήγ‚’γ‚―γƒªγƒƒγ‚―γ—γζ™‚γ«ε‘Όγ³ε‡Ίγ•γ‚γ‚‹γ€‚
+ *	γ‚‚γ—??γƒ³ item γ TF_LBI_STYLE_BTN_BUTTON γ‚Ή?γ‚¤γƒ«γ‚’ζγγªγ„
+ *	γ®γªγ‚‰γ€γ“γ® method δ½Ώγ‚γ‚γªγ„γ€‚
  *(*)
- *	ΠΡªΞ?όΟªΗªΟχεªΛωΌªβªΉªλω±ι©ªΟªΚª¤ªΞªΗ΅ΆS_OK ªς?ΪχªΉ΅£
+ *	δ»γ®?ζ³γ§γ―η‰Ήγ«δ½•γ‚‚γ™γ‚‹εΏ…θ¦γ―γªγ„γ®γ§γ€S_OK γ‚’?θΏ”γ™γ€‚
  */
 STDAPI
 CLangBarItemCModeButton::OnClick (
@@ -290,9 +290,9 @@ CLangBarItemCModeButton::OnClick (
 
 /*	ITfLangBarItemButton::InitMenu
  *
- *	ª³ªΞ method ªΟ TF_LBI_STYLE_BTN_MENU «Ή?«¤«λªςς¥ªΓªΏελεή«Π?ªΞ??«σ
- *	ªςελεή«Π?ª¬??«σªΛ?ª·ªΖ?γΖªΉªλ menu item ªςυΪΚ¥ª·ªΖκσ?ªΛªΉªλªΏªα
- *	ªΛϋΌªΣυσªµªμªλ΅£
+ *	γ“γ® method γ― TF_LBI_STYLE_BTN_MENU γ‚Ή?γ‚¤γƒ«γ‚’ζγ£γθ¨€θªγƒ?γ®??γƒ³
+ *	γ‚’θ¨€θªγƒ?γ??γƒ³γ«?γ—γ¦?η¤Ίγ™γ‚‹ menu item γ‚’θΏ½ε γ—γ¦ζ‰?γ«γ™γ‚‹γγ‚
+ *	γ«ε‘Όγ³ε‡Ίγ•γ‚γ‚‹γ€‚
  */
 STDAPI
 CLangBarItemCModeButton::InitMenu (
@@ -311,8 +311,8 @@ CLangBarItemCModeButton::InitMenu (
 
 	hIMC	= _GetCurrentHIMC () ;
 	if (hIMC != NULL) {
-		/*	ªΘª¤ª¦ªοª±ªΗ??«σª¬δγªµªμªΏγΑªΛ?γΖªµªμªλ«α«Λ«ε?ªΞ
-		 *	Ττ?ªςϊΌª¦΅£
+		/*	γ¨γ„γ†γ‚γ‘γ§??γƒ³γζΌγ•γ‚γζ™‚γ«?η¤Ίγ•γ‚γ‚‹γƒ΅γƒ‹γƒ¥?γ®
+		 *	η™»?γ‚’θ΅γ†γ€‚
 		 */
 		nCMode	= _GetConversionMode (hIMC) ;
 		for (i = 0 ; i < ARRAYSIZE (c_rgMenuItems) ; i ++) {
@@ -346,7 +346,7 @@ CLangBarItemCModeButton::OnMenuSelect (
 	if (wID >= ARRAYSIZE (c_rgMenuItems))
 		return	E_FAIL ;
 
-	/*	NULL ªΞνήωκªΟ Cancel ªΐªΘήΦª¦ª³ªΘªΛªΉªλ΅£*/
+	/*	NULL γ®ε ΄εγ― Cancel γ γ¨ζ€γ†γ“γ¨γ«γ™γ‚‹γ€‚*/
 	if (c_rgMenuItems [wID].pfnHandler != NULL) {
 		c_rgMenuItems [wID].pfnHandler () ;
 		UpdateLanguageBar () ;

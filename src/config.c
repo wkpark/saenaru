@@ -35,7 +35,8 @@
 #include "saenaru.h"
 #include "prsht.h"
 #include "resource.h"
-#include "malloc.h"
+#define MEMALLOC(x)      LocalAlloc(LMEM_FIXED, x)
+#define MEMFREE(x)       LocalFree(x)
 
 #define MAX_PAGES 5
 
@@ -601,7 +602,7 @@ INT_PTR CALLBACK SelectToggleDlgProc(HWND hDlg, UINT message , WPARAM wParam, LP
                         if (ret != CB_ERR) {
                             if (ret == 29 || ret == 42 || ret == 54) {
                                 // Ctrl, Shift, RShift
-                                // ¿Ã ≈∞µÈ¿∫ select«“ ºˆ æ¯µµ∑œ «—¥Ÿ.
+                                // Ïù¥ ÌÇ§Îì§ÏùÄ selectÌï† Ïàò ÏóÜÎèÑÎ°ù ÌïúÎã§.
                                 SendMessage(hwndRadio, CB_SETCURSEL, 0, 0);
                             }
                             //SendMessage(hwndRadio, CB_SETCURSEL, ret, 0);
@@ -741,7 +742,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
 
-                    // ªÁøÎ¿⁄ ≈∞∫∏µÂ?
+                    // ÏÇ¨Ïö©Ïûê ÌÇ§Î≥¥Îìú?
                     if ((hwndRadio = GetDlgItem (hDlg, IDC_LAYOUT_USER))) {
                         UINT ret;
                         ret = (UINT) SendMessage(hwndRadio, CB_GETCURSEL, 0, 0);
@@ -1222,6 +1223,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
 {
     int i;
     WCHAR *line, *p, *saved_position;
+    WCHAR *save;
     TCHAR buf[256];
     //FILE* file;
     DWORD key, value;
@@ -1269,7 +1271,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) malloc(sz);
+    kbuf=(LPTSTR) MEMALLOC(sz);
     //
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read keyboard registry\n")));
@@ -1290,30 +1292,30 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             _map[i] = i + '!';
             //_map[i] = 0;
 
-    for (line = Mystrtok(kbuf, TEXT("\0"));
+    for (line = Mystrtok(kbuf, TEXT("\0"), &save);
          ;
-         line = Mystrtok(saved_position, TEXT("\0"))) {
+         line = Mystrtok(saved_position, TEXT("\0"), &save)) {
         len=Mylstrlen(line);
         saved_position=line+len+1;
 
         //MyDebugPrint((TEXT("Saenaru: %s:%d\n"),line,len));
         if (len==0) break;
 
-        p = Mystrtok(line, TEXT(" \t\0"));
+        p = Mystrtok(line, TEXT(" \t\0"), &save);
         MyDebugPrint((TEXT("tok: %s\n"),p));
         /* comment */
         if (p == NULL || p[0] == '#')
             continue;
 
         if (Mylstrcmp(p, TEXT("Name:")) == 0) {
-            p = Mystrtok(NULL, TEXT(" \t\0"));
+            p = Mystrtok(NULL, TEXT(" \t\0"), &save);
             if (p == NULL)
                 continue;
             //name = g_strdup(p);
             continue;
         } else if (Mylstrcmp(p, TEXT("Compose:")) == 0) {
             // Set default compose map
-            p = Mystrtok(NULL, TEXT(" \t\0"));
+            p = Mystrtok(NULL, TEXT(" \t\0"), &save);
             if (p == NULL)
                 continue;
             if (Mylstrcmp(p, TEXT("yet")) == 0) {
@@ -1336,7 +1338,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             if (key == 0)
                 continue;
 
-            p = Mystrtok(NULL, TEXT(" \t"));
+            p = Mystrtok(NULL, TEXT(" \t"), &save);
             if (p == NULL)
                 continue;
             value = string_to_hex(p);
@@ -1351,7 +1353,7 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             _map[key - '!'] = (WCHAR)value;
         }
     }
-    free(kbuf);
+    MEMFREE(kbuf);
 
     if (keyboard_map != NULL)
         for (i=0;i<94;i++) keyboard_map[i]=_map[i];        
@@ -1371,6 +1373,7 @@ UINT
 load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *compose_map)
 {
     WCHAR *line, *p, *saved_position;
+    WCHAR *save;
     TCHAR buf[256];
     //FILE* file;
     UINT key1, key2;
@@ -1422,7 +1425,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) malloc(sz);
+    kbuf=(LPTSTR) MEMALLOC(sz);
     //
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read compose map registry\n")));
@@ -1435,22 +1438,22 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
     //compose_map->map = NULL;
     //compose_map->size = 0;
 
-    for (line = Mystrtok(kbuf, TEXT("\0"));id<256
+    for (line = Mystrtok(kbuf, TEXT("\0"), &save);id<256
 	 ;
-	 line = Mystrtok(saved_position, TEXT("\0"))) {
+	 line = Mystrtok(saved_position, TEXT("\0"), &save)) {
         len=Mylstrlen(line);
         saved_position=line+len+1;
 
         if (len==0) break;
 
-	p = Mystrtok(line, TEXT(" \t\0"));
+	p = Mystrtok(line, TEXT(" \t\0"), &save);
         MyDebugPrint((TEXT("tok: %s\n"),p));
 	/* comment */
 	if (p == NULL || p[0] == '#')
 	    continue;
 
 	if (Mylstrcmp(p, TEXT("Name:")) == 0) {
-	    p = Mystrtok(NULL, TEXT(" \t\0"));
+	    p = Mystrtok(NULL, TEXT(" \t\0"), &save);
 	    if (p == NULL)
 		continue;
 	    //compose_map->name = g_strdup(p);
@@ -1464,14 +1467,14 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
 	    if (key1 == 0)
 		continue;
 
-	    p = Mystrtok(NULL, TEXT(" \t"));
+	    p = Mystrtok(NULL, TEXT(" \t"), &save);
 	    if (p == NULL)
 		continue;
 	    key2 = string_to_hex(p);
 	    if (key2 == 0)
 		continue;
 
-	    p = Mystrtok(NULL, TEXT(" \t"));
+	    p = Mystrtok(NULL, TEXT(" \t"), &save);
 	    if (p == NULL)
 		continue;
 	    value = string_to_hex(p);
@@ -1483,7 +1486,7 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
             id++;
 	}
     }
-    free(kbuf);
+    MEMFREE(kbuf);
     map_size=(UINT)id;
 
     //if (compose_map == NULL) {

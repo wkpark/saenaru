@@ -614,7 +614,7 @@ HFONT CheckNativeCharset(HDC hDC)
     if (font[0] == TEXT('\0')) {
         ret = GetRegStringValue(NULL, TEXT("CandFont"), lpFont);
         if (ret == -1)
-            /* ±âº»°ªÀ» »õ±¼¸²À¸·Î ÇÑ´Ù */
+            /* ê¸°ë³¸ê°’ì„ ìƒˆêµ´ë¦¼ìœ¼ë¡œ í•œë‹¤ */
             lpFont = TEXT("New Gulim");
     }
 
@@ -626,7 +626,7 @@ HFONT CheckNativeCharset(HDC hDC)
     Mylstrcpy(lfFont.lfFaceName,lpFont);
     hTemp = CreateFontIndirect(&lfFont);
     hOldFont = SelectObject(hDC, hTemp);
-    /* ¾Æ¹« ±Û²ÃÀÌ ¾øÀ¸¸é ±âº» °ªÀ» °¡Á®¿Â´Ù */
+    /* ì•„ë¬´ ê¸€ê¼´ì´ ì—†ìœ¼ë©´ ê¸°ë³¸ ê°’ì„ ê°€ì ¸ì˜¨ë‹¤ */
     if (lfFont.lfCharSet != NATIVE_CHARSET) {
         DeleteObject(hTemp);
 

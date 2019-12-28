@@ -533,7 +533,7 @@ BOOL PASCAL GetCandPosFromCompForm(LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra,LPP
                 MyDebugPrint((TEXT("FromCompForm root style #2\n")));
                 GetWindowRect(lpIMC->hWnd,&rc);
                 lppt->x = rc.left;
-                lppt->y = rc.bottom + 23; // 23 Àû´çÇÑ Ã¢ Å×µÎ¸® XXX
+                lppt->y = rc.bottom + 23; // 23 ì ë‹¹í•œ ì°½ í…Œë‘ë¦¬ XXX
             }
         }
         ScreenToClient(lpIMC->hWnd,lppt);
@@ -555,8 +555,8 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
     LPCANDIDATELIST lpCandList;
 
     MyDebugPrint((TEXT("CreateCandWindow\n")));
-    // CandWindow´Â CompWindowÀÇ À§Ä¡¸¦ ±â¹İÀ¸·Î »ı¼ºµÈ´Ù.
-    // ±×·¯³ª, CompWindow°¡ ¾ø´Â °æ¿ìµµ ÀÖ´Ù (¿öµåÆĞµå)
+    // CandWindowëŠ” CompWindowì˜ ìœ„ì¹˜ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ìƒì„±ëœë‹¤.
+    // ê·¸ëŸ¬ë‚˜, CompWindowê°€ ì—†ëŠ” ê²½ìš°ë„ ìˆë‹¤ (ì›Œë“œíŒ¨ë“œ)
     if (!GetCandPosFromCompWnd(lpUIExtra,&pt))
     {
         RECT rc;
@@ -568,21 +568,21 @@ void PASCAL CreateCandWindow( HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lp
         lpCP->dwSize = dwSize;
         MyDebugPrint((TEXT("Cand dwSize :%d\n"),dwSize));
  
-        // ¿öµåÆĞµå °°Àº °æ¿ì´Â IMR_QUERYCHARPOSITIONÀ» Áö¿øÇÑ´Ù.
+        // ì›Œë“œíŒ¨ë“œ ê°™ì€ ê²½ìš°ëŠ” IMR_QUERYCHARPOSITIONì„ ì§€ì›í•œë‹¤.
         if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
             pt.x = lpCP->pt.x;
             pt.y = lpCP->pt.y + lpCP->cLineHeight + 1;
             MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
         } else if (lpIMC->cfCandForm[0].dwIndex != -1) {
-            // ÀÌ¹Ì ¸¸µé¾î Áø °ÍÀÌ ÀÖ´Â °æ¿ì.
+            // ì´ë¯¸ ë§Œë“¤ì–´ ì§„ ê²ƒì´ ìˆëŠ” ê²½ìš°.
             pt.x = lpIMC->cfCandForm[0].ptCurrentPos.x;
             pt.y = lpIMC->cfCandForm[0].ptCurrentPos.y;
             ClientToScreen(lpIMC->hWnd,&pt);
             MyDebugPrint((TEXT("Already opened cand POS pt %dx%d\n"),pt.x,pt.y));
         } else {
-            // ÀÌ °æ¿ì, ÀüÃ¼ À©µµ¿ì Å©±â¸¦ ¾Ë¾Æ¼­ ¿ŞÂÊ ÇÏ´Ü¿¡ ºÙ¿©ÁØ´Ù.
-            // ¸¶Ä¡ ¸®´ª½ºÀÇ ÀÔ·Â»óÅÂ Ã¢°°Àº À§Ä¡
-            // skkime¿¡¼­´Â root À©µµ¶ó ºÎ¸§.
+            // ì´ ê²½ìš°, ì „ì²´ ìœˆë„ìš° í¬ê¸°ë¥¼ ì•Œì•„ì„œ ì™¼ìª½ í•˜ë‹¨ì— ë¶™ì—¬ì¤€ë‹¤.
+            // ë§ˆì¹˜ ë¦¬ëˆ…ìŠ¤ì˜ ì…ë ¥ìƒíƒœ ì°½ê°™ì€ ìœ„ì¹˜
+            // skkimeì—ì„œëŠ” root ìœˆë„ë¼ ë¶€ë¦„.
             GetWindowRect(lpIMC->hWnd,&rc);
             pt.x = rc.left;
             pt.y = rc.bottom + 1;
@@ -885,7 +885,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     MyTextOut(hMemDC,5 + GetSystemMetrics(SM_CXEDGE) + left,height,num,Mylstrlen(num));
                     //MyTextOut(hDC,6 + GetSystemMetrics(SM_CXEDGE),height,num,Mylstrlen(num));
                 }
-                // ÇÑ ±ÛÀÚÀÌ¸é¼­ KSX1002 Áö¿øÀÌ ¾Æ´Ï¸é charset Ã¼Å©
+                // í•œ ê¸€ìì´ë©´ì„œ KSX1002 ì§€ì›ì´ ì•„ë‹ˆë©´ charset ì²´í¬
                 if (i < lpCandList->dwCount && wtype != -1 && dwOptionFlag & KSX1002_SUPPORT)
                 {
                     WORD mb;
@@ -898,7 +898,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                         DWORD code = (DWORD) *(lpstr);
                         wtype = 1;
 
-                        // KS X 1002¿¡ Æ÷ÇÔ ¾ÈµÇ´Â È®Àå ÇÑÀÚÀÇ °æ¿ì
+                        // KS X 1002ì— í¬í•¨ ì•ˆë˜ëŠ” í™•ì¥ í•œìì˜ ê²½ìš°
                         if (!is_ksx1002(code))
                             wtype = 2;
                     }
@@ -911,14 +911,14 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     MyTextOut(hMemDC,25 + 1 + GetSystemMetrics(SM_CXEDGE) + left,
                             height + 1,lpstr, Mylstrlen(lpstr));
                 }
-                // ¿Ï¼ºÇü 4888ÀÚ°¡ ¾Æ´Ñ °æ¿ì »öÀ» Ã»»öÁ¶·Î.
+                // ì™„ì„±í˜• 4888ìê°€ ì•„ë‹Œ ê²½ìš° ìƒ‰ì„ ì²­ìƒ‰ì¡°ë¡œ.
                 if (highlighted) {
                     SetTextColor(hMemDC,GetSysColor(COLOR_HIGHLIGHTTEXT));
                 } else if (wtype) {
                     if (wtype == 1)
                         SetTextColor(hMemDC,RGB(16,83,239));
                     else
-                        // KS X 1002¿¡µµ Æ÷ÇÔ ¾ÈµÇ´Â °æ¿ì´Â ³ì»ö.
+                        // KS X 1002ì—ë„ í¬í•¨ ì•ˆë˜ëŠ” ê²½ìš°ëŠ” ë…¹ìƒ‰.
                         SetTextColor(hMemDC,RGB(30,150,30));
                 }
 
@@ -1160,21 +1160,21 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             lpCP = (PIMECHARPOSITION)GlobalAlloc(GPTR, dwSize);
             lpCP->dwSize = dwSize;
         
-            // ¾î¶² ¾îÇÃ¸®ÄÉÀÌ¼ÇÀº CompWindow¸¦ °¡Áö°í ÀÖÁö ¾Ê´Ù.
-            // ¿öµåÆĞµå°¡ ´ëÇ¥ÀûÀÎ ÄÉÀÌ½º
-            // ÀÌ °æ¿ì IMR_QUERYCHARPOSITIONÀ» »ç¿ëÇÑ´Ù.
+            // ì–´ë–¤ ì–´í”Œë¦¬ì¼€ì´ì…˜ì€ CompWindowë¥¼ ê°€ì§€ê³  ìˆì§€ ì•Šë‹¤.
+            // ì›Œë“œíŒ¨ë“œê°€ ëŒ€í‘œì ì¸ ì¼€ì´ìŠ¤
+            // ì´ ê²½ìš° IMR_QUERYCHARPOSITIONì„ ì‚¬ìš©í•œë‹¤.
             if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
                 pt.x = lpCP->pt.x;
-                pt.y = lpCP->pt.y + lpCP->cLineHeight + 1; // ±ÛÀÚ ³ôÀÌ + 1
+                pt.y = lpCP->pt.y + lpCP->cLineHeight + 1; // ê¸€ì ë†’ì´ + 1
                 MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
             } else {
-                // IMR_QUERYCHARPOSITIONµµ Áö¿øÇÏÁö ¾ÊÀ¸¸é root window ½ºÅ¸ÀÏ·Î.
+                // IMR_QUERYCHARPOSITIONë„ ì§€ì›í•˜ì§€ ì•Šìœ¼ë©´ root window ìŠ¤íƒ€ì¼ë¡œ.
                 GetWindowRect(lpIMC->hWnd,&rc);
                 lpUIExtra->uiCand.pt.x = rc.left;
                 lpUIExtra->uiCand.pt.y = rc.bottom;
 
                 pt.x = rc.left;
-                pt.y = rc.bottom + 24; // ÃßÁ¤ ³ôÀÌ 24 XXX
+                pt.y = rc.bottom + 24; // ì¶”ì • ë†’ì´ 24 XXX
             }
             GlobalFree(lpCP);
         }
@@ -1268,20 +1268,20 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
             lpCP->dwSize = dwSize;
             MyDebugPrint((TEXT("Cand dwSize :%d\n"),dwSize));
  
-            // ¿öµåÆĞµå °°Àº °æ¿ì´Â IMR_QUERYCHARPOSITIONÀ» Áö¿øÇÑ´Ù.
+            // ì›Œë“œíŒ¨ë“œ ê°™ì€ ê²½ìš°ëŠ” IMR_QUERYCHARPOSITIONì„ ì§€ì›í•œë‹¤.
             if (dwSize = (DWORD) MyImmRequestMessage(lpUIExtra->hIMC, IMR_QUERYCHARPOSITION, (LPARAM)lpCP)) {
                 pt.x = lpCP->pt.x;
                 pt.y = lpCP->pt.y + lpCP->cLineHeight + 1;
                 MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
             } else {
-                // ¾î¶² ¾îÇÃ¸®ÄÉÀÌ¼ÇÀº CompWindow¸¦ °¡Áö°í ÀÖÁö ¾Ê´Ù.
-                // ¿öµåÆĞµå°¡ ´ëÇ¥ÀûÀÎ ÄÉÀÌ½º
+                // ì–´ë–¤ ì–´í”Œë¦¬ì¼€ì´ì…˜ì€ CompWindowë¥¼ ê°€ì§€ê³  ìˆì§€ ì•Šë‹¤.
+                // ì›Œë“œíŒ¨ë“œê°€ ëŒ€í‘œì ì¸ ì¼€ì´ìŠ¤
                 GetWindowRect(lpIMC->hWnd,&rc);
                 lpUIExtra->uiCand.pt.x = rc.left;
                 lpUIExtra->uiCand.pt.y = rc.bottom;
 
                 pt.x = rc.left;
-                pt.y = rc.bottom + 24; // 24´Â ÃßÁ¤ ³ôÀÌ.
+                pt.y = rc.bottom + 24; // 24ëŠ” ì¶”ì • ë†’ì´.
             }
             GlobalFree(lpCP);
         }

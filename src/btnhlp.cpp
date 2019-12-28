@@ -40,9 +40,9 @@ extern "C" {
 #include "saenaru.h"
 #include "resource.h"
 }
-/*	Platform SDK ªËëîğíª¹ªëİ»İÂ¡£Platform SDK ªË include path
- *	ªò÷×ª¹ªÎª¬ÕŞª¤ªÎª«Üúª«¡£õó?ªìªĞ DDK ªËª³ªìªéªÎ header ªò
- *	Ô¤ª·ªÆª¯ªìªëªÈÕŞª¤ªÎªÀª¬¡£
+/*	Platform SDK ã«ä¾å­˜ã™ã‚‹éƒ¨åˆ†ã€‚Platform SDK ã« include path
+ *	ã‚’é€šã™ã®ãŒè‰¯ã„ã®ã‹å¦ã‹ã€‚å‡º?ã‚Œã° DDK ã«ã“ã‚Œã‚‰ã® header ã‚’
+ *	æ¸¡ã—ã¦ãã‚Œã‚‹ã¨è‰¯ã„ã®ã ãŒã€‚
  */
 //#include "c:\Program Files\Microsoft SDK\include\msctf.h"
 #include "msctf.h"
@@ -53,7 +53,7 @@ extern "C" {
 #endif
 #include "tsf.h"
 
-#define LANGBAR_ITEM_DESC	L"µµ¿ò¸»" // max 32 chars
+#define LANGBAR_ITEM_DESC	L"ë„ì›€ë§" // max 32 chars
 
 static	void	_Menu_SaenaruHelp(void);
 static	void	_Menu_About(void);

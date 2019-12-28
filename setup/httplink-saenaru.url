@@ -1,5 +1,5 @@
 [DEFAULT]
-BASEURL=http://saenaru.i18n.org/
+BASEURL=https://github.com/wkpark/saenaru
 [InternetShortcut]
-URL=http://kldp.net/projects/saenaru
+URL=https://github.com/wkpark/saenaru
 Modified=70F6B6BF8DAACA01DD

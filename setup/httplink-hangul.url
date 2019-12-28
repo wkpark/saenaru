@@ -1,5 +1,5 @@
 [DEFAULT]
-BASEURL=http://kldp.net/projects/hangul
+BASEURL=http://kldp.net/hangul
 [InternetShortcut]
-URL=http://kldp.net/projects/hangul
+URL=http://kldp.net/hangul
 Modified=D0462585F3CBC30142
