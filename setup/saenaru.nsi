@@ -1,23 +1,25 @@
 ﻿; Saenaru Installation Script
-; Written by Hye-Shik Chang <perky@i18n.org>
-; $Id$
+; by Hye-Shik Chang <perky@i18n.org>
 
-!define RELVERSION      "1.1.0cvs-snapshot"
+Unicode true
+
+!define RELVERSION      "1.2.0-GIT"
 !define APPNAME         "새나루 스냅샷 ${RELVERSION}"
 
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
-!define DDKBUILDDIR     "..\src\objfre_wxp_x86\i386"
-!define DDK64BUILDDIR   "..\src\objfre_win7_amd64\amd64"
-!define DVBUILDDIR      "..\kbddvk\objfre_wxp_x86\i386"
-!define DV64BUILDDIR    "..\kbddvk\objfre_win7_amd64\amd64"
-!define CMBUILDDIR      "..\colemak\objfre_wxp_x86\i386"
-!define CM64BUILDDIR    "..\colemak\objfre_win7_amd64\amd64"
+!define DDKBUILDDIR     "..\Release"
+!define DDK64BUILDDIR   "..\x64\Release"
+!define DVBUILDDIR      "..\prebuilt\kbddvk\x86"
+!define DV64BUILDDIR    "..\prebuilt\kbddvk\x64"
+!define CMBUILDDIR      "..\prebuilt\colemak\x86"
+!define CM64BUILDDIR    "..\prebuilt\colemak\x64"
 !define RESOURCEDIR     "..\resource"
-!define HELPDIR         "..\help"
+!define HELPDIR         "..\prebuilt"
 !define SRCROOTDIR      ".."
 !define SMPATH          "$SMPROGRAMS\새나루"
 
+;; custom fixes
 !include /NONFATAL ".\local.nsi"
 
 !include "x64.nsh"
@@ -142,7 +144,7 @@ Section "새나루 입력기" SecBody
   File "${RESOURCEDIR}\old2set3set.reg"
   File "${RESOURCEDIR}\nk2set.reg"
   File "${RESOURCEDIR}\comp_default.reg"
-  ;;
+  ;; custom fix
   !include /NONFATAL ".\userkbd\file.nsi"
   ;;
   File /oname=saenaru.ico "${RESOURCEDIR}\about.ico"
@@ -151,24 +153,31 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "${REGISTRY_PATH}" "" $INSTDIR
 
   ;IME keys
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout file" "kbdkor.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout text" "새나루 한글 입력기"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout display name" "한글 입력기 (새나루)"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME file" "SAENARU.IME"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout File" "kbdkor.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout Text" "새나루 한글 입력기"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "Layout Display Name" "새나루 한글 입력기"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412" "IME File" "SAENARU.IME"
 
   ; dvorak driver support
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout file" "kbddvk.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout text" "새나루 한글 입력기"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout display name" "한글 입력기 (새나루 드보락)"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME file" "SAENARU.IME"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout File" "kbddvk.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout Text" "새나루 한글 입력기 (드보락)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "Layout Display Name" "새나루 한글 입력기 (드보락)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412" "IME File" "SAENARU.IME"
 
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "" "nabi.dic"
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Symbol" "symwin.dic"
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
 
-  WriteRegDWORD HKCU "${REGISTRY_PATH}" "OptionFlag" 169
-  WriteRegDWORD HKCU "${REGISTRY_PATH" "LayoutFlag" "1"
+  ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "OptionFlag" 
+  IfErrors 0 regDone
+  WriteRegDWORD HKCU "${REGISTRY_PATH}" "OptionFlag" 41
+  regDone:
+  ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "HangulToggle" 
+  IfErrors 0 regDone2
+  WriteRegDWORD HKCU "${REGISTRY_PATH}" "HangulToggle" 65568
+  regDone2:
+  ;WriteRegDWORD HKCU "${REGISTRY_PATH}" "LayoutFlag" "1"
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -180,8 +189,8 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "DisplayIcon" "$INSTDIR\saenaru.ico,-0"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "DisplayVersion" "${RELVERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "Publisher" "Open Hangul Project"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "HelpLink" "http://saenaru.i18n.org"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "URLInfoAbout" "http://kldp.net/projects/saenaru"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "HelpLink" "https://github.com/wkpark/saenaru"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru" "URLInfoAbout" "https://github.com/wkpark/saenaru"
 
   ;Create short cuts
   CreateDirectory "${SMPATH}"
@@ -227,10 +236,10 @@ Section /o "새나루 콜맥(Colemak)" SecColemak
   ${EndIf}
 
   ; Colemak driver support
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout file" "kbdcmk.dll"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout text" "새나루 한글 입력기"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout display name" "한글 입력기 (새나루 콜맥)"
-  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "IME file" "SAENARU.IME"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout File" "kbdcmk.dll"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout Text" "새나루 한글 입력기 (콜맥)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "Layout Display Name" "새나루 한글 입력기 (콜맥)"
+  WriteRegStr HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0140412" "IME File" "SAENARU.IME"
 
   IfRebootFlag 0 noreboot
     MessageBox MB_OK|MB_ICONINFORMATION "새나루가 사용중이기 때문에 설치/업데이트가 완료되지 못했습니다. 재부팅을 해야 설치가 완료됩니다."
@@ -347,6 +356,7 @@ SectionEnd
   LangString DESC_KBD_NEW_BUTTON ${LANG_KOREAN} "새두벌/새세벌 자판 (&N)"
   LangString DESC_KBD_NK_BUTTON ${LANG_KOREAN} "북한 두벌식 (&K)"
 
+;; custom fix
 !include /NONFATAL ".\userkbd\extra.nsi"
 
 Function OpenInputSetting
@@ -381,6 +391,7 @@ Function OpenUserKeyboard
 	${NSD_CreateCheckBox} 0 144 110u 17u "$(DESC_KBD_NK_BUTTON)"
 	Pop $nk_kbd
 
+        ;; custom fix
         !include /NONFATAL "userkbd\ui.nsi"
 
 	nsDialogs::Show
