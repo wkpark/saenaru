@@ -218,6 +218,7 @@
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,6 +239,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -260,6 +262,7 @@
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -281,6 +284,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -303,6 +307,7 @@
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -325,6 +330,7 @@
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -346,6 +352,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -368,6 +375,7 @@
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
