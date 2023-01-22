@@ -52,42 +52,6 @@
 
 #define SAENARU_MUTEX_NAME  TEXT("SaeNaru_Mutex")
 
-#define LAYOUT_OLD2BUL      0x00000001
-#define LAYOUT_3FIN         0x00000002
-#define LAYOUT_390	    0x00000003
-#define LAYOUT_3SUN	    0x00000004
-#define LAYOUT_NEW2BUL	    0x00000005
-#define LAYOUT_NEW3BUL	    0x00000006
-#define LAYOUT_AHNMATAE	    0x00000007
-#define LAYOUT_YET2BUL	    0x00000008
-#define LAYOUT_YET3BUL	    0x00000009
-#define LAYOUT_NK_2BUL	    0x0000000a
-#define LAYOUT_USER         0x0000000b
-
-
-#define SAENARU_ONTHESPOT      0x00020000
-#define SAENARU_MODE_CANDIDATE 0x00040000
-#define AUTOMATA_2SET          0x00100000
-#define AUTOMATA_3SET          0x00200000
-#define AUTOMATA_NULL          0x00400000
-
-#define COMPOSITE_TYPING       0x00000001
-#define CONCURRENT_TYPING      0x00000002
-#define PSEUDO_COMPOSITE       0x00000004
-#define BACKSPACE_BY_JAMO      0x00000008
-#define KSX1001_SUPPORT        0x00000010
-#define KSX1002_SUPPORT        0x00000020
-#define FULL_MULTIJOMO         0x00000040
-#define USE_SHIFT_SPACE        0x00000080
-#define DVORAK_SUPPORT         0x00000100
-#define ESCENG_SUPPORT         0x00000200
-#define QWERTY_HOTKEY_SUPPORT  0x00000400
-#define HANGUL_JAMOS           0x00000800
-#define HANJA_CAND_WITH_SPACE  0x00001000
-#define SEARCH_SIMILAR_WORDS   0x00002000
-#define USE_CTRL_SPACE         0x00004000
-#define SCANCODE_BASED         0x00010000
-
 #define MASK_LSHIFT         0x00010000
 #define MASK_LCTRL          0x00020000
 #define MASK_LALT           0x00040000
@@ -98,27 +62,9 @@
 #define MASK_CTRL           0x00220000
 #define MASK_ALT            0x00440000
 
-/* for Unicode SAENARU */
-typedef LPTSTR            LPMYSTR;
-typedef TCHAR             MYCHAR;
-#define MYTEXT(x)         TEXT(x)
-#define Mylstrlen(x)      lstrlen(x)
-#define Mylstrcpy(x, y)   MylstrcpyW((x), (y))
-#define Mylstrcmp(x, y)   MylstrcmpW((x), (y))
-#define MyCharPrev(x, y)  MyCharPrevW((x), (y))
-#define MyCharPrev(x, y)  MyCharPrevW((x), (y))
-#define MyHanCharPrev(x, y)  MyHanCharPrevW((x), (y))
-#define MyCharNext(x)     MyCharNextW(x)
-#include <string.h>
-#define Mystrtok          wcstok
-#define Mystrchr          wcschr
-#define Mylstrcpyn        lstrcpyn
-#define MyTextOut         TextOut
-#define MyGetTextExtentPoint  GetTextExtentPoint
-#define LPMYIMEMENUITEMINFO LPIMEMENUITEMINFO
-#define MyImmRequestMessage ImmRequestMessage
-#define MyOutputDebugString OutputDebugString
-#define MyFileName        TEXT("saenaru.ime")
+#include "unicode.h"
+
+#define MyFileName        MYTEXT("saenaru.ime")
 
 /* for limit of SAENARU */
 #define MAXCOMPWND              10
@@ -344,31 +290,6 @@ typedef struct _tagMYGUIDELINE{
     DWORD dwPrivateID;
 } MYGUIDELINE, NEAR *PMYGUIDELINE, FAR *LPMYGUIDELINE;
 
-#define MAXICREADSIZE   10+2
-#define MAXICCOMPSIZE   2
-typedef struct _tagHangulIC {
-    //WCHAR read[10]; // L{1,3}V{1,3}T{0,3}
-    WCHAR read[MAXICREADSIZE];
-    WCHAR comp[MAXICCOMPSIZE]; // NOT USED
-    WCHAR cho;
-    WCHAR jung;
-    WCHAR jong;
-    WCHAR last;
-    WCHAR last0;
-    UINT  len;
-    UINT  lastvkey;
-    int   laststate;
-    BOOL  syllable;
-} HangulIC;
-
-struct _HangulCompose 
-{
-  UINT key;
-  WCHAR code;
-};
-
-typedef struct _HangulCompose	HangulCompose;
-
 /**********************************************************************/
 /*                                                                    */
 /*      Externs                                                       */
@@ -412,8 +333,6 @@ extern DWORD dwImeFlag;
 
 extern BOOL gfSaenaruSecure;
 
-extern HangulIC ic;
-
 extern UINT WM_MSIME_QUERYPOSITION;
 #endif //_NO_EXTERN_
 
@@ -437,11 +356,9 @@ BOOL PASCAL IsConvertedCompStr(HIMC hIMC);
 BOOL PASCAL IsCandidate(LPINPUTCONTEXT lpIMC);
 void PASCAL UpdateIndicIcon(HIMC hIMC);
 void PASCAL lmemset(LPBYTE,BYTE,UINT);
-int PASCAL MylstrcmpW(LPWSTR lp0, LPWSTR lp1);
-int PASCAL MylstrcpyW(LPWSTR lp0, LPWSTR lp1);
+
 LPWSTR PASCAL MyCharPrevW(LPWSTR lpStart, LPWSTR lpCur);
 LPWSTR PASCAL MyCharNextW(LPWSTR lp);
-LPWSTR PASCAL MylstrcpynW(LPWSTR lp0, LPWSTR lp1, int nCount);
 HFONT CheckNativeCharset(HDC hDC);
 
 int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
@@ -512,8 +429,10 @@ INT_PTR CALLBACK SelectDictionaryDlgProc(HWND hDlg, UINT message , WPARAM wParam
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
+
+/* regconf.c */
 UINT load_keyboard_map_from_reg(LPCTSTR, UINT, WCHAR *);
-UINT load_compose_map_from_reg(LPCTSTR, UINT, HangulCompose *);
+UINT load_compose_map_from_reg(LPCTSTR, UINT, void *);
 
 /* DIC.C         */
 BOOL PASCAL IsEat(WORD);
@@ -523,13 +442,6 @@ void PASCAL FlushText();
 void PASCAL RevertText(HIMC hIMC);
 
 void PASCAL AddChar(HIMC,WORD);
-UINT PASCAL hangul_ic_get(HangulIC*, UINT, LPMYSTR);
-WCHAR PASCAL hangul_ic_pop(HangulIC*);
-WCHAR PASCAL hangul_ic_peek(HangulIC*);
-void PASCAL  hangul_ic_init(HangulIC*);
-void hangul_ic_push(HangulIC *, WCHAR);
-
-int hangul_del_prev(LPWSTR);
 
 BOOL PASCAL ConvHanja(HIMC, int, int);
 BOOL WINAPI MakeResultString(HIMC,BOOL);
@@ -539,18 +451,9 @@ BOOL PASCAL CheckAttr( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL MakeAttrClause( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 
-/* hangul.c       */
+/* hansub.c       */
 DWORD PASCAL checkHangulKey(HIMC,UINT,LPARAM,LPBYTE);
 void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
-WCHAR PASCAL keyToHangulKey(WCHAR);
-WORD PASCAL checkDvorak(WORD);
-int PASCAL set_keyboard(UINT);
-int PASCAL set_compose(UINT);
-int PASCAL set_automata(UINT);
-
-BOOL hangul_is_syllable(WCHAR);
-void PASCAL hangul_syllable_to_jamo(WCHAR, WCHAR*, WCHAR*, WCHAR*);
-WCHAR PASCAL hangul_jamo_to_syllable(WCHAR, WCHAR, WCHAR);
 
 /* hanjaidx.c       */
 UINT PASCAL is_ksx1002(UINT);
@@ -589,29 +492,7 @@ void PASCAL SetGlobalFlags();
 void GetRegKeyList(LPCTSTR lpszSubDir);
 BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey);
 void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr);
-#ifdef DEBUG
-
-//#include "debug.h"
-#define DEBUGPRINTF(arg)	DebugPrint##arg
-#define DEBUGPRINTFW(arg)       DebugPrintW##arg
-
-#if !defined (DEBUG_LV)
-#define DEBUG_LV                1
-#endif
-#define DEBUGPRINTFEX(level,arg)    if((level) >= DEBUG_LV) DebugPrint##arg
-
-#define MyDebugPrint(x) DebugPrint x
-int DebugPrint(LPCTSTR lpszFormat, ...);
-#else
-#define MyDebugPrint(x)
-#define ImeLog(dwFlag, lpStr) FALSE
-
-#define DEBUGPRINTF(arg)        /*arg*/
-#define DEBUGPRINTFW(arg)       /*arg*/
-
-#define DEBUGPRINTFEX(level,arg)    /*if((level) >= DEBUG_LV) DebugPrintfToFile##arg*/
-
-#endif
+#include "debug.h"
 
 /* tsf.cpp */
 #if !defined (NO_TSF)

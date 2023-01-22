@@ -35,6 +35,7 @@
 #include "commctrl.h"
 #include "immdev.h"
 #include "saenaru.h"
+#include "hangul.h"
 
 int PASCAL GetCompFontHeight(LPUIEXTRA lpUIExtra);
 

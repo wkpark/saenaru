@@ -38,6 +38,7 @@
 
 extern "C" {
 #include "saenaru.h"
+#include "hangul.h"
 #include "resource.h"
 }
 /*    Platform SDK に依存する部分。Platform SDK に include path

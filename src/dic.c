@@ -33,16 +33,10 @@
 #include <windows.h>
 #include <immdev.h>
 #include "saenaru.h"
+#include "hangul.h"
 #include "resource.h"
 #include "vksub.h"
 #include "immsec.h"
-
-#define hangul_is_choseong(ch)	((ch) >= 0x1100 && (ch) <= 0x115e)
-#define hangul_is_jungseong(ch)	((ch) >= 0x1161 && (ch) <= 0x11a7)
-#define hangul_is_jongseong(ch)	((ch) >= 0x11a8 && (ch) <= 0x11ff)
-#define hangul_is_bangjum(ch)	((ch) == 0x302e || (ch) == 0x302f)
-#define is_combining_mark(ch)	((ch) >= 0x0300 && (ch) <= 0x036f || \
-	(ch) >= 0x1dc0 && (ch) <= 0x1de6 || (ch) >= 0x20d0 && (ch) <= 0x20f0)
 
 int GetCandidateStringsFromDictionary(LPWSTR lpString, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR szDicFileName);
 

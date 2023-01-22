@@ -534,38 +534,6 @@ void PASCAL lmemset(LPBYTE lp, BYTE b, UINT cnt)
 
 /*****************************************************************************
 *                                                                            *
-* MylstrcmpW( )                                                              *
-*                                                                            *
-*****************************************************************************/
-int PASCAL MylstrcmpW(LPWSTR lp0, LPWSTR lp1)
-{
-    while(*lp0 && *lp1 && (*lp0 == *lp1)) {
-                lp0++;
-                lp1++;
-        }
-        return (*lp0 - *lp1);
-}
-/*****************************************************************************
-*                                                                            *
-* MylstrcpyW( )                                                              *
-*                                                                            *
-*****************************************************************************/
-int PASCAL MylstrcpyW(LPWSTR lp0, LPWSTR lp1)
-{
-    int n = 0;
-
-    while(*lp1)
-    {
-        *lp0 = *lp1;
-        lp0++;
-        lp1++;
-        n++;
-    }
-    *lp0 = *lp1;
-    return n;
-}
-/*****************************************************************************
-*                                                                            *
 * MyCharPrevW( )                                                             *
 *                                                                            *
 *****************************************************************************/
@@ -585,19 +553,6 @@ LPWSTR PASCAL MyCharPrevW(LPWSTR lpStart, LPWSTR lpCur)
 LPWSTR PASCAL MyCharNextW(LPWSTR lp)
 {
     return lp++;
-}
-/*****************************************************************************
-*                                                                            *
-* MylstrcpynW( )                                                             *
-*                                                                            *
-*****************************************************************************/
-LPWSTR PASCAL MylstrcpynW(LPWSTR lp0, LPWSTR lp1, int nCount)
-{
-    int n;
-    for (n = 0; *lp1 && n < nCount - 1; *lp0++ = *lp1++, n++)
-               ;
-    *lp0 = L'\0';
-    return lp0;
 }
 
 HFONT CheckNativeCharset(HDC hDC) 

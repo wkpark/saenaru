@@ -31,8 +31,7 @@
  */
 
 #include <windows.h>
-#include "immdev.h"
-#include "saenaru.h"
+#include "debug.h"
 
 #if   UNICODE
 const LPTSTR g_szRegInfoPath = TEXT("software\\OpenHangulProject\\Saenaru");
@@ -40,7 +39,6 @@ const LPTSTR g_szRegInfoPath = TEXT("software\\OpenHangulProject\\Saenaru");
 const LPTSTR g_szRegInfoPath = TEXT("software\\OpenHangulProject\\Saenaru");
 #endif
 
-#ifdef DEBUG
 int DebugPrint(LPCTSTR lpszFormat, ...)
 {
     int nCount;
@@ -53,7 +51,6 @@ int DebugPrint(LPCTSTR lpszFormat, ...)
     OutputDebugString(szMsg);
     return nCount;
 }
-#endif
 
 DWORD PASCAL GetDwordFromSetting(LPTSTR lpszKey)
 {
@@ -283,49 +280,6 @@ void SetDwordToSetting(LPCTSTR lpszKey, DWORD dwFlag)
     }
     MyDebugPrint((TEXT("Setting: %s=%#8.8x: dwRet=%#8.8x\n"), lpszKey, dwFlag, dwRet));
 }
-
-void PASCAL SetGlobalFlags()
-{
-    DWORD tmp;
-#ifdef DEBUG
-    dwLogFlag = GetDwordFromSetting(TEXT("LogFlag"));
-    dwDebugFlag = GetDwordFromSetting(TEXT("DebugFlag"));
-#endif
-
-    dwOptionFlag = GetDwordFromSetting(TEXT("OptionFlag"));
-    dwLayoutFlag = GetDwordFromSetting(TEXT("LayoutFlag"));
-
-    // get ScanCode based setting.
-    dwScanCodeBased = GetDwordFromSetting(TEXT("ScanCodeBased"));
-
-    // HangulToggle Key
-    dwToggleKey = GetDwordFromSetting(TEXT("HangulToggle"));
-
-    tmp = GetDwordFromSetting(TEXT("ImeFlag"));
-    if (tmp) {
-        dwImeFlag = tmp;
-    }
-}
-
-#ifdef DEBUG
-void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr)
-{
-    TCHAR szBuf[80];
-
-    if (dwFlag & dwLogFlag)
-    {
-        if (dwDebugFlag & DEBF_THREADID)
-        {
-            DWORD dwThreadId = GetCurrentThreadId();
-            wsprintf(szBuf, TEXT("ThreadID = %X "), dwThreadId);
-            OutputDebugString(szBuf);
-        }
-
-        OutputDebugString(lpStr);
-        OutputDebugString(TEXT("\r\n"));
-    }
-}
-#endif //DEBUG
 
 /*
  * ex: ts=8 sts=4 sw=4 et

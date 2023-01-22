@@ -34,6 +34,7 @@
 #include "windows.h"
 #include "immdev.h"
 #include "saenaru.h"
+#include "hangul.h"
 
 /**********************************************************************/
 /*                                                                    */

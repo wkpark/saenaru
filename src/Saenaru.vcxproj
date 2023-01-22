@@ -36,9 +36,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="config.c" />
+    <ClCompile Include="regconf.c" />
+    <ClCompile Include="regime.c" />
     <ClCompile Include="data.c" />
     <ClCompile Include="dic.c" />
     <ClCompile Include="hangul.c" />
+    <ClCompile Include="hansub.c" />
     <ClCompile Include="hanjaidx.c" />
     <ClCompile Include="saenaru.c" />
     <ClCompile Include="reg.c" />
@@ -48,6 +51,7 @@
     <ClCompile Include="process.c" />
     <ClCompile Include="regword.c" />
     <ClCompile Include="subs.c" />
+    <ClCompile Include="strsubs.c" />
     <ClCompile Include="toascii.c" />
     <ClCompile Include="ui.c" />
     <ClCompile Include="uicand.c" />
@@ -69,6 +73,8 @@
     <ClInclude Include="tsf.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="vksub.h" />
+    <ClInclude Include="hangul.h" />
+    <ClInclude Include="debug.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="saenaru.rc" />
@@ -260,7 +266,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
-      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0xA00;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
@@ -283,7 +289,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
-      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0xA00;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>

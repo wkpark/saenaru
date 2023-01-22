@@ -34,6 +34,7 @@
 #include <windows.h>
 #include <immdev.h>
 #include "saenaru.h"
+#include "hangul.h"
 #include "vksub.h"
 
 void PASCAL ShowUIWindows(HWND hWnd, BOOL fFlag);

@@ -27,62 +27,62 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Saenaru: saenaru/src/data.c,v 1.5 2006/10/08 09:16:02 wkpark Exp $
  */
+#include <windows.h>
 
-#include "windows.h"
-#include "immdev.h"
-#define _NO_EXTERN_
-#include "saenaru.h"
-#include "hangul.h"
-#include "resource.h"
-
-HINSTANCE   hInst;
-HANDLE      hMutex = NULL;
-HKL hMyKL = 0;
-
-/* for Translat */
-LPTRANSMSGLIST lpCurTransKey= NULL;
-UINT     uNumTransKey;
-BOOL     fOverTransKey = FALSE;
-
-/* for UI */
-TCHAR    szUIClassName[]      = TEXT("SAENARUUI");
-TCHAR    szCompStrClassName[] = TEXT("SAENARUCompStr");
-TCHAR    szCandClassName[]    = TEXT("SAENARUCand");
-TCHAR    szStatusClassName[]  = TEXT("SAENARUStatus");
-TCHAR    szGuideClassName[]   = TEXT("SAENARUGuide");
-
-MYGUIDELINE glTable[] = {
-        {GL_LEVEL_ERROR,   GL_ID_NODICTIONARY, IDS_GL_NODICTIONARY, 0},
-        {GL_LEVEL_WARNING, GL_ID_TYPINGERROR,  IDS_GL_TYPINGERROR, 0},
-        {GL_LEVEL_WARNING, GL_ID_PRIVATE_FIRST,IDS_GL_TESTGUIDELINESTR, IDS_GL_TESTGUIDELINEPRIVATE}
-        };
-
-/* for DIC */
-TCHAR    szDicFileName[256];         /* Dictionary file name stored buffer */
-
-
-
-#pragma data_seg("SHAREDDATA")
 #ifdef DEBUG
-/* for DebugOptions */
-DWORD dwLogFlag = 0L;
-DWORD dwDebugFlag = 0L;
+extern DWORD dwLogFlag;
+extern DWORD dwDebugFlag;
+#ifndef DEBF_THREADID
+#define DEBF_THREADID       0x00000001
 #endif
-DWORD dwLayoutFlag = 0L;
-DWORD dwComposeFlag = 0L;
-DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
-DWORD dwHanjaMode = 0L;
-DWORD dwScanCodeBased = 0L;
-DWORD dwToggleKey = 0L;
+#endif
 
-BOOL gfSaenaruSecure = FALSE;
+extern DWORD dwOptionFlag;
+extern DWORD dwLayoutFlag;
+extern DWORD dwScanCodeBased;
+extern DWORD dwToggleKey;
+extern DWORD dwImeFlag;
 
-/* local flags */
-DWORD dwImeFlag = SAENARU_ONTHESPOT;
-#pragma data_seg()
+void PASCAL SetGlobalFlags()
+{
+    DWORD tmp;
+#ifdef DEBUG
+    dwLogFlag = GetDwordFromSetting(TEXT("LogFlag"));
+    dwDebugFlag = GetDwordFromSetting(TEXT("DebugFlag"));
+#endif
 
-/*
- * ex: ts=8 sts=4 sw=4 et
- */
+    dwOptionFlag = GetDwordFromSetting(TEXT("OptionFlag"));
+    dwLayoutFlag = GetDwordFromSetting(TEXT("LayoutFlag"));
+
+    // get ScanCode based setting.
+    dwScanCodeBased = GetDwordFromSetting(TEXT("ScanCodeBased"));
+
+    // HangulToggle Key
+    dwToggleKey = GetDwordFromSetting(TEXT("HangulToggle"));
+
+    tmp = GetDwordFromSetting(TEXT("ImeFlag"));
+    if (tmp) {
+        dwImeFlag = tmp;
+    }
+}
+
+#ifdef DEBUG
+void PASCAL ImeLog(DWORD dwFlag, LPTSTR lpStr)
+{
+    TCHAR szBuf[80];
+
+    if (dwFlag & dwLogFlag)
+    {
+        if (dwDebugFlag & DEBF_THREADID)
+        {
+            DWORD dwThreadId = GetCurrentThreadId();
+            wsprintf(szBuf, TEXT("ThreadID = %X "), dwThreadId);
+            OutputDebugString(szBuf);
+        }
+
+        OutputDebugString(lpStr);
+        OutputDebugString(TEXT("\r\n"));
+    }
+}
+#endif //DEBUG

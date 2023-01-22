@@ -33,6 +33,7 @@
 #include "windows.h"
 #include "immdev.h"
 #include "saenaru.h"
+#include "hangul.h"
 
 int GetCandidateStringsFromDictionary(LPWSTR lpString, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR szDicFileName);
 
