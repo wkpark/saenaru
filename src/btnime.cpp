@@ -370,7 +370,7 @@ CLangBarItemImeButton::InitMenu (
         wstrDesc = (LPCWSTR)lpDesc;
         //wstrDesc = c_rgMenuItems [i].pchDesc;
         if (c_rgMenuItems [i].chDesc != NULL) {
-            nstrDesc = wcslen (wstrDesc);
+            nstrDesc = (ULONG) wcslen (wstrDesc);
             dwFlag = 0;
             if (c_rgMenuItems [i].pfnGetFlag != NULL)
                 dwFlag = (c_rgMenuItems [i].pfnGetFlag)(i);
@@ -398,7 +398,7 @@ CLangBarItemImeButton::InitMenu (
 	LoadString(hInst,c_rgKeyboardItems [i].chDesc,lpDesc,128);
         wstrDesc = (LPCWSTR)lpDesc;
         //wstrDesc = c_rgKeyboardItems [i].pchDesc;
-        nstrDesc = wcslen (wstrDesc);
+        nstrDesc = (ULONG) wcslen (wstrDesc);
         dwFlag = c_rgKeyboardItems [i].dwFlag;
 
         if (dwFlag == NULL)
@@ -462,7 +462,7 @@ CLangBarItemImeButton::InitMenu (
         wstrDesc = (LPCWSTR)lpDesc;
         //wstrDesc = c_rgMenuItems [i].pchDesc;
         if (wstrDesc != NULL) {
-            nstrDesc = wcslen (wstrDesc);
+            nstrDesc = (ULONG) wcslen (wstrDesc);
             dwFlag = (c_rgMenuItems [i].pfnGetFlag != NULL)? (c_rgMenuItems [i].pfnGetFlag)(i) : 0;
         } else {
             nstrDesc = 0;
@@ -499,7 +499,7 @@ CLangBarItemImeButton::InitMenu (
                 MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
             }     
             wstrDesc = achValue;
-            nstrDesc = wcslen (wstrDesc);
+            nstrDesc = (ULONG) wcslen (wstrDesc);
             dwFlag = _MenuItem_GetKeyboardFlag(id);
             pUserKeyboardMenu->AddMenuItem (id++,
             //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,
@@ -539,7 +539,7 @@ CLangBarItemImeButton::InitMenu (
                 MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
             }     
             wstrDesc = achValue;
-            nstrDesc = wcslen (wstrDesc);
+            nstrDesc = (ULONG) wcslen (wstrDesc);
             dwFlag = _MenuItem_GetComposeFlag(id);
             pUserComposeMenu->AddMenuItem (id++,
             //pUserKeyboardMenu->AddMenuItem (idUserKeyboardMenu,

@@ -328,7 +328,7 @@ CLangBarItemCModeButton::InitMenu (
 			wstrDesc		= (LPCWSTR)lpDesc;
 			//wstrDesc		= c_rgMenuItems [i].pchDesc ;
 			if (wstrDesc != NULL) {
-				nstrDesc	= wcslen (wstrDesc) ;
+				nstrDesc	= (ULONG) wcslen (wstrDesc) ;
 				dwFlag		= (i == nCMode)? TF_LBMENUF_CHECKED : 0 ;
 			} else {
 				nstrDesc	= 0 ;

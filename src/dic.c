@@ -1802,8 +1802,8 @@ LPBYTE lpbKeyState;
                             }
                             MyDebugPrint((TEXT(">>>>>>lpToken ='%s'\n"), lpToken));
 
-                            lpRS->dwCompStrOffset += (lpToken - lpDump)*sizeof(MYCHAR);
-                            lpRS->dwTargetStrOffset += (lpToken - lpDump)*sizeof(MYCHAR);
+                            lpRS->dwCompStrOffset += (DWORD)(lpToken - lpDump)*sizeof(MYCHAR);
+                            lpRS->dwTargetStrOffset += (DWORD)(lpToken - lpDump)*sizeof(MYCHAR);
                             // XXX 1. manage not convertable ascii chars.
 
                             lpRS->dwCompStrLen = Mylstrlen(lpToken);

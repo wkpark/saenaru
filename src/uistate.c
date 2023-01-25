@@ -566,7 +566,7 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                             break;
                         }
                         wstrDesc = achValue;
-                        nstrDesc = wcslen (wstrDesc);
+                        nstrDesc = (ULONG) wcslen (wstrDesc);
                         achValue[nstrDesc]='\0';
                         
                         ucheck = MF_STRING|MF_ENABLED;
@@ -627,7 +627,7 @@ void PASCAL ButtonStatus( HWND hStatusWnd, UINT message, WPARAM wParam, LPARAM l
                             break;
                         }
                         wstrDesc = achValue;
-                        nstrDesc = wcslen (wstrDesc);
+                        nstrDesc = (ULONG) wcslen (wstrDesc);
                         achValue[nstrDesc]='\0';
     
                         ucheck = MF_STRING|MF_ENABLED;

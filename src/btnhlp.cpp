@@ -184,7 +184,7 @@ CLangBarItemHelpMenu::InitMenu (
 		wstrDesc		= (LPCWSTR)lpDesc;
 		//wstrDesc		= c_rgMenuItems [i].pchDesc ;
 		if (wstrDesc != NULL) {
-			nstrDesc	= wcslen (wstrDesc) ;
+			nstrDesc	= (ULONG) wcslen (wstrDesc) ;
 			dwFlag		= 0;
 		} else {
 			nstrDesc	= 0 ;

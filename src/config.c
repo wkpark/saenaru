@@ -850,7 +850,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         MyDebugPrint((TEXT("(%d) %s\n"), i+1, achValue));
                     }     
                     wstrDesc = achValue;
-                    nstrDesc = wcslen (wstrDesc);
+                    nstrDesc = (ULONG) wcslen (wstrDesc);
     
                     SendMessage(hwndRadio, CB_ADDSTRING,
                         0,
