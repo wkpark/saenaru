@@ -3,26 +3,56 @@ signature="$CHICAGO$"
 SetupClass=BASE
 
 [DefaultInstall]
-CopyFiles=SaeNaru.sys.install, SaeNaru.win.install
+CopyFiles=SaeNaru.sys.install, SaeNaru.win.install, SaeNaru.chm.install
 AddReg=SaeNaru_Reg
 
 [DefaultInstall.nt]
-CopyFiles=SaeNaru.sys.install, SaeNaru.win.install
+CopyFiles=SaeNaru.sys.install, SaeNaru.win.install, SaeNaru.chm.install
+AddReg=SaeNaru_Reg_NT
+
+[DefaultInstall.ntamd64]
+CopyFiles=SaeNaru.sys.install.ntamd64, SaeNaru.sys.install.syswow64, SaeNaru.win.install, SaeNaru.chm.install
 AddReg=SaeNaru_Reg_NT
 
 [SaeNaru.sys.install]
-saenaru.ime
+saenaru.ime,x86\saenaru.ime
+kbddvk.dll,prebuilt\kbddvk\x86\kbddvk.dll
+kbdcmk.dll,prebuilt\colemak\x86\kbdcmk.dll
+
+[SaeNaru.sys.install.ntamd64]
+saenaru.ime,x64\saenaru.ime
+kbddvk.dll,prebuilt\kbddvk\x64\kbddvk.dll
+kbdcmk.dll,prebuilt\colemak\x64\kbdcmk.dll
+
+[SaeNaru.sys.install.syswow64]
+saenaru.ime,x86\saenaru.ime
+kbddvk.dll,prebuilt\kbddvk\x86\kbddvk.dll
+kbdcmk.dll,prebuilt\colemak\x86\kbdcmk.dll
+
+[SaeNaru.chm.install]
+saenaru.chm,prebuilt\saenaru.chm
 
 [SaeNaru.win.install]
-saenaru.dic
-
+saenaru.dic,resource\saenaru.dic
+word.dic,resource\word.dic
+symwin.dic,resource\symwin.dic
+nabi.dic,resource\nabi.dic
+jinsuk.dic,resource\jinsuk.dic
+2set3set.reg,resource\2set3set.reg
+ahnmatae.reg,resource\ahnmatae.reg
+old2set3set.reg,resource\old2set3set.reg
+nk2set.reg,resource\nk2set.reg
+comp_default.reg,resource\comp_default.reg
 
 [DestinationDirs]
 SaeNaru.sys.install=11 ; to System (Windows 98) or System32 (NT)
-SaeNaru.win.install=25 ; to Windows
+SaeNaru.win.install=10,IME\Saenaru
+SaeNaru.sys.install.syswow64=16425
+SaeNaru.sys.install.ntamd64=11
+SaeNaru.chm.install=10,IME\Saenaru\help
 
 [SaeNaru_Reg]
-HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",,kbdus.kbd
+HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout file",,kbdkor.dll
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout text",,"새나루 한글 입력기"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","Layout display name",,"한글 입력기 (새나루)"
 HKLM,"system\currentcontrolset\control\keyboard layouts\E0120412","IME File",,"SAENARU.IME"
