@@ -444,6 +444,7 @@ BEGIN
 END
 
 STRINGTABLE DISCARDABLE 
+LANGUAGE 0x12, 0x1
 BEGIN
     IDS_KEY_NEW2BUL            "货滴国"
     IDS_KEY_NEW3BUL            "货技国"
@@ -727,6 +728,17 @@ BEGIN
     IDS_TIP_YET2BUL            "Yet 2-Set"
     IDS_TIP_YET3BUL            "Yet 3-Set"
     IDS_TIP_USER               "User Defined"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x9, 0x1
+BEGIN
+    IDS_KEY_NEW2BUL            "New 2-Set"
+    IDS_KEY_NEW3BUL            "New 3-Set"
+    IDS_KEY_AHNMATAE           "Ahnmatae"
+    IDS_KEY_NK_2BUL            "North Korea 2-set"
+    IDS_KEY_YET2BUL            "Yet 2-Set"
+    IDS_KEY_YET3BUL            "Yet 3-Set"
 END
 
 #endif // English (U.S.) resources
