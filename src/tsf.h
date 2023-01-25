@@ -40,7 +40,7 @@ inline void SafeStringCopy (WCHAR *pchDst, ULONG cchMax, const WCHAR *pchSrc)
 {
     if (cchMax > 0)
     {
-        wcsncpy(pchDst, pchSrc, cchMax);
+        wcsncpy_s(pchDst, cchMax, pchSrc, cchMax);
         pchDst[cchMax-1] = '\0';
     }
 }

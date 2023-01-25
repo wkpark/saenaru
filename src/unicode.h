@@ -40,7 +40,7 @@ typedef TCHAR             MYCHAR;
 #define MyHanCharPrev(x, y)  MyHanCharPrevW((x), (y))
 #define MyCharNext(x)     MyCharNextW(x)
 #include <string.h>
-#define Mystrtok          wcstok
+#define Mystrtok(a,b,c)   wcstok_s((a),(b),(c))
 #define Mystrchr          wcschr
 #define Mylstrcpyn        lstrcpyn
 #define MyTextOut         TextOut
