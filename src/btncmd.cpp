@@ -40,6 +40,7 @@
 extern "C" {
 #include "saenaru.h"
 #include "resource.h"
+#include "hangul.h"
 }
 /*	Platform SDK に依存する部分。Platform SDK に include path
  *	を通すのが良いのか否か。出?れば DDK にこれらの header を
