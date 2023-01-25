@@ -33,6 +33,7 @@
 #include <windows.h>
 #include "immdev.h"
 #include "saenaru.h"
+#include "hangul.h"
 #include "resource.h"
 #include "immsec.h"
 

@@ -123,7 +123,11 @@ WORD PASCAL checkDvorak(WORD);
 int PASCAL set_keyboard(UINT);
 int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);
+WCHAR PASCAL hangul_compose(WCHAR first, WCHAR last);
 
 BOOL hangul_is_syllable(WCHAR);
 void PASCAL hangul_syllable_to_jamo(WCHAR, WCHAR*, WCHAR*, WCHAR*);
 WCHAR PASCAL hangul_jamo_to_syllable(WCHAR, WCHAR, WCHAR);
+WCHAR PASCAL hangul_jamo_to_cjamo_full(WCHAR key);
+WCHAR PASCAL hangul_jamo_to_cjamo(WCHAR key);
+BOOL hangul_is_cjamo(WCHAR c);

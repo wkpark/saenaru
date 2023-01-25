@@ -44,6 +44,8 @@ extern DWORD dwScanCodeBased;
 extern DWORD dwToggleKey;
 extern DWORD dwImeFlag;
 
+DWORD PASCAL GetDwordFromSetting(LPTSTR lpszKey);
+
 void PASCAL SetGlobalFlags()
 {
     DWORD tmp;

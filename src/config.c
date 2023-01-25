@@ -36,8 +36,6 @@
 #include "hangul.h"
 #include "prsht.h"
 #include "resource.h"
-#define MEMALLOC(x)      LocalAlloc(LMEM_FIXED, x)
-#define MEMFREE(x)       LocalFree(x)
 
 #define MAX_PAGES 5
 
