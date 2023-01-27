@@ -36,6 +36,28 @@
 #define ARRAYSIZE(array)    (sizeof (array) / sizeof (array[0]))
 #endif
 
+#ifdef _WIN64
+#define TSF_NEED_MUTEX
+
+extern "C" {
+#include "immsec.h"
+}
+
+static inline HANDLE PASCAL
+SaenaruCreateMutex(LPCTSTR pMutexName)
+{
+    PSECURITY_ATTRIBUTES psa;
+    HANDLE hMutex;
+
+    psa = CreateSecurityAttributes();
+    //psa = NULL;
+    hMutex = CreateMutex(psa, FALSE, pMutexName);
+    if (psa != NULL)
+        FreeSecurityAttributes(psa);
+    return hMutex;
+}
+#endif
+
 inline void SafeStringCopy (WCHAR *pchDst, ULONG cchMax, const WCHAR *pchSrc)
 {
     if (cchMax > 0)
