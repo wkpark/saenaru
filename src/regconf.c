@@ -33,8 +33,8 @@
 #include "unicode.h"
 #include "debug.h"
 
-#define MEMALLOC(x)      LocalAlloc(LMEM_FIXED, x)
-#define MEMFREE(x)       LocalFree(x)
+#define MEMALLOC(x)      HeapAlloc(GetProcessHeap(), 0, (x))
+#define MEMFREE(x)       HeapFree(GetProcessHeap(), 0, (x))
 
 #define SAENARU_KEYBOARD_2SET 2
 #define SAENARU_KEYBOARD_3SET 3
