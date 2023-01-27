@@ -4,6 +4,7 @@
 Unicode true
 
 !define RELVERSION      "1.2.0-GIT"
+!include /NONFATAL ".\ver.nsi"
 !define APPNAME         "새나루 스냅샷 ${RELVERSION}"
 
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
@@ -297,6 +298,7 @@ Section /o "기본 한글입력기로 지정" SecDefault
   ReadRegStr $0 HKCU "Keyboard Layout\Preload" "1"
   StrCmp $0 "e0120412" exit # saenaru
   StrCmp $0 "e0130412" exit # saenaru dvorak
+  StrCmp $0 "e0140412" exit # saenaru colemak
   ; set Saenaru as the default IME
   ; with rundll32
   ;
