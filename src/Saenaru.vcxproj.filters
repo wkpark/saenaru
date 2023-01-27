@@ -40,6 +40,12 @@
     <ClInclude Include="vksub.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hangul.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="saenaru.c">
@@ -117,6 +123,18 @@
     <ClCompile Include="btnext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="regconf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regime.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hansub.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strsubs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="saenaru.rc">
@@ -137,6 +155,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\resource\text\hankey.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\resource\text\han2key.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\resource\text\engkey.ico">

@@ -88,6 +88,7 @@
     <Image Include="..\resource\penindic.ico" />
     <Image Include="..\resource\about.ico" />
     <Image Include="..\resource\text\hankey.ico" />
+    <Image Include="..\resource\text\han2key.ico" />
     <Image Include="..\resource\text\engkey.ico" />
     <Image Include="..\resource\text\hanjakey.ico" />
     <Image Include="..\resource\keyboard.ico" />
