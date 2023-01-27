@@ -327,7 +327,8 @@ VOID FreeSecurityAttributes( PSECURITY_ATTRIBUTES psa )
 //
 BOOL IsNT()
 {
-    return GetVersionInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT;
+    return (GetVersionInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT) &&
+        (GetVersionInfo()->dwMajorVersion >= 4);
 }
 
 POSVERSIONINFO GetVersionInfo()

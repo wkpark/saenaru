@@ -204,7 +204,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     LPINPUTCONTEXT lpIMC;
     LPCOMPOSITIONSTRING lpCompStr;
     LPCANDIDATEINFO lpCandInfo;
-    LPCANDIDATELIST lpCandList;
+    LPCANDIDATELIST lpCandList = NULL;
     MYCHAR szBuf[1024+2];
     int nBufLen;
     LPMYSTR lpstr;
