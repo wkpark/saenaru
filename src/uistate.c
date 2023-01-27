@@ -259,8 +259,12 @@ void PASCAL PaintStatus( HWND hStatusWnd , HDC hDC, LPPOINT lppt, DWORD dwPushed
         if (lpIMC->fOpen) {
             if (lpIMC->fdwConversion & IME_CMODE_HANJACONVERT)
                 x = 40;
-            else if (lpIMC->fdwConversion & IME_CMODE_NATIVE)
-                x = 0;
+            else if (lpIMC->fdwConversion & IME_CMODE_NATIVE) {
+                if (dwImeFlag & AUTOMATA_3SET)
+                    x = 0; /* 3SET */
+                else
+                    x = 100; /* 2SET */
+            }
         }
 
         bmTemp = CreateCompatibleBitmap(hDC, BTX, BTY);
