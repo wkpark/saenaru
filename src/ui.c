@@ -292,9 +292,11 @@ LPARAM lParam;
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
             //SetConsoleHookFunc();
+#if !defined(NO_TSF)
             if (InitLanguageBar()) {
                 ActivateLanguageBar(TRUE);
             }
+#endif
 
             break;
 
@@ -571,8 +573,10 @@ LPARAM lParam;
 
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
+#if !defined(NO_TSF)
             ActivateLanguageBar(FALSE);
             //XXX UninitLanguageBar();
+#endif
             //UnsetConsoleHookFunc();
 
             break;
@@ -770,7 +774,10 @@ LONG PASCAL NotifyCommand(HIMC hUICurIMC, HWND hWnd, UINT message, WPARAM wParam
             }
 #ifndef USE_STATUS_WIN98_XXX
             if (!GetDwordFromSetting(TEXT("HideStatus"))
-                    && !IsLangBarEnabled()) {
+#if !defined(NO_TSF)
+                    && !IsLangBarEnabled()
+#endif
+                    ) {
                 MyDebugPrint((TEXT("***** LangBar NOT Enabled ******\r\n")));
             if (!IsWindow(lpUIExtra->uiStatus.hWnd))
             {
