@@ -139,7 +139,7 @@ public:
     {
         if (_pComposition != NULL)
         {
-            //_ClearCompositionDisplayAttributes(ec);
+            _ClearCompositionDisplayAttributes(ec);
             _pComposition->EndComposition(ec);
             SafeReleaseClear(_pComposition);
         }

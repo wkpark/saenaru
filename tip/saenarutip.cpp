@@ -196,10 +196,10 @@ STDAPI CSaenaruTextService::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
         goto ExitError;
     }
 
-    /*
     if (!_InitDisplayAttributeGuidAtom())
         goto ExitError;
 
+    /*
     if (!_InitCleanupContextDurationSink())
         goto ExitError;
 

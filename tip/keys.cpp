@@ -263,7 +263,7 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
     // apply our dislay attribute property to the inserted text
     // we need to apply it to the entire composition, since the
     // display attribute property is static, not static compact
-    //_SetCompositionDisplayAttributes(ec);
+    _SetCompositionDisplayAttributes(ec);
 
 Exit:
     tfSelection.range->Release();
@@ -559,7 +559,7 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
     // apply our dislay attribute property to the inserted text
     // we need to apply it to the entire composition, since the
     // display attribute property is static, not static compact
-    //_SetCompositionDisplayAttributes(ec);
+    _SetCompositionDisplayAttributes(ec);
 
 Exit:
     //if (tfSelection.range)

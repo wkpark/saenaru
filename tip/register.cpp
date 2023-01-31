@@ -30,7 +30,7 @@ c_rgCategories[] =
     { &GUID_TFCAT_TIP_KEYBOARD, &c_clsidSaenaruTextService },
     { &GUID_TFCAT_TIPCAP_IMMERSIVESUPPORT, &c_clsidSaenaruTextService },
     { &GUID_TFCAT_TIPCAP_SYSTRAYSUPPORT, &c_clsidSaenaruTextService }, /* not needed but useful for debuging purpose */
-/*    { &GUID_TFCAT_DISPLAYATTRIBUTEPROVIDER, &c_clsidSaenaruTextService }, */
+    { &GUID_TFCAT_DISPLAYATTRIBUTEPROVIDER, &c_clsidSaenaruTextService },
 /*   { &GUID_TFCAT_PROPSTYLE_STATICCOMPACT, &c_guidCaseProperty }, */
     { &GUID_TFCAT_PROPSTYLE_CUSTOM, &c_guidCustomProperty },
 };

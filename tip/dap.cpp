@@ -40,11 +40,15 @@ g_DisplayAttributeInfo;
 
 const TF_DISPLAYATTRIBUTE CDisplayAttributeInfo::_c_DefaultDisplayAttribute =
 {
-    { TF_CT_COLORREF, RGB(255, 0, 0) },     // text color
-    { TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
-    TF_LS_SOLID,                            // underline style
+    //{ TF_CT_COLORREF, RGB(255, 0, 0) },     // text color
+    //{ TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
+    { TF_CT_COLORREF, RGB(255,255,255) },     // text color
+    { TF_CT_COLORREF, RGB(  0,110,210) },     // background color
+    TF_LS_NONE,                               // underline style
+    //TF_LS_SOLID,                            // underline style
     FALSE,                                  // underline boldness
-    { TF_CT_COLORREF, RGB(255, 0, 0) },     // underline color
+    { TF_CT_NONE, 0 },     // underline color
+    //{ TF_CT_COLORREF, RGB(255, 0, 0) },     // underline color
     TF_ATTR_INPUT                           // attribute info
 };
 

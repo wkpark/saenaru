@@ -214,7 +214,7 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         DEBUGPRINTFEX(100, (TEXT("\tSetComposition\n"), ec));
         _pSaenaru->_SetComposition(pComposition);
         // underline the composition text to give the user some feedback UI
-        //_pSaenaru->_SetCompositionDisplayAttributes(ec);
+        _pSaenaru->_SetCompositionDisplayAttributes(ec);
 
         // set selection to the adjusted range
         TF_SELECTION tfSelection;
@@ -331,11 +331,6 @@ STDAPI CEndCompositionEditSession::DoEditSession(TfEditCookie ec)
     DEBUGPRINTFEX(100, (TEXT("\t_TerminateCompositon() !!\n")));
 #endif
 
-    // apply our dislay attribute property to the inserted text
-    // we need to apply it to the entire composition, since the
-    // display attribute property is static, not static compact
-    //_SetCompositionDisplayAttributes(ec);
-
     hr = S_OK;
 
     return hr;
@@ -427,7 +422,7 @@ STDAPI CCompositionEditSession::DoEditSession(TfEditCookie ec)
         {
             _pSaenaru->_SetComposition(pComposition);
             // underline the composition text to give the user some feedback UI
-            //_pSaenaru->_SetCompositionDisplayAttributes(ec);
+            _pSaenaru->_SetCompositionDisplayAttributes(ec);
         }
     }
 
@@ -536,6 +531,7 @@ BOOL CSaenaruTextService::_SetCompositionDisplayAttributes(TfEditCookie ec)
     VARIANT var;
     HRESULT hr;
 
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_SetCompositionDisplayAttributes()\n")));
     // we need a range and the context it lives in
     if (_pComposition->GetRange(&pRangeComposition) != S_OK)
         return FALSE;
@@ -560,6 +556,7 @@ BOOL CSaenaruTextService::_SetCompositionDisplayAttributes(TfEditCookie ec)
     hr = pDisplayAttributeProperty->SetValue(ec, pRangeComposition, &var);
 
     pDisplayAttributeProperty->Release();
+    DEBUGPRINTFEX(100, (TEXT("\tOK!!\n")));
 
 Exit:
     pRangeComposition->Release();
