@@ -1,0 +1,297 @@
+//
+// saenarutip.rc
+//
+// Resources.
+//
+
+#define APSTUDIO_READONLY_SYMBOLS
+
+#include "resource.h"
+#include "winver.h"
+#include "version.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+IMEICON		ICON	DISCARDABLE		"..\\resource\\penindic.ico"
+INDIC_SAENARU	ICON	DISCARDABLE		"..\\resource\\saenaru.ico"
+INDIC_HAN	ICON	DISCARDABLE		"..\\resource\\text\hankey.ico"
+INDIC_HAN2	ICON	DISCARDABLE		"..\\resource\\text\han2key.ico"
+INDIC_ENG	ICON	DISCARDABLE		"..\\resource\\text\engkey.ico"
+INDIC_HANJA	ICON	DISCARDABLE		"..\\resource\\text\\hanjakey.ico"
+INDIC_KEY	ICON    DISCARDABLE		"..\\resource\\keyboard.ico"
+INDIC_HALF	ICON    DISCARDABLE		"..\\resource\\half.ico"
+INDIC_FULL	ICON    DISCARDABLE		"..\\resource\\full.ico"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "resrc1.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "#include ""winuser.h""\r\n"
+    "#include ""saenarutip.h""\r\n"
+    "#include ""resource.h""\r\n"
+    "#include ""winver.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+/////////////////////////////////////////////////////////////////////////////
+// Korean resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VER_MAJOR,VER_MINOR,VER_BUILD,VER_PATCHLEVEL
+ PRODUCTVERSION VER_MAJOR,VER_MINOR,VER_BUILD,VER_PATCHLEVEL
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0xbL
+#else
+ FILEFLAGS 0xaL
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+#if 0
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041203b5"
+        BEGIN
+            VALUE "Comments", "새나루 TSF 한글 입력기\0"
+            VALUE "CompanyName", "Open Hangul Project\0"
+            VALUE "FileDescription", "새나루 TIP" VER_MAJOR_STR "." VER_MINOR_STR "." VER_PATCHLEVEL_STR "\0"
+            VALUE "FileVersion", VER_MAJOR_STR "." VER_MINOR_STR "\0"
+            VALUE "InternalName", "SAENARUTIP\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 박원규.\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "SAENARUTIP.DLL\0"
+#ifdef VER_SNAPSHOT
+            VALUE "PrivateBuild", VER_SNAPSHOT "\0"
+#endif
+            VALUE "ProductName", "새나루 TIP\0"
+            VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR "\0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 949
+    END
+#endif
+
+#if 1
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Saenaru TSF Hangul Input Method\0"
+            VALUE "CompanyName", "Open Hangul Project\0"
+            VALUE "FileDescription", "Saenaru TIP" VER_MAJOR_STR "." VER_MINOR_STR "." VER_PATCHLEVEL_STR "\0"
+            VALUE "FileVersion", VER_MAJOR_STR "." VER_MINOR_STR "\0"
+            VALUE "InternalName", "SAENARUTIP\0"
+            VALUE "LegalCopyright", "MIT Copyright (C) 2023 Won-Kyu Park.\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "SAENARUTIP.DLL\0"
+#ifdef VER_SNAPSHOT
+            VALUE "PrivateBuild", VER_SNAPSHOT "\0"
+#endif
+            VALUE "ProductName", "Saenaru TIP\0"
+            VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR "\0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+#endif
+
+END
+
+#endif    // !_MAC
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+RIGHTCLKMENU MENU DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    POPUP ""
+    BEGIN
+
+    	MENUITEM "환경설정(&R)",	IDM_CONFIG
+	MENUITEM SEPARATOR
+	MENUITEM "한글(&H)",		IDM_HANGUL
+	MENUITEM "영문(&E)",		IDM_ENG
+	MENUITEM "한자(&I)",		IDM_HANJA
+	MENUITEM SEPARATOR
+	MENUITEM "두벌식(&2)",  	IDM_OLD2BUL
+	MENUITEM "세벌식(&3)",  	IDM_3BUL
+	MENUITEM "세벌식 390(&9)",  	IDM_390
+    	MENUITEM "옛한글 두벌(&D)",	IDM_YET2BUL
+    	MENUITEM "옛한글 세벌(&S)",	IDM_YET3BUL
+     	MENUITEM "북한 두벌식(&P)",	IDM_NK_2BUL
+    	MENUITEM "세벌식 순아래(&N)",	IDM_3SOON
+    	MENUITEM "사용자 자판(&U)",	IDM_USER
+    	MENUITEM "사용자 조합(&C)",	IDM_USER_COMP
+	MENUITEM SEPARATOR
+    	MENUITEM "드보락(&V)",		IDM_DVORAK
+    	MENUITEM "ESC 영문전환(&E)",	IDM_ESC_ASCII
+    	MENUITEM "Shift-SPACE 한/영키 (&H)", IDM_HANGUL_TOGGLE
+    	MENUITEM "단어단위 편집(&W)",	IDM_WORD_UNIT
+	MENUITEM SEPARATOR
+    	MENUITEM "키보드 보기(&K)",	IDM_SHOW_KEYBOARD
+	MENUITEM SEPARATOR
+        MENUITEM "변환(&C)",		IDM_RECONVERT
+	MENUITEM "새나루는(&A)...",	IDM_ABOUT
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_SAENARU_DESC        "새나루 TSF 한글 입력기"
+    IDS_HELP_DESC           "새나루 TSF 한글 입력기 도움말(&H)"
+    IDS_ABOUT               "새나루에 대해(&A)..."
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_INPUT_CMODE_DESC        "입력방식"
+    IDS_TOGGLE_HALFFULL_DESC    "전각/반각 전환"
+    IDS_KEYBOARD_OPTION_DESC    "글쇠/입력기 설정"
+    IDS_MENU_HANGUL             "한글(&H)"
+    IDS_MENU_ASCII              "영문(&E)"
+    IDS_MENU_HANJA              "한자(&I)"
+    IDS_MENU_CANCEL             "취소"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_START_END_COMPOSITION   "컴포지션 시작/종료"
+    IDS_GET_GLOBAL_COMPART      "전역 컴파트먼트 설정"
+    IDS_SET_CASE_PROP           "대/소문자 속성 설정"
+    IDS_SET_CUSTOM_PROP         "커스텀 속성 설정"
+    IDS_GET_CASE_PROP           "대/소문자 속성 보기"
+    IDS_GET_CUSTOM_PROP         "커스텀 속성 보기"
+END
+
+#endif    // Korean resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+
+
+RIGHTCLKMENU MENU DISCARDABLE
+LANGUAGE 0x09, 0x1
+BEGIN
+    POPUP ""
+    BEGIN
+
+    	MENUITEM "Configu&re",		IDM_CONFIG
+	MENUITEM SEPARATOR
+	MENUITEM "&Hangul",		IDM_HANGUL
+	MENUITEM "&English",		IDM_ENG
+	MENUITEM "&Ideograph",		IDM_HANJA
+	MENUITEM SEPARATOR
+	MENUITEM "&2-set",  		IDM_OLD2BUL
+	MENUITEM "&3-set",  		IDM_3BUL
+	MENUITEM "3-set 3&90",  	IDM_390
+    	MENUITEM "New 2-set(&D)",	IDM_NEW2BUL
+    	MENUITEM "New 3-set(&S)",	IDM_NEW3BUL
+     	MENUITEM "&Ahnmatae",		IDM_AHNMATAE
+    	MENUITEM "&Yet 2-set",	        IDM_YET2BUL
+    	MENUITEM "Yet 3-set(&Z)",	IDM_YET3BUL
+     	MENUITEM "2-set North-Korea(&P)", IDM_NK_2BUL
+    	MENUITEM "3-set &No-shift",	IDM_3SOON
+    	MENUITEM "&User keyboard",	IDM_USER
+    	MENUITEM "&Compose Map",	IDM_USER_COMP
+	MENUITEM SEPARATOR
+    	MENUITEM "D&vorak",		IDM_DVORAK
+    	MENUITEM "&ESC to english",	IDM_ESC_ASCII
+        MENUITEM "Use Shift-SPACE(&H)", IDM_HANGUL_TOGGLE
+    	MENUITEM "&Word unit edit",	IDM_WORD_UNIT
+	MENUITEM SEPARATOR
+    	MENUITEM "Show &Keyboard",	IDM_SHOW_KEYBOARD
+	MENUITEM SEPARATOR
+        MENUITEM "Re&Convert",		IDM_RECONVERT
+	MENUITEM "&About saenaru...",	IDM_ABOUT
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_SAENARU_DESC        "Saenaru TSF Hangul Input Method"
+    IDS_HELP_DESC           "&Help for Saenaru TSF Hangul IME"
+    IDS_ABOUT               "&About Saenaru..."
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_INPUT_CMODE_DESC        "Input Mode"
+    IDS_TOGGLE_HALFFULL_DESC    "Fullwidth/Halfwidth Toggle"
+    IDS_KEYBOARD_OPTION_DESC    "Keyboard/InputMethod Options"
+    IDS_MENU_HANGUL             "&Hangul"
+    IDS_MENU_ASCII              "&English"
+    IDS_MENU_HANJA              "&Ideograh"
+    IDS_MENU_CANCEL             "Cancel"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_START_END_COMPOSITION   "Start/End Composition"
+    IDS_GET_GLOBAL_COMPART      "Set Global Compartment"
+    IDS_SET_CASE_PROP           "Set Case Property"
+    IDS_SET_CUSTOM_PROP         "Set Custom Property"
+    IDS_GET_CASE_PROP           "View Case Property"
+    IDS_GET_CUSTOM_PROP         "View Custom Property"
+END
+
+#endif // English (U.S.) resources
+
+/*
+ * vim: et sts=4 sw=4
+ */
