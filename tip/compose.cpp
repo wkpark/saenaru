@@ -188,7 +188,7 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         goto Exit;
     }
 
-    if (pInsertAtSelection->InsertTextAtSelection(ec, ch ? 0 : TF_IAS_QUERYONLY, ch ? &ch : NULL, ch ? 1 : 0, &pRangeInsert) != S_OK)
+    if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, ch ? &ch : NULL, ch ? ch : 0, &pRangeInsert) != S_OK)
         goto Exit;
 
     // get an interface on the context to deal with compositions
@@ -204,10 +204,16 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         DEBUGPRINTFEX(100, (TEXT("\tStartComposition() failed??\n")));
     }
 
-    //pRangeInsert->Release();
-
     // _pComposition may be NULL even if StartComposition return S_OK, this mean the application
     // rejected the composition
+
+    // insert the text
+    // we use SetText here instead of InsertTextAtSelection because we've already started a composition
+    // we don't want to the app to adjust the insertion point inside our composition
+    if (ch != NULL && pRangeInsert->SetText(ec, TF_ST_CORRECTION, &ch, 1) != S_OK)
+    {
+        goto Exit;
+    }
 
     if (pComposition != NULL)
     {
@@ -266,19 +272,26 @@ STDAPI CEndCompositionEditSession::DoEditSession(TfEditCookie ec)
         // we need a special interface to insert text at the selection
         if (_pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection) == S_OK)
         {
-            //if (pInsertAtSelection->InsertTextAtSelection(ec, 0, &ch, 1, &pRangeInsert) == S_OK)
-            if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) == S_OK)
+            if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, ch ? &ch :NULL, ch ? ch : 0, &pRangeInsert) == S_OK)
             {
                 DEBUGPRINTFEX(100, (TEXT("\tANCHOR_END SetSelection()\n")));
 
-                // fix for firefox/chrome. from NavilIME
+                // double check empty range case. (firefox/chrome etc.)
                 BOOL isEmpty;
-                pRangeInsert->IsEmpty(ec, &isEmpty);
-                DEBUGPRINTFEX(100, (TEXT("\tRange is empty = %d\n"), isEmpty));
-                if (isEmpty)
+                ITfRange *range = NULL;
+                if (ch != NULL && pRangeInsert->IsEmpty(ec, &isEmpty) == S_OK && pRangeInsert->Clone(&range) == S_OK)
                 {
-                    LONG cch;
-                    pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
+                    BOOL isEqual;
+                    range->Collapse(ec, TF_ANCHOR_END);
+                    pRangeInsert->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
+                    DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
+                    if (isEqual)
+                    {
+                        LONG cch;
+                        pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
+                    }
+
+                    range->Release();
                 }
 
                 if (pRangeInsert->SetText(ec, 0, &ch, 1) == S_OK)

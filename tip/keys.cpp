@@ -239,14 +239,22 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
         }
     }
 
-    // fix for firefox/chrome. from NavilIME
+    // check empty range case. (firefox/chrome etc.)
     BOOL isEmpty;
-    tfSelection.range->IsEmpty(ec, &isEmpty);
-    DEBUGPRINTFEX(100, (TEXT("\tRange is empty = %d\n"), isEmpty));
-    if (isEmpty)
+    ITfRange *range = NULL;
+    if (ch != NULL && tfSelection.range->IsEmpty(ec, &isEmpty) == S_OK && tfSelection.range->Clone(&range) == S_OK)
     {
-        LONG cch;
-        tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
+        BOOL isEqual;
+        range->Collapse(ec, TF_ANCHOR_END);
+        tfSelection.range->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
+        DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
+        if (isEqual)
+        {
+            LONG cch;
+            tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
+        }
+
+        range->Release();
     }
     // insert the text
     // we use SetText here instead of InsertTextAtSelection because we've already started a composition
@@ -477,14 +485,22 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
     {
         if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) == S_OK)
         {
-            // fix for firefox/chrome. from NavilIME
+            // double check empty range case. (firefox/chrome etc.)
             BOOL isEmpty;
-            pRangeInsert->IsEmpty(ec, &isEmpty);
-            DEBUGPRINTFEX(100, (TEXT("\tXXX Range is empty = %d\n"), isEmpty));
-            if (isEmpty)
+            ITfRange *range = NULL;
+            if (ch != NULL && pRangeInsert->IsEmpty(ec, &isEmpty) == S_OK && pRangeInsert->Clone(&range) == S_OK)
             {
-                LONG cch;
-                pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
+                BOOL isEqual;
+                range->Collapse(ec, TF_ANCHOR_END);
+                pRangeInsert->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
+                DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
+                if (isEqual)
+                {
+                    LONG cch;
+                    pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
+                }
+
+                range->Release();
             }
 
             if (pRangeInsert->SetText(ec, TF_ST_CORRECTION, &ch, 1) == S_OK)
@@ -525,14 +541,22 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
         }
     }
 
-    // fix for firefox/chrome. from NavilIME
+    // double check empty range case. (firefox/chrome etc.)
     BOOL isEmpty;
-    tfSelection.range->IsEmpty(ec, &isEmpty);
-    DEBUGPRINTFEX(100, (TEXT("\tRange is empty = %d\n"), isEmpty));
-    if (isEmpty)
+    ITfRange *range = NULL;
+    if (ch != NULL && tfSelection.range->IsEmpty(ec, &isEmpty) == S_OK && tfSelection.range->Clone(&range) == S_OK)
     {
-        LONG cch;
-        tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
+        BOOL isEqual;
+        range->Collapse(ec, TF_ANCHOR_END);
+        tfSelection.range->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
+        DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
+        if (isEqual)
+        {
+            LONG cch;
+            tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
+        }
+
+        range->Release();
     }
 
     // insert the text
@@ -546,6 +570,7 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
     tfSelection.range->Collapse(ec, TF_ANCHOR_END);
 
     pContext->SetSelection(ec, 1, &tfSelection);
+    tfSelection.range->Release();
 #endif
 
     if (ret > 0) {
@@ -562,8 +587,6 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
     _SetCompositionDisplayAttributes(ec);
 
 Exit:
-    //if (tfSelection.range)
-    //    tfSelection.range->Release();
     DEBUGPRINTFEX(100, (TEXT("\tEND CSaenaruTextService::_HandleKeyDown()\n")));
     return hr;
 }
