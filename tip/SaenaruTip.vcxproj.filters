@@ -42,6 +42,9 @@
     <ClCompile Include="langbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="btnshape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="precomp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,6 +64,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tmgrsink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/hangul.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/regconf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/reg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/strsubs.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,6 +98,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="saenarutip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="langbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="btnshape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../src/hangul.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../src/debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
