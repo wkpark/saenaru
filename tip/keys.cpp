@@ -459,6 +459,12 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
         if (ncs > 0)
             ch = lcs[ncs - 1];
         DEBUGPRINTFEX(100, (TEXT("\thangul_automata preedit : %d, %s\r\n"), ncs, lcs));
+    } else {
+        // new composition
+        int ncs;
+        ncs = hangul_ic_get(&ic, 0, lcs);
+        ch = lcs[0];
+        DEBUGPRINTFEX(100, (TEXT("\thangul_automata new preedit : %d, %s\r\n"), ncs, lcs));
     }
 
     hr = S_OK; // return S_FALSE to NOT eat the key
