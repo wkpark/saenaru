@@ -276,24 +276,6 @@ STDAPI CEndCompositionEditSession::DoEditSession(TfEditCookie ec)
             {
                 DEBUGPRINTFEX(100, (TEXT("\tANCHOR_END SetSelection()\n")));
 
-                // double check empty range case. (firefox/chrome etc.)
-                BOOL isEmpty;
-                ITfRange *range = NULL;
-                if (ch != NULL && pRangeInsert->IsEmpty(ec, &isEmpty) == S_OK && pRangeInsert->Clone(&range) == S_OK)
-                {
-                    BOOL isEqual;
-                    range->Collapse(ec, TF_ANCHOR_END);
-                    pRangeInsert->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
-                    DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
-                    if (isEqual)
-                    {
-                        LONG cch;
-                        pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
-                    }
-
-                    range->Release();
-                }
-
                 if (pRangeInsert->SetText(ec, 0, &ch, 1) == S_OK)
                 {
                     // update the selection

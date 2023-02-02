@@ -239,23 +239,6 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
         }
     }
 
-    // check empty range case. (firefox/chrome etc.)
-    BOOL isEmpty;
-    ITfRange *range = NULL;
-    if (ch != NULL && tfSelection.range->IsEmpty(ec, &isEmpty) == S_OK && tfSelection.range->Clone(&range) == S_OK)
-    {
-        BOOL isEqual;
-        range->Collapse(ec, TF_ANCHOR_END);
-        tfSelection.range->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
-        DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
-        if (isEqual)
-        {
-            LONG cch;
-            tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
-        }
-
-        range->Release();
-    }
     // insert the text
     // we use SetText here instead of InsertTextAtSelection because we've already started a composition
     // we don't want to the app to adjust the insertion point inside our composition
@@ -264,7 +247,7 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
 
     // update the selection, we'll make it an insertion point just past
     // the inserted text.
-    tfSelection.range->Collapse(ec, TF_ANCHOR_END);
+    //tfSelection.range->Collapse(ec, TF_ANCHOR_END);
 
     pContext->SetSelection(ec, 1, &tfSelection);
 
@@ -491,23 +474,6 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
     {
         if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) == S_OK)
         {
-            // double check empty range case. (firefox/chrome etc.)
-            BOOL isEmpty;
-            ITfRange *range = NULL;
-            if (ch != NULL && pRangeInsert->IsEmpty(ec, &isEmpty) == S_OK && pRangeInsert->Clone(&range) == S_OK)
-            {
-                BOOL isEqual;
-                range->Collapse(ec, TF_ANCHOR_END);
-                pRangeInsert->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
-                DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
-                if (isEqual)
-                {
-                    LONG cch;
-                    pRangeInsert->ShiftStart(ec, -1, &cch, NULL);
-                }
-
-                range->Release();
-            }
 
             if (pRangeInsert->SetText(ec, TF_ST_CORRECTION, &ch, 1) == S_OK)
             {
@@ -515,8 +481,8 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
                 TF_SELECTION tfSelection;
                 tfSelection.range = pRangeInsert;
                 tfSelection.style.ase = TF_AE_NONE;
-                tfSelection.style.fInterimChar = TRUE; // not a intermidate char
-                tfSelection.range->Collapse(ec, TF_ANCHOR_END);
+                tfSelection.style.fInterimChar = TRUE; // a intermidate char
+                //tfSelection.range->Collapse(ec, TF_ANCHOR_END);
 
                 pContext->SetSelection(ec, 1, &tfSelection);
 
@@ -547,24 +513,6 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
         }
     }
 
-    // double check empty range case. (firefox/chrome etc.)
-    BOOL isEmpty;
-    ITfRange *range = NULL;
-    if (ch != NULL && tfSelection.range->IsEmpty(ec, &isEmpty) == S_OK && tfSelection.range->Clone(&range) == S_OK)
-    {
-        BOOL isEqual;
-        range->Collapse(ec, TF_ANCHOR_END);
-        tfSelection.range->IsEqualStart(ec, range, TF_ANCHOR_START, &isEqual);
-        DEBUGPRINTFEX(100, (TEXT("\tis Eqaul Start = %d\n"), isEqual));
-        if (isEqual)
-        {
-            LONG cch;
-            tfSelection.range->ShiftStart(ec, -1, &cch, NULL);
-        }
-
-        range->Release();
-    }
-
     // insert the text
     // we use SetText here instead of InsertTextAtSelection because we've already started a composition
     // we don't want to the app to adjust the insertion point inside our composition
@@ -573,7 +521,7 @@ HRESULT CSaenaruTextService::_HandleKeyDown(TfEditCookie ec, ITfContext *pContex
 
     // update the selection, we'll make it an insertion point just past
     // the inserted text.
-    tfSelection.range->Collapse(ec, TF_ANCHOR_END);
+    //tfSelection.range->Collapse(ec, TF_ANCHOR_END);
 
     pContext->SetSelection(ec, 1, &tfSelection);
     tfSelection.range->Release();
