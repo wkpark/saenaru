@@ -519,13 +519,18 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-BOOL CSaenaruTextService::_SetCompositionDisplayAttributes(TfEditCookie ec)
+BOOL CSaenaruTextService::_SetCompositionDisplayAttributes(TfEditCookie ec, TfGuidAtom gaDisplayAttribute)
 {
     ITfRange *pRangeComposition;
     ITfContext *pContext;
     ITfProperty *pDisplayAttributeProperty;
     VARIANT var;
     HRESULT hr;
+
+    if (gaDisplayAttribute == 0)
+    {
+        gaDisplayAttribute = _gaDisplayAttributeConverted;
+    }
 
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_SetCompositionDisplayAttributes()\n")));
     // we need a range and the context it lives in
@@ -547,7 +552,7 @@ BOOL CSaenaruTextService::_SetCompositionDisplayAttributes(TfEditCookie ec)
     // set the value over the range
     // the application will use this guid atom to lookup the acutal rendering information
     var.vt = VT_I4; // we're going to set a TfGuidAtom
-    var.lVal = _gaDisplayAttribute; // our cached guid atom for c_guidSaenaruDisplayAttribute
+    var.lVal = gaDisplayAttribute;
 
     hr = pDisplayAttributeProperty->SetValue(ec, pRangeComposition, &var);
 
@@ -582,7 +587,8 @@ BOOL CSaenaruTextService::_InitDisplayAttributeGuidAtom()
         return FALSE;
     }
 
-    hr = pCategoryMgr->RegisterGUID(c_guidSaenaruDisplayAttribute, &_gaDisplayAttribute);
+    hr = pCategoryMgr->RegisterGUID(c_guidSaenaruDisplayAttributeInput, &_gaDisplayAttributeInput);
+    hr = pCategoryMgr->RegisterGUID(c_guidSaenaruDisplayAttributeConverted, &_gaDisplayAttributeConverted);
 
     pCategoryMgr->Release();
 

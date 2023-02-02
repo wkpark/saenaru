@@ -54,8 +54,8 @@ CSaenaruTextService::CSaenaruTextService()
 
     _fCleaningUp = FALSE;
 
-    //_gaDisplayAttribute = TF_DEFAULT_SELECTION;
-    _gaDisplayAttribute = TF_INVALID_GUIDATOM;
+    _gaDisplayAttributeInput = TF_INVALID_GUIDATOM;
+    _gaDisplayAttributeConverted = TF_INVALID_GUIDATOM;
 
     _pLangBarItem = NULL;
 

@@ -10,21 +10,22 @@
 static const TCHAR c_szAttributeInfoKey[] = TEXT("Software\\Saenaru Text Service");
 static const TCHAR c_szAttributeInfoValueName[] = TEXT("DisplayAttr");
 
-// this text service has only a single display attribute so we'll use
-// a single static object.
+//+---------------------------------------------------------------------------
+//
+// CDisplayAttributeInfo class
+//
+//----------------------------------------------------------------------------
+
 class CDisplayAttributeInfo : public ITfDisplayAttributeInfo
 {
 public:
+    CDisplayAttributeInfo();
+    ~CDisplayAttributeInfo();
+
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void)
-    {
-        return DllAddRef();
-    }
-    STDMETHODIMP_(ULONG) Release(void)
-    {
-        return DllRelease();
-    }
+    STDMETHODIMP_(ULONG) AddRef(void);
+    STDMETHODIMP_(ULONG) Release(void);
 
     // ITfDisplayAttributeInfo
     STDMETHODIMP GetGUID(GUID *pguid);
@@ -33,23 +34,86 @@ public:
     STDMETHODIMP SetAttributeInfo(const TF_DISPLAYATTRIBUTE *ptfDisplayAttr);
     STDMETHODIMP Reset();
 
-private:
-    static const TF_DISPLAYATTRIBUTE _c_DefaultDisplayAttribute;
-}
-g_DisplayAttributeInfo;
+protected:
+    const GUID* _pguid;
+    const TF_DISPLAYATTRIBUTE* _pDisplayAttribute;
+    const WCHAR* _pDescription;
+    const WCHAR* _pValueName;
 
-const TF_DISPLAYATTRIBUTE CDisplayAttributeInfo::_c_DefaultDisplayAttribute =
+private:
+    LONG _refCount; // COM ref count
+};
+
+//+---------------------------------------------------------------------------
+//
+// CDisplayAttributeInfoInput class
+//
+//----------------------------------------------------------------------------
+
+class CDisplayAttributeInfoInput : public CDisplayAttributeInfo
 {
-    //{ TF_CT_COLORREF, RGB(255, 0, 0) },     // text color
-    //{ TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
-    { TF_CT_COLORREF, RGB(255,255,255) },     // text color
-    { TF_CT_COLORREF, RGB(  0,110,210) },     // background color
-    TF_LS_NONE,                               // underline style
-    //TF_LS_SOLID,                            // underline style
+public:
+    CDisplayAttributeInfoInput()
+    {
+        _pguid = &c_guidSaenaruDisplayAttributeInput;
+        _pDisplayAttribute = &_s_DisplayAttribute;
+        _pDescription = _s_szDescription;
+        _pValueName = _s_szValueName;
+    }
+
+    static const TF_DISPLAYATTRIBUTE _s_DisplayAttribute;
+    static const WCHAR _s_szDescription[];
+    static const WCHAR _s_szValueName[];
+};
+
+//+---------------------------------------------------------------------------
+//
+// CDisplayAttributeInfoConverted class
+//
+//----------------------------------------------------------------------------
+
+class CDisplayAttributeInfoConverted : public CDisplayAttributeInfo
+{
+public:
+    CDisplayAttributeInfoConverted()
+    {
+        _pguid = &c_guidSaenaruDisplayAttributeConverted;
+        _pDisplayAttribute = &_s_DisplayAttribute;
+        _pDescription = _s_szDescription;
+        _pValueName = _s_szValueName;
+    }
+
+    static const TF_DISPLAYATTRIBUTE _s_DisplayAttribute;
+    static const WCHAR _s_szDescription[];
+    static const WCHAR _s_szValueName[];
+};
+
+// the registry values of the custmized display attributes
+const WCHAR CDisplayAttributeInfoInput::_s_szValueName[] = TEXT("DisplayAttributeInput");
+const WCHAR CDisplayAttributeInfoConverted::_s_szValueName[] = TEXT("DisplayAttributeConverted");
+
+// The descriptions
+const WCHAR CDisplayAttributeInfoInput::_s_szDescription[] = TEXT("Saenaru Display Attribute Input");
+const WCHAR CDisplayAttributeInfoConverted::_s_szDescription[] = TEXT("Saenaru Display Attribute Converted");
+
+const TF_DISPLAYATTRIBUTE CDisplayAttributeInfoInput::_s_DisplayAttribute =
+{
+    { TF_CT_COLORREF, RGB(0xff, 0xff, 0xff) }, // text color
+    { TF_CT_COLORREF, RGB(0x00, 0xff, 0xff) }, // background color
+    TF_LS_NONE,                             // underline style
     FALSE,                                  // underline boldness
-    { TF_CT_NONE, 0 },     // underline color
-    //{ TF_CT_COLORREF, RGB(255, 0, 0) },     // underline color
+    { TF_CT_NONE, 0 },                      // underline color
     TF_ATTR_INPUT                           // attribute info
+};
+
+const TF_DISPLAYATTRIBUTE CDisplayAttributeInfoConverted::_s_DisplayAttribute =
+{
+    { TF_CT_COLORREF, RGB(0xff, 0xff, 0xff) }, // text color
+    { TF_CT_COLORREF, RGB(0x00, 0x6e, 0xde) }, // background color
+    TF_LS_NONE,                             // underline style
+    FALSE,                                  // underline boldness
+    { TF_CT_NONE, 0 },                      // underline color
+    TF_ATTR_TARGET_CONVERTED                // attribute info
 };
 
 //+---------------------------------------------------------------------------
@@ -82,6 +146,65 @@ STDAPI CDisplayAttributeInfo::QueryInterface(REFIID riid, void **ppvObj)
 
 //+---------------------------------------------------------------------------
 //
+// ctor
+//
+//----------------------------------------------------------------------------
+
+CDisplayAttributeInfo::CDisplayAttributeInfo()
+{
+    DllAddRef();
+
+    _pguid = nullptr;
+    _pDisplayAttribute = nullptr;
+    _pValueName = nullptr;
+
+    _refCount = 1;
+}
+
+//+---------------------------------------------------------------------------
+//
+// dtor
+//
+//----------------------------------------------------------------------------
+
+CDisplayAttributeInfo::~CDisplayAttributeInfo()
+{
+    DllRelease();
+}
+
+//+---------------------------------------------------------------------------
+//
+// AddRef
+//
+//----------------------------------------------------------------------------
+
+ULONG CDisplayAttributeInfo::AddRef(void)
+{
+    return ++_refCount;
+}
+
+//+---------------------------------------------------------------------------
+//
+// Release
+//
+//----------------------------------------------------------------------------
+
+ULONG CDisplayAttributeInfo::Release(void)
+{
+    LONG cr = --_refCount;
+
+    assert(_refCount >= 0);
+
+    if (_refCount == 0)
+    {
+        delete this;
+    }
+
+    return cr;
+}
+
+//+---------------------------------------------------------------------------
+//
 // GetGUID
 //
 //----------------------------------------------------------------------------
@@ -91,7 +214,7 @@ STDAPI CDisplayAttributeInfo::GetGUID(GUID *pguid)
     if (pguid == NULL)
         return E_INVALIDARG;
 
-    *pguid = c_guidSaenaruDisplayAttribute;
+    *pguid = *_pguid;
 
     return S_OK;
 }
@@ -111,7 +234,7 @@ STDAPI CDisplayAttributeInfo::GetDescription(BSTR *pbstrDesc)
 
     *pbstrDesc = NULL;
 
-    if ((bstrDesc = SysAllocString(L"Saenaru Display Attribute")) == NULL)
+    if ((bstrDesc = SysAllocString(_pDescription)) == NULL)
         return E_OUTOFMEMORY;
 
     *pbstrDesc = bstrDesc;
@@ -134,6 +257,7 @@ STDAPI CDisplayAttributeInfo::GetAttributeInfo(TF_DISPLAYATTRIBUTE *ptfDisplayAt
     if (ptfDisplayAttr == NULL)
         return E_INVALIDARG;
 
+#if 0
     lResult = E_FAIL;
 
     if (RegOpenKeyEx(HKEY_CURRENT_USER, c_szAttributeInfoKey, 0, KEY_READ, &hKeyAttributeInfo) == ERROR_SUCCESS)
@@ -151,7 +275,12 @@ STDAPI CDisplayAttributeInfo::GetAttributeInfo(TF_DISPLAYATTRIBUTE *ptfDisplayAt
     {
         // go with the defaults
         *ptfDisplayAttr = _c_DefaultDisplayAttribute;
+        MyDebugPrint((TEXT("\t Default GetAttributeInfo()\n")));
     }
+#endif
+    // return the default display attribute.
+    *ptfDisplayAttr = *_pDisplayAttribute;
+    MyDebugPrint((TEXT("END GetAttributeInfo()\n")));
 
     return S_OK;
 }
@@ -164,6 +293,7 @@ STDAPI CDisplayAttributeInfo::GetAttributeInfo(TF_DISPLAYATTRIBUTE *ptfDisplayAt
 
 STDAPI CDisplayAttributeInfo::SetAttributeInfo(const TF_DISPLAYATTRIBUTE *ptfDisplayAttr)
 {
+#if 0
     HKEY hKeyAttributeInfo;
     LONG lResult;
 
@@ -181,6 +311,11 @@ STDAPI CDisplayAttributeInfo::SetAttributeInfo(const TF_DISPLAYATTRIBUTE *ptfDis
     RegCloseKey(hKeyAttributeInfo);
 
     return (lResult == ERROR_SUCCESS) ? S_OK : E_FAIL;
+#endif
+    MyDebugPrint((TEXT("\tEND SetAttributeInfo()\n")));
+    ptfDisplayAttr;
+
+    return E_NOTIMPL;
 }
 
 //+---------------------------------------------------------------------------
@@ -191,7 +326,7 @@ STDAPI CDisplayAttributeInfo::SetAttributeInfo(const TF_DISPLAYATTRIBUTE *ptfDis
 
 STDAPI CDisplayAttributeInfo::Reset()
 {
-    return SetAttributeInfo(&_c_DefaultDisplayAttribute);
+    return SetAttributeInfo(_pDisplayAttribute);
 }
 
 class CEnumDisplayAttributeInfo : public IEnumTfDisplayAttributeInfo
@@ -335,32 +470,58 @@ STDAPI CEnumDisplayAttributeInfo::Clone(IEnumTfDisplayAttributeInfo **ppEnum)
 // Returns an array of display attribute info objects supported by this service.
 //----------------------------------------------------------------------------
 
+const int MAX_DISPLAY_ATTRIBUTE_INFO = 2;
+
 STDAPI CEnumDisplayAttributeInfo::Next(ULONG ulCount, ITfDisplayAttributeInfo **rgInfo, ULONG *pcFetched)
 {
     ULONG cFetched;
 
-    if (pcFetched == NULL)
+    cFetched = 0;
+
+    if (ulCount == 0)
+        return S_OK;
+    if (rgInfo == NULL)
+    {
+        return E_INVALIDARG;
+    }
+
+    while (cFetched < ulCount)
+    {
+        ITfDisplayAttributeInfo* pDisplayAttributeInfo = nullptr;
+
+        if (_iIndex == 0)
+        {
+            pDisplayAttributeInfo = new CDisplayAttributeInfoInput();
+            if ((pDisplayAttributeInfo) == NULL)
+            {
+                return E_OUTOFMEMORY;
+            }
+        }
+        else if (_iIndex == 1)
+        {
+            pDisplayAttributeInfo = new CDisplayAttributeInfoConverted();
+            if ((pDisplayAttributeInfo) == NULL)
+            {
+                return E_OUTOFMEMORY;
+            }
+        }
+        else
+        {
+            break;
+        }
+        *rgInfo = pDisplayAttributeInfo;
+        rgInfo++;
+        cFetched++;
+        _iIndex++;
+    }
+
+    if (pcFetched != NULL)
     {
         // technically this is only legal if ulCount == 1, but we won't check
         pcFetched = &cFetched;
     }
 
-    *pcFetched = 0;
-
-    if (ulCount == 0)
-        return S_OK;
-
-    // we only have a single display attribute to enum, so this is trivial
-
-    if (_iIndex == 0)
-    {
-        *rgInfo = &g_DisplayAttributeInfo;
-        (*rgInfo)->AddRef();
-        *pcFetched = 1;
-        _iIndex++;
-    }
-
-    return (*pcFetched == ulCount) ? S_OK : S_FALSE;
+    return (cFetched == ulCount) ? S_OK : S_FALSE;
 }
 
 //+---------------------------------------------------------------------------
@@ -385,12 +546,12 @@ STDAPI CEnumDisplayAttributeInfo::Reset()
 
 STDAPI CEnumDisplayAttributeInfo::Skip(ULONG ulCount)
 {
-    // we have only a single item to enum
-    // so we can just skip it and avoid any overflow errors
-    if (ulCount > 0 && _iIndex == 0)
+    if ((ulCount + _iIndex ) > 0 && MAX_DISPLAY_ATTRIBUTE_INFO || (ulCount + _iIndex) < ulCount)
     {
-        _iIndex++;
+        _iIndex = MAX_DISPLAY_ATTRIBUTE_INFO;
+        return S_FALSE;
     }
+    _iIndex += ulCount;
     return S_OK;
 }
 
@@ -430,12 +591,26 @@ STDAPI CSaenaruTextService::GetDisplayAttributeInfo(REFGUID guidInfo, ITfDisplay
 
     *ppInfo = NULL;
 
-    // unsupported GUID?
-    if (!IsEqualGUID(guidInfo, c_guidSaenaruDisplayAttribute))
+    if (IsEqualGUID(guidInfo, c_guidSaenaruDisplayAttributeInput))
+    {
+        *ppInfo = new CDisplayAttributeInfoInput();
+        if ((*ppInfo) == nullptr)
+        {
+            return E_OUTOFMEMORY;
+        }
+    }
+    else if (IsEqualGUID(guidInfo, c_guidSaenaruDisplayAttributeConverted))
+    {
+        *ppInfo = new CDisplayAttributeInfoConverted();
+        if ((*ppInfo) == nullptr)
+        {
+            return E_OUTOFMEMORY;
+        }
+    }
+    else
+    {
         return E_INVALIDARG;
-
-    *ppInfo = &g_DisplayAttributeInfo;
-    (*ppInfo)->AddRef();
+    }
 
     return S_OK;
 }

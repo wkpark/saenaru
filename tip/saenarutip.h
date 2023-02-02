@@ -150,7 +150,7 @@ public:
     void _EndCompositionInContext(ITfContext *pContext, WPARAM wParam = 0);
 
     void _ClearCompositionDisplayAttributes(TfEditCookie ec);
-    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec);
+    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, TfGuidAtom gaDisplayAttribute = 0);
 
     // messages for the worker wnd
     enum { WM_DISPLAY_PROPERTY = WM_USER + 1 };
@@ -200,7 +200,8 @@ private:
 
     BOOL _fCleaningUp;
 
-    TfGuidAtom _gaDisplayAttribute;
+    TfGuidAtom _gaDisplayAttributeInput;
+    TfGuidAtom _gaDisplayAttributeConverted;
 
     CLangBarItemButton *_pLangBarItem;
     CLangBarItemShapeButton *_pLangBarShapeItem;

@@ -116,11 +116,13 @@ extern const GUID c_guidSaenaruProfile;
 extern const GUID c_guidLangBarItemButton;
 extern const GUID c_guidLangBarItemButtonShape;
 extern const GUID c_guidLangBarItemButtonIME;
-extern const GUID c_guidSaenaruDisplayAttribute;
 extern const GUID c_guidSaenaruContextCompartment;
 extern const GUID c_guidSaenaruGlobalCompartment;
 extern const GUID c_guidCaseProperty;
 extern const GUID c_guidCustomProperty;
+
+extern const GUID c_guidSaenaruDisplayAttributeInput;
+extern const GUID c_guidSaenaruDisplayAttributeConverted;
 
 #endif // GLOBALS_H
 
