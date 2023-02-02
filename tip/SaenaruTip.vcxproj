@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="btnshape.cpp" />
+    <ClCompile Include="btnime.cpp" />
     <ClCompile Include="cleanup.cpp" />
     <ClCompile Include="compart.cpp" />
     <ClCompile Include="compose.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="btnshape.h" />
+    <ClInclude Include="btnime.h" />
     <ClInclude Include="langbar.h" />
     <ClInclude Include="editsess.h" />
     <ClInclude Include="globals.h" />

@@ -115,6 +115,7 @@ extern const CLSID c_clsidSaenaruTextService;
 extern const GUID c_guidSaenaruProfile;
 extern const GUID c_guidLangBarItemButton;
 extern const GUID c_guidLangBarItemButtonShape;
+extern const GUID c_guidLangBarItemButtonIME;
 extern const GUID c_guidSaenaruDisplayAttribute;
 extern const GUID c_guidSaenaruContextCompartment;
 extern const GUID c_guidSaenaruGlobalCompartment;

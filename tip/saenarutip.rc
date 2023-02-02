@@ -23,6 +23,9 @@ INDIC_KEY	ICON    DISCARDABLE		"..\\resource\\keyboard.ico"
 INDIC_HALF	ICON    DISCARDABLE		"..\\resource\\half.ico"
 INDIC_FULL	ICON    DISCARDABLE		"..\\resource\\full.ico"
 
+INDIC_2SET	ICON    DISCARDABLE		"..\\resource\\2set.ico"
+INDIC_3SET	ICON    DISCARDABLE		"..\\resource\\3set.ico"
+
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -200,6 +203,59 @@ END
 STRINGTABLE DISCARDABLE
 LANGUAGE 0x12, 0x1
 BEGIN
+    IDS_MENU_ENV                "환경설정(&R)"
+    IDS_MENU_DVORAK             "드보락(&V)"
+    IDS_MENU_ESC_ASCII          "&ESC 영문전환"
+    IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
+    IDS_MENU_HANGUL_TOGGLE      "Shift-SPACE 한/영키 (&H)"
+    IDS_MENU_SHOW_KEYBOARD      "키보드 보기(&K)"
+
+    IDS_MENU_OLD2BUL            "두벌식(&2)"
+    IDS_MENU_3FIN               "세벌식(&3)"
+    IDS_MENU_390                "세벌식 3&90"
+    IDS_MENU_NEW2BUL            "새두벌(&S)"
+    IDS_MENU_NEW3BUL            "새세벌(&D)"
+    IDS_MENU_AHNMATAE           "안마태(&A)"
+    IDS_MENU_NK_2BUL            "북한 두벌식(&P)"
+    IDS_MENU_YET2BUL            "옛한글 두벌(&Y)"
+    IDS_MENU_YET3BUL            "옛한글 세벌(&Z)"
+    IDS_MENU_3SOON              "세벌식 순아래(&N)"
+    IDS_MENU_USER               "사용자 자판(&U)"
+    IDS_MENU_USER_COMP          "사용자 조합(&C)"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_TIP_ASCII              "영문"
+    IDS_TIP_HANGUL             "한글"
+    IDS_TIP_OLD2BUL            "두벌식"
+    IDS_TIP_3FIN               "세벌식"
+    IDS_TIP_390                "세벌식 390"
+    IDS_TIP_3SOON              "세벌식 순아래"
+    IDS_TIP_NEW2BUL            "새두벌"
+    IDS_TIP_NEW3BUL            "새세벌"
+    IDS_TIP_AHNMATAE           "안마태"
+    IDS_TIP_NK_2BUL            "북한 두벌식"
+    IDS_TIP_YET2BUL            "옛한글 두벌"
+    IDS_TIP_YET3BUL            "옛한글 세벌"
+    IDS_TIP_USER               "사용자 자판"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
+    IDS_KEY_NEW2BUL            "새두벌"
+    IDS_KEY_NEW3BUL            "새세벌"
+    IDS_KEY_AHNMATAE           "안마태"
+    IDS_KEY_NK_2BUL            "북한 두벌식"
+    IDS_KEY_YET2BUL            "옛한글 두벌"
+    IDS_KEY_YET3BUL            "옛한글 세벌"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x12, 0x1
+BEGIN
     IDS_START_END_COMPOSITION   "컴포지션 시작/종료"
     IDS_GET_GLOBAL_COMPART      "전역 컴파트먼트 설정"
     IDS_SET_CASE_PROP           "대/소문자 속성 설정"
@@ -277,6 +333,35 @@ BEGIN
     IDS_MENU_ASCII              "&English"
     IDS_MENU_HANJA              "&Ideograh"
     IDS_MENU_CANCEL             "Cancel"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x09, 0x1
+BEGIN
+    IDS_TIP_ASCII              "English"
+    IDS_TIP_HANGUL             "Hangul"
+    IDS_TIP_OLD2BUL            "2-Set"
+    IDS_TIP_3FIN               "3-Set Final"
+    IDS_TIP_390                "3-Set 390"
+    IDS_TIP_3SOON              "3-Set No-Shift"
+    IDS_TIP_NEW2BUL            "New 2-Set"
+    IDS_TIP_NEW3BUL            "New 3-Set"
+    IDS_TIP_AHNMATAE           "Ahnmatae"
+    IDS_TIP_NK_2BUL            "North Korea 2-set"
+    IDS_TIP_YET2BUL            "Yet 2-Set"
+    IDS_TIP_YET3BUL            "Yet 3-Set"
+    IDS_TIP_USER               "User Defined"
+END
+
+STRINGTABLE DISCARDABLE
+LANGUAGE 0x9, 0x1
+BEGIN
+    IDS_KEY_NEW2BUL            "New 2-Set"
+    IDS_KEY_NEW3BUL            "New 3-Set"
+    IDS_KEY_AHNMATAE           "Ahnmatae"
+    IDS_KEY_NK_2BUL            "North Korea 2-set"
+    IDS_KEY_YET2BUL            "Yet 2-Set"
+    IDS_KEY_YET3BUL            "Yet 3-Set"
 END
 
 STRINGTABLE DISCARDABLE

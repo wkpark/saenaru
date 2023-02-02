@@ -969,7 +969,7 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
             status ^= CMODE_HANGUL;
 
             if (_pLangBarItem) {
-                _pLangBarItem->_Update();
+                _pLangBarItem->_OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
             }
 
             if (_IsComposing()) {

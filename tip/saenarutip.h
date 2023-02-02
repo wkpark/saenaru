@@ -18,6 +18,7 @@
 
 class CLangBarItemButton;
 class CLangBarItemShapeButton;
+class CLangBarItemImeButton;
 
 class CSaenaruTextService : public ITfTextInputProcessor,
                          public ITfDisplayAttributeProvider,
@@ -121,6 +122,7 @@ public:
 
     // some utils
     WORD _ConvertVKey(UINT code);
+    void _UpdateLanguageBar(DWORD dwFlags);
 
     // callbacks for CCompositionEditSession
     BOOL _IsComposing()
@@ -202,6 +204,7 @@ private:
 
     CLangBarItemButton *_pLangBarItem;
     CLangBarItemShapeButton *_pLangBarShapeItem;
+    CLangBarItemImeButton *_pLangBarImeItem;
 
     DWORD _dwThreadMgrEventSinkCookie;
     DWORD _dwThreadFocusSinkCookie;

@@ -54,7 +54,6 @@ CLangBarItemShapeButton::CLangBarItemShapeButton(CSaenaruTextService *pSaenaru)
     lpDesc = (LPTSTR)& _tfLangBarItemInfo.szDescription;
     LoadString(g_hInst, IDS_TOGGLE_HALFFULL_DESC, lpDesc, ARRAYSIZE(_tfLangBarItemInfo.szDescription));
 
-    // SafeStringCopy(_tfLangBarItemInfo.szDescription, ARRAYSIZE(_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC);
     _pSaenaru = pSaenaru;
     _pSaenaru->AddRef();
     _pLangBarItemSink = NULL;
@@ -139,7 +138,7 @@ CLangBarItemShapeButton::GetStatus(
     if (pdwStatus == NULL)
         return E_INVALIDARG;
 
-    //*pdwStatus  = (_GetCurrentHIMC() != NULL)? 0 : TF_LBI_STATUS_DISABLED;
+    *pdwStatus = 0 ; // TF_LBI_STATUS_DISABLED;
     return S_OK;
 }
 
@@ -151,7 +150,6 @@ CLangBarItemShapeButton::GetTooltipString(
         return E_INVALIDARG;
 
     *pbstrToolTip = SysAllocString(_tfLangBarItemInfo.szDescription);
-    //*pbstrToolTip = SysAllocString(LANGBAR_ITEM_DESC);
     return (*pbstrToolTip == NULL)? E_OUTOFMEMORY : S_OK;
 }
 
@@ -161,6 +159,20 @@ CLangBarItemShapeButton::OnClick(
     POINT                   pt,
     const RECT*             prcArea)
 {
+    DWORD dwConversion = 0;
+    switch (click)
+    {
+        case TF_LBI_CLK_LEFT:
+            dwConversion = _pSaenaru->GetConversionStatus();
+            dwConversion ^= CMODE_FULLSHAPE;
+            _pSaenaru->SetConversionStatus(dwConversion);
+
+            _pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
+            return S_OK;
+        case TF_LBI_CLK_RIGHT:
+            return S_OK;
+    }
+
     return S_OK;
 }
 
@@ -195,7 +207,7 @@ STDAPI
 CLangBarItemShapeButton::GetIcon(
     HICON* phIcon)
 {
-    DWORD dwConversion, dwSentence;
+    DWORD dwConversion;
     register LPCTSTR str = NULL;
 
     DEBUGPRINTFEX(100, (TEXT("CLangBarItemShapeButton::GetIcon(%p)\n"), phIcon));
@@ -203,25 +215,10 @@ CLangBarItemShapeButton::GetIcon(
     if (phIcon == NULL)
         return E_INVALIDARG;
 
-#if 0
-    hIMC    = _GetCurrentHIMC();
-    if (hIMC == NULL)
-        goto    Skip;
-
-    if (ImmGetOpenStatus(hIMC)) {
-        if (ImmGetConversionStatus(hIMC, &dwConversion, &dwSentence)) {
-            if (dwConversion & IME_CMODE_FULLSHAPE){
-                str = TEXT("INDIC_FULL");
-            } else {
-                str = TEXT("INDIC_HALF");
-            }
-        }
+    dwConversion = _pSaenaru->GetConversionStatus();
+    if (dwConversion & CMODE_FULLSHAPE) {
+        str = TEXT("INDIC_FULL");
     } else {
-        str = TEXT("INDIC_HALF");
-    }
-#endif
-Skip:
-    if (str == NULL) {
         str = TEXT("INDIC_HALF");
     }
     *phIcon = (HICON)LoadImage(g_hInst, str, IMAGE_ICON, 16, 16, 0);
@@ -235,7 +232,6 @@ CLangBarItemShapeButton::GetText(
     if (pbstrText == NULL)
         return E_INVALIDARG;
 
-    //*pbstrText    = SysAllocString(LANGBAR_ITEM_DESC);
     *pbstrText  = SysAllocString(_tfLangBarItemInfo.szDescription);
     return (*pbstrText == NULL)? E_OUTOFMEMORY : S_OK;
 }
@@ -282,6 +278,15 @@ CLangBarItemShapeButton::UnadviseSink(
     _pLangBarItemSink = NULL;
 
     return S_OK;
+}
+
+//
+// _OnUpdate
+//
+void CLangBarItemShapeButton::_OnUpdate(DWORD dwFlags)
+{
+    if (_pLangBarItemSink)
+        _pLangBarItemSink->OnUpdate(dwFlags);
 }
 
 /*

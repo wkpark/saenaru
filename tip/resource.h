@@ -45,6 +45,35 @@
 #define IDS_GET_CUSTOM_PROP         9005
 #endif
 
+#define IDS_TIP_ASCII               3999
+#define IDS_TIP_HANGUL              4000
+#define IDS_TIP_OLD2BUL             4001
+#define IDS_TIP_3FIN                4002
+#define IDS_TIP_390                 4003
+#define IDS_TIP_3SOON               4004
+#define IDS_TIP_YET2BUL             4005
+#define IDS_TIP_YET3BUL             4006
+#define IDS_TIP_NK_2BUL             4007
+#define IDS_TIP_NEW2BUL             4008
+#define IDS_TIP_NEW3BUL             4009
+#define IDS_TIP_AHNMATAE            4010
+#define IDS_TIP_USER                4011
+
+#define IDS_MENU_USER_COMP          2120
+#define IDS_MENU_ENV                2131
+#define IDS_MENU_DVORAK             2132
+#define IDS_MENU_ESC_ASCII          2133
+#define IDS_MENU_EDIT_WORD_UNIT     2134
+#define IDS_MENU_SHOW_KEYBOARD      2135
+#define IDS_MENU_HANGUL_TOGGLE      2136
+
+#define IDS_KEY_NEW2BUL             3105
+#define IDS_KEY_NEW3BUL             3106
+#define IDS_KEY_AHNMATAE            3107
+#define IDS_KEY_YET2BUL             3108
+#define IDS_KEY_YET3BUL             3109
+#define IDS_KEY_NK_2BUL             3110
+
 #define IDM_CONFIG     		40000
 #define IDM_OLD2BUL		40001
 #define IDM_3BUL		40002

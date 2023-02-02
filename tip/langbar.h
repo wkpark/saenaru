@@ -29,7 +29,7 @@ public:
     STDMETHODIMP UnadviseSink(DWORD dwCookie);
 
     // misc
-    void _Update(void);
+    void _OnUpdate(DWORD);
 
 private:
     CSaenaruTextService *_pSaenaru;

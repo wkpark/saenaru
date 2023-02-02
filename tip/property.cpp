@@ -541,18 +541,29 @@ Exit:
 void CSaenaruTextService::_Menu_ToHangul(CSaenaruTextService *_this)
 {
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_Menu_ToHangul(%p)\n"), _this));
+    DWORD dwConversion = _this->GetConversionStatus();
+    dwConversion ^= CMODE_HANGUL;
+    dwConversion |= CMODE_HANGUL;
+    _this->SetConversionStatus(dwConversion);
 }
 
 /* static */
 void CSaenaruTextService::_Menu_ToAscII(CSaenaruTextService *_this)
 {
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_Menu_ToAscII(%p)\n"), _this));
+    DWORD dwConversion = _this->GetConversionStatus();
+    dwConversion ^= CMODE_HANGUL;
+    _this->SetConversionStatus(dwConversion);
 }
 
 /* static */
 void CSaenaruTextService::_Menu_ToHanja(CSaenaruTextService *_this)
 {
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_Menu_ToHanja(%p)\n"), _this));
+    DWORD dwConversion = _this->GetConversionStatus();
+    dwConversion ^= CMODE_HANGUL;
+    dwConversion |= CMODE_HANGUL;
+    _this->SetConversionStatus(dwConversion);
 }
 
 /*

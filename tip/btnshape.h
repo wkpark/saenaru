@@ -29,6 +29,9 @@ public:
     STDMETHODIMP AdviseSink(REFIID riid, IUnknown *punk, DWORD *pdwCookie);
     STDMETHODIMP UnadviseSink(DWORD dwCookie);
 
+    // Misc
+    void _OnUpdate(DWORD);
+
 private:
     CSaenaruTextService *_pSaenaru;
     ITfLangBarItemSink* _pLangBarItemSink;
