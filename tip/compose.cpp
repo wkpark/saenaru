@@ -219,8 +219,6 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
     {
         DEBUGPRINTFEX(100, (TEXT("\tSetComposition\n"), ec));
         _pSaenaru->_SetComposition(pComposition);
-        // underline the composition text to give the user some feedback UI
-        _pSaenaru->_SetCompositionDisplayAttributes(ec);
 
         // set selection to the adjusted range
         TF_SELECTION tfSelection;
@@ -229,6 +227,9 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         tfSelection.style.fInterimChar = TRUE;
 
         _pContext->SetSelection(ec, 1, &tfSelection);
+
+        // set the attributes of the composition text to give the user some feedback UI
+        _pSaenaru->_SetCompositionDisplayAttributes(ec);
     }
 
     // if we make it here, we've succeeded
