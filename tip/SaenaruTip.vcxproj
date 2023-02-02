@@ -91,6 +91,9 @@
       <SubSystem>Windows</SubSystem>
       <ModuleDefinitionFile>saenarutip.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>icacls "$(TargetPath)" /grant *S-1-15-2-1:RX &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -108,6 +111,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>saenarutip.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>icacls "$(TargetPath)" /grant *S-1-15-2-1:RX &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -122,6 +128,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>saenarutip.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>icacls "$(TargetPath)" /grant *S-1-15-2-1:RX &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,6 +147,9 @@
       <AdditionalDependencies>comctl32.lib;ucrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenarutip.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>icacls "$(TargetPath)" /grant *S-1-15-2-1:RX &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="btnshape.cpp" />
