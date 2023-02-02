@@ -47,11 +47,9 @@ static const TCHAR c_szModelName[] = TEXT("ThreadingModel");
 
 BOOL CSaenaruTextService::RegisterProfiles()
 {
-    ITfInputProcessorProfiles *pInputProcessProfiles;
+    ITfInputProcessorProfileMgr *pInputProcessProfileMgr;
     WCHAR achIconFile[MAX_PATH];
-    char achFileNameA[MAX_PATH];
     DWORD cchA;
-    int cchIconFile;
     HRESULT hr;
 
     LPTSTR lpDesc;
@@ -61,32 +59,24 @@ BOOL CSaenaruTextService::RegisterProfiles()
     LoadString(g_hInst, IDS_SAENARU_DESC, lpDesc, 128);
 
     hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL, CLSCTX_INPROC_SERVER,
-                          IID_ITfInputProcessorProfiles, (void**)&pInputProcessProfiles);
+                          IID_ITfInputProcessorProfileMgr, (void**)&pInputProcessProfileMgr);
 
     if (hr != S_OK)
         return E_FAIL;
 
-    hr = pInputProcessProfiles->Register(c_clsidSaenaruTextService);
+    cchA = GetModuleFileNameW(g_hInst, achIconFile, ARRAYSIZE(achIconFile));
+    achIconFile[cchA] = '\0';
 
-    if (hr != S_OK)
-        goto Exit;
-
-    cchA = GetModuleFileNameA(g_hInst, achFileNameA, ARRAYSIZE(achFileNameA));
-
-    cchIconFile = MultiByteToWideChar(CP_ACP, 0, achFileNameA, cchA, achIconFile, ARRAYSIZE(achIconFile)-1);
-    achIconFile[cchIconFile] = '\0';
-
-    hr = pInputProcessProfiles->AddLanguageProfile(c_clsidSaenaruTextService,
+    hr = pInputProcessProfileMgr->RegisterProfile(c_clsidSaenaruTextService,
                                   SAENARU_LANGID,
                                   c_guidSaenaruProfile,
                                   lpDesc,
                                   (ULONG)wcslen(lpDesc),
                                   achIconFile,
-                                  cchIconFile,
-                                  SAENARU_ICON_INDEX);
+                                  cchA,
+                                  (UINT)SAENARU_ICON_INDEX, NULL, 0, TRUE, 0);
 
-Exit:
-    pInputProcessProfiles->Release();
+    pInputProcessProfileMgr->Release();
     return (hr == S_OK);
 }
 
