@@ -45,7 +45,12 @@ BrandingText "새나루 인스톨러"
 
   ;General
   Name "${APPNAME}"
-  OutFile "Saenaru-${RELVERSION}.exe"
+  !ifndef OUTPUTFILE
+    OutFile "Saenaru-${RELVERSION}.exe"
+  !else
+    OutFile "${OUTPUTFILE}"
+  !endif
+
   !define MUI_ICON "install.ico"
   !define MUI_UNICON "install.ico"
 
