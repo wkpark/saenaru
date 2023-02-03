@@ -37,6 +37,7 @@ extern "C"
 {
 #include "hangul.h"
     BOOL GetRegKeyHandle(LPCTSTR, HKEY *);
+    BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData);
 }
 
 #define SAENARU_LANGBARITEMSINK_COOKIE 0x0fab0fac
@@ -547,12 +548,12 @@ void CLangBarItemImeButton::_Menu_Property(CLangBarItemImeButton *_this, UINT wI
 {
     UNUSED(_this);
 
-    // HKL hKL = GetMyHKL();
+    HKL hKL = GetKeyboardLayout(0);
     HWND hWnd = GetFocus();
 
-    // if (hKL == NULL)
-    //     return;
-    //(void) ImeConfigure(hKL, hWnd, IME_CONFIG_GENERAL, NULL);
+    if (hKL == NULL)
+        return;
+    (void) ImeConfigure(hKL, hWnd, IME_CONFIG_GENERAL, NULL);
     return;
 }
 

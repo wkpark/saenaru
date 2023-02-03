@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="cleanup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
