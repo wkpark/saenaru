@@ -5,7 +5,11 @@ Unicode true
 
 !define RELVERSION      "1.2.0-GIT"
 !include /NONFATAL ".\ver.nsi"
-!define APPNAME         "새나루 스냅샷 ${RELVERSION}"
+!ifndef DEVREL
+  !define APPNAME         "새나루 ${RELVERSION}"
+!else
+  !define APPNAME         "새나루 스냅샷 ${RELVERSION}"
+!endif
 
 !define REGISTRY_PATH_ROOT   "Software\OpenHangulProject\Saenaru"
 !define REGISTRY_PATH   "Software\OpenHangulProject\Saenaru"
@@ -29,6 +33,8 @@ Unicode true
 !include "MUI2.nsh"
 ;Include Radio buttons
 !include "Sections.nsh"
+;Include Library
+!include "Library.nsh"
 
 SetCompressor /SOLID lzma
 
@@ -53,7 +59,11 @@ BrandingText "새나루 인스톨러"
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_DEFAULT MUI_WELCOMEFINISHPAGE_BITMAP "setup.bmp"
+  !ifndef DEVREL
+    !insertmacro MUI_DEFAULT MUI_WELCOMEFINISHPAGE_BITMAP "setup.bmp"
+  !else
+    !insertmacro MUI_DEFAULT MUI_WELCOMEFINISHPAGE_BITMAP "dev.bmp"
+  !endif
 
   !insertmacro MUI_PAGE_WELCOME 
   !insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
@@ -97,6 +107,16 @@ Section "새나루 입력기" SecBody
   Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
   SaenaruDone:
 
+  #File "${DDKBUILDDIR}\SaenaruTip.dll"
+  #IfErrors 0 SaenaruTipDone
+
+  #GetTempFileName $3
+  #File /oname=$3 "${DDKBUILDDIR}\SaenaruTip.dll"
+  #Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
+  #SaenaruTipDone:
+
+  !insertmacro InstallLib REGDLL SHARED REBOOT_PROTECTED "${DDKBUILDDIR}\SaenaruTip.dll" "$SYSDIR\SaenaruTip.dll" $SYSDIR
+
   File "${DVBUILDDIR}\kbddvk.dll"
   IfErrors 0 kbddvkDone
 
@@ -120,6 +140,13 @@ Section "새나루 입력기" SecBody
     Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
     Saenaru64Done:
 
+    File "${DDK64BUILDDIR}\SaenaruTip.dll"
+    IfErrors 0 SaenaruTip64Done
+
+    GetTempFileName $3
+    File /oname=$3 "${DDK64BUILDDIR}\SaenaruTip.dll"
+    Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
+    SaenaruTip64Done:
 
     File "${DV64BUILDDIR}\kbddvk.dll"
     IfErrors 0 kbddvk64Done
@@ -254,6 +281,7 @@ Section /o "새나루 소스 코드" SecSource
   File ${SRCROOTDIR}\LICENSE
   File ${SRCROOTDIR}\LICENSE.MICROSOFT
   File ${SRCROOTDIR}\Makefile
+  File ${SRCROOTDIR}\Saenaru.sln
 
   SetOutPath "$INSTDIR\Source\doc"
   File ${SRCROOTDIR}\doc\saenaru.htm
@@ -289,6 +317,15 @@ Section /o "새나루 소스 코드" SecSource
   File ${SRCROOTDIR}\src\*.c
   File ${SRCROOTDIR}\src\*.h
   File ${SRCROOTDIR}\src\*.cpp
+  File ${SRCROOTDIR}\src\*.def
+
+  SetOutPath "$INSTDIR\Source\tip"
+  File ${SRCROOTDIR}\tip\*.rc
+  File ${SRCROOTDIR}\tip\*.vcxproj
+  File ${SRCROOTDIR}\tip\*.vcxproj.*
+  File ${SRCROOTDIR}\tip\saenarutip.def
+  File ${SRCROOTDIR}\tip\*.h
+  File ${SRCROOTDIR}\tip\*.cpp
   File ${SRCROOTDIR}\src\*.def
 
 SectionEnd
@@ -426,10 +463,10 @@ FunctionEnd
 ;--------------------------------
 ;Descriptions
 
-  LangString DESC_SecBody ${LANG_KOREAN} "새나루 입력기를 위한 기본적인 파일을 설치합니다."
-  LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다.$\r$\n새나루는 모든 소스코드가 공개된 자유 소프트웨어입니다.$\r$\n소스코드는 http://kldp.net/projects/saenaru 사이트에서 직접 받으실 수 있습니다."
-  LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.$\r$\n로그오프 후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다."
-  LangString DESC_SecAdd ${LANG_KOREAN} "새나루를 한글 입력기 목록에 추가합니다.$\r$\n이 경우 입력기 상태바에서 새나루를 선택하실 수 있게 됩니다."
+  LangString DESC_SecBody ${LANG_KOREAN} "새나루 입력기를 위한 기본적인 파일을 설치합니다.$\r$\n구형 IME 및 신형 TSF지원 입력기가 함께 설치됩니다."
+  LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다. 새나루는 모든 소스코드가 공개된 자유 소프트웨어입니다.$\r$\n소스코드는 https://github.com/wkpark/saenaru 사이트에서 직접 받으실 수 있습니다."
+  LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.$\r$\n로그오프 후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다.$\r$\n$\r$\n(윈도우 10 이상에서는 제대로 반영이 안될 수 있습니다)"
+  LangString DESC_SecAdd ${LANG_KOREAN} "새나루를 한글 입력기 목록에 추가합니다.$\r$\n이 경우 입력기 상태바에서 새나루를 선택하실 수 있게 됩니다.$\r$\n$\r$\n(윈도우 10 이상에서는 제대로 반영이 안될 수 있습니다)"
   LangString DESC_SecColemak ${LANG_KOREAN} "새나루 콜맥(Colemak)자판 지원을 위한 콜맥 키보드 레이아웃 드라이버 설치 및 설정을 합니다."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -457,27 +494,30 @@ Section "Uninstall"
 
   ${If} ${RunningX64}
     ${DisableX64FSRedirection}
-    Delete "$SYSDIR\saenaru.ime"
-    Delete "$SYSDIR\kbddvk.dll"
-    Delete "$SYSDIR\kbdcmk.dll"
+    Delete /REBOOTOK "$SYSDIR\saenaru.ime"
+    Delete /REBOOTOK "$SYSDIR\SaenaruTip.dll"
+    Delete /REBOOTOK "$SYSDIR\kbddvk.dll"
+    Delete /REBOOTOK "$SYSDIR\kbdcmk.dll"
     ${EnableX64FSRedirection}
   ${EndIf}
 
-  Delete "$SYSDIR\saenaru.ime"
-  Delete "$SYSDIR\kbddvk.dll"
-  Delete "$SYSDIR\kbdcmk.dll"
+  Delete /REBOOTOK "$SYSDIR\saenaru.ime"
+  Delete /REBOOTOK "$SYSDIR\SaenaruTip.dll"
+  Delete /REBOOTOK "$SYSDIR\kbddvk.dll"
+  Delete /REBOOTOK "$SYSDIR\kbdcmk.dll"
 
-  Delete "$INSTDIR\saenaru.dic"
-  Delete "$INSTDIR\nabi.dic"
-  Delete "$INSTDIR\winsym.dic"
-  Delete "$INSTDIR\word.dic"
-  Delete "$INSTDIR\jinsuk.dic"
+  Delete /REBOOTOK "$INSTDIR\saenaru.dic"
+  Delete /REBOOTOK "$INSTDIR\nabi.dic"
+  Delete /REBOOTOK "$INSTDIR\winsym.dic"
+  Delete /REBOOTOK "$INSTDIR\word.dic"
+  Delete /REBOOTOK "$INSTDIR\jinsuk.dic"
   Delete "$INSTDIR\help\saenaru.chm"
 
   Delete "$INSTDIR\Source\DIRS"
   Delete "$INSTDIR\Source\LICENSE"
   Delete "$INSTDIR\Source\LICENSE.MICROSOFT"
   Delete "$INSTDIR\Source\Makefile"
+  Delete "$INSTDIR\Source\Saenaru.sln"
   Delete "$INSTDIR\Source\doc\saenaru.htm"
   Delete "$INSTDIR\Source\resource\2set3set.reg"
   Delete "$INSTDIR\Source\resource\ahnmatae.reg"
@@ -560,9 +600,42 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\src\vksub.h"
   Delete "$INSTDIR\Source\src\Saenaru.vcxproj"
   Delete "$INSTDIR\Source\src\Saenaru.vcxproj.filters"
+  Delete "$INSTDIR\Source\tip\btnime.cpp"
+  Delete "$INSTDIR\Source\tip\btnshape.cpp"
+  Delete "$INSTDIR\Source\tip\cleanup.cpp"
+  Delete "$INSTDIR\Source\tip\compart.cpp"
+  Delete "$INSTDIR\Source\tip\compose.cpp"
+  Delete "$INSTDIR\Source\tip\config.cpp"
+  Delete "$INSTDIR\Source\tip\dap.cpp"
+  Delete "$INSTDIR\Source\tip\dllmain.cpp"
+  Delete "$INSTDIR\Source\tip\editsink.cpp"
+  Delete "$INSTDIR\Source\tip\globals.cpp"
+  Delete "$INSTDIR\Source\tip\keys.cpp"
+  Delete "$INSTDIR\Source\tip\langbar.cpp"
+  Delete "$INSTDIR\Source\tip\precomp.cpp"
+  Delete "$INSTDIR\Source\tip\property.cpp"
+  Delete "$INSTDIR\Source\tip\pstore.cpp"
+  Delete "$INSTDIR\Source\tip\register.cpp"
+  Delete "$INSTDIR\Source\tip\saenarutip.cpp"
+  Delete "$INSTDIR\Source\tip\server.cpp"
+  Delete "$INSTDIR\Source\tip\tmgrsink.cpp"
+  Delete "$INSTDIR\Source\tip\btnime.h"
+  Delete "$INSTDIR\Source\tip\btnshape.h"
+  Delete "$INSTDIR\Source\tip\editsess.h"
+  Delete "$INSTDIR\Source\tip\globals.h"
+  Delete "$INSTDIR\Source\tip\langbar.h"
+  Delete "$INSTDIR\Source\tip\pstore.h"
+  Delete "$INSTDIR\Source\tip\resource.h"
+  Delete "$INSTDIR\Source\tip\saenarutip.h"
+  Delete "$INSTDIR\Source\tip\version.h"
+  Delete "$INSTDIR\Source\tip\SaenaruTip.vcxproj"
+  Delete "$INSTDIR\Source\tip\SaenaruTip.vcxproj.filters"
+  Delete "$INSTDIR\Source\tip\saenarutip.rc"
+  Delete "$INSTDIR\Source\tip\saenarutip.def"
   Delete "$INSTDIR\saenaru.ico"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR\Source\src"
+  RMDir "$INSTDIR\Source\tip"
   RMDir "$INSTDIR\Source\setup"
   RMDir "$INSTDIR\Source\resource\text"
   RMDir "$INSTDIR\Source\resource\button"
@@ -578,6 +651,7 @@ Section "Uninstall"
   DeleteRegKey HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru"
   DeleteRegKey /ifempty HKLM "${REGISTRY_PATH}"
+  UnregDll "$SYSDIR\SaenaruTip.dll"
 
 SectionEnd
 
