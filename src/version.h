@@ -32,12 +32,12 @@
 
 #define VER_MAJOR	 1
 #define VER_MAJOR_STR	"1"
-#define VER_MINOR	 2
-#define VER_MINOR_STR	"2"
+#define VER_MINOR	 3
+#define VER_MINOR_STR	"3"
 
 #define VER_BUILD	 2026
 #define VER_BUILD_STR	"2026"
-#define VER_PATCHLEVEL	     1
-#define VER_PATCHLEVEL_STR  "1"
+#define VER_PATCHLEVEL	     0
+#define VER_PATCHLEVEL_STR  "0"
 
-#define VER_SNAPSHOT	"1.2.1-GIT"
+#define VER_SNAPSHOT	"1.3.0-GIT"

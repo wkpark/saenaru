@@ -30,15 +30,15 @@
 
 #define VER_MAJOR	 1
 #define VER_MAJOR_STR	"1"
-#define VER_MINOR	 0
-#define VER_MINOR_STR	"0"
+#define VER_MINOR	 1
+#define VER_MINOR_STR	"1"
 
-#define VER_BUILD	 1000
-#define VER_BUILD_STR	"1000"
+#define VER_BUILD	 1020
+#define VER_BUILD_STR	"1020"
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
-#define VER_SNAPSHOT	"1.0.0-GIT"
+#define VER_SNAPSHOT	"1.1.0-GIT"
 
 /*
  * vim: et sts=4 sw=4
