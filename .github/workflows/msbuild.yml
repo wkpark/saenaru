@@ -47,7 +47,14 @@ jobs:
         echo "version=$VER" >> $GITHUB_OUTPUT
         HASH=$(git rev-parse --short HEAD)
         echo "commitHash=$HASH" >> $GITHUB_OUTPUT
-        echo rel=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+        VER=${GITHUB_REF#refs/tags/}
+        if [[ ${GITHUB_REF} = "refs/heads/master" ]]; then
+          VER=latest
+        fi
+        if [[ ${GITHUB_REF} = "refs/pull/"* ]]; then
+          VER=PR-${GITHUB_REF#refs/pull/}
+        fi
+        echo rel=${VER} >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Build package
