@@ -53,6 +53,7 @@ jobs:
         fi
         if [[ ${GITHUB_REF} = "refs/pull/"* ]]; then
           VER=PR-${GITHUB_REF#refs/pull/}
+          VER=${VER%/merge}
         fi
         echo rel=${VER} >> $GITHUB_OUTPUT
       shell: bash
@@ -75,7 +76,7 @@ jobs:
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: Saenaru-${{ steps.setup.output.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
+        name: Saenaru-${{ steps.setup.outputs.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
         path: |
           ${{ github.workspace }}\Saenaru-*.exe
 
