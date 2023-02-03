@@ -1,0 +1,112 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: |
+        msbuild /m /p:platform=x64 /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+        msbuild /m /p:platform=x86 /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Prepare Metadata
+      id: setup
+      run: |
+        VER=$(grep VER_SNAP src/version.h | cut -d'"' -f2)
+        echo "version=$VER" >> $GITHUB_OUTPUT
+        HASH=$(git rev-parse --short HEAD)
+        echo "commitHash=$HASH" >> $GITHUB_OUTPUT
+        echo rel=${GITHUB_REF#refs/tags/} >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Build package
+      run: |
+        set PATH=C:\Program Files (x86)\NSIS\;%PATH%
+        cd setup
+
+        echo '!undef RELVERSION' > ver.nsi
+        echo '!define RELVERSION "'${{ steps.setup.output.version }}'"' >> ver.nsi
+        echo '!define DEVREL' >> ver.nsi
+
+        makensis.exe /DOUTPUTFILE=Saenaru-${{ steps.setup.output.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}.exe saenaru.nsi
+      shell: pwsh
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Saenaru-${{ steps.setup.output.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
+        path: |
+          ${{ github.workspace }}/Saenaru-*.exe
+
+  make-release:
+    name: Create and upload release
+    runs-on: windows-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: [build]
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Get Metadata
+        id: metadata
+        run: |
+          ## METADATA SCRIPT
+          echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Generate Checksums
+        run: |
+          ## CHECKSUM GENERATION SCRIPT
+          shopt -s extglob
+          echo "### Checksums" > ${{ github.workspace }}/CHECKSUMS.txt
+          for file in ${{ github.workspace }}/**/@(*.pkg|*.exe|*.deb|*.zip|*.tgz); do
+            echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> ${{ github.workspace }}/CHECKSUMS.txt
+          done
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        with:
+          draft: false
+          prerelease: ${{ contains(steps.metadata.outputs.version, 'rc') || contains(steps.metadata.outputs.version, 'beta') }}
+          tag_name: ${{ steps.metadata.outputs.version }}
+          name: "Saenaru ${{ steps.metadata.outputs.version }}"
+          body_path: ${{ github.workspace }}/CHECKSUMS.txt
+          files: |
+            ${{ github.workspace }}/**/*.zip
+            ${{ github.workspace }}/**/*.exe
+            ${{ github.workspace }}/**/*.deb
+            ${{ github.workspace }}/**/*.tgz
+            ${{ github.workspace }}/**/*.pkg
