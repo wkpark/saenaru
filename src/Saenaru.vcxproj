@@ -236,7 +236,7 @@
       <BaseAddress>0x00500000</BaseAddress>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <EntryPointSymbol>DLLEntry</EntryPointSymbol>
-      <AdditionalDependencies>ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vcruntime.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
