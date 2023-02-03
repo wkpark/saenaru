@@ -9,6 +9,7 @@
 HINSTANCE g_hInst;
 
 extern "C" {
+#include "hangul.h"
 #pragma data_seg("SHAREDDATA")
 #ifdef DEBUG
 /* for DebugOptions */
@@ -17,13 +18,13 @@ DWORD dwDebugFlag = 0L;
 #endif
 DWORD dwLayoutFlag = 0L;
 DWORD dwComposeFlag = 0L;
-DWORD dwOptionFlag = 0L;
+DWORD dwOptionFlag = BACKSPACE_BY_JAMO;
 DWORD dwHanjaMode = 0L;
 DWORD dwScanCodeBased = 0L;
 DWORD dwToggleKey = 0L;
 
 /* local flags */
-DWORD dwImeFlag = 0L /* SAENARU_ONTHESPOT */;
+DWORD dwImeFlag = SAENARU_ONTHESPOT;
 #pragma data_seg()
 
 }
