@@ -103,9 +103,9 @@ jobs:
         run: |
           ## CHECKSUM GENERATION SCRIPT
           shopt -s extglob
-          echo "### Checksums" > ${{ github.workspace }}/CHECKSUMS.txt
-          for file in ${{ github.workspace }}/**/@(*.pkg|*.exe|*.deb|*.zip|*.tgz); do
-            echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> ${{ github.workspace }}/CHECKSUMS.txt
+          echo "### Checksums" > "${{ github.workspace }}/CHECKSUMS.txt"
+          for file in "${{ github.workspace }}"/**/@(*.pkg|*.exe|*.deb|*.zip|*.tgz); do
+            echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> "${{ github.workspace }}/CHECKSUMS.txt"
           done
       - name: Create Release
         id: create_release
