@@ -47,19 +47,22 @@ jobs:
         echo "version=$VER" >> $GITHUB_OUTPUT
         HASH=$(git rev-parse --short HEAD)
         echo "commitHash=$HASH" >> $GITHUB_OUTPUT
-        echo rel=${GITHUB_REF#refs/tags/} >> $GITHUB_OUTPUT
+        echo rel=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Build package
       run: |
-        set PATH=C:\Program Files (x86)\NSIS\;%PATH%
+        $env:PATH += ';C:\Program Files (x86)\NSIS\'
         cd setup
 
-        echo '!undef RELVERSION' > ver.nsi
-        echo '!define RELVERSION "'${{ steps.setup.output.version }}'"' >> ver.nsi
-        echo '!define DEVREL' >> ver.nsi
+        echo "!undef RELVERSION" > ver.nsi
+        echo "!define RELVERSION ""${{ steps.setup.outputs.version }}""" >> ver.nsi
+        echo "!define DEVREL" >> ver.nsi
 
-        makensis.exe /DOUTPUTFILE=Saenaru-${{ steps.setup.output.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}.exe saenaru.nsi
+        cat ver.nsi
+
+        makensis.exe /DOUTPUTFILE=..\Saenaru-${{ steps.setup.outputs.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}.exe saenaru.nsi
+        dir ..\*.exe
       shell: pwsh
 
     - name: Upload Build Artifact
@@ -67,7 +70,7 @@ jobs:
       with:
         name: Saenaru-${{ steps.setup.output.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
         path: |
-          ${{ github.workspace }}/Saenaru-*.exe
+          ${{ github.workspace }}\Saenaru-*.exe
 
   make-release:
     name: Create and upload release
