@@ -39,6 +39,7 @@ const LPTSTR g_szRegInfoPath = TEXT("software\\OpenHangulProject\\Saenaru");
 const LPTSTR g_szRegInfoPath = TEXT("software\\OpenHangulProject\\Saenaru");
 #endif
 
+#ifdef DEBUG
 int DebugPrint(LPCTSTR lpszFormat, ...)
 {
     int nCount;
@@ -51,6 +52,7 @@ int DebugPrint(LPCTSTR lpszFormat, ...)
     OutputDebugString(szMsg);
     return nCount;
 }
+#endif
 
 DWORD PASCAL GetDwordFromSetting(LPTSTR lpszKey)
 {

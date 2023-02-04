@@ -51,6 +51,8 @@ CONST LPBYTE lpbKeyState;
 {
     WORD wVKey;
 
+    if (!hIMC)
+        return FALSE;
 
     switch( wVKey = ( LOWORD(wParam) & 0x00FF ) ){
         case VK_SHIFT:

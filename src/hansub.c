@@ -190,7 +190,12 @@ LPBYTE lpbKeyState;
 
     MyDebugPrint((TEXT("check scan= 0x%x, code= 0x%x\r\n"), scan, code));
 
+    if (!hIMC)
+        return 0;
+
     lpIMC = ImmLockIMC(hIMC);
+    if (!lpIMC)
+        return 0;
     // Get ConvMode from IMC.
     fdwConversion = lpIMC->fdwConversion;
 
@@ -275,7 +280,14 @@ CONST LPBYTE lpbKeyState;
 
     MyDebugPrint((TEXT("scan= 0x%x, code= 0x%x\r\n"), scan, code));
 
+    if (!hIMC)
+        return;
+
     lpIMC = ImmLockIMC(hIMC);
+
+    if (!lpIMC)
+        return;
+
     // Get ConvMode from IMC.
     fdwConversion = lpIMC->fdwConversion;
 
