@@ -1294,7 +1294,7 @@ BOOL PASCAL DicKeydownHandler( hIMC, wParam, lParam ,lpbKeyState)
 HIMC hIMC;
 UINT wParam;
 LPARAM lParam;
-LPBYTE lpbKeyState;
+CONST LPBYTE lpbKeyState;
 {
     LPINPUTCONTEXT lpIMC;
     LPCOMPOSITIONSTRING lpCompStr;
@@ -2385,10 +2385,10 @@ BOOL PASCAL MakeGuideLine(HIMC hIMC, DWORD dwID)
 /**********************************************************************/
 BOOL PASCAL GenerateMessage(HIMC hIMC, LPINPUTCONTEXT lpIMC, LPTRANSMSGLIST lpTransBuf,LPTRANSMSG lpGeneMsg)
 {
-    MyDebugPrint((TEXT("GenerateMessage:TransKey %d\n"),lpGeneMsg->message));
+    MyDebugPrint((TEXT("GenerateMessage:TransKey %ld\n"),lpGeneMsg->message));
     if (lpTransBuf)
         return GenerateMessageToTransKey(lpTransBuf,lpGeneMsg);
-    MyDebugPrint((TEXT("GenerateMessage:ImmGenerateMessage %d\n"),lpGeneMsg->message));
+    MyDebugPrint((TEXT("GenerateMessage:ImmGenerateMessage %ld\n"),lpGeneMsg->message));
 
     if (IsWindow(lpIMC->hWnd))
     {

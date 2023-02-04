@@ -248,7 +248,7 @@ void PASCAL hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState)
 HIMC hIMC;
 WPARAM wParam;
 LPARAM lParam;
-LPBYTE lpbKeyState;
+CONST LPBYTE lpbKeyState;
 {
     WORD code = (WORD) HIWORD(wParam);
     WORD scan = (WORD) (HIWORD(lParam) & 0xFF);

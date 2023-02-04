@@ -345,7 +345,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         return FALSE;
     }
 #endif
-    MyDebugPrint((TEXT("\t** lKeyData is 0x%x\r\n"),lKeyData));
+    MyDebugPrint((TEXT("\t** lKeyData is 0x%lx\r\n"),lKeyData));
 
     if (!(lpIMC = ImmLockIMC(hIMC)))
         return FALSE;
@@ -616,7 +616,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
         }
     }
     ImmUnlockIMC(hIMC);
-    MyDebugPrint((TEXT("END of ImeProcessKey:%x, Ret=%x\n"), vKey, fRet));
+    MyDebugPrint((TEXT("END of ImeProcessKey:%lx, Ret=%x\n"), vKey, fRet));
     return fRet;
 }
 

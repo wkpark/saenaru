@@ -244,7 +244,7 @@ LPARAM lParam;
                 OutputDebugString((LPTSTR)szDev);
                 wsprintf((LPTSTR)szDev,TEXT("\twParam is %x\r\n"),wParam);
                 OutputDebugString((LPTSTR)szDev);
-                wsprintf((LPTSTR)szDev,TEXT("\tlParam is %x\r\n"),lParam);
+                wsprintf((LPTSTR)szDev,TEXT("\tlParam is %lx\r\n"),lParam);
                 OutputDebugString((LPTSTR)szDev);
                 }
 #endif
@@ -255,7 +255,7 @@ LPARAM lParam;
         }
     }
 
-    MyDebugPrint((TEXT("* WM_IME_XXX %x : %d\r\n"), message, message));
+    MyDebugPrint((TEXT("* WM_IME_XXX %lx : %ld\r\n"), message, message));
     switch (message)
     {
         case WM_CREATE:
@@ -521,7 +521,7 @@ LPARAM lParam;
                 GlobalUnlock(hUIExtra);
             }
             if (lParam)
-                MyDebugPrint((TEXT("* hKL=%x\r\n"),lParam));
+                MyDebugPrint((TEXT("* hKL=%x\r\n"),(HANDLE)lParam));
 
             if (!dwScanCodeBased &&
                     ((HANDLE)lParam != LongToHandle(0xE0120412) || (HANDLE)lParam != LongToHandle(0xE0130412)))
@@ -1421,9 +1421,9 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
 #if DEBUG
     if (vKey == VK_PROCESSKEY) {
-        MyDebugPrint((TEXT("\tMainProc: VK_PROCESSKEY and 0x%x\r\n"),lpmsg->lParam));
+        MyDebugPrint((TEXT("\tMainProc: VK_PROCESSKEY and 0x%lx\r\n"),lpmsg->lParam));
     } else if (vKey == VK_MENU) {
-        MyDebugPrint((TEXT("\tMainProc: VK_MENU and 0x%x\r\n"),lpmsg->lParam));
+        MyDebugPrint((TEXT("\tMainProc: VK_MENU and 0x%lx\r\n"),lpmsg->lParam));
     }
 #endif
 
@@ -1436,7 +1436,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
         HIMC hIMC;
         LPINPUTCONTEXT lpIMC;
         HWND hwnd = GetFocus();
-        MyDebugPrint((TEXT("\tWM_TIMER: wParam=%d, lParam=%d\r\n"),
+        MyDebugPrint((TEXT("\tWM_TIMER: wParam=%d, lParam=%ld\r\n"),
                     lpmsg->wParam, lpmsg->lParam));
 
         hIMC = ImmGetContext(hwnd);
@@ -1497,7 +1497,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
                 lpmsg->wParam=VK_HANGUL; // XXX
                 //lpmsg->lParam=(0xF2<<16) | 0x41000001;
-                MyDebugPrint((TEXT(">>> Fake Hangul Toggle + %x\n"), vKey));
+                MyDebugPrint((TEXT(">>> Fake Hangul Toggle + %lx\n"), vKey));
                 break;
             }
             break;
@@ -1520,7 +1520,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
 
                     //ToAsciiEx(vKey,sc,pbKeyState,&ch,0,hcur);
                     ch = 0xff & ch;
-                MyDebugPrint((TEXT("\t** Try to translate 0x%x 0x%x\r\n"),vKey,ch));
+                MyDebugPrint((TEXT("\t** Try to translate 0x%lx 0x%x\r\n"),vKey,ch));
                     if (ch < '!' || ch > '~')
                         break;
                     lpmsg->wParam=ch;
@@ -1594,7 +1594,7 @@ LRESULT CALLBACK SAENARUKbdProc(int code, WPARAM wParam, LPARAM lParam)
                 MyDebugPrint((TEXT("RALT + %x\n"), ch));
 #if 1
                 lpmsg->message-=4; // WM_SYSKEYUP - WM_KEYUP = 4 See WINUSER.H
-                MyDebugPrint((TEXT("RALT %x\n"), lpmsg->lParam));
+                MyDebugPrint((TEXT("RALT %lx\n"), lpmsg->lParam));
 
                 if (FALSE && dvorak)
                  {

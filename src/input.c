@@ -47,7 +47,7 @@ BOOL PASCAL IMEKeydownHandler( hIMC, wParam, lParam,lpbKeyState)
 HIMC hIMC;
 WPARAM wParam;
 LPARAM lParam;
-LPBYTE lpbKeyState;
+CONST LPBYTE lpbKeyState;
 {
     WORD wVKey;
 
@@ -81,7 +81,7 @@ LPBYTE lpbKeyState;
                 }
             }
             if( !DicKeydownHandler( hIMC, wVKey, lParam, lpbKeyState ) ) {
-                MyDebugPrint((TEXT("Vkey: %x\r\n"), wVKey));
+                MyDebugPrint((TEXT("Vkey: %lx\r\n"), wVKey));
                 // This WM_IMEKEYDOWN has actual character code in itself.
                 hangulKeyHandler( hIMC, wParam, lParam, lpbKeyState );
                 //AddChar( hIMC,  HIWORD(wParam));
@@ -103,7 +103,7 @@ BOOL PASCAL IMEKeyupHandler( hIMC, wParam, lParam ,lpbKeyState)
 HIMC hIMC;
 WPARAM wParam;
 LPARAM lParam;
-LPBYTE lpbKeyState;
+CONST LPBYTE lpbKeyState;
 {
     return FALSE;
 }

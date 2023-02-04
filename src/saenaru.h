@@ -373,8 +373,8 @@ BOOL PASCAL NotifyUCConversionMode(HIMC hIMC);
 BOOL PASCAL NotifyUCSetCompositionWindow(HIMC hIMC);
 
 /*   input.c     */
-BOOL PASCAL IMEKeydownHandler(HIMC,WPARAM,LPARAM,LPBYTE);
-BOOL PASCAL IMEKeyupHandler(HIMC,WPARAM,LPARAM,LPBYTE);
+BOOL PASCAL IMEKeydownHandler(HIMC,WPARAM,LPARAM,CONST LPBYTE);
+BOOL PASCAL IMEKeyupHandler(HIMC,WPARAM,LPARAM,CONST LPBYTE);
 
 /*   ui.c        */
 BOOL IMERegisterClass(HANDLE hInstance);
@@ -436,7 +436,7 @@ UINT load_compose_map_from_reg(LPCTSTR, UINT, void *);
 
 /* DIC.C         */
 BOOL PASCAL IsEat(WORD);
-BOOL PASCAL DicKeydownHandler(HIMC,UINT,LPARAM,LPBYTE);
+BOOL PASCAL DicKeydownHandler(HIMC,UINT,LPARAM,CONST LPBYTE);
 void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey);
 void PASCAL FlushText();
 void PASCAL RevertText(HIMC hIMC);
@@ -453,7 +453,7 @@ void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 
 /* hansub.c       */
 DWORD PASCAL checkHangulKey(HIMC,UINT,LPARAM,LPBYTE);
-void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,LPBYTE);
+void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,CONST LPBYTE);
 
 /* hanjaidx.c       */
 UINT PASCAL is_ksx1002(UINT);
