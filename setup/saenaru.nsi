@@ -120,7 +120,7 @@ Section "새나루 입력기" SecBody
   #Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
   #SaenaruTipDone:
 
-  !insertmacro InstallLib REGDLL SHARED REBOOT_PROTECTED "${DDKBUILDDIR}\SaenaruTip.dll" "$SYSDIR\SaenaruTip.dll" $SYSDIR
+  !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "${DDKBUILDDIR}\SaenaruTip.dll" "$SYSDIR\SaenaruTip.dll" $SYSDIR
 
   File "${DVBUILDDIR}\kbddvk.dll"
   IfErrors 0 kbddvkDone
@@ -230,7 +230,7 @@ Section "새나루 입력기" SecBody
   SetOutPath "${SMPATH}"
   File "/oname=새나루 프로젝트.url" "httplink-saenaru.url"
   File "/oname=열린 한글 프로젝트.url" "httplink-hangul.url"
-  CreateShortCut "${SMPATH}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "${SMPATH}\새나루 Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 
   IfRebootFlag 0 noreboot
     MessageBox MB_OK|MB_ICONINFORMATION "새나루가 사용중이기 때문에 설치/업데이트가 완료되지 못했습니다. 재부팅을 해야 설치가 완료됩니다."
@@ -322,7 +322,6 @@ Section /o "새나루 소스 코드" SecSource
   File ${SRCROOTDIR}\src\*.c
   File ${SRCROOTDIR}\src\*.h
   File ${SRCROOTDIR}\src\*.cpp
-  File ${SRCROOTDIR}\src\*.def
 
   SetOutPath "$INSTDIR\Source\tip"
   File ${SRCROOTDIR}\tip\*.rc
@@ -331,7 +330,6 @@ Section /o "새나루 소스 코드" SecSource
   File ${SRCROOTDIR}\tip\saenarutip.def
   File ${SRCROOTDIR}\tip\*.h
   File ${SRCROOTDIR}\tip\*.cpp
-  File ${SRCROOTDIR}\src\*.def
 
 SectionEnd
 
@@ -497,6 +495,8 @@ FunctionEnd
 
 Section "Uninstall"
 
+  UnregDll "$SYSDIR\SaenaruTip.dll"
+
   ${If} ${RunningX64}
     ${DisableX64FSRedirection}
     Delete /REBOOTOK "$SYSDIR\saenaru.ime"
@@ -513,9 +513,14 @@ Section "Uninstall"
 
   Delete /REBOOTOK "$INSTDIR\saenaru.dic"
   Delete /REBOOTOK "$INSTDIR\nabi.dic"
-  Delete /REBOOTOK "$INSTDIR\winsym.dic"
+  Delete /REBOOTOK "$INSTDIR\symwin.dic"
   Delete /REBOOTOK "$INSTDIR\word.dic"
   Delete /REBOOTOK "$INSTDIR\jinsuk.dic"
+  Delete "$INSTDIR\2set3set.reg"
+  Delete "$INSTDIR\ahnmatae.reg"
+  Delete "$INSTDIR\comp_default.reg"
+  Delete "$INSTDIR\nk2set.reg"
+  Delete "$INSTDIR\old2set3set.reg"
   Delete "$INSTDIR\help\saenaru.chm"
 
   Delete "$INSTDIR\Source\DIRS"
@@ -525,6 +530,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\Saenaru.sln"
   Delete "$INSTDIR\Source\doc\saenaru.htm"
   Delete "$INSTDIR\Source\resource\2set3set.reg"
+  Delete "$INSTDIR\Source\resource\2set.ico"
+  Delete "$INSTDIR\Source\resource\3set.ico"
   Delete "$INSTDIR\Source\resource\ahnmatae.reg"
   Delete "$INSTDIR\Source\resource\ARWDWN.ico"
   Delete "$INSTDIR\Source\resource\ARWUP.ico"
@@ -532,19 +539,22 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\button\engkey.ico"
   Delete "$INSTDIR\Source\resource\button\hanjakey.ico"
   Delete "$INSTDIR\Source\resource\button\hankey.ico"
-  Delete "$INSTDIR\Source\resource\button\han2key.ico"
   Delete "$INSTDIR\Source\resource\check.bmp"
   Delete "$INSTDIR\Source\resource\close.bmp"
+  Delete "$INSTDIR\Source\resource\comp_default.reg"
   Delete "$INSTDIR\Source\resource\face.bmp"
   Delete "$INSTDIR\Source\resource\full.ico"
-  Delete "$INSTDIR\Source\resource\full_old.ico"
   Delete "$INSTDIR\Source\resource\general.ico"
   Delete "$INSTDIR\Source\resource\half.ico"
   Delete "$INSTDIR\Source\resource\keyboard.ico"
+  Delete "$INSTDIR\Source\resource\hjcheck.bmp"
+  Delete "$INSTDIR\Source\resource\hjmode.bmp"
   Delete "$INSTDIR\Source\resource\imepad.ico"
+  Delete "$INSTDIR\Source\resource\nk2set.reg"
+  Delete "$INSTDIR\Source\resource\old2set3set.reg"
   Delete "$INSTDIR\Source\resource\penindic.ico"
   Delete "$INSTDIR\Source\resource\saenaru.dic"
-  Delete "$INSTDIR\Source\resource\winsym.dic"
+  Delete "$INSTDIR\Source\resource\symwin.dic"
   Delete "$INSTDIR\Source\resource\nabi.dic"
   Delete "$INSTDIR\Source\resource\word.dic"
   Delete "$INSTDIR\Source\resource\jinsuk.dic"
@@ -553,6 +563,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\saenaru.rcv"
   Delete "$INSTDIR\Source\resource\status.bmp"
   Delete "$INSTDIR\Source\resource\text\engkey.ico"
+  Delete "$INSTDIR\Source\resource\text\han2key.ico"
   Delete "$INSTDIR\Source\resource\text\hanjakey.ico"
   Delete "$INSTDIR\Source\resource\text\hankey.ico"
   Delete "$INSTDIR\Source\resource\uncheck.bmp"
@@ -562,6 +573,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\setup\saenaru.inf"
   Delete "$INSTDIR\Source\setup\saenaru.nsi"
   Delete "$INSTDIR\Source\src\btncmd.cpp"
+  Delete "$INSTDIR\Source\src\btnhlp.cpp"
+  Delete "$INSTDIR\Source\src\btnpad.cpp"
   Delete "$INSTDIR\Source\src\btnext.cpp"
   Delete "$INSTDIR\Source\src\btnime.cpp"
   Delete "$INSTDIR\Source\src\config.c"
@@ -573,6 +586,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\src\hangul.h"
   Delete "$INSTDIR\Source\src\hangul.c"
   Delete "$INSTDIR\Source\src\hansub.c"
+  Delete "$INSTDIR\Source\src\hanja.c"
   Delete "$INSTDIR\Source\src\hanjaidx.c"
   Delete "$INSTDIR\Source\src\imm.c"
   Delete "$INSTDIR\Source\src\immsec.c"
@@ -603,6 +617,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\src\uiguide.c"
   Delete "$INSTDIR\Source\src\uistate.c"
   Delete "$INSTDIR\Source\src\vksub.h"
+  Delete "$INSTDIR\Source\src\unicode.h"
+  Delete "$INSTDIR\Source\src\version.h"
   Delete "$INSTDIR\Source\src\Saenaru.vcxproj"
   Delete "$INSTDIR\Source\src\Saenaru.vcxproj.filters"
   Delete "$INSTDIR\Source\tip\btnime.cpp"
@@ -647,6 +663,7 @@ Section "Uninstall"
   RMDir "$INSTDIR\Source\resource"
   RMDir "$INSTDIR\Source\doc"
   RMDir "$INSTDIR\Source"
+  RMDir "$INSTDIR\help"
   RMDir "$INSTDIR"
 
   Delete "${SMPATH}\*.*"
@@ -656,7 +673,6 @@ Section "Uninstall"
   DeleteRegKey HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0130412"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Saenaru"
   DeleteRegKey /ifempty HKLM "${REGISTRY_PATH}"
-  UnregDll "$SYSDIR\SaenaruTip.dll"
 
 SectionEnd
 
