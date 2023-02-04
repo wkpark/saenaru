@@ -383,7 +383,10 @@ CLangBarItemCModeButton::GetIcon (
 				}
 			} else {
 				if (dwConversion & IME_CMODE_NATIVE){
-					str	= TEXT ("INDIC_HAN") ;
+					if (dwImeFlag & AUTOMATA_3SET)
+						str = TEXT("INDIC_HAN");
+					else
+						str = TEXT("INDIC_HAN2") ;
 				} else {
 					str	= TEXT ("INDIC_ENG") ;
 				}
