@@ -2185,7 +2185,7 @@ CONST LPBYTE lpbKeyState;
         return( FALSE );
     }
     else {
-        MyDebugPrint((TEXT("code: %x\r\n"), wParam));
+        MyDebugPrint((TEXT("code: %x\r\n"), (DWORD)wParam));
         return( TRUE );
     }
 }

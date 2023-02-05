@@ -324,7 +324,7 @@ void PASCAL MoveCompWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
     //
     MyDebugPrint((TEXT("MoveCompWindow\r\n")));
     lpUIExtra->dwCompStyle = lpIMC->cfCompForm.dwStyle;
-    MyDebugPrint((TEXT("MoveCompWindow dwStyle %x\r\n"), lpIMC->cfCompForm.dwStyle));
+    MyDebugPrint((TEXT("MoveCompWindow dwStyle %x\r\n"), (DWORD)lpIMC->cfCompForm.dwStyle));
 
     if (lpUIExtra->uiDefComp.pt.x == -1) {
         // Not initialized CompWnd position.

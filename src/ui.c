@@ -242,7 +242,7 @@ LPARAM lParam;
                 OutputDebugString((LPTSTR)szDev);
                 wsprintf((LPTSTR)szDev,TEXT("\tmessage is %x\r\n"),message);
                 OutputDebugString((LPTSTR)szDev);
-                wsprintf((LPTSTR)szDev,TEXT("\twParam is %x\r\n"),wParam);
+                wsprintf((LPTSTR)szDev,TEXT("\twParam is hi=0x%x,lo=0x%x\r\n"),HIWORD(wParam), LOWORD(wParam));
                 OutputDebugString((LPTSTR)szDev);
                 wsprintf((LPTSTR)szDev,TEXT("\tlParam is %lx\r\n"),lParam);
                 OutputDebugString((LPTSTR)szDev);
@@ -255,7 +255,7 @@ LPARAM lParam;
         }
     }
 
-    MyDebugPrint((TEXT("* WM_IME_XXX %lx : %ld\r\n"), message, message));
+    MyDebugPrint((TEXT("* WM_IME_XXX %x : %d\r\n"), message, message));
     switch (message)
     {
         case WM_CREATE:

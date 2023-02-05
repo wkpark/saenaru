@@ -424,7 +424,7 @@ INT_PTR CALLBACK SelectToggleDlgProc(HWND hDlg, UINT message , WPARAM wParam, LP
     switch(message)
     {
         case WM_KEYDOWN:
-            MyDebugPrint((TEXT(" >>>>>>> WM_KEYDOWN : vk=%d\n"), wParam));
+            MyDebugPrint((TEXT(" >>>>>>> WM_KEYDOWN : hi=%d,lo=%d\n"), HIWORD(wParam), LOWORD(wParam)));
             break;
 
         case WM_NOTIFY:
