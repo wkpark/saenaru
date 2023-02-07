@@ -34,8 +34,13 @@
 #include <stdio.h>
 #include "immsec.h"
 
+#ifdef _WIN64
+#define MEMALLOC(x)      GlobalAlloc(GPTR, (x))
+#define MEMFREE(x)       GlobalFree((x))
+#else
 #define MEMALLOC(x)      LocalAlloc(LMEM_FIXED, x)
 #define MEMFREE(x)       LocalFree(x)
+#endif
 
 //
 // internal functions
