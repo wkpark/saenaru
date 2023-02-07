@@ -499,7 +499,18 @@ void PASCAL UpdateIndicIcon(HIMC hIMC)
     }
 
 #if !defined (NO_TSF)
-    UpdateLanguageBar ();
+    if (hIMC)
+        UpdateLanguageBar();
+#else
+    if (hIMC)
+    {
+        lpIMC = ImmLockIMC(hIMC);
+        if (lpIMC)
+        {
+            fOpen = lpIMC->fOpen;
+            ImmUnlockIMC(hIMC);
+        }
+    }
 #endif
 
     hwndIndicate = FindWindow(INDICATOR_CLASS, NULL);
