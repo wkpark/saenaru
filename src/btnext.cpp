@@ -111,6 +111,9 @@ public:
 	STDMETHODIMP AdviseSink(REFIID riid, IUnknown *punk, DWORD *pdwCookie);
 	STDMETHODIMP UnadviseSink(DWORD dwCookie);
 
+	// Misc
+	STDMETHODIMP Update(void);
+
 private:
 	ITfLangBarItemSink*		_pLangBarItemSink ;
 	TF_LANGBARITEMINFO		_tfLangBarItemInfo ;
@@ -433,6 +436,16 @@ CLangBarItemShapeButton::UnadviseSink (
     return	S_OK ;
 }
 
+STDAPI
+CLangBarItemShapeButton::Update()
+{
+    if (_pLangBarItemSink == NULL)
+        return CONNECT_E_NOCONNECTION;
+
+    _pLangBarItemSink->OnUpdate(TF_LBI_STATUS);
+    return S_OK;
+}
+
 /*========================================================================*
  *	public function interface
  */
@@ -444,6 +457,18 @@ CreateItemButtonShape (
 		return	FALSE ;
 	*ppLangBarItem	= new CLangBarItemShapeButton ;
 	return	(*ppLangBarItem != NULL) ;
+}
+
+HRESULT
+ItemButtonShapeUpdate(ITfLangBarItem* pItem)
+{
+    CLangBarItemShapeButton* pButtonShape;
+
+    if (pItem == NULL)
+        return  E_INVALIDARG;
+
+    pButtonShape = (CLangBarItemShapeButton*) pItem;
+    return pButtonShape->Update();
 }
 
 #if 0

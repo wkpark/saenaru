@@ -91,6 +91,11 @@ BOOL PASCAL CreateItemButtonPad(ITfLangBarItem** ppLangBarItem);
 BOOL PASCAL CreateItemHelp(ITfSystemLangBarItemSink** ppLangBarItemSink);
 BOOL PASCAL IsLangBarEnabled(VOID);
 
+HRESULT ItemButtonImeUpdate(ITfLangBarItem* pItem);
+HRESULT ItemButtonCModeUpdate(ITfLangBarItem* pItem);
+HRESULT ItemButtonShapeUpdate(ITfLangBarItem* pItem);
+HRESULT ItemButtonPadUpdate(ITfLangBarItem* pItem);
+
 LONG DllAddRef(void);
 LONG DllRelease(void);
 

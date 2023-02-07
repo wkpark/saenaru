@@ -118,6 +118,9 @@ public:
 	STDMETHODIMP AdviseSink(REFIID riid, IUnknown *punk, DWORD *pdwCookie);
 	STDMETHODIMP UnadviseSink(DWORD dwCookie);
 
+	// Misc
+	STDMETHODIMP Update(void);
+
 private:
 	ITfLangBarItemSink*		_pLangBarItemSink ;
 	TF_LANGBARITEMINFO		_tfLangBarItemInfo ;
@@ -458,6 +461,16 @@ CLangBarItemCModeButton::UnadviseSink (
     return	S_OK ;
 }
 
+STDAPI
+CLangBarItemCModeButton::Update()
+{
+    if (_pLangBarItemSink == NULL)
+        return CONNECT_E_NOCONNECTION;
+
+    _pLangBarItemSink->OnUpdate(TF_LBI_STATUS);
+    return S_OK;
+}
+
 /*========================================================================*
  *	public function interface
  */
@@ -469,6 +482,18 @@ CreateItemButtonCMode (
 		return	FALSE ;
 	*ppLangBarItem	= new CLangBarItemCModeButton ;
 	return	(*ppLangBarItem != NULL) ;
+}
+
+HRESULT
+ItemButtonCModeUpdate(ITfLangBarItem* pItem)
+{
+    CLangBarItemCModeButton* pButtonCMode;
+
+    if (pItem == NULL)
+        return  E_INVALIDARG;
+
+    pButtonCMode = (CLangBarItemCModeButton*) pItem;
+    return pButtonCMode->Update();
 }
 
 /*========================================================================*

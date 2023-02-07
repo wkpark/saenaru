@@ -306,7 +306,11 @@ UpdateLanguageBar (void)
 
     /*    ?回レジストリを?照するのは正しいのだろうか？ */
     fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
+#ifdef _WIN64
+    fShowPadIcon = FALSE;
+#else
     fShowPadIcon = TRUE;
+#endif
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
     if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWIMEICON), &dwValue))
@@ -327,9 +331,7 @@ UpdateLanguageBar (void)
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonCMode, &pItem)) &&
                 pItem != NULL) {
-                pLangBarItemMgr->RemoveItem (pItem);
-                if (fShowInputModeIcon) 
-                    pLangBarItemMgr->AddItem (pItem);
+                ItemButtonCModeUpdate(pItem);
                 pItem->Release ();
             }
         }
@@ -338,9 +340,7 @@ UpdateLanguageBar (void)
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonShape, &pItem)) &&
                 pItem != NULL) {
-                pLangBarItemMgr->RemoveItem (pItem);
-                if (fShowShapeIcon) 
-                    pLangBarItemMgr->AddItem (pItem);
+                ItemButtonShapeUpdate(pItem);
                 pItem->Release ();
             }
         }
@@ -349,9 +349,7 @@ UpdateLanguageBar (void)
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonIME, &pItem)) &&
                 pItem != NULL) {
-                pLangBarItemMgr->RemoveItem (pItem);
-                if (fShowIMEIcon) 
-                    pLangBarItemMgr->AddItem (pItem);
+                ItemButtonImeUpdate(pItem);
                 pItem->Release ();
             }
         }
@@ -360,9 +358,7 @@ UpdateLanguageBar (void)
             pItem    = NULL;
             if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonPad, &pItem)) &&
                 pItem != NULL) {
-                pLangBarItemMgr->RemoveItem (pItem);
-                if (fShowPadIcon) 
-                    pLangBarItemMgr->AddItem (pItem);
+                ItemButtonPadUpdate(pItem);
                 pItem->Release ();
             }
         }
