@@ -238,6 +238,7 @@
       <EntryPointSymbol>DLLEntry</EntryPointSymbol>
       <AdditionalDependencies>vcruntime.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
+      <MergeSections>.rdata=.text</MergeSections>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -261,6 +262,7 @@
       <AdditionalDependencies>vcruntime.lib;ucrt.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+      <MergeSections>.rdata=.text</MergeSections>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -271,7 +273,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">saenaru.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0xA00;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -284,6 +286,7 @@
       <AdditionalDependencies>vcruntimed.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+      <MergeSections>.rdata=.text</MergeSections>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -306,6 +309,7 @@
       <AdditionalDependencies>vcruntime.lib;ucrt.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
+      <MergeSections>.rdata=.text</MergeSections>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
