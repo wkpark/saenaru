@@ -293,9 +293,7 @@ LPARAM lParam;
             SetHookFunc();
             //SetConsoleHookFunc();
 #if !defined(NO_TSF)
-            if (InitLanguageBar()) {
-                ActivateLanguageBar(TRUE);
-            }
+            ActivateLanguageBar(TRUE); // ActivateLanguageBar() again for some cases
 #endif
 
             break;
@@ -574,8 +572,8 @@ LPARAM lParam;
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
 #if !defined(NO_TSF)
-            ActivateLanguageBar(FALSE);
-            //XXX UninitLanguageBar();
+            //ActivateLanguageBar(FALSE);
+            //UninitLanguageBar();
 #endif
             //UnsetConsoleHookFunc();
 

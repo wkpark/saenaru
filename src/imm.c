@@ -929,6 +929,14 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
 
     ImeLog(LOGF_ENTRY | LOGF_API, TEXT("ImeSelect"));
 
+#if !defined (NO_TSF)
+    if (fSelect) {
+        if (InitLanguageBar())
+            ActivateLanguageBar(TRUE);
+    } else {
+        ActivateLanguageBar(FALSE);
+    }
+#endif
     if (fSelect)
         UpdateIndicIcon(hIMC);
 
@@ -975,16 +983,6 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }
         }
-#if !defined (NO_TSF)
-        /*
-        if (fSelect) {
-            if (InitLanguageBar ())
-                ActivateLanguageBar (TRUE) ;
-        } else {
-            ActivateLanguageBar (FALSE) ;
-        }
-        */
-#endif
         ImmUnlockIMC(hIMC);
     }
 
