@@ -64,7 +64,7 @@ TCHAR    szDicFileName[256];         /* Dictionary file name stored buffer */
 
 
 
-#pragma data_seg("SHAREDDATA")
+#pragma data_seg(".SHAREDDATA")
 #ifdef DEBUG
 /* for DebugOptions */
 DWORD dwLogFlag = 0L;
