@@ -54,6 +54,22 @@ int DebugPrint(LPCTSTR lpszFormat, ...)
 }
 #endif
 
+BOOL IsWindowsVersionOrLater(DWORD dwMajorVersion, DWORD dwMinorVersion, DWORD dwBuildNumber)
+{
+    OSVERSIONINFOEXW osvi = { 0 };
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    osvi.dwMajorVersion = dwMajorVersion;
+    osvi.dwMinorVersion = dwMinorVersion;
+    osvi.dwBuildNumber = dwBuildNumber;
+
+    DWORDLONG mask = 0;
+    VER_SET_CONDITION(mask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    VER_SET_CONDITION(mask, VER_MINORVERSION, VER_GREATER_EQUAL);
+    VER_SET_CONDITION(mask, VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER, mask);
+}
+
 DWORD PASCAL GetDwordFromSetting(LPTSTR lpszKey)
 {
     HKEY hkey;

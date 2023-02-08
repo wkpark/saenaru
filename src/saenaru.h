@@ -505,6 +505,8 @@ BOOL PASCAL IsTSFEnabled(void);
 BOOL PASCAL IsLangBarEnabled(void);
 #endif
 
+BOOL IsWindowsVersionOrLater(DWORD dwMajorVersion, DWORD dwMinorVersion, DWORD dwBuildNumber);
+
 /*
  * ex: ts=8 sts=4 sw=4 et
  */
