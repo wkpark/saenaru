@@ -499,8 +499,7 @@ void PASCAL UpdateIndicIcon(HIMC hIMC)
     }
 
 #if !defined (NO_TSF)
-    if (hIMC)
-        UpdateLanguageBar();
+    UpdateLanguageBar();
 #else
     if (hIMC)
     {
@@ -515,7 +514,11 @@ void PASCAL UpdateIndicIcon(HIMC hIMC)
 
     hwndIndicate = FindWindow(INDICATOR_CLASS, NULL);
 
-    if (IsWindow(hwndIndicate))
+    if (IsWindow(hwndIndicate)
+#if !defined (NO_TSF)
+        && !IsLangBarEnabled()
+#endif
+        )
     {
         ATOM atomTip;
 
