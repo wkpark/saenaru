@@ -149,6 +149,11 @@ const GUID c_guidItemButtonHelp = {
     0xed9d5450, 0xebe6, 0x4255, { 0x82, 0x89, 0xf8, 0xa3, 0x1e, 0x68, 0x72, 0x28 }
 };
 
+#ifdef _WIN64
+// On Windows 8 or later, keep the instance.
+static ITfLangBarItemMgr* _pLangBarItemMgr = NULL;
+#endif
+
 BOOL PASCAL
 InitLanguageBar (void)
 {
@@ -192,10 +197,17 @@ InitLanguageBar (void)
     fRet = TRUE;
     g_fInitTSF = TRUE;
 
-#define USE_HELPSINK
+#ifdef _WIN64
+    _pLangBarItemMgr = NULL;
+#endif
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr == NULL)
+    {
+        goto Exit_Func;
+    }
+//#define USE_HELPSINK
 #ifdef USE_HELPSINK
     // http://msdn2.microsoft.com/en-us/library/ms628993.aspx
-    pLangBarItemMgr = _QueryLangBarItemMgr();
     if (pLangBarItemMgr != NULL && g_dwHelpButtonCookie == NULL) {
         ITfLangBarItem* pItem;
         ITfSource* pSource;
@@ -217,7 +229,6 @@ InitLanguageBar (void)
             }
             pItem->Release();
         }
-        pLangBarItemMgr->Release();
     }
 #endif
 
@@ -238,6 +249,13 @@ InitLanguageBar (void)
     CloseHandle (hMutex);
 #endif
     DEBUGPRINTF ((TEXT ("Leave::InitLanguageBar - %d\n"), fRet));
+
+    if (pLangBarItemMgr
+#ifdef _WIN64
+            && !IsWindowsVersionOrLater(6, 2, 0)
+#endif
+        )
+        pLangBarItemMgr->Release();
     return fRet;
 }
 
@@ -306,11 +324,7 @@ UpdateLanguageBar (void)
 
     /*    ?回レジストリを?照するのは正しいのだろうか？ */
     fShowIMEIcon = fShowInputModeIcon = fShowShapeIcon = TRUE;
-#ifdef _WIN64
     fShowPadIcon = FALSE;
-#else
-    fShowPadIcon = TRUE;
-#endif
 #if 0
 #if !defined (NO_TOUCH_REGISTRY)
     if (GetRegDwordValue (TEXT ("\\CICERO"), TEXT(REGKEY_SHOWIMEICON), &dwValue))
@@ -363,7 +377,12 @@ UpdateLanguageBar (void)
             }
         }
 
-        pLangBarItemMgr->Release ();
+        if (pLangBarItemMgr
+#ifdef _WIN64
+                && !IsWindowsVersionOrLater(6, 2, 0)
+#endif
+            )
+            pLangBarItemMgr->Release();
     }
 #if DEBUG
     _DumpLangBarItem();
@@ -426,80 +445,95 @@ ActivateLanguageBar (
 #endif
     }
 
-    pLangBarItemMgr    = _QueryLangBarItemMgr ();
-    if (pLangBarItemMgr != NULL) {
-        ITfLangBarItem*        pItem;
-        ITfLangBarItem*        pNewItem;
-        BOOL                fRemove;
+    pLangBarItemMgr = _QueryLangBarItemMgr();
+    if (pLangBarItemMgr != NULL)
+    {
+        ITfLangBarItem* pItem;
+        ITfLangBarItem* pNewItem;
+        pNewItem = NULL;
+        pItem = NULL;
 
-        pItem    = NULL;
-        fRemove    = FALSE;
+        if (!fSelect)
+        {
+            // remove all buttons
+            if (SUCCEEDED(pLangBarItemMgr->GetItem(c_guidItemButtonCMode, &pItem)) &&
+                    pItem != NULL)
+            {
+                pLangBarItemMgr->RemoveItem(pItem);
+                pItem->Release();
+                pItem = NULL;
+            }
 
-        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonCMode, &pItem)) &&
-            pItem != NULL) {
-            fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
-            pItem->Release ();
-        }
+            if (SUCCEEDED(pLangBarItemMgr->GetItem(c_guidItemButtonShape, &pItem)) &&
+                    pItem != NULL)
+            {
+                pLangBarItemMgr->RemoveItem(pItem);
+                pItem->Release();
+                pItem = NULL;
+            }
 
-        if ((pItem == NULL || fRemove) && fSelect && fShowInputModeIcon) {
-            pNewItem    = NULL;
-            if (CreateItemButtonCMode (&pNewItem) && pNewItem != NULL) {
-                pLangBarItemMgr->AddItem (pNewItem);
-                pNewItem->Release ();
+            if (SUCCEEDED(pLangBarItemMgr->GetItem(c_guidItemButtonIME, &pItem)) &&
+                    pItem != NULL)
+            {
+                pLangBarItemMgr->RemoveItem(pItem);
+                pItem->Release();
+                pItem = NULL;
+            }
+            if (SUCCEEDED(pLangBarItemMgr->GetItem(c_guidItemButtonPad, &pItem)) &&
+                    pItem != NULL)
+            {
+                pLangBarItemMgr->RemoveItem(pItem);
+                pItem->Release();
+                pItem = NULL;
             }
         }
-        pItem    = NULL;
-        fRemove    = FALSE;
-
-        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonShape, &pItem)) &&
-            pItem != NULL) {
-            fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
-            pItem->Release ();
-        }
-
-        if ((pItem == NULL || fRemove) && fSelect && fShowShapeIcon) {
-            pNewItem    = NULL;
-            if (CreateItemButtonShape (&pNewItem) && pNewItem != NULL) {
-                pLangBarItemMgr->AddItem (pNewItem);
-                pNewItem->Release ();
+        else
+        {
+            // check Cmode button.
+            if (SUCCEEDED(pLangBarItemMgr->GetItem(c_guidItemButtonCMode, &pItem)) &&
+                    pItem != NULL)
+            {
+                // already have.
+                goto Exit_Func;
             }
-        }
-        pItem    = NULL;
-        fRemove    = FALSE;
 
-
-        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonIME, &pItem)) &&
-            pItem != NULL) {
-            fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
-            pItem->Release ();
-        }
-        if ((pItem == NULL || fRemove) && fSelect && fShowIMEIcon) {
-            pNewItem    = NULL;
-            if (CreateItemButtonIME (&pNewItem) && pNewItem != NULL) {
-                pLangBarItemMgr->AddItem (pNewItem);
-                pNewItem->Release ();
+            // add all buttons
+            if (fShowInputModeIcon && CreateItemButtonCMode(&pNewItem) && pNewItem != NULL)
+            {
+                pLangBarItemMgr->AddItem(pNewItem);
+                pNewItem->Release();
+                pNewItem = NULL;
             }
-        }
-        pItem    = NULL;
-        fRemove    = FALSE;
-#if 1
-        if (SUCCEEDED (pLangBarItemMgr->GetItem (c_guidItemButtonPad, &pItem)) &&
-            pItem != NULL) {
-            fRemove    = SUCCEEDED (pLangBarItemMgr->RemoveItem (pItem));
-            pItem->Release ();
-        }
 
-        if ((pItem == NULL || fRemove) && fSelect && fShowPadIcon) {
-            pNewItem    = NULL;
-            if (CreateItemButtonPad (&pNewItem) && pNewItem != NULL) {
-                pLangBarItemMgr->AddItem (pNewItem);
-                pNewItem->Release ();
+            if (fShowShapeIcon && CreateItemButtonShape(&pNewItem) && pNewItem != NULL)
+            {
+                pLangBarItemMgr->AddItem(pNewItem);
+                pNewItem->Release();
+                pNewItem = NULL;
             }
-        }
-        pItem    = NULL;
-        fRemove    = FALSE;
+
+            if (fShowIMEIcon && CreateItemButtonIME(&pNewItem) && pNewItem != NULL)
+            {
+                pLangBarItemMgr->AddItem(pNewItem);
+                pNewItem->Release();
+                pNewItem = NULL;
+            }
+#if 0
+            if (fShowPadIcon && CreateItemButtonPad(&pNewItem) && pNewItem != NULL)
+            {
+                pLangBarItemMgr->AddItem(pNewItem);
+                pNewItem->Release();
+                pNewItem = NULL;
+            }
 #endif
-        pLangBarItemMgr->Release ();
+        }
+
+        if (pLangBarItemMgr
+#ifdef _WIN64
+                && !IsWindowsVersionOrLater(6, 2, 0)
+#endif
+            )
+            pLangBarItemMgr->Release();
     }
   Exit_Func:
 #if defined (TSF_NEED_MUTEX)
@@ -522,10 +556,10 @@ UninitLanguageBar (void)
     }
 #endif
 
+    pLangBarItemMgr = _QueryLangBarItemMgr();
 #ifdef USE_HELPSINK
     DEBUGPRINTF ((TEXT ("Enter::UninitLanguageBar\n")));
     // http://msdn2.microsoft.com/en-us/library/ms628993.aspx
-    pLangBarItemMgr = _QueryLangBarItemMgr();
     if (pLangBarItemMgr != NULL) {
         ITfLangBarItem* pItem;
         ITfSource* pSource;
@@ -541,14 +575,18 @@ UninitLanguageBar (void)
             }
             pItem->Release();
         }
-        pLangBarItemMgr->Release();
     }
 #endif
+
     if (shMSCTF != NULL) {
         FreeLibrary (shMSCTF);
         shMSCTF    = NULL;
     }
     g_fInitTSF    = FALSE;
+
+    //if (pLangBarItemMgr && !IsWindowsVersionOrLater(6, 2, 0))
+    if (pLangBarItemMgr)
+        pLangBarItemMgr->Release();
     return;
 }
 
@@ -581,13 +619,25 @@ _QueryLangBarItemMgr (void)
     if (shMSCTF == NULL)
         return    NULL;
 
+#ifdef _WIN64
+    if (IsWindowsVersionOrLater(6, 2, 0))
+        if (_pLangBarItemMgr)
+            return _pLangBarItemMgr;
+#endif
+
     pfnCreateLangBarItemMgr    = (PTF_CREATELANGBARITEMMGR)GetProcAddress (shMSCTF, "TF_CreateLangBarItemMgr");
     if (pfnCreateLangBarItemMgr == NULL) 
         return    NULL;
 
     hr = (*pfnCreateLangBarItemMgr)(&pLangBarItemMgr);
-    if (SUCCEEDED (hr)) 
+    if (SUCCEEDED (hr))
+    {
+#ifdef _WIN64
+        if (IsWindowsVersionOrLater(6, 2, 0))
+            _pLangBarItemMgr = pLangBarItemMgr;
+#endif
         return    pLangBarItemMgr;
+    }
     return    NULL;
 }
 
@@ -679,6 +729,13 @@ _DumpLangBarItem (void)
 	}
 	pEnum->Release ();
     }
+    if (pLangBarItemMgr
+#ifdef _WIN64
+            && !IsWindowsVersionOrLater(6, 2, 0)
+#endif
+        )
+        pLangBarItemMgr->Release();
+
     return;
 }
 #endif
