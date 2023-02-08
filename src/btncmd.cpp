@@ -253,7 +253,13 @@ CLangBarItemCModeButton::GetTooltipString (
 		return	E_INVALIDARG ;
 
 	hIMC	= _GetCurrentHIMC () ;
-	if (hIMC != NULL && dwLayoutFlag) {
+
+	LPINPUTCONTEXT lpIMC = NULL;
+
+	if (hIMC)
+		lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+
+	if (hIMC != NULL && lpIMC != NULL && dwLayoutFlag) {
 		lpDesc=(LPTSTR)szDesc;
 		if (! ImmGetOpenStatus (hIMC)) {
 			LoadString(hInst, IDS_TIP_ASCII, lpDesc, 128);
@@ -262,6 +268,7 @@ CLangBarItemCModeButton::GetTooltipString (
 		} else {
 			LoadString(hInst, IDS_TIP_USER, lpDesc, 128);
 		}
+		ImmUnlockIMC(hIMC);
 	} else {
 		lpDesc=(LPTSTR)&_tfLangBarItemInfo.szDescription;
 		LoadString(hInst,IDS_INPUT_CMODE_DESC, lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
@@ -375,6 +382,12 @@ CLangBarItemCModeButton::GetIcon (
 	if (hIMC == NULL) 
 		goto	Skip ;
 
+	LPINPUTCONTEXT lpIMC;
+
+	lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+	if (!lpIMC)
+		goto Skip;
+
 	if (ImmGetOpenStatus (hIMC)) {
 		if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence)) {
 			if (dwConversion & IME_CMODE_HANJACONVERT){
@@ -398,6 +411,7 @@ CLangBarItemCModeButton::GetIcon (
 	} else {
 		str	= TEXT ("INDIC_ENG") ;
 	}
+	ImmUnlockIMC(hIMC);
 Skip:
 	if (str == NULL)
 		str	= TEXT ("INDIC_ENG") ;
@@ -519,7 +533,13 @@ _Menu_ToAscII    (void)
 	if (! hIMC)
 		return ;
 	_Menu_ToCMode (IME_CMODE_ROMAN) ;
+
+	LPINPUTCONTEXT lpIMC;
+	lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+	if (!lpIMC)
+		return;
 	ImmSetOpenStatus (hIMC, FALSE) ;
+	ImmUnlockIMC(hIMC);
 }
 
 void
@@ -530,9 +550,15 @@ _Menu_ToCMode (
 	if (! hIMC)
 		return ;
 
+	LPINPUTCONTEXT lpIMC;
+	lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+	if (!lpIMC)
+		return;
+
 	if (! ImmGetOpenStatus (hIMC)) 
 		ImmSetOpenStatus (hIMC, TRUE) ;
 	ImmSetConversionStatus (hIMC, fdwConversion, 0) ;
+	ImmUnlockIMC(hIMC);
 	return ;
 }
 
@@ -545,11 +571,22 @@ _GetConversionMode (
 	if (! hIMC)
 		return	MENU_ITEM_INDEX_ASCII ;
 
-	if (! ImmGetOpenStatus (hIMC)) 
+	LPINPUTCONTEXT lpIMC;
+	lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+	if (!lpIMC)
+		return MENU_ITEM_INDEX_ASCII;
+	if (! ImmGetOpenStatus (hIMC))
+	{
+		ImmUnlockIMC(hIMC);
 		return	MENU_ITEM_INDEX_ASCII ;
+	}
 
 	if (! ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
+	{
+		ImmUnlockIMC(hIMC);
 		return	MENU_ITEM_INDEX_CANCEL ;
+	}
+	ImmUnlockIMC(hIMC);
 
 	if (dwConversion & IME_CMODE_HANJACONVERT){
 		if (dwConversion & IME_CMODE_NATIVE){
