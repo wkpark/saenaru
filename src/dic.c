@@ -1302,7 +1302,7 @@ CONST LPBYTE lpbKeyState;
 
     BOOL cf=FALSE;
     int next=0;
-    UINT select=0, changed=0;
+    int select=0, changed=0;
     LRESULT candOk=FALSE;
 
     if ( (dwOptionFlag & USE_SHIFT_SPACE) && wParam == VK_SPACE && IsCTLPushed(lpbKeyState))
@@ -2572,7 +2572,8 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     LPMYSTR lpReadBase;
     const LPMYSTR szSep = MYTEXT("\n");
     LPMYSTR lpToken = NULL, lpNext = NULL;
-    DWORD llen = 0, found = 0, dwRead;
+    DWORD llen = 0, dwRead;
+    int found = 0;
     LPMYSTR lpWrite = lpBuf;
     int olen = Mylstrlen(lpRead);
     MYCHAR r_from = 0, r_to = 0;

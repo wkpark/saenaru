@@ -397,7 +397,7 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             dwOptionFlag & USE_SHIFT_SPACE)
     {
         MyDebugPrint((TEXT(">>>>>>>> Check Hangul Toggle key=%x, vkey=%x\n"), vkToggle, LOWORD(vKey) & 0xFF));
-        while ((LOWORD(vKey) & 0x00FF) == vkToggle) {
+        while ((UINT)(LOWORD(vKey) & 0x00FF) == (UINT)vkToggle) {
             UINT ModState = dwToggleKey & 0xffff0000;
             UINT ok;
             MyDebugPrint((TEXT(">>>>>>>> Hangul Toggle key\n")));
