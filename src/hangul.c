@@ -2187,8 +2187,8 @@ int (*hangul_automata)(HangulIC*, WCHAR, LPMYSTR, int *)= hangul_automata2;
 
 int PASCAL set_keyboard(UINT type)
 {
-    INT atype;
-    INT ctype;
+    UINT atype;
+    UINT ctype;
     switch (type)
     {
         case LAYOUT_OLD2BUL:
