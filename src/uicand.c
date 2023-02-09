@@ -80,10 +80,10 @@ LPARAM lParam;
         case WM_CREATE:
 
             hbmpHanja = LoadImage(hInst,TEXT("HANJA_MODE_BMP"), IMAGE_BITMAP,
-                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION|LR_SHARED);
 
             hbmpCheck = LoadImage(hInst,TEXT("HANJA_CHECK_BMP"), IMAGE_BITMAP,
-                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION|LR_SHARED);
 
             if (hbmpHanja) {
                 HDC hdc = CreateCompatibleDC(NULL);

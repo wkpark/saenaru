@@ -600,7 +600,7 @@ CLangBarItemImeButton::GetIcon (
 	    str = TEXT("INDIC_2SET");
     }
 
-    *phIcon    = (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, 0);
+    *phIcon    = (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, LR_SHARED);
     return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
 

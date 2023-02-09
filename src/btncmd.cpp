@@ -416,7 +416,7 @@ Skip:
 	if (str == NULL)
 		str	= TEXT ("INDIC_ENG") ;
 
-    *phIcon	= (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, 0);
+    *phIcon	= (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, LR_SHARED);
     return (*phIcon != NULL) ? S_OK : E_FAIL ;
 }
 

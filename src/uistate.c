@@ -91,7 +91,7 @@ LPARAM lParam;
         case WM_CREATE:
             /*hbmpStatus = LoadBitmap(hInst,TEXT("STATUSBMP")); */
             hbmpStatus =(HBITMAP)LoadImage(hInst,TEXT("STATUSBMP"),IMAGE_BITMAP,
-                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION);
+                    0,0,LR_LOADTRANSPARENT|LR_CREATEDIBSECTION|LR_SHARED);
 
             if (hbmpStatus) {
                 HDC hdc = CreateCompatibleDC(NULL);

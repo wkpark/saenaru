@@ -267,7 +267,7 @@ CLangBarItemPadButton::GetIcon (
 	if (phIcon == NULL)
 		return	E_INVALIDARG ;
 
-	*phIcon    = (HICON)LoadImage (hInst, TEXT ("INDIC_PAD"), IMAGE_ICON, 16, 16, 0);
+	*phIcon    = (HICON)LoadImage (hInst, TEXT ("INDIC_PAD"), IMAGE_ICON, 16, 16, LR_SHARED);
 	return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
 
