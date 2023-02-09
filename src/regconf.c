@@ -189,6 +189,8 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             continue;
         } else if (Mylstrcmp(p, TEXT("Type2")) == 0) {
             type = SAENARU_KEYBOARD_2SET;
+        } else if (Mylstrcmp(p, TEXT("Type3")) == 0) {
+            type = SAENARU_KEYBOARD_3SET;
         } else {
             key = string_to_hex(p);
             if (key == 0)
