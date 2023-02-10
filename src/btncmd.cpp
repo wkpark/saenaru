@@ -489,7 +489,10 @@ CLangBarItemCModeButton::GetIcon (
 {
 	HIMC	hIMC ;
 	DWORD	dwConversion, dwSentence ;
-	register LPCTSTR	str	= NULL ;
+	LPTSTR lpDesc;
+	TCHAR szDesc[128];
+	lpDesc = (LPTSTR)szDesc;
+	lpDesc[0] = TEXT('\0');
 
 	DEBUGPRINTFEX (100, (TEXT ("CLangBarItemCModeButton::GetIcon(%p)\n"), phIcon)) ;
 
@@ -511,30 +514,37 @@ CLangBarItemCModeButton::GetIcon (
 			if (dwConversion & IME_CMODE_HANJACONVERT){
 				if (dwConversion & IME_CMODE_NATIVE)
 				{
-					str	= TEXT ("INDIC_HANJA") ;
+					lstrcpyn(lpDesc, TEXT("INDIC_HANJA"), 12);
 				} else {
-					str	= TEXT ("INDIC_ENG") ;
+					lstrcpyn(lpDesc, TEXT("INDIC_ENG"), 10);
 				}
 			} else {
 				if (dwConversion & IME_CMODE_NATIVE){
 					if (dwImeFlag & AUTOMATA_3SET)
-						str = TEXT("INDIC_HAN");
+						lstrcpyn(lpDesc, TEXT("INDIC_HAN"), 10);
 					else
-						str = TEXT("INDIC_HAN2") ;
+						lstrcpyn(lpDesc, TEXT("INDIC_HAN2"), 11);
+
+					// Middle-aged Hangul
+					if (dwOptionFlag & HANGUL_JAMOS)
+					{
+						lpDesc[lstrlen(lpDesc) + 1] = TEXT('\0');
+						lpDesc[lstrlen(lpDesc)] = TEXT('O');
+					}
 				} else {
-					str	= TEXT ("INDIC_ENG") ;
+					lstrcpyn(lpDesc, TEXT("INDIC_ENG"), 10);
 				}
 			}
 		}
 	} else {
-		str	= TEXT ("INDIC_ENG") ;
+		lstrcpyn(lpDesc, TEXT("INDIC_ENG"), 10);
 	}
 	ImmUnlockIMC(hIMC);
 Skip:
-	if (str == NULL)
-		str	= TEXT ("INDIC_ENG") ;
+	if (lpDesc[0] == TEXT('\0'))
+		lstrcpyn(lpDesc, TEXT("INDIC_ENG"), 11);
 
-    *phIcon	= (HICON)LoadImage (hInst, str, IMAGE_ICON, 16, 16, LR_SHARED);
+    *phIcon	= (HICON)LoadImage (hInst, lpDesc, IMAGE_ICON, 16, 16, LR_SHARED);
     return (*phIcon != NULL) ? S_OK : E_FAIL ;
 }
 
