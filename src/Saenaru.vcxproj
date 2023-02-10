@@ -279,19 +279,20 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <EntryPointSymbol>DLLEntry</EntryPointSymbol>
       <AdditionalDependencies>vcruntimed.lib;ucrtd.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
       <MergeSections>.rdata=.text</MergeSections>
+      <AdditionalOptions>/HIGHENTROPYVA:NO</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0xA00;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -302,12 +303,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <EntryPointSymbol>DLLEntry</EntryPointSymbol>
       <AdditionalDependencies>vcruntime.lib;ucrt.lib;comctl32.lib;imm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>saenaru.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\saenaru.ime</OutputFile>
       <MergeSections>.rdata=.text</MergeSections>
+      <AdditionalOptions>/HIGHENTROPYVA:NO</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
