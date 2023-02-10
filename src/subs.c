@@ -455,7 +455,7 @@ HKL PASCAL GetMyHKL()
 
     dwSize = GetKeyboardLayoutList(0, NULL);
 
-    lphkl = (HKL *)GlobalAlloc(GPTR, dwSize * sizeof(DWORD));
+    lphkl = (HKL *)GlobalAlloc(GPTR, dwSize * sizeof(HKL));
 
     if (!lphkl)
         return NULL;
@@ -467,7 +467,7 @@ HKL PASCAL GetMyHKL()
     {
         TCHAR szFile[32];
         HKL hKLTemp = *(lphkl + dwi);
-        ImmGetIMEFileName(hKLTemp, szFile, sizeof(szFile));
+        ImmGetIMEFileName(hKLTemp, szFile, sizeof(szFile) / sizeof(TCHAR));
 
         if (!lstrcmpi(szFile, MyFileName))
         {
