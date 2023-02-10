@@ -137,14 +137,14 @@ CLangBarItemCModeButton::CLangBarItemCModeButton ()
 	_tfLangBarItemInfo.clsidService	= c_clsidSaenaruTextService ;
 	//_tfLangBarItemInfo.clsidService	= CLSID_NULL ;
 	_tfLangBarItemInfo.guidItem		= c_guidItemButtonCMode ;
-	_tfLangBarItemInfo.dwStyle		= TF_LBI_STYLE_BTN_MENU
+	_tfLangBarItemInfo.dwStyle		= TF_LBI_STYLE_BTN_BUTTON
 	       | TF_LBI_STYLE_SHOWNINTRAY
 	       | TF_LBI_STYLE_HIDDENSTATUSCONTROL
 #if 1
 	       | TF_LBI_STYLE_TEXTCOLORICON
 #endif
 	       ;
-	_tfLangBarItemInfo.ulSort		= 1 ;
+	_tfLangBarItemInfo.ulSort		= 0;
 
 	lpDesc=(LPTSTR)&_tfLangBarItemInfo.szDescription;
 	LoadString(hInst,IDS_INPUT_CMODE_DESC, lpDesc,ARRAYSIZE (_tfLangBarItemInfo.szDescription));
@@ -281,14 +281,6 @@ CLangBarItemCModeButton::GetTooltipString (
 }
 
 /*	ITfLangBarItemButton::OnClick
- *
- *	この method はユ?ザが言語バ?の TF_LBI_STYLE_BTN_BUTTON また
- *	は TF_LBI_STYLE_BTN_TOGGLE ス?イルを持っている??ンの上で?
- *	ウスをクリックした時に呼び出される。
- *	もし??ン item が TF_LBI_STYLE_BTN_BUTTON ス?イルを持たない
- *	のなら、この method 使われない。
- *(*)
- *	今の?況では特に何もする必要はないので、S_OK を?返す。
  */
 STDAPI
 CLangBarItemCModeButton::OnClick (
@@ -296,7 +288,133 @@ CLangBarItemCModeButton::OnClick (
 	POINT					pt,
 	const RECT*				prcArea)
 {
-	return	S_OK ;
+	HIMC hIMC;
+	DWORD dwConversion, dwSentence ;
+
+	HMENU hMenu;
+	int i;
+
+	// HACK generate VK_ESCAPE to close the default IME popup menu.
+	keybd_event(VK_ESCAPE, 0x0, 0, 0);
+
+	hIMC = _GetCurrentHIMC();
+	switch (click)
+	{
+		case TF_LBI_CLK_LEFT:
+			if (hIMC == NULL)
+				return S_OK;
+
+			LPINPUTCONTEXT lpIMC;
+
+			lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+			if (!lpIMC)
+				return S_OK;
+
+			if (!ImmGetOpenStatus(hIMC))
+			{
+				ImmUnlockIMC(hIMC);
+				_Menu_ToHangul();
+				return S_OK;
+			}
+			ImmUnlockIMC(hIMC);
+
+			_Menu_ToAscII();
+			UpdateLanguageBar();
+			break;
+
+		case TF_LBI_CLK_RIGHT:
+			if (hIMC == NULL)
+				return S_OK;
+
+			lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+			if (!lpIMC)
+				return S_OK;
+
+			// get the current conversion mode.
+			UINT selected = 0;
+			if (ImmGetOpenStatus (hIMC))
+			{
+				if (ImmGetConversionStatus(hIMC, &dwConversion, &dwSentence))
+				{
+					if (dwConversion & IME_CMODE_HANJACONVERT)
+					{
+						if (dwConversion & IME_CMODE_NATIVE)
+							selected = 2; // HANJA
+						else
+							selected = 1; // ENG
+					}
+					else
+					{
+						if (dwConversion & IME_CMODE_NATIVE)
+							selected = 0; // HANGUL
+						else
+							selected = 1; // ENG
+					}
+				}
+			}
+			else
+			{
+				selected = 1; // ENG
+			}
+
+			hMenu = CreatePopupMenu();
+			for (i = 0 ; i < ARRAYSIZE(c_rgMenuItems); i++)
+			{
+				LPTSTR lpDesc;
+				TCHAR szDesc[128];
+				MENUITEMINFO mii;
+				UINT state = 0;
+
+				lpDesc = (LPTSTR)&szDesc;
+				if (c_rgMenuItems[i].chDesc != NULL)
+					LoadString(hInst, c_rgMenuItems[i].chDesc, lpDesc, 128);
+				else
+					lpDesc = NULL;
+
+				mii.cbSize = sizeof(MENUITEMINFO);
+
+				if (i == selected)
+					state = MFS_CHECKED;
+				else
+					state = 0;
+
+				mii.wID = i;
+				if (lpDesc == NULL)
+				{
+					mii.fMask = MIIM_ID | MIIM_FTYPE;
+					mii.fType = MFT_SEPARATOR;
+				}
+				else
+				{
+					mii.fMask = MIIM_ID | MIIM_STRING | MIIM_STATE | MIIM_FTYPE;
+					mii.fType = MFT_STRING | MFT_RADIOCHECK;
+					mii.dwTypeData = lpDesc;
+					mii.fState = state;
+					mii.cch = (UINT)wcslen(lpDesc);
+				}
+				InsertMenuItem(hMenu, i, TRUE, &mii);
+			}
+			ImmUnlockIMC(hIMC);
+
+			{
+				TPMPARAMS tpm = {};
+				TPMPARAMS *ptpm = nullptr;
+				if (prcArea != nullptr)
+				{
+					tpm.cbSize = sizeof(tpm);
+					tpm.rcExclude = *prcArea;
+					ptpm = &tpm;
+				}
+				// open popup menu
+				UINT bRet = TrackPopupMenuEx(hMenu,
+						TPM_LEFTALIGN | TPM_TOPALIGN | TPM_NONOTIFY | TPM_RETURNCMD | TPM_LEFTBUTTON | TPM_VERTICAL,
+						pt.x, pt.y, GetFocus(), ptpm);
+				this->OnMenuSelect(bRet);
+			}
+			DestroyMenu(hMenu);
+			break;
+	}
+	return S_OK;
 }
 
 /*	ITfLangBarItemButton::InitMenu

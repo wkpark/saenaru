@@ -567,15 +567,16 @@ CLangBarItemImeButton::OnMenuSelect (
         if (wID >= 30) wID-= 28;
         if (c_rgMenuItems [wID].pfnHandler != NULL) {
             c_rgMenuItems [wID].pfnHandler (wID);
-            //UpdateLanguageBar ();
+	    if (wID != 0)
+		UpdateLanguageBar();
         }
     } else if (wID < 20) {
         _Menu_SelectKeyboard (wID);
+        UpdateLanguageBar();
     } else {
         _Menu_SelectCompose (wID);
     }
 
-    UpdateLanguageBar();
     return    S_OK;
 }
 
@@ -714,11 +715,21 @@ void
 _Menu_Property (UINT wID)
 {
     register HKL    hKL        = GetMyHKL ();
-    register HWND    hWnd    = GetFocus ();
 
     if (hKL == NULL)
         return;
-    (void) ImeConfigure (hKL, hWnd, IME_CONFIG_GENERAL, NULL);
+
+    HIMC hIMC = _GetCurrentHIMC();
+    if (hIMC == NULL)
+        return;
+    LPINPUTCONTEXT lpIMC;
+    lpIMC = (LPINPUTCONTEXT)ImmLockIMC(hIMC);
+    if (lpIMC)
+    {
+        (void) ImeConfigure (hKL, lpIMC->hWnd, IME_CONFIG_GENERAL, NULL);
+        ImmUnlockIMC(hIMC);
+    }
+
     return;
 }
 
@@ -794,7 +805,7 @@ _MenuItem_GetKeyboardFlag (UINT wID)
     DEBUGPRINTFEX (100, (TEXT ("GetKeyboardFlag:%d)\n"), wID));
     //if ( flag & dwLayoutFlag)
     if ( wID == dwLayoutFlag)
-        return 1;
+        return TF_LBMENUF_RADIOCHECKED;
     return    0;
 }
 
