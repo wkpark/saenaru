@@ -37,3 +37,6 @@ EXPORTS
                 AboutDlgProc
                 RegWordDlgProc
                 SelectDictionaryDlgProc
+
+                ; RunDLL32 entry point
+                InstallLayout

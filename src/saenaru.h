@@ -430,6 +430,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lP
 INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM lParam);
 
+void CALLBACK InstallLayout(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow);
+
 /* regconf.c */
 UINT load_keyboard_map_from_reg(LPCTSTR, UINT, WCHAR *);
 UINT load_compose_map_from_reg(LPCTSTR, UINT, void *);

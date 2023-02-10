@@ -1179,7 +1179,87 @@ INT_PTR CALLBACK DebugOptionDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPA
 
     }
     return TRUE;
-} 
+}
+
+/* Rundll32 entrypoint */
+typedef BOOL (WINAPI* fpInstallLayoutOrTip)(_In_ LPCWSTR psz, _In_ DWORD dwFlags);
+void CALLBACK InstallLayout(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+{
+    HMODULE module = NULL;
+
+    hwnd;
+    hinst;
+
+    module = LoadLibrary(TEXT("input.dll"));
+    if (module == NULL)
+    {
+        MessageBox(hwnd, TEXT("Fail to load input.dll"), TEXT("InstallLayout"), MB_ICONSTOP | MB_OK);
+        return;
+    }
+
+    fpInstallLayoutOrTip pInstallLayoutOrTip;
+
+    pInstallLayoutOrTip = (fpInstallLayoutOrTip)GetProcAddress(module, "InstallLayoutOrTip");
+    if (pInstallLayoutOrTip)
+    {
+        WCHAR *profiles[3] = {
+            TEXT("0412:E0120412"), // Saenaru default
+            TEXT("0412:E0130412"), // Saenaru dvorak
+            TEXT("0412:E0140412"), // Saenaru colemak
+        };
+        WCHAR *keyboards[3] = {
+            TEXT("새나루 한글 입력기"),
+            TEXT("새나루 한글 입력기 (드보락)"),
+            TEXT("새나루 한글 입력기 (콜맥)"),
+        };
+        WCHAR *types[2] = {
+            TEXT("제거됨"),
+            TEXT("설치됨"),
+        };
+
+        char *save = NULL;
+        char *tok = strtok_s(lpszCmdLine, " ,", &save);
+        int i = atoi(tok);
+        if (i < 0 || i > 2)
+            i = 0;
+        char *mode = strtok_s(NULL, " ,", &save);
+        int m = 1; // default INSTALL
+        if (mode)
+        {
+            m = atoi(mode);
+            if (m == 0)
+                m = 0; // UNINSTALL
+            else
+                m = 1;
+        }
+        char *tmp = strtok_s(NULL, "", &save);
+        int silent = 0;
+        if (tmp)
+            silent = 1;
+
+        BOOL ret = (pInstallLayoutOrTip)(profiles[i], m ? 0 : 1);
+        if (ret)
+        {
+            if (!silent)
+            {
+                WCHAR sz[80];
+                wsprintf(sz, TEXT("%s %s"), keyboards[i], types[m]);
+                MessageBox(hwnd, sz, TEXT("InstallLayout"), MB_ICONINFORMATION | MB_OK);
+            }
+        }
+        else
+        {
+            if (!silent)
+                MessageBox(hwnd, TEXT("Fail to call InstallLayoutOrTip()"), TEXT("InstallLayout"), MB_ICONINFORMATION | MB_OK);
+        }
+    }
+    else
+    {
+        MessageBox(hwnd, TEXT("Fail to find InstallLayoutOrTip()"), TEXT("InstallLayout"), MB_ICONINFORMATION | MB_OK);
+    }
+    FreeLibrary(module);
+    return;
+}
 
 /*
  * ex: ts=8 sts=4 sw=4 et
