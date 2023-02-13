@@ -164,6 +164,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
@@ -175,8 +176,9 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -185,6 +187,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8</AdditionalOptions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -195,8 +198,7 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <EntryPointSymbol>DLLEntry</EntryPointSymbol>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)\kbddvk.dll</OutputFile>
     </Link>
@@ -207,6 +209,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
@@ -219,7 +222,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
@@ -230,6 +233,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8</AdditionalOptions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -240,7 +244,7 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
@@ -251,6 +255,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
@@ -262,7 +267,7 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
@@ -284,7 +289,7 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
@@ -295,6 +300,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8</AdditionalOptions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -305,7 +311,8 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
@@ -316,6 +323,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">kbddvk.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG=1;DEBUG_LV=103;UNICODE;_UNICODE;_WINDOWS;WINVER=0x500;NO_NTDLL=1;USE_MSVCRT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4311;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/utf-8</AdditionalOptions>
@@ -327,7 +335,7 @@
       <AdditionalOptions>%(AdditionalOptions) /ignore:4253,4254</AdditionalOptions>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <ModuleDefinitionFile>kbddvk.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)kbddvk.dll</OutputFile>
     </Link>
