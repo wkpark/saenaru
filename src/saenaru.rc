@@ -1,6 +1,7 @@
 //
 // $Id$
 //
+#pragma code_page(65001)
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -71,86 +72,86 @@ HANJA_CHECK_BMP         BITMAP  DISCARDABLE     "..\\resource\\hjcheck.bmp"
 //DLG_GENERAL DIALOG DISCARDABLE  30, 65, 215, 135
 DLG_GENERAL DIALOG DISCARDABLE  30, 65, 228, 158
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
-CAPTION "ÀÚÆÇ ÀÏ¹Ý ¼³Á¤"
-FONT 9, "±¼¸²"
+CAPTION "ìžíŒ ì¼ë°˜ ì„¤ì •"
+FONT 9, "êµ´ë¦¼"
 LANGUAGE 0x12, 0x1
 BEGIN
     ICON            IDI_GENERAL,IDC_STATIC,4,5,18,21
-    GROUPBOX        "ÀÚÆÇ ¼±ÅÃ",IDC_STATIC,26,2,77,68
-    CONTROL         "µÎ¹ú½Ä (&2)",IDC_LAYOUT_OLD2BUL,"Button",
+    GROUPBOX        "ìžíŒ ì„ íƒ",IDC_STATIC,26,2,77,68
+    CONTROL         "ë‘ë²Œì‹ (&2)",IDC_LAYOUT_OLD2BUL,"Button",
                     BS_AUTORADIOBUTTON,33,15,56,11
-    CONTROL         "¼¼¹ú½Ä (&3)",IDC_LAYOUT_3FIN,"Button",
+    CONTROL         "ì„¸ë²Œì‹ (&3)",IDC_LAYOUT_3FIN,"Button",
                     BS_AUTORADIOBUTTON,33,27,56,11
-    CONTROL         "¼¼¹ú½Ä 390 (&9)",IDC_LAYOUT_390,"Button",
+    CONTROL         "ì„¸ë²Œì‹ 390 (&9)",IDC_LAYOUT_390,"Button",
                     BS_AUTORADIOBUTTON,33,39,56,11
-    CONTROL         "¼¼¹ú½Ä ¼ø¾Æ·¡ (&N)",IDC_LAYOUT_3SUN,"Button",
+    CONTROL         "ì„¸ë²Œì‹ ìˆœì•„ëž˜ (&N)",IDC_LAYOUT_3SUN,"Button",
                     BS_AUTORADIOBUTTON,33,51,68,11
-    GROUPBOX        "»ç¿ëÀÚ Á¤ÀÇ ÀÚÆÇ",IDC_STATIC,106,2,117,68
-    CONTROL         "¿¾ÇÑ±Û µÎ¹ú (&Y)",IDC_LAYOUT_YET2BUL,"Button",
+    GROUPBOX        "ì‚¬ìš©ìž ì •ì˜ ìžíŒ",IDC_STATIC,106,2,117,68
+    CONTROL         "ì˜›í•œê¸€ ë‘ë²Œ (&Y)",IDC_LAYOUT_YET2BUL,"Button",
                     BS_AUTORADIOBUTTON,111,16,62,11
-    CONTROL         "¿¾ÇÑ±Û ¼¼¹ú (&Z)",IDC_LAYOUT_YET3BUL,"Button",
+    CONTROL         "ì˜›í•œê¸€ ì„¸ë²Œ (&Z)",IDC_LAYOUT_YET3BUL,"Button",
                     BS_AUTORADIOBUTTON,111,28,62,11
-    CONTROL         "ºÏÇÑ µÎ¹ú½Ä (&P)",IDC_LAYOUT_NK_2BUL,"Button",
+    CONTROL         "ë¶í•œ ë‘ë²Œì‹ (&P)",IDC_LAYOUT_NK_2BUL,"Button",
                     BS_AUTORADIOBUTTON,111,39,62,11
-    CONTROL         "»õµÎ¹ú (&D)",IDC_LAYOUT_NEW2BUL,"Button",
+    CONTROL         "ìƒˆë‘ë²Œ (&D)",IDC_LAYOUT_NEW2BUL,"Button",
                     BS_AUTORADIOBUTTON,174,15,46,11
-    CONTROL         "»õ¼¼¹ú (&S)",IDC_LAYOUT_NEW3BUL,"Button",
+    CONTROL         "ìƒˆì„¸ë²Œ (&S)",IDC_LAYOUT_NEW3BUL,"Button",
                     BS_AUTORADIOBUTTON,174,27,46,11
-    CONTROL         "¾È¸¶ÅÂ (&A)",IDC_LAYOUT_AHNMATAE,"Button",
+    CONTROL         "ì•ˆë§ˆíƒœ (&A)",IDC_LAYOUT_AHNMATAE,"Button",
                     BS_AUTORADIOBUTTON,174,39,46,11
-    //CONTROL         "»ç¿ëÀÚ Á¤ÀÇ ÀÚÆÇ (&U)",IDC_LAYOUT_USER,"Button",
+    //CONTROL         "ì‚¬ìš©ìž ì •ì˜ ìžíŒ (&U)",IDC_LAYOUT_USER,"Button",
     //                BS_AUTORADIOBUTTON,115,57,77,11
     CONTROL         "",IDC_LAYOUT_USER,COMBOBOX,CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_VSCROLL
                     ,117,51,101,87
 
-    CONTROL         "¸ð¾ÆÄ¡±â (&L)",IDC_COMPOSITE_TYPING,"Button",
+    CONTROL         "ëª¨ì•„ì¹˜ê¸° (&L)",IDC_COMPOSITE_TYPING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,16,76,53,10
-    CONTROL         "µ¿½ÃÄ¡±â (&C)",IDC_CONCURRENT_TYPING,"Button",
+    CONTROL         "ë™ì‹œì¹˜ê¸° (&C)",IDC_CONCURRENT_TYPING,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,74,76,53,10
 
-    CONTROL         "ÀÚ¼Ò ´ÜÀ§ Áö¿ò (&J)", IDC_BACKSPACE_BY_JAMO, "Button",
+    CONTROL         "ìžì†Œ ë‹¨ìœ„ ì§€ì›€ (&J)", IDC_BACKSPACE_BY_JAMO, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 134, 76, 71, 10 
-    CONTROL         "<Shift>-<SPACE> ÇÑ/¿µÅ° (&H)", IDC_USE_SHIFT_SPACE, "Button",
+    CONTROL         "<Shift>-<SPACE> í•œ/ì˜í‚¤ (&H)", IDC_USE_SHIFT_SPACE, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 16, 89, 126, 10
 
-    CONTROL         "ÇÑ/¿µÅ° ¼³Á¤(&T)", IDC_HANGUL_TOGGLE, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 88, 62, 13 
+    CONTROL         "í•œ/ì˜í‚¤ ì„¤ì •(&T)", IDC_HANGUL_TOGGLE, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 142, 88, 62, 13 
 
-    CONTROL         "<ESC> ¿µ¹®ÀüÈ¯ (&E)", IDC_ESCENG_SUPPORT, "Button",
+    CONTROL         "<ESC> ì˜ë¬¸ì „í™˜ (&E)", IDC_ESCENG_SUPPORT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 16, 101,79, 10 
-    CONTROL         "µåº¸¶ô Áö¿ø (&V)", IDC_DVORAK_SUPPORT, "Button",
+    CONTROL         "ë“œë³´ë½ ì§€ì› (&V)", IDC_DVORAK_SUPPORT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 98, 102, 64, 11
-    CONTROL         "ÄõÆ¼ ´ÜÃàÅ° (&Q)", IDC_QWERTY_HOTKEY_SUPPORT, "Button",
+    CONTROL         "ì¿¼í‹° ë‹¨ì¶•í‚¤ (&Q)", IDC_QWERTY_HOTKEY_SUPPORT, "Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP, 163, 103, 61, 10
 /*
-    CONTROL         "µåº¸¶ô Áö¿ø (&V)",IDC_DVORAK_SUPPORT,"Button",
+    CONTROL         "ë“œë³´ë½ ì§€ì› (&V)",IDC_DVORAK_SUPPORT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,79,60,10
-    CONTROL         "ÀÚ¼Ò ´ÜÀ§ Áö¿ò (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
+    CONTROL         "ìžì†Œ ë‹¨ìœ„ ì§€ì›€ (&J)",IDC_BACKSPACE_BY_JAMO,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,26, 91,71,10
-    CONTROL         "<ESC> ¿µ¹®ÀüÈ¯ (&E)",IDC_ESCENG_SUPPORT,"Button",
+    CONTROL         "<ESC> ì˜ë¬¸ì „í™˜ (&E)",IDC_ESCENG_SUPPORT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,104, 91,83,10
-    CONTROL         "<Shift>-<SPACE> ÇÑ/¿µ ÀüÈ¯ (&H)",IDC_USE_SHIFT_SPACE,"Button",
+    CONTROL         "<Shift>-<SPACE> í•œ/ì˜ ì „í™˜ (&H)",IDC_USE_SHIFT_SPACE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,26,103,124,10
 */
-    CONTROL         "¿Ï¼ºÇü(KS X 1001) À½Àý Á¦ÇÑ (&K)",IDC_KSX1001_SUPPORT,
+    CONTROL         "ì™„ì„±í˜•(KS X 1001) ìŒì ˆ ì œí•œ (&K)",IDC_KSX1001_SUPPORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,114,114,10
-    CONTROL         "ÇÑ±Û Ã¹°¡³¡ Á¶ÇÕ (&O)",
+    CONTROL         "í•œê¸€ ì²«ê°€ë ì¡°í•© (&O)",
                     IDC_JAMOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     16,127,82,10
-    CONTROL         "ÀüÃ¼ ´ÜÀÚ¸ð Á¶ÇÕ (&U)",
+    CONTROL         "ì „ì²´ ë‹¨ìžëª¨ ì¡°í•© (&U)",
                     IDC_FULL_MULTIJOMO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     16,139,78,10
-    CONTROL         "È®ÀåÇÑÀÚ Áö¿ø (&X)",IDC_KSX1002_SUPPORT,
+    CONTROL         "í™•ìž¥í•œìž ì§€ì› (&X)",IDC_KSX1002_SUPPORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,115,77 ,10
-    CONTROL         "<SPACE> ÇÑÀÚ ¼±ÅÃ (&L)", IDC_HANJA_CAND_SPACE,
+    CONTROL         "<SPACE> í•œìž ì„ íƒ (&L)", IDC_HANJA_CAND_SPACE,
                     BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,134, 128, 90, 10 
-    CONTROL         "ºñ½ÁÇÑ ´Ü¾î º¸±â(&M)", IDC_SIMILAR_WORDS, BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,
+    CONTROL         "ë¹„ìŠ·í•œ ë‹¨ì–´ ë³´ê¸°(&M)", IDC_SIMILAR_WORDS, BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP,
                     134,140,90,10 
 END
 
 DLG_REGISTERWORD DIALOG DISCARDABLE  46, 36, 191, 83
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "Register Word"
-FONT 9, "±¼¸²"
+FONT 9, "êµ´ë¦¼"
 LANGUAGE 0x12, 0x1
 BEGIN
     LTEXT           "&String",-1,15,17,41,8
@@ -164,29 +165,29 @@ END
 
 DLG_SELECTDICTIONARY DIALOG DISCARDABLE  34, 31, 186, 85
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
-CAPTION "»çÀü"
-FONT 9, "±¼¸²"
+CAPTION "ì‚¬ì „"
+FONT 9, "êµ´ë¦¼"
 LANGUAGE 0x12, 0x1
 BEGIN
-    LTEXT           "ÇöÀç »çÀü",-1,5,15,84,8
+    LTEXT           "í˜„ìž¬ ì‚¬ì „",-1,5,15,84,8
     LTEXT           "",ID_SD_DICPATH,11,28,162,9
-    PUSHBUTTON      "¼±ÅÃ",ID_SD_SELDIC,123,43,40,14
+    PUSHBUTTON      "ì„ íƒ",ID_SD_SELDIC,123,43,40,14
 END
 
 
 DLG_ABOUT DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "»õ³ª·ç¿¡ ´ëÇØ..."
-FONT 9, "±¼¸²"
+CAPTION "ìƒˆë‚˜ë£¨ì— ëŒ€í•´..."
+FONT 9, "êµ´ë¦¼"
 LANGUAGE 0x12, 0x1
 BEGIN
-    LTEXT           "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â ¹öÀü 1.1.2",IDC_STATIC,61,36,98,8
+    LTEXT           "ìƒˆë‚˜ë£¨ í•œê¸€ ìž…ë ¥ê¸° ë²„ì „ 1.1.2",IDC_STATIC,61,36,98,8
     ICON            IDI_ABOUT,IDC_STATIC,98,4,20,20
-    LTEXT           "ÀåÇý½Ä, ¹Ú¿ø±Ô ¸¸µê 2003-2010",IDC_STATIC,
+    LTEXT           "ìž¥í˜œì‹, ë°•ì›ê·œ ë§Œë“¦ 2003-2010",IDC_STATIC,
 		     59,54,98,8
-    LTEXT           "ÀÌ ¼ÒÇÁÆ®¿þ¾î´Â ¿Ã¹Ù¸¥ µ¿ÀÛÀÌ³ª Æ¯Á¤ ¸ñÀû¿¡ÀÇ ÀûÇÕ¼º¿¡ ´ëÇÑ ¾î¶°ÇÑ º¸Áõ¾øÀÌ ""ÀÖ´Â ±×´ë·Î"" ¹èÆ÷µË´Ï´Ù.",
+    LTEXT           "ì´ ì†Œí”„íŠ¸ì›¨ì–´ëŠ” ì˜¬ë°”ë¥¸ ë™ìž‘ì´ë‚˜ íŠ¹ì • ëª©ì ì—ì˜ ì í•©ì„±ì— ëŒ€í•œ ì–´ë– í•œ ë³´ì¦ì—†ì´ ""ìžˆëŠ” ê·¸ëŒ€ë¡œ"" ë°°í¬ë©ë‹ˆë‹¤.",
                     IDC_STATIC,8,81,198,18
-    LTEXT           "ÀÌ ¼ÒÇÁÆ®¿þ¾î´Â ´ëÇÑ¹Î±¹ ÀúÀÛ±Ç¹ý¿¡ ÀÇÇØ º¸È£µË´Ï´Ù. ÀÚ¼¼ÇÑ ÀúÀÛ±Ç »çÇ×Àº °°ÀÌ ¹èÆ÷µÇ´Â °ü·Ã ¹®¼­ ¶Ç´Â ÇÁ·ÎÁ§Æ® È¨ÆäÀÌÁö(http://kldp.net/projects/saenaru/)¸¦ ÂüÁ¶ÇÏ½Ê½Ã¿À.",
+    LTEXT           "ì´ ì†Œí”„íŠ¸ì›¨ì–´ëŠ” ëŒ€í•œë¯¼êµ­ ì €ìž‘ê¶Œë²•ì— ì˜í•´ ë³´í˜¸ë©ë‹ˆë‹¤. ìžì„¸í•œ ì €ìž‘ê¶Œ ì‚¬í•­ì€ ê°™ì´ ë°°í¬ë˜ëŠ” ê´€ë ¨ ë¬¸ì„œ ë˜ëŠ” í”„ë¡œì íŠ¸ í™ˆíŽ˜ì´ì§€(http://kldp.net/projects/saenaru/)ë¥¼ ì°¸ì¡°í•˜ì‹­ì‹œì˜¤.",
                     IDC_STATIC,8,101,198,24
     GROUPBOX        "",IDC_STATIC,3,72,209,58
 END
@@ -194,7 +195,7 @@ END
 DLG_DEBUG DIALOG DISCARDABLE  30, 65, 215, 135
 STYLE DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "DebugOptions"
-FONT 9, "±¼¸²"
+FONT 9, "êµ´ë¦¼"
 LANGUAGE 0x12, 0x1
 BEGIN
     CONTROL         "LOGF_ENTRY",IDC_LOGF_ENTRY,"Button",BS_AUTOCHECKBOX | 
@@ -213,13 +214,13 @@ END
 DLG_TOGGLE_KEY DIALOG 0, 0, 201, 76
 STYLE WS_SYSMENU | DS_MODALFRAME | DS_NOIDLEMSG | WS_POPUP | WS_VISIBLE | WS_CAPTION
 EXSTYLE WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE
-CAPTION "ÇÑ/¿µ ÀüÈ¯ Å° ¼³Á¤"
+CAPTION "í•œ/ì˜ ì „í™˜ í‚¤ ì„¤ì •"
 LANGUAGE 0x12, 0x1
 FONT 9, "MS Shell Dlg"
 {
-   CONTROL "ÇÑ/¿µÀüÈ¯ Å°", -1, BUTTON, BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 9, 6, 129, 63 
-   CONTROL "¿ÞÂÊ", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 41, 18, 18, 10 
-   CONTROL "¿À¸¥ÂÊ", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 65, 18, 24, 11 
+   CONTROL "í•œ/ì˜ì „í™˜ í‚¤", -1, BUTTON, BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 9, 6, 129, 63 
+   CONTROL "ì™¼ìª½", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 41, 18, 18, 10 
+   CONTROL "ì˜¤ë¥¸ìª½", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 65, 18, 24, 11 
    CONTROL "SHIFT", IDC_LSHIFT, BUTTON, BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 15, 29, 40, 10 
    CONTROL "-", IDC_RSHIFT, BUTTON, BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 61, 29, 16, 10 
    CONTROL "CTRL", IDC_LCTRL, BUTTON, BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 15, 41, 40, 10 
@@ -227,8 +228,8 @@ FONT 9, "MS Shell Dlg"
    CONTROL "ALT", IDC_LALT, BUTTON, BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 15, 53, 40, 10 
    CONTROL "-", IDC_RALT, BUTTON, BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 61, 53, 16, 10 
    CONTROL "", IDC_TOGGLE, COMBOBOX, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 87, 39, 46, 40 
-   CONTROL "È®ÀÎ", 1, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 143, 14, 50, 16 
-   CONTROL "±âº»°ª", 2, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 143, 33, 50, 16 
+   CONTROL "í™•ì¸", 1, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 143, 14, 50, 16 
+   CONTROL "ê¸°ë³¸ê°’", 2, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 143, 33, 50, 16 
 }
 
 
@@ -256,18 +257,18 @@ BEGIN
     BEGIN
         BLOCK "041203b5"
         BEGIN
-            VALUE "Comments", "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â\0"
+            VALUE "Comments", "ìƒˆë‚˜ë£¨ í•œê¸€ ìž…ë ¥ê¸°\0"
             VALUE "CompanyName", "Open Hangul Project\0"
-            VALUE "FileDescription", "»õ³ª·ç " VER_MAJOR_STR "." VER_MINOR_STR "." VER_PATCHLEVEL_STR "\0"
+            VALUE "FileDescription", "ìƒˆë‚˜ë£¨ " VER_MAJOR_STR "." VER_MINOR_STR "." VER_PATCHLEVEL_STR "\0"
             VALUE "FileVersion", VER_MAJOR_STR "." VER_MINOR_STR "\0"
             VALUE "InternalName", "SAENARU\0"
-            VALUE "LegalCopyright", "Copyright (C) 2003-2010 ÀåÇý½Ä, ¹Ú¿ø±Ô.\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003-2010 ìž¥í˜œì‹, ë°•ì›ê·œ.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "SAENARU.IME\0"
 #ifdef VER_SNAPSHOT
             VALUE "PrivateBuild", VER_SNAPSHOT "\0"
 #endif
-            VALUE "ProductName", "»õ³ª·ç\0"
+            VALUE "ProductName", "ìƒˆë‚˜ë£¨\0"
             VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR "\0"
 //            VALUE "SpecialBuild", "\0"
         END
@@ -322,31 +323,31 @@ BEGIN
     POPUP ""
     BEGIN
 
-    	MENUITEM "È¯°æ¼³Á¤(&R)",	IDM_CONFIG
+    	MENUITEM "í™˜ê²½ì„¤ì •(&R)",	IDM_CONFIG
 	MENUITEM SEPARATOR
-	MENUITEM "ÇÑ±Û(&H)",		IDM_HANGUL
-	MENUITEM "¿µ¹®(&E)",		IDM_ENG
-	MENUITEM "ÇÑÀÚ(&I)",		IDM_HANJA
+	MENUITEM "í•œê¸€(&H)",		IDM_HANGUL
+	MENUITEM "ì˜ë¬¸(&E)",		IDM_ENG
+	MENUITEM "í•œìž(&I)",		IDM_HANJA
 	MENUITEM SEPARATOR
-	MENUITEM "µÎ¹ú½Ä(&2)",  	IDM_OLD2BUL
-	MENUITEM "¼¼¹ú½Ä(&3)",  	IDM_3BUL
-	MENUITEM "¼¼¹ú½Ä 390(&9)",  	IDM_390
-    	MENUITEM "¿¾ÇÑ±Û µÎ¹ú(&D)",	IDM_YET2BUL
-    	MENUITEM "¿¾ÇÑ±Û ¼¼¹ú(&S)",	IDM_YET3BUL
-     	MENUITEM "ºÏÇÑ µÎ¹ú½Ä(&P)",	IDM_NK_2BUL
-    	MENUITEM "¼¼¹ú½Ä ¼ø¾Æ·¡(&N)",	IDM_3SOON
-    	MENUITEM "»ç¿ëÀÚ ÀÚÆÇ(&U)",	IDM_USER
-    	MENUITEM "»ç¿ëÀÚ Á¶ÇÕ(&C)",	IDM_USER_COMP
+	MENUITEM "ë‘ë²Œì‹(&2)",  	IDM_OLD2BUL
+	MENUITEM "ì„¸ë²Œì‹(&3)",  	IDM_3BUL
+	MENUITEM "ì„¸ë²Œì‹ 390(&9)",  	IDM_390
+    	MENUITEM "ì˜›í•œê¸€ ë‘ë²Œ(&D)",	IDM_YET2BUL
+    	MENUITEM "ì˜›í•œê¸€ ì„¸ë²Œ(&S)",	IDM_YET3BUL
+     	MENUITEM "ë¶í•œ ë‘ë²Œì‹(&P)",	IDM_NK_2BUL
+    	MENUITEM "ì„¸ë²Œì‹ ìˆœì•„ëž˜(&N)",	IDM_3SOON
+    	MENUITEM "ì‚¬ìš©ìž ìžíŒ(&U)",	IDM_USER
+    	MENUITEM "ì‚¬ìš©ìž ì¡°í•©(&C)",	IDM_USER_COMP
 	MENUITEM SEPARATOR
-    	MENUITEM "µåº¸¶ô(&V)",		IDM_DVORAK
-    	MENUITEM "ESC ¿µ¹®ÀüÈ¯(&E)",	IDM_ESC_ASCII
-    	MENUITEM "Shift-SPACE ÇÑ/¿µÅ° (&H)", IDM_HANGUL_TOGGLE
-    	MENUITEM "´Ü¾î´ÜÀ§ ÆíÁý(&W)",	IDM_WORD_UNIT
+    	MENUITEM "ë“œë³´ë½(&V)",		IDM_DVORAK
+    	MENUITEM "ESC ì˜ë¬¸ì „í™˜(&E)",	IDM_ESC_ASCII
+    	MENUITEM "Shift-SPACE í•œ/ì˜í‚¤ (&H)", IDM_HANGUL_TOGGLE
+    	MENUITEM "ë‹¨ì–´ë‹¨ìœ„ íŽ¸ì§‘(&W)",	IDM_WORD_UNIT
 	MENUITEM SEPARATOR
-    	MENUITEM "Å°º¸µå º¸±â(&K)",	IDM_SHOW_KEYBOARD
+    	MENUITEM "í‚¤ë³´ë“œ ë³´ê¸°(&K)",	IDM_SHOW_KEYBOARD
 	MENUITEM SEPARATOR
-        MENUITEM "º¯È¯(&C)",		IDM_RECONVERT
-	MENUITEM "»õ³ª·ç´Â(&A)...",	IDM_ABOUT          
+        MENUITEM "ë³€í™˜(&C)",		IDM_RECONVERT
+	MENUITEM "ìƒˆë‚˜ë£¨ëŠ”(&A)...",	IDM_ABOUT          
     END
 END
 
@@ -376,9 +377,9 @@ END
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_CONFIGNAME          "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â"
-    IDS_HELP_DESC           "»õ³ª·ç ÇÑ±Û ÀÔ·Â±â µµ¿ò¸»(&H)"
-    IDS_ABOUT               "»õ³ª·ç¿¡ ´ëÇØ(&A)..."
+    IDS_CONFIGNAME          "ìƒˆë‚˜ë£¨ í•œê¸€ ìž…ë ¥ê¸°"
+    IDS_HELP_DESC           "ìƒˆë‚˜ë£¨ í•œê¸€ ìž…ë ¥ê¸° ë„ì›€ë§(&H)"
+    IDS_ABOUT               "ìƒˆë‚˜ë£¨ì— ëŒ€í•´(&A)..."
 END
 
 
@@ -395,65 +396,65 @@ END
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_INPUT_CMODE_DESC        "ÀÔ·Â¹æ½Ä"
-    IDS_TOGGLE_HALFFULL_DESC    "Àü°¢/¹Ý°¢ ÀüÈ¯"
-    IDS_KEYBOARD_OPTION_DESC    "±Û¼è/ÀÔ·Â±â ¼³Á¤"
-    IDS_MENU_HANGUL             "ÇÑ±Û(&H)"
-    IDS_MENU_ASCII              "¿µ¹®(&E)"
-    IDS_MENU_HANJA              "ÇÑÀÚ(&I)"
-    IDS_MENU_CANCEL             "Ãë¼Ò"
+    IDS_INPUT_CMODE_DESC        "ìž…ë ¥ë°©ì‹"
+    IDS_TOGGLE_HALFFULL_DESC    "ì „ê°/ë°˜ê° ì „í™˜"
+    IDS_KEYBOARD_OPTION_DESC    "ê¸€ì‡ /ìž…ë ¥ê¸° ì„¤ì •"
+    IDS_MENU_HANGUL             "í•œê¸€(&H)"
+    IDS_MENU_ASCII              "ì˜ë¬¸(&E)"
+    IDS_MENU_HANJA              "í•œìž(&I)"
+    IDS_MENU_CANCEL             "ì·¨ì†Œ"
 END
 
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_MENU_ENV                "È¯°æ¼³Á¤(&R)"
-    IDS_MENU_DVORAK             "µåº¸¶ô(&V)"
-    IDS_MENU_ESC_ASCII          "&ESC ¿µ¹®ÀüÈ¯"
-    IDS_MENU_EDIT_WORD_UNIT     "´Ü¾î´ÜÀ§ ÆíÁý(&W)"
-    IDS_MENU_HANGUL_TOGGLE      "Shift-SPACE ÇÑ/¿µÅ° (&H)"
-    IDS_MENU_SHOW_KEYBOARD      "Å°º¸µå º¸±â(&K)"
+    IDS_MENU_ENV                "í™˜ê²½ì„¤ì •(&R)"
+    IDS_MENU_DVORAK             "ë“œë³´ë½(&V)"
+    IDS_MENU_ESC_ASCII          "&ESC ì˜ë¬¸ì „í™˜"
+    IDS_MENU_EDIT_WORD_UNIT     "ë‹¨ì–´ë‹¨ìœ„ íŽ¸ì§‘(&W)"
+    IDS_MENU_HANGUL_TOGGLE      "Shift-SPACE í•œ/ì˜í‚¤ (&H)"
+    IDS_MENU_SHOW_KEYBOARD      "í‚¤ë³´ë“œ ë³´ê¸°(&K)"
 
-    IDS_MENU_OLD2BUL            "µÎ¹ú½Ä(&2)"
-    IDS_MENU_3FIN               "¼¼¹ú½Ä(&3)"
-    IDS_MENU_390                "¼¼¹ú½Ä 3&90"
-    IDS_MENU_NEW2BUL            "»õµÎ¹ú(&S)"
-    IDS_MENU_NEW3BUL            "»õ¼¼¹ú(&D)"
-    IDS_MENU_AHNMATAE           "¾È¸¶ÅÂ(&A)"
-    IDS_MENU_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä(&P)"
-    IDS_MENU_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú(&Y)"
-    IDS_MENU_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú(&Z)"
-    IDS_MENU_3SOON              "¼¼¹ú½Ä ¼ø¾Æ·¡(&N)"
-    IDS_MENU_USER               "»ç¿ëÀÚ ÀÚÆÇ(&U)" 
-    IDS_MENU_USER_COMP          "»ç¿ëÀÚ Á¶ÇÕ(&C)"
+    IDS_MENU_OLD2BUL            "ë‘ë²Œì‹(&2)"
+    IDS_MENU_3FIN               "ì„¸ë²Œì‹(&3)"
+    IDS_MENU_390                "ì„¸ë²Œì‹ 3&90"
+    IDS_MENU_NEW2BUL            "ìƒˆë‘ë²Œ(&S)"
+    IDS_MENU_NEW3BUL            "ìƒˆì„¸ë²Œ(&D)"
+    IDS_MENU_AHNMATAE           "ì•ˆë§ˆíƒœ(&A)"
+    IDS_MENU_NK_2BUL            "ë¶í•œ ë‘ë²Œì‹(&P)"
+    IDS_MENU_YET2BUL            "ì˜›í•œê¸€ ë‘ë²Œ(&Y)"
+    IDS_MENU_YET3BUL            "ì˜›í•œê¸€ ì„¸ë²Œ(&Z)"
+    IDS_MENU_3SOON              "ì„¸ë²Œì‹ ìˆœì•„ëž˜(&N)"
+    IDS_MENU_USER               "ì‚¬ìš©ìž ìžíŒ(&U)" 
+    IDS_MENU_USER_COMP          "ì‚¬ìš©ìž ì¡°í•©(&C)"
 END
 
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_TIP_ASCII              "¿µ¹®"
-    IDS_TIP_OLD2BUL            "µÎ¹ú½Ä"
-    IDS_TIP_3FIN               "¼¼¹ú½Ä"
-    IDS_TIP_390                "¼¼¹ú½Ä 390"
-    IDS_TIP_3SOON              "¼¼¹ú½Ä ¼ø¾Æ·¡"
-    IDS_TIP_NEW2BUL            "»õµÎ¹ú"
-    IDS_TIP_NEW3BUL            "»õ¼¼¹ú"
-    IDS_TIP_AHNMATAE           "¾È¸¶ÅÂ"
-    IDS_TIP_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä"
-    IDS_TIP_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú"
-    IDS_TIP_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú"
-    IDS_TIP_USER               "»ç¿ëÀÚ ÀÚÆÇ"
+    IDS_TIP_ASCII              "ì˜ë¬¸"
+    IDS_TIP_OLD2BUL            "ë‘ë²Œì‹"
+    IDS_TIP_3FIN               "ì„¸ë²Œì‹"
+    IDS_TIP_390                "ì„¸ë²Œì‹ 390"
+    IDS_TIP_3SOON              "ì„¸ë²Œì‹ ìˆœì•„ëž˜"
+    IDS_TIP_NEW2BUL            "ìƒˆë‘ë²Œ"
+    IDS_TIP_NEW3BUL            "ìƒˆì„¸ë²Œ"
+    IDS_TIP_AHNMATAE           "ì•ˆë§ˆíƒœ"
+    IDS_TIP_NK_2BUL            "ë¶í•œ ë‘ë²Œì‹"
+    IDS_TIP_YET2BUL            "ì˜›í•œê¸€ ë‘ë²Œ"
+    IDS_TIP_YET3BUL            "ì˜›í•œê¸€ ì„¸ë²Œ"
+    IDS_TIP_USER               "ì‚¬ìš©ìž ìžíŒ"
 END
 
 STRINGTABLE DISCARDABLE 
 LANGUAGE 0x12, 0x1
 BEGIN
-    IDS_KEY_NEW2BUL            "»õµÎ¹ú"
-    IDS_KEY_NEW3BUL            "»õ¼¼¹ú"
-    IDS_KEY_AHNMATAE           "¾È¸¶ÅÂ"
-    IDS_KEY_NK_2BUL            "ºÏÇÑ µÎ¹ú½Ä"
-    IDS_KEY_YET2BUL            "¿¾ÇÑ±Û µÎ¹ú"
-    IDS_KEY_YET3BUL            "¿¾ÇÑ±Û ¼¼¹ú"
+    IDS_KEY_NEW2BUL            "ìƒˆë‘ë²Œ"
+    IDS_KEY_NEW3BUL            "ìƒˆì„¸ë²Œ"
+    IDS_KEY_AHNMATAE           "ì•ˆë§ˆíƒœ"
+    IDS_KEY_NK_2BUL            "ë¶í•œ ë‘ë²Œì‹"
+    IDS_KEY_YET2BUL            "ì˜›í•œê¸€ ë‘ë²Œ"
+    IDS_KEY_YET3BUL            "ì˜›í•œê¸€ ì„¸ë²Œ"
 END
 
 
@@ -466,10 +467,10 @@ BEGIN
     IDS_GL_TESTGUIDELINEPRIVATE "TestGuideLine Private"
     IDS_NOREADING           "There is no reading string\r\nPlease enter the reading string"
     IDS_NOSTRING            "There is no string\r\nPlease enter the string"
-    IDS_NOMEMORY            "¸Þ¸ð¸®°¡ ºÎÁ·ÇÕ´Ï´Ù."
+    IDS_NOMEMORY            "ë©”ëª¨ë¦¬ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤."
     IDS_REGWORDRET          "Fail to register Word"
 
-    IDS_HANGUL_TOGGLE          "ÇÑ/¿µÅ° (&H)"
+    IDS_HANGUL_TOGGLE          "í•œ/ì˜í‚¤ (&H)"
 END
 
 #endif    // Korean resources
