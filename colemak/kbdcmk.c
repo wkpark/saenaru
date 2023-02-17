@@ -401,8 +401,8 @@ static ALLOC_SECTION_LDATA VSC_LPWSTR aKeyNamesExt[] = {
     0x5b,    L"Left Windows",
     0x5c,    L"Right Windows",
     0x5d,    L"Application",
-    0xf1,    L"Hanguel",
-    0xf1,    L"Hanja",
+    0xf1,    L"Hangul",
+    0xf2,    L"Hanja",
     0   ,    NULL
 };
 
@@ -912,3 +912,93 @@ PKBDTABLES KbdLayerDescriptor(VOID)
 {
     return &KbdTables;
 }
+
+/***********************************************************************\
+* VkToFuncTable_101[]
+*
+\***********************************************************************/
+
+static ALLOC_SECTION_LDATA VK_F VkToFuncTable_101[] = {
+#if KBD_TYPE == 12
+    {
+        VK_SPACE,             // Base Vk
+        KBDNLS_TYPE_NORMAL,   // NLSFEProcType
+        KBDNLS_INDEX_NORMAL,  // NLSFEProcCurrent
+        0x00, /* 00000000 */  // NLSFEProcSwitch
+        {                     // NLSFEProc
+            {KBDNLS_SEND_BASE_VK,0},            // Base
+            {KBDNLS_SEND_PARAM_VK,VK_HANGUL},   // Shift
+            {KBDNLS_SEND_PARAM_VK,VK_HANJA},    // Control
+            {KBDNLS_SEND_BASE_VK,0},            // Shift+Control
+            {KBDNLS_SEND_BASE_VK,0},            // Alt
+            {KBDNLS_SEND_BASE_VK,0},            // Shift+Alt
+            {KBDNLS_SEND_BASE_VK,0},            // Control+Alt
+            {KBDNLS_SEND_BASE_VK,0}             // Shift+Control+Alt
+        },
+        {                     // NLSFEProcAlt
+            {KBDNLS_NULL,0},  // Base
+            {KBDNLS_NULL,0},  // Shift
+            {KBDNLS_NULL,0},  // Control
+            {KBDNLS_NULL,0},  // Shift+Control
+            {KBDNLS_NULL,0},  // Alt
+            {KBDNLS_NULL,0},  // Shift+Alt
+            {KBDNLS_NULL,0},  // Control+Alt
+            {KBDNLS_NULL,0}   // Shift+Control+Alt
+        }
+    },
+#endif
+    {
+        VK_OEM_3,             // Base Vk
+        KBDNLS_TYPE_NORMAL,   // NLSFEProcType
+        KBDNLS_INDEX_NORMAL,  // NLSFEProcCurrent
+        0x0,                  // NLSFEProcSwitch
+        {                     // NLSFEProc
+            {KBDNLS_SEND_BASE_VK,0},           // Base
+            {KBDNLS_SEND_BASE_VK,0},           // Shift
+            {KBDNLS_SEND_PARAM_VK,VK_HANGUL},  // Control
+            {KBDNLS_SEND_PARAM_VK,VK_HANJA},   // Shift+Control
+            {KBDNLS_SEND_PARAM_VK,VK_JUNJA},   // Alt
+            {KBDNLS_SEND_BASE_VK,0},           // Shift+Alt
+            {KBDNLS_SEND_BASE_VK,0},           // Control+Alt
+            {KBDNLS_SEND_BASE_VK,0}            // Shift+Control+Alt
+        },
+        {                     // NLSFEProcAlt
+            {KBDNLS_NULL,0},                   // Base
+            {KBDNLS_NULL,0},                   // Shift
+            {KBDNLS_NULL,0},                   // Control
+            {KBDNLS_NULL,0},                   // Shift+Control
+            {KBDNLS_NULL,0},                   // Alt
+            {KBDNLS_NULL,0},                   // Shift+Alt
+            {KBDNLS_NULL,0},                   // Control+Alt
+            {KBDNLS_NULL,0}                    // Shift+Control+Alt
+        }
+    },
+};
+
+/***********************************************************************\
+* KbdNlsTables
+*
+\***********************************************************************/
+
+ALLOC_SECTION_LDATA KBDNLSTABLES KbdNlsTables101 = {
+    0,                      // OEM ID (0 = Microsoft)
+    0,                      // Information
+#if KBD_TYPE == 12
+    2,                      // Number of VK_F entry
+#else
+    1,                      // Number of VK_F entry
+#endif
+    VkToFuncTable_101,      // Pointer to VK_F array
+    0,                      // Number of MouseVk entry
+    NULL                    // Pointer to MouseVk array
+};
+
+PKBDNLSTABLES KbdNlsLayerDescriptor(VOID)
+{
+    OutputDebugStringW(L"Call KBDCmk KbdNlsLayerDescriptor\r\n");
+    return &KbdNlsTables101;
+}
+
+/*
+ * vim: et sts=4 sw=4 ts=8
+ */

@@ -186,13 +186,14 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVkToBits[] = {
 
 static ALLOC_SECTION_LDATA MODIFIERS CharModifiers = {
     &aVkToBits[0],
-    2,
+    3,
     {
     //  Modification# //  Keys Pressed
     //  ============= // =============
         0,            // 
         1,            // Shift 
-        2             // Control 
+        2,            // Control
+        3,            // Shift + Control
      }
 };
 
@@ -235,61 +236,71 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2 aVkToWch2[] = {
 static ALLOC_SECTION_LDATA VK_TO_WCHARS3 aVkToWch3[] = {
 //                      |         |  Shift  |  Ctrl   |
 //                      |=========|=========|=========|
-  {'1'          ,0      ,'1'      ,'!'      ,WCH_NONE },
-  {'2'          ,0      ,'2'      ,'@'      ,WCH_NONE },
-  {'3'          ,0      ,'3'      ,'#'      ,WCH_NONE },
-  {'4'          ,0      ,'4'      ,'$'      ,WCH_NONE },
-  {'5'          ,0      ,'5'      ,'%'      ,WCH_NONE },
-  {'6'          ,0      ,'6'      ,'^'      ,WCH_NONE },
-  {'7'          ,0      ,'7'      ,'&'      ,WCH_NONE },
-  {'8'          ,0      ,'8'      ,'*'      ,WCH_NONE },
-  {'9'          ,0      ,'9'      ,'('      ,WCH_NONE },
-  {'0'          ,0      ,'0'      ,')'      ,WCH_NONE },
-  {VK_OEM_4     ,0      ,'['      ,'{'      ,WCH_NONE },
-  {VK_OEM_6     ,0      ,']'      ,'}'      ,WCH_NONE },
-  {VK_OEM_7     ,0      ,'\''     ,'\"'     ,WCH_NONE },
-  {VK_OEM_COMMA ,0      ,','      ,'<'      ,WCH_NONE },
-  {VK_OEM_PERIOD,0      ,'.'      ,'>'      ,WCH_NONE },
-  {'P'          ,CAPLOK ,'p'      ,'P'      ,WCH_NONE },
-  {'Y'          ,CAPLOK ,'y'      ,'Y'      ,WCH_NONE },
-  {'F'          ,CAPLOK ,'f'      ,'F'      ,WCH_NONE },
-  {'G'          ,CAPLOK ,'g'      ,'G'      ,WCH_NONE },
-  {'C'          ,CAPLOK ,'c'      ,'C'      ,WCH_NONE },
-  {'R'          ,CAPLOK ,'r'      ,'R'      ,WCH_NONE },
-  {'L'          ,CAPLOK ,'l'      ,'L'      ,WCH_NONE },
-  {VK_OEM_2     ,0      ,'/'      ,'?'      ,WCH_NONE },
-  {VK_OEM_PLUS  ,0      ,'='      ,'+'      ,WCH_NONE },
-  {'A'          ,CAPLOK ,'a'      ,'A'      ,WCH_NONE },
-  {'O'          ,CAPLOK ,'o'      ,'O'      ,WCH_NONE },
-  {'E'          ,CAPLOK ,'e'      ,'E'      ,WCH_NONE },
-  {'U'          ,CAPLOK ,'u'      ,'U'      ,WCH_NONE },
-  {'I'          ,CAPLOK ,'i'      ,'I'      ,WCH_NONE },
-  {'D'          ,CAPLOK ,'d'      ,'D'      ,WCH_NONE },
-  {'H'          ,CAPLOK ,'h'      ,'H'      ,WCH_NONE },
-  {'T'          ,CAPLOK ,'t'      ,'T'      ,WCH_NONE },
-  {'N'          ,CAPLOK ,'n'      ,'N'      ,WCH_NONE },
-  {'S'          ,CAPLOK ,'s'      ,'S'      ,WCH_NONE },
-  {VK_OEM_MINUS ,0      ,'-'      ,'_'      ,WCH_NONE },
-  {VK_OEM_3     ,0      ,'`'      ,'~'      ,WCH_NONE },
-  {VK_OEM_5     ,0      ,'\\'     ,'|'      ,WCH_NONE },
-  {VK_OEM_1     ,0      ,';'      ,':'      ,WCH_NONE },
-  {'Q'          ,CAPLOK ,'q'      ,'Q'      ,WCH_NONE },
-  {'J'          ,CAPLOK ,'j'      ,'J'      ,WCH_NONE },
-  {'K'          ,CAPLOK ,'k'      ,'K'      ,WCH_NONE },
-  {'X'          ,CAPLOK ,'x'      ,'X'      ,WCH_NONE },
-  {'B'          ,CAPLOK ,'b'      ,'B'      ,WCH_NONE },
-  {'M'          ,CAPLOK ,'m'      ,'M'      ,WCH_NONE },
-  {'W'          ,CAPLOK ,'w'      ,'W'      ,WCH_NONE },
-  {'V'          ,CAPLOK ,'v'      ,'V'      ,WCH_NONE },
-  {'Z'          ,CAPLOK ,'z'      ,'Z'      ,WCH_NONE },
-  {VK_SPACE     ,0      ,' '      ,' '      ,' '      },
-  {VK_OEM_102   ,0      ,'\\'     ,'|'      ,WCH_NONE },
-  {VK_DECIMAL   ,0      ,'.'      ,'.'      ,WCH_NONE },
   {VK_BACK      ,0      ,'\b'     ,'\b'     ,0x007f   },
   {VK_ESCAPE    ,0      ,0x001b   ,0x001b   ,0x001b   },
   {VK_RETURN    ,0      ,'\r'     ,'\r'     ,'\n'     },
   {VK_CANCEL    ,0      ,0x0003   ,0x0003   ,0x0003   },
   {0            ,0      ,0        ,0        ,0        }
+};
+
+static ALLOC_SECTION_LDATA VK_TO_WCHARS4 aVkToWch4[] = {
+//                      |         |  Shift  |  Ctrl   | S+Ctrl |
+//                      |=========|=========|=========|========|
+  {'1'          ,0      ,'1'      ,'!'      ,WCH_NONE ,WCH_NONE},
+  {'2'          ,0      ,'2'      ,'@'      ,WCH_NONE ,0x0000  },
+  {'3'          ,0      ,'3'      ,'#'      ,WCH_NONE ,WCH_NONE},
+  {'4'          ,0      ,'4'      ,'$'      ,WCH_NONE ,WCH_NONE},
+  {'5'          ,0      ,'5'      ,'%'      ,WCH_NONE ,WCH_NONE},
+  {'6'          ,0      ,'6'      ,'^'      ,WCH_NONE ,WCH_NONE},
+  {'7'          ,0      ,'7'      ,'&'      ,WCH_NONE ,WCH_NONE},
+  {'8'          ,0      ,'8'      ,'*'      ,WCH_NONE ,WCH_NONE},
+  {'9'          ,0      ,'9'      ,'('      ,WCH_NONE ,WCH_NONE},
+  {'0'          ,0      ,'0'      ,')'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_4     ,0      ,'['      ,'{'      ,VK_ESCAPE,WCH_NONE},
+  {VK_OEM_6     ,0      ,']'      ,'}'      ,VK_NONCONVERT,WCH_NONE},
+  {VK_OEM_7     ,0      ,'\''     ,'\"'     ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_COMMA ,0      ,','      ,'<'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_PERIOD,0      ,'.'      ,'>'      ,WCH_NONE ,WCH_NONE},
+  {'P'          ,CAPLOK ,'p'      ,'P'      ,WCH_NONE ,WCH_NONE},
+  {'Y'          ,CAPLOK ,'y'      ,'Y'      ,WCH_NONE ,WCH_NONE},
+  {'F'          ,CAPLOK ,'f'      ,'F'      ,WCH_NONE ,WCH_NONE},
+  {'G'          ,CAPLOK ,'g'      ,'G'      ,WCH_NONE ,WCH_NONE},
+  {'C'          ,CAPLOK ,'c'      ,'C'      ,WCH_NONE ,WCH_NONE},
+  {'R'          ,CAPLOK ,'r'      ,'R'      ,WCH_NONE ,WCH_NONE},
+  {'L'          ,CAPLOK ,'l'      ,'L'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_2     ,0      ,'/'      ,'?'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_PLUS  ,0      ,'='      ,'+'      ,WCH_NONE ,WCH_NONE},
+  {'A'          ,CAPLOK ,'a'      ,'A'      ,WCH_NONE ,WCH_NONE},
+  {'O'          ,CAPLOK ,'o'      ,'O'      ,WCH_NONE ,WCH_NONE},
+  {'E'          ,CAPLOK ,'e'      ,'E'      ,WCH_NONE ,WCH_NONE},
+  {'U'          ,CAPLOK ,'u'      ,'U'      ,WCH_NONE ,WCH_NONE},
+  {'I'          ,CAPLOK ,'i'      ,'I'      ,WCH_NONE ,WCH_NONE},
+  {'D'          ,CAPLOK ,'d'      ,'D'      ,WCH_NONE ,WCH_NONE},
+  {'H'          ,CAPLOK ,'h'      ,'H'      ,WCH_NONE ,WCH_NONE},
+  {'T'          ,CAPLOK ,'t'      ,'T'      ,WCH_NONE ,WCH_NONE},
+  {'N'          ,CAPLOK ,'n'      ,'N'      ,WCH_NONE ,WCH_NONE},
+  {'S'          ,CAPLOK ,'s'      ,'S'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_MINUS ,0      ,'-'      ,'_'      ,WCH_NONE ,VK_MODECHANGE},
+  {VK_OEM_3     ,0      ,'`'      ,'~'      ,WCH_NONE ,WCH_NONE},
+  {VK_OEM_5     ,0      ,'\\'     ,'|'      ,VK_CONVERT ,WCH_NONE},
+  {VK_OEM_1     ,0      ,';'      ,':'      ,WCH_NONE ,WCH_NONE},
+  {'Q'          ,CAPLOK ,'q'      ,'Q'      ,WCH_NONE ,WCH_NONE},
+  {'J'          ,CAPLOK ,'j'      ,'J'      ,WCH_NONE ,WCH_NONE},
+  {'K'          ,CAPLOK ,'k'      ,'K'      ,WCH_NONE ,WCH_NONE},
+  {'X'          ,CAPLOK ,'x'      ,'X'      ,WCH_NONE ,WCH_NONE},
+  {'B'          ,CAPLOK ,'b'      ,'B'      ,WCH_NONE ,WCH_NONE},
+  {'M'          ,CAPLOK ,'m'      ,'M'      ,WCH_NONE ,WCH_NONE},
+  {'W'          ,CAPLOK ,'w'      ,'W'      ,WCH_NONE ,WCH_NONE},
+  {'V'          ,CAPLOK ,'v'      ,'V'      ,WCH_NONE ,WCH_NONE},
+  {'Z'          ,CAPLOK ,'z'      ,'Z'      ,WCH_NONE ,WCH_NONE},
+  {VK_SPACE     ,0      ,' '      ,' '      ,' '      ,WCH_NONE},
+  {VK_OEM_102   ,0      ,'\\'     ,'|'      ,WCH_NONE ,WCH_NONE},
+  {VK_DECIMAL   ,0      ,'.'      ,'.'      ,WCH_NONE ,WCH_NONE},
+  {VK_BACK      ,0      ,'\b'     ,'\b'     ,0x007f   ,WCH_NONE},
+  {VK_ESCAPE    ,0      ,0x001b   ,0x001b   ,0x001b   ,WCH_NONE},
+  {VK_RETURN    ,0      ,'\r'     ,'\r'     ,'\n'     ,WCH_NONE},
+  {VK_CANCEL    ,0      ,0x0003   ,0x0003   ,0x0003   ,WCH_NONE},
+  {0            ,0      ,0        ,0        ,0        ,0       }
 };
 
 // Put this last so that VkKeyScan interprets number characters
@@ -312,6 +323,7 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS1 aVkToWch1[] = {
 
 static ALLOC_SECTION_LDATA VK_TO_WCHAR_TABLE aVkToWcharTable[] = {
     {  (PVK_TO_WCHARS1)aVkToWch3, 3, sizeof(aVkToWch3[0]) },
+    {  (PVK_TO_WCHARS1)aVkToWch4, 4, sizeof(aVkToWch4[0]) },
     {  (PVK_TO_WCHARS1)aVkToWch2, 2, sizeof(aVkToWch2[0]) },
     {  (PVK_TO_WCHARS1)aVkToWch1, 1, sizeof(aVkToWch1[0]) },
     {                       NULL, 0, 0                    },
@@ -404,8 +416,8 @@ static ALLOC_SECTION_LDATA VSC_LPWSTR aKeyNamesExt[] = {
     0x5b,    L"Left Windows",
     0x5c,    L"Right Windows",
     0x5d,    L"Application",
-    0xf1,    L"Hanguel",
-    0xf1,    L"Hanja",
+    0xf1,    L"Hangul",
+    0xf2,    L"Hanja",
     0   ,    NULL
 };
 
@@ -457,3 +469,93 @@ PKBDTABLES KbdLayerDescriptor(VOID)
 {
     return &KbdTables;
 }
+
+/***********************************************************************\
+* VkToFuncTable_101[]
+*
+\***********************************************************************/
+
+static ALLOC_SECTION_LDATA VK_F VkToFuncTable_101[] = {
+#if KBD_TYPE == 12
+    {
+        VK_SPACE,             // Base Vk
+        KBDNLS_TYPE_NORMAL,   // NLSFEProcType
+        KBDNLS_INDEX_NORMAL,  // NLSFEProcCurrent
+        0x00, /* 00000000 */  // NLSFEProcSwitch
+        {                     // NLSFEProc
+            {KBDNLS_SEND_BASE_VK,0},            // Base
+            {KBDNLS_SEND_PARAM_VK,VK_HANGUL},   // Shift
+            {KBDNLS_SEND_PARAM_VK,VK_HANJA},    // Control
+            {KBDNLS_SEND_BASE_VK,0},            // Shift+Control
+            {KBDNLS_SEND_BASE_VK,0},            // Alt
+            {KBDNLS_SEND_BASE_VK,0},            // Shift+Alt
+            {KBDNLS_SEND_BASE_VK,0},            // Control+Alt
+            {KBDNLS_SEND_BASE_VK,0}             // Shift+Control+Alt
+        },
+        {                     // NLSFEProcAlt
+            {KBDNLS_NULL,0},  // Base
+            {KBDNLS_NULL,0},  // Shift
+            {KBDNLS_NULL,0},  // Control
+            {KBDNLS_NULL,0},  // Shift+Control
+            {KBDNLS_NULL,0},  // Alt
+            {KBDNLS_NULL,0},  // Shift+Alt
+            {KBDNLS_NULL,0},  // Control+Alt
+            {KBDNLS_NULL,0}   // Shift+Control+Alt
+        }
+    },
+#endif
+    {
+        VK_OEM_3,             // Base Vk
+        KBDNLS_TYPE_NORMAL,   // NLSFEProcType
+        KBDNLS_INDEX_NORMAL,  // NLSFEProcCurrent
+        0x0,                  // NLSFEProcSwitch
+        {                     // NLSFEProc
+            {KBDNLS_SEND_BASE_VK,0},           // Base
+            {KBDNLS_SEND_BASE_VK,0},           // Shift
+            {KBDNLS_SEND_PARAM_VK,VK_HANGUL},  // Control
+            {KBDNLS_SEND_PARAM_VK,VK_HANJA},   // Shift+Control
+            {KBDNLS_SEND_PARAM_VK,VK_JUNJA},   // Alt
+            {KBDNLS_SEND_BASE_VK,0},           // Shift+Alt
+            {KBDNLS_SEND_BASE_VK,0},           // Control+Alt
+            {KBDNLS_SEND_BASE_VK,0}            // Shift+Control+Alt
+        },
+        {                     // NLSFEProcAlt
+            {KBDNLS_NULL,0},                   // Base
+            {KBDNLS_NULL,0},                   // Shift
+            {KBDNLS_NULL,0},                   // Control
+            {KBDNLS_NULL,0},                   // Shift+Control
+            {KBDNLS_NULL,0},                   // Alt
+            {KBDNLS_NULL,0},                   // Shift+Alt
+            {KBDNLS_NULL,0},                   // Control+Alt
+            {KBDNLS_NULL,0}                    // Shift+Control+Alt
+        }
+    },
+};
+
+/***********************************************************************\
+* KbdNlsTables
+*
+\***********************************************************************/
+
+ALLOC_SECTION_LDATA KBDNLSTABLES KbdNlsTables101 = {
+    0,                      // OEM ID (0 = Microsoft)
+    0,                      // Information
+#if KBD_TYPE == 12
+    2,                      // Number of VK_F entry
+#else
+    1,                      // Number of VK_F entry
+#endif
+    VkToFuncTable_101,      // Pointer to VK_F array
+    0,                      // Number of MouseVk entry
+    NULL                    // Pointer to MouseVk array
+};
+
+PKBDNLSTABLES KbdNlsLayerDescriptor(VOID)
+{
+    OutputDebugStringW(L"Call KBDdvk KbdNlsLayerDescriptor\r\n");
+    return &KbdNlsTables101;
+}
+
+/*
+ * vim: et sts=4 sw=4 ts=8
+ */
