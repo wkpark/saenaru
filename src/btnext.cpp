@@ -274,12 +274,10 @@ CLangBarItemShapeButton::OnClick (
 	if (!lpIMC)
 		return S_OK;
 
-	if (!ImmGetOpenStatus(hIMC))
-	{
-		ImmUnlockIMC(hIMC);
-		return	S_OK ;
-	}
-	//	ImmSetOpenStatus (hIMC, TRUE) ;
+	BOOL fOpen = ImmGetOpenStatus(hIMC);
+	if (!fOpen)
+		ImmSetOpenStatus(hIMC, TRUE);
+
 	if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentense))
 	{
 		if (dwConversion & IME_CMODE_FULLSHAPE)
@@ -288,6 +286,9 @@ CLangBarItemShapeButton::OnClick (
 			dwConversion |= IME_CMODE_FULLSHAPE;
 		ImmSetConversionStatus (hIMC, dwConversion, 0) ;
 	}
+	if (!fOpen)
+                ImmSetOpenStatus(hIMC, FALSE);
+
 	ImmUnlockIMC(hIMC);
 	UpdateLanguageBar () ;
 #endif
@@ -376,17 +377,13 @@ CLangBarItemShapeButton::GetIcon (
 	if (!lpIMC)
 		goto Skip;
 
-	if (ImmGetOpenStatus (hIMC)) {
-		if (ImmGetConversionStatus (hIMC, &dwConversion, &dwSentence)) {
-			if (dwConversion & IME_CMODE_FULLSHAPE){
-				str	= TEXT ("INDIC_FULL") ;
-			} else {
-				str	= TEXT ("INDIC_HALF") ;
-			}
-		}
+	if (lpIMC->fdwConversion & IME_CMODE_FULLSHAPE)
+	{
+		str = TEXT("INDIC_FULL");
 	} else {
-		str	= TEXT ("INDIC_HALF") ;
+		str = TEXT("INDIC_HALF");
 	}
+
 	ImmUnlockIMC(hIMC);
 Skip:
 	if (str == NULL) {
