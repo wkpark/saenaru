@@ -11,11 +11,13 @@
 #include "btnshape.h"
 #include "btnime.h"
 #include "langbar.h"
+#include "tchar.h"
 
 extern "C" {
 #include "hangul.h"
+    BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData);
+    BOOL IsWindowsVersionOrLater(DWORD dwMajorVersion, DWORD dwMinorVersion, DWORD dwBuildNumber);
 }
-
 #define SAENARU_LANGBARITEMSINK_COOKIE 0x0fab0fab
 
 const struct
@@ -55,17 +57,15 @@ enum {
 //
 //----------------------------------------------------------------------------
 
-CLangBarItemButton::CLangBarItemButton(CSaenaruTextService *pSaenaru)
+CLangBarItemButton::CLangBarItemButton(CSaenaruTextService *pSaenaru, REFGUID guid)
 {
     DllAddRef();
 
     _tfLangBarItemInfo.clsidService = c_clsidSaenaruTextService;
-    //_tfLangBarItemInfo.guidItem = GUID_LBI_INPUTMODE;
-    _tfLangBarItemInfo.guidItem = c_guidLangBarItemButton;
+    _tfLangBarItemInfo.guidItem = guid;
     _tfLangBarItemInfo.dwStyle = TF_LBI_STYLE_SHOWNINTRAY
-//        | TF_LBI_STYLE_BTN_BUTTON
-        | TF_LBI_STYLE_BTN_MENU
-        | TF_LBI_STYLE_TEXTCOLORICON
+        | (IsEqualGUID(guid, GUID_LBI_INPUTMODE) ? TF_LBI_STYLE_BTN_MENU : TF_LBI_STYLE_TEXTCOLORICON)
+        | TF_LBI_STYLE_BTN_BUTTON
         ;
     _tfLangBarItemInfo.ulSort = 0;
     SafeStringCopy(_tfLangBarItemInfo.szDescription, ARRAYSIZE(_tfLangBarItemInfo.szDescription), LANGBAR_ITEM_DESC);
@@ -73,6 +73,8 @@ CLangBarItemButton::CLangBarItemButton(CSaenaruTextService *pSaenaru)
     _pSaenaru = pSaenaru;
     _pSaenaru->AddRef();
     _pLangBarItemSink = NULL;
+
+    _status = 0;
 
     _cRef = 1;
 }
@@ -162,6 +164,13 @@ STDAPI_(ULONG) CLangBarItemButton::Release()
 
 STDAPI CLangBarItemButton::GetInfo(TF_LANGBARITEMINFO *pInfo)
 {
+    DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::GetInfo(this:%p)\n"), this));
+
+    if (pInfo == nullptr)
+    {
+        return E_INVALIDARG;
+    }
+    _tfLangBarItemInfo.dwStyle |= TF_LBI_STYLE_SHOWNINTRAY;
     *pInfo = _tfLangBarItemInfo;
     return S_OK;
 }
@@ -174,8 +183,50 @@ STDAPI CLangBarItemButton::GetInfo(TF_LANGBARITEMINFO *pInfo)
 
 STDAPI CLangBarItemButton::GetStatus(DWORD *pdwStatus)
 {
-    *pdwStatus = 0;
+    DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::GetInfo(this:%p)\n"), this));
+
+    if (pdwStatus == nullptr)
+    {
+        E_INVALIDARG;
+    }
+
+    *pdwStatus = _status;
     return S_OK;
+}
+
+//+---------------------------------------------------------------------------
+//
+// SetStatus
+//
+//----------------------------------------------------------------------------
+
+void CLangBarItemButton::SetStatus(DWORD dwStatus, BOOL fSet)
+{
+    BOOL isChange = FALSE;
+
+    if (fSet)
+    {
+        if (!(_status & dwStatus))
+        {
+            _status |= dwStatus;
+            isChange = TRUE;
+        }
+    }
+    else
+    {
+        if (_status & dwStatus)
+        {
+            _status &= ~dwStatus;
+            isChange = TRUE;
+        }
+    }
+
+    if (isChange && _pLangBarItemSink)
+    {
+        _pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
+    }
+
+    return;
 }
 
 //+---------------------------------------------------------------------------
@@ -186,6 +237,12 @@ STDAPI CLangBarItemButton::GetStatus(DWORD *pdwStatus)
 
 STDAPI CLangBarItemButton::Show(BOOL fShow)
 {
+    fShow;
+
+    if (_pLangBarItemSink)
+    {
+        _pLangBarItemSink->OnUpdate(TF_LBI_STATUS);
+    }
     return E_NOTIMPL;
 }
 
@@ -229,6 +286,9 @@ STDAPI CLangBarItemButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
     ITfRange *pRangeComposition;
     ITfContext *pCompositionContext;
 
+    // HACK generate VK_ESCAPE to close the default IME popup menu.
+    keybd_event(VK_ESCAPE, 0x0, 0, 0);
+
     switch (click)
     {
         case TF_LBI_CLK_LEFT:
@@ -256,6 +316,84 @@ STDAPI CLangBarItemButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
             _pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
             return S_OK;
         case TF_LBI_CLK_RIGHT:
+            DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::OnClick()\n")));
+            {
+                UINT checked = 0;
+                HMENU hMenu = CreatePopupMenu();
+                if (hMenu)
+                {
+                    dwConversion = _pSaenaru->GetConversionStatus();
+
+                    UINT selected = 0;
+                    if (dwConversion & CMODE_HANGUL)
+                    {
+                        checked = IDM_HANGUL;
+                        selected = 0;
+                    }
+                    else
+                    {
+                        checked = IDM_ENG;
+                        selected = 1;
+                    }
+
+                    for (int i = 0 ; i < ARRAYSIZE(c_rgMenuItems); i++)
+                    {
+                        LPTSTR lpDesc;
+                        TCHAR szDesc[128];
+                        MENUITEMINFO mii;
+                        UINT state = 0;
+
+                        lpDesc = (LPTSTR)&szDesc;
+                        if (c_rgMenuItems[i].chDesc != NULL)
+                            LoadString(g_hInst, c_rgMenuItems[i].chDesc, lpDesc, 128);
+                        else
+                            lpDesc = NULL;
+
+                        mii.cbSize = sizeof(MENUITEMINFO);
+
+                        if (i == selected)
+                            state = MFS_CHECKED;
+                        else
+                            state = 0;
+
+                        mii.wID = i;
+                        if (lpDesc == NULL)
+                        {
+                            mii.fMask = MIIM_ID | MIIM_FTYPE;
+                            mii.fType = MFT_SEPARATOR;
+                        }
+                        else
+                        {
+                            mii.fMask = MIIM_ID | MIIM_STRING | MIIM_STATE | MIIM_FTYPE;
+                            mii.fType = MFT_STRING | MFT_RADIOCHECK;
+                            mii.dwTypeData = lpDesc;
+                            mii.fState = state;
+                            mii.cch = (UINT)wcslen(lpDesc);
+                        }
+                        InsertMenuItem(hMenu, i, TRUE, &mii);
+                    }
+
+                    CheckMenuRadioItem(hMenu, IDM_HANGUL, IDM_HANJA, checked, MF_BYCOMMAND);
+
+                    {
+                        TPMPARAMS tpm = {};
+                        TPMPARAMS *ptpm = nullptr;
+                        if (prcArea != nullptr)
+                        {
+                            tpm.cbSize = sizeof(tpm);
+                            tpm.rcExclude = *prcArea;
+                            ptpm = &tpm;
+                        }
+                        // open popup menu
+                        UINT bRet = TrackPopupMenuEx(hMenu,
+                                TPM_LEFTALIGN | TPM_TOPALIGN | TPM_NONOTIFY | TPM_RETURNCMD | TPM_LEFTBUTTON | TPM_VERTICAL,
+                                pt.x, pt.y, GetFocus(), ptpm);
+                        DEBUGPRINTFEX(100, (TEXT("\t - bRet = %d\n"), bRet));
+                        this->OnMenuSelect(bRet);
+                    }
+                    DestroyMenu(hMenu);
+                }
+            }
             return S_OK;
     }
 
@@ -275,6 +413,7 @@ STDAPI CLangBarItemButton::InitMenu(ITfMenu *pMenu)
     register LPCWSTR wstrDesc;
     register ULONG nstrDesc;
 
+    DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::InitMenu()\n")));
     DWORD dwConversion = _pSaenaru->GetConversionStatus();
     if (dwConversion & CMODE_HANGUL)
     {
@@ -318,7 +457,69 @@ STDAPI CLangBarItemButton::InitMenu(ITfMenu *pMenu)
 
 STDAPI CLangBarItemButton::OnMenuSelect(UINT wID)
 {
-    if (c_rgMenuItems[wID].pfnHandler != NULL) {
+    DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::OnMenuSelect(wID = %d)\n"), wID));
+    if (wID >= IDM_CONFIG)
+    {
+        DWORD dwConversion;
+        DEBUGPRINTFEX(100, (TEXT("\twID = %d\n"), wID));
+
+        switch(wID)
+        {
+            case IDM_HANGUL:
+                dwConversion = _pSaenaru->GetConversionStatus();
+                dwConversion = CMODE_HANGUL;
+                _pSaenaru->SetConversionStatus(dwConversion);
+                break;
+            case IDM_ENG:
+                dwConversion = _pSaenaru->GetConversionStatus();
+                dwConversion = CMODE_ALPHANUMERIC;
+                _pSaenaru->SetConversionStatus(dwConversion);
+                break;
+            case IDM_DVORAK:
+                DEBUGPRINTFEX(100, (TEXT("\tDVORAK = %d)\n"), dwOptionFlag));
+                if (dwOptionFlag & DVORAK_SUPPORT)
+                    dwOptionFlag &= ~DVORAK_SUPPORT;
+                else
+                    dwOptionFlag |= DVORAK_SUPPORT;
+                break;
+            case IDM_ESC_ASCII:
+                DEBUGPRINTFEX(100, (TEXT("\tESC = %d)\n"), dwOptionFlag));
+                if (dwOptionFlag & ESCENG_SUPPORT)
+                    dwOptionFlag &= ~ESCENG_SUPPORT;
+                else
+                    dwOptionFlag |= ESCENG_SUPPORT;
+                break;
+            case IDM_WORD_UNIT:
+                DEBUGPRINTFEX(100, (TEXT("\tWORD = %d)\n"), dwImeFlag));
+                if (dwImeFlag & SAENARU_ONTHESPOT)
+                    dwImeFlag &= ~SAENARU_ONTHESPOT;
+                else
+                    dwImeFlag |= SAENARU_ONTHESPOT;
+                break;
+            case IDM_HANGUL_TOGGLE:
+                DEBUGPRINTFEX(100, (TEXT("\tTOGGLE = %d)\n"), dwOptionFlag));
+                if (dwOptionFlag & USE_SHIFT_SPACE)
+                    dwOptionFlag &= ~USE_SHIFT_SPACE;
+                else
+                    dwOptionFlag |= USE_SHIFT_SPACE;
+                break;
+            case IDM_CONFIG:
+                {
+                    HKL hKL = GetKeyboardLayout(0);
+                    HWND hWnd = GetFocus();
+
+                    if (hKL == NULL)
+                        break;
+                    (void) ImeConfigure(hKL, hWnd, IME_CONFIG_GENERAL, NULL);
+                }
+                break;
+        }
+
+        _pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
+        return S_OK;
+    }
+
+    if (wID < ARRAYSIZE(c_rgMenuItems) && c_rgMenuItems[wID].pfnHandler != NULL) {
         c_rgMenuItems[wID].pfnHandler(_pSaenaru);
     }
 
@@ -335,23 +536,33 @@ STDAPI CLangBarItemButton::OnMenuSelect(UINT wID)
 
 STDAPI CLangBarItemButton::GetIcon(HICON *phIcon)
 {
+    LPTSTR lpDesc;
+    TCHAR szDesc[128];
+    lpDesc = (LPTSTR)szDesc;
+
     DWORD status = _pSaenaru->GetConversionStatus();
 
     DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::GetIcon(status = %x)\n"), status));
     if (status & CMODE_HANGUL)
     {
         if (dwImeFlag & AUTOMATA_3SET)
-            *phIcon = (HICON)LoadImage(g_hInst, TEXT("INDIC_HAN"),
-                    IMAGE_ICON, 16, 16, 0);
+            lstrcpyn(lpDesc, TEXT("INDIC_HAN"), 10);
         else
-            *phIcon = (HICON)LoadImage(g_hInst, TEXT("INDIC_HAN2"),
-                    IMAGE_ICON, 16, 16, 0);
+            lstrcpyn(lpDesc, TEXT("INDIC_HAN2"), 11);
     }
     else
     {
-        *phIcon = (HICON)LoadImage(g_hInst, TEXT("INDIC_ENG"),
-		    IMAGE_ICON, 16, 16, 0);
+        lstrcpyn(lpDesc, TEXT("INDIC_ENG"), 10);
     }
+
+    if (!(_tfLangBarItemInfo.dwStyle & TF_LBI_STYLE_TEXTCOLORICON))
+    {
+        lpDesc[lstrlen(lpDesc) + 1] = TEXT('\0');
+        lpDesc[lstrlen(lpDesc)] = TEXT('X'); // append 'X' to get the 32-bit icon with alpha channel.
+    }
+    DEBUGPRINTFEX(100, (TEXT("\tIcon = %s\n"), lpDesc));
+
+    *phIcon = (HICON)LoadImage(g_hInst, lpDesc, IMAGE_ICON, 16, 16, 0);
 
     return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
@@ -439,8 +650,15 @@ BOOL CSaenaruTextService::_InitLanguageBar()
 
     fRet = FALSE;
 
-    if ((_pLangBarItem = new CLangBarItemButton(this)) == NULL)
+    if ((_pLangBarModeItem = new CLangBarItemButton(this, c_guidLangBarItemButton)) == NULL)
         goto Exit;
+
+    _pLangBarItem = NULL;
+    if (IsWindowsVersionOrLater(6, 2, 0))
+    {
+        if ((_pLangBarItem = new CLangBarItemButton(this, GUID_LBI_INPUTMODE)) == NULL)
+            goto Exit;
+    }
 
     if ((_pLangBarShapeItem = new CLangBarItemShapeButton(this)) == NULL)
         goto Exit;
@@ -448,7 +666,14 @@ BOOL CSaenaruTextService::_InitLanguageBar()
     if ((_pLangBarImeItem = new CLangBarItemImeButton(this)) == NULL)
         goto Exit;
 
-    if (pLangBarItemMgr->AddItem(_pLangBarItem) != S_OK)
+    if (pLangBarItemMgr->AddItem(_pLangBarModeItem) != S_OK)
+    {
+        _pLangBarModeItem->Release();
+        _pLangBarModeItem = NULL;
+        goto Exit;
+    }
+
+    if (_pLangBarItem && pLangBarItemMgr->AddItem(_pLangBarItem) != S_OK)
     {
         _pLangBarItem->Release();
         _pLangBarItem = NULL;
@@ -494,6 +719,12 @@ void CSaenaruTextService::_UninitLanguageBar()
             _pLangBarItem->Release();
             _pLangBarItem = NULL;
         }
+        if (_pLangBarModeItem)
+        {
+            pLangBarItemMgr->RemoveItem(_pLangBarModeItem);
+            _pLangBarModeItem->Release();
+            _pLangBarModeItem = NULL;
+        }
         if (_pLangBarShapeItem)
         {
             pLangBarItemMgr->RemoveItem(_pLangBarShapeItem);
@@ -521,6 +752,10 @@ void CSaenaruTextService::_UpdateLanguageBar(DWORD dwFlags)
     if (_pLangBarItem)
     {
         _pLangBarItem->_OnUpdate(dwFlags);
+    }
+    if (_pLangBarModeItem)
+    {
+        _pLangBarModeItem->_OnUpdate(dwFlags);
     }
     if (_pLangBarShapeItem)
     {
