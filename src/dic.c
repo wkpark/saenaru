@@ -1275,7 +1275,30 @@ ac_exit:
 }
 
 #endif
-
+/**********************************************************************/
+/*                                                                    */
+/* ConvJunja()                                                        */
+/*                                                                    */
+/* convert character to Double-Width char                             */
+/*                                                                    */
+/**********************************************************************/
+DWORD PASCAL ConvJunja(DWORD code, WORD mode)
+{
+    DWORD dw = 0;
+    if (code == TEXT('\\'))
+    {
+        dw = 0xFFE6;
+    }
+    else if (code < '!' || code > '~')
+    {
+        return 0;
+    }
+    else
+    {
+        dw = code - '!' + 1 + 0xFF00 /* FULLWIDTH base code point */;
+    }
+    return dw;
+}
 
 /**********************************************************************/
 /*                                                                    */
@@ -2077,6 +2100,7 @@ CONST LPBYTE lpbKeyState;
             fdwConversion = lpIMC->fdwConversion;
             ImmUnlockIMC(hIMC);
             if (IsCompStr(hIMC) &&
+                    IsCandidate(lpIMC) &&
                     (fdwConversion & IME_CMODE_FULLSHAPE) &&
                     (fdwConversion & IME_CMODE_NATIVE)) {
                 MakeResultString(hIMC,TRUE);

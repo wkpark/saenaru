@@ -341,6 +341,16 @@ CONST LPBYTE lpbKeyState;
     if ( (!hkey || (hkey >= TEXT('!') && hkey <= TEXT('~')) )
 	    && !IsCompStr(hIMC)) {
 	// 이 경우 마지막 입력받은 ascii문자를 그대로 내뱉는다.
+
+        // 전자 입력 모드일 경우 전자로 변환
+        if ((fdwConversion & IME_CMODE_FULLSHAPE))
+        {
+            DWORD ch = ConvJunja(hkey, 0);
+            MyDebugPrint((TEXT("JUNJA Vkey: %lx => %x\r\n"), hkey, ch));
+            if (ch != 0)
+                hkey = ch;
+        }
+
 	PostMessage(lpIMC->hWnd,WM_CHAR,hkey,lParam);
 
         ImmUnlockIMC(hIMC);
@@ -679,6 +689,15 @@ CONST LPBYTE lpbKeyState;
 		lpchText = GETLPCOMPSTR(lpCompStr);
 		lpstr = lpchText;
 	    }
+
+            // 전자 입력 모드일 경우 전자로 변환
+            if ((fdwConversion & IME_CMODE_FULLSHAPE))
+            {
+                DWORD ch = ConvJunja(hkey, 0);
+                MyDebugPrint((TEXT("JUNJA Vkey: %lx => %x\r\n"), hkey, ch));
+                if (ch != 0)
+                    code = (WORD) hkey = ch;
+            }
 
 	    /* */
 	    /* XXX how to fix EditPlus problem ? */
