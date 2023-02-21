@@ -97,6 +97,7 @@ BrandingText "새나루 인스톨러"
   LangString DESC_VCRUNTIME_MSG ${LANG_KOREAN} "VC런타임이 필요합니다.$\r$\n설치를 계속하기 위해 VC런타임을 설치하시겠습니까?"
   LangString DESC_END_INSTALL ${LANG_KOREAN} "설치를 종료합니다"
   LangString DESC_VCREDIST_DOWNLOAD ${LANG_KOREAN} "VC++ Redist를 다운로드합니다..."
+  LangString DESC_VCREDIST86_DOWNLOAD ${LANG_KOREAN} "VC++ Redist(x86)를 다운로드합니다..."
   LangString DESC_VCREDIST_INSTALL ${LANG_KOREAN} "VC런타임을 설치합니다..."
   LangString DESC_VCREDIST86_INSTALL ${LANG_KOREAN} "VC런타임(x86)을 설치합니다..."
   LangString DESC_INSTALL_WITHOUT_VCREDIST ${LANG_KOREAN} "VC런타임없이 설치를 진행합니다.$\r$\n설치후 실행이 제대로 안될 수 있습니다."
@@ -107,23 +108,29 @@ Section "VC런타임 점검" SecPrep
   SectionIn RO
 
   IfFileExists $SYSDIR\vcruntime140.dll 0 +2
-  Goto VCRuntimePass
+  Goto VCRuntimeNext
   MessageBox MB_YESNOCANCEL|MB_ICONINFORMATION "$(DESC_VCRUNTIME_MSG)" IDYES +4 IDNO +3
   MessageBox MB_OK|MB_ICONSTOP "$(DESC_END_INSTALL)"
   Quit
   Goto VCRuntimeNo
-  DetailPrint "$(DESC_VCREDIST_DOWNLOAD)"
+  DetailPrint "$(DESC_VCREDIST86_DOWNLOAD)"
+  NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$Temp\vc_redist.x86.exe"
+  DetailPrint "$(DESC_VCREDIST86_INSTALL)"
+  ExecWait '"$Temp\vc_redist.x86.exe" /norestart'
+  VCRuntimeNext:
   ${If} ${RunningX64}
+    IfFileExists $SYSDIR\vcruntime140.dll 0 +2
+    Goto VCRuntimePass
+    MessageBox MB_YESNOCANCEL|MB_ICONINFORMATION "$(DESC_VCRUNTIME_MSG)" IDYES +4 IDNO +3
+    MessageBox MB_OK|MB_ICONSTOP "$(DESC_END_INSTALL)"
+    Quit
+    Goto VCRuntimeNo
+    DetailPrint "$(DESC_VCREDIST_DOWNLOAD)"
     NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x64.exe" "$Temp\vc_redist.x64.exe"
     DetailPrint "$(DESC_VCREDIST_INSTALL)"
     ExecWait '"$Temp\vc_redist.x64.exe" /norestart'
-  ${Else}
-    NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$Temp\vc_redist.x86.exe"
-    DetailPrint "$(DESC_VCREDIST86_INSTALL)"
-    ExecWait '"$Temp\vc_redist.x86.exe" /norestart'
   ${EndIf}
 
-  DetailPrint "완료"
   Goto VCRuntimePass
   VCRuntimeNo:
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(DESC_INSTALL_WITHOUT_VCREDIST)"
