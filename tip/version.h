@@ -33,8 +33,8 @@
 #define VER_MINOR	 1
 #define VER_MINOR_STR	"1"
 
-#define VER_BUILD	 1020
-#define VER_BUILD_STR	"1020"
+#define VER_BUILD	 1025
+#define VER_BUILD_STR	"1025"
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
