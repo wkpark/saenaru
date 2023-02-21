@@ -50,6 +50,7 @@ BOOL WINAPI ImeInquire(LPIMEINFO lpIMEInfo,LPTSTR lpszClassName,DWORD dwSystemIn
     lpIMEInfo->fdwProperty = IME_PROP_KBD_CHAR_FIRST |
                              IME_PROP_UNICODE |
                              IME_PROP_COMPLETE_ON_UNSELECT |
+                             IME_PROP_NEED_ALTKEY |
                              IME_PROP_AT_CARET;
     lpIMEInfo->fdwConversionCaps = IME_CMODE_LANGUAGE |
                                 IME_CMODE_FULLSHAPE |
@@ -363,6 +364,10 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             vKey = vkey = VK_HANGUL;
         } if (vk == 0xf1) { // VK_HANJA
             vKey = vkey = VK_HANJA;
+        } if (vk == 0x17) { // VK_JUNJA
+            vKey = vkey = VK_JUNJA;
+        } else {
+            MyDebugPrint((TEXT("\t** XXXX unknown VK! lKeyData vkey is 0x%lx\r\n"), vk));
         }
     }
 
@@ -522,6 +527,39 @@ BOOL WINAPI ImeProcessKey(HIMC hIMC,UINT vKey,LPARAM lKeyData,CONST LPBYTE lpbKe
             }
             if (!fOpen)
                 ImmSetOpenStatus(hIMC,FALSE);
+
+            ImmUnlockIMC(hIMC);
+
+            return FALSE;
+            break;
+
+        case VK_JUNJA:
+            if (lKeyData & 0x80000000) break;
+
+            if (IsCompStr(hIMC))
+                 MakeResultString(hIMC, TRUE);
+
+            fOpen = ImmGetOpenStatus(hIMC);
+            if (!fOpen)
+                ImmSetOpenStatus(hIMC, TRUE);
+
+            if (ImmGetConversionStatus(hIMC, &dwConversion, &dwSentense))
+            {
+                if (dwConversion & IME_CMODE_FULLSHAPE)
+                {
+                    dwConversion &= ~IME_CMODE_FULLSHAPE;
+                    MyDebugPrint((TEXT("x JUNJA key\n")));
+                }
+                else
+                {
+                    dwConversion &= ~IME_CMODE_FULLSHAPE;
+                    dwConversion |= IME_CMODE_FULLSHAPE;
+                    MyDebugPrint((TEXT("o JUNJA key\n")));
+                }
+                ImmSetConversionStatus(hIMC, dwConversion, dwSentense);
+            }
+            if (!fOpen)
+                ImmSetOpenStatus(hIMC, FALSE);
 
             ImmUnlockIMC(hIMC);
 

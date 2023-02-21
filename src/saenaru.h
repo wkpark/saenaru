@@ -444,6 +444,7 @@ void PASCAL FlushText();
 void PASCAL RevertText(HIMC hIMC);
 
 void PASCAL AddChar(HIMC,WORD);
+DWORD PASCAL ConvJunja(DWORD, WORD);
 
 BOOL PASCAL ConvHanja(HIMC, int, int);
 BOOL WINAPI MakeResultString(HIMC,BOOL);
