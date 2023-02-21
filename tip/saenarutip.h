@@ -204,6 +204,7 @@ private:
     TfGuidAtom _gaDisplayAttributeConverted;
 
     CLangBarItemButton *_pLangBarItem;
+    CLangBarItemButton *_pLangBarModeItem;
     CLangBarItemShapeButton *_pLangBarShapeItem;
     CLangBarItemImeButton *_pLangBarImeItem;
 

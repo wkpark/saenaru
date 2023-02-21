@@ -3,7 +3,7 @@ class CLangBarItemButton : public ITfLangBarItemButton,
                            public ITfSource
 {
 public:
-    CLangBarItemButton(CSaenaruTextService *pSaenaru);
+    CLangBarItemButton(CSaenaruTextService *pSaenaru, REFGUID guid);
     ~CLangBarItemButton();
 
     // IUnknown
@@ -31,11 +31,14 @@ public:
     // misc
     void _OnUpdate(DWORD);
 
+    void SetStatus(DWORD pdwStatus, BOOL fSet);
+
 private:
     CSaenaruTextService *_pSaenaru;
     ITfLangBarItemSink *_pLangBarItemSink;
     TF_LANGBARITEMINFO _tfLangBarItemInfo;
     LONG _cRef;
+    DWORD _status;
 };
 
 /*
