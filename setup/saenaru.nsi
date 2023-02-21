@@ -74,6 +74,7 @@ BrandingText "새나루 인스톨러"
   !insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_INSTFILES
+  Page custom OpenEnableIme EnableImeSettings
   Page custom OpenInputSetting
   Page custom OpenUserKeyboard OpenUserKbdSettings
   !insertmacro MUI_PAGE_FINISH 
@@ -92,6 +93,43 @@ BrandingText "새나루 인스톨러"
 ;Languages
  
   !insertmacro MUI_LANGUAGE "Korean"
+
+  LangString DESC_VCRUNTIME_MSG ${LANG_KOREAN} "VC런타임이 필요합니다.$\r$\n설치를 계속하기 위해 VC런타임을 설치하시겠습니까?"
+  LangString DESC_END_INSTALL ${LANG_KOREAN} "설치를 종료합니다"
+  LangString DESC_VCREDIST_DOWNLOAD ${LANG_KOREAN} "VC++ Redist를 다운로드합니다..."
+  LangString DESC_VCREDIST_INSTALL ${LANG_KOREAN} "VC런타임을 설치합니다..."
+  LangString DESC_VCREDIST86_INSTALL ${LANG_KOREAN} "VC런타임(x86)을 설치합니다..."
+  LangString DESC_INSTALL_WITHOUT_VCREDIST ${LANG_KOREAN} "VC런타임없이 설치를 진행합니다.$\r$\n설치후 실행이 제대로 안될 수 있습니다."
+
+;--------------------------------
+;check vcruntime140.dll
+Section "VC런타임 점검" SecPrep
+  SectionIn RO
+
+  IfFileExists $SYSDIR\vcruntime140.dll 0 +2
+  Goto VCRuntimePass
+  MessageBox MB_YESNOCANCEL|MB_ICONINFORMATION "$(DESC_VCRUNTIME_MSG)" IDYES +4 IDNO +3
+  MessageBox MB_OK|MB_ICONSTOP "$(DESC_END_INSTALL)"
+  Quit
+  Goto VCRuntimeNo
+  DetailPrint "$(DESC_VCREDIST_DOWNLOAD)"
+  ${If} ${RunningX64}
+    NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x64.exe" "$Temp\vc_redist.x64.exe"
+    DetailPrint "$(DESC_VCREDIST_INSTALL)"
+    ExecWait '"$Temp\vc_redist.x64.exe" /norestart'
+  ${Else}
+    NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$Temp\vc_redist.x86.exe"
+    DetailPrint "$(DESC_VCREDIST86_INSTALL)"
+    ExecWait '"$Temp\vc_redist.x86.exe" /norestart'
+  ${EndIf}
+
+  DetailPrint "완료"
+  Goto VCRuntimePass
+  VCRuntimeNo:
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(DESC_INSTALL_WITHOUT_VCREDIST)"
+
+  VCRuntimePass:
+SectionEnd
 
 ;--------------------------------
 ;Installer Sections
@@ -388,6 +426,13 @@ Section "한글입력기 목록에 추가" SecAdd
   exit:
 SectionEnd
 
+  LangString DESC_IME_DEFAULT_TITLE ${LANG_KOREAN} "IME 입력기 설정"
+  LangString DESC_IME_DEFAULT_SUBTITLE ${LANG_KOREAN} "구형 IME 입력기를 기본으로 변경합니다."
+  LangString DESC_IME_DEFAULT_HEADER ${LANG_KOREAN} "윈도우10/11에서 IME입력기를 강제로 활성화시킵니다.$\r$\n상당수의 어플에서 구형 IME를 사용하실 수 있습니다.(단, 닷넷 앱은 사용이 불가능합니다)"
+  LangString DESC_IME_DEFAULT_BUTTON ${LANG_KOREAN} "새나루 입력기 사용"
+  LangString DESC_IME_DVORAK_BUTTON ${LANG_KOREAN} "새나루 입력기(드보락) 사용"
+  LangString DESC_IME_COLEMAK_BUTTON ${LANG_KOREAN} "새나루 입력기(콜맥) 사용"
+
   LangString DESC_IME_SETTING_TITLE ${LANG_KOREAN} "입력기 설정"
   LangString DESC_IME_SETTING_SUBTITLE ${LANG_KOREAN} "입력기 설정을 사용자가 직접 변경할 수 있습니다."
   LangString DESC_IME_SETTING_HEADER ${LANG_KOREAN} "제어판의 입력기 설정 변경창을 직접 열어 사용자가 입력기 설정을 추가 및 변경할 수 있습니다."
@@ -402,6 +447,50 @@ SectionEnd
 
 ;; custom fix
 !include /NONFATAL ".\userkbd\extra.nsi"
+
+Var default_ime
+Var dvorak_ime
+Var colemak_ime
+Var ime_dialog
+Function OpenEnableIme
+	nsDialogs::Create 1018
+        Pop $ime_dialog
+	!insertmacro MUI_HEADER_TEXT "$(DESC_IME_DEFAULT_TITLE)" "$(DESC_IME_DEFAULT_SUBTITLE)"
+	${NSD_CreateLabel} 0 0 100% 103 "$(DESC_IME_DEFAULT_HEADER)"
+	${NSD_CreateCheckBox} 0 104 110u 17u "$(DESC_IME_DEFAULT_BUTTON)"
+	Pop $default_ime
+	${NSD_CreateCheckBox} 120u 104 110u 17u "$(DESC_IME_DVORAK_BUTTON)"
+	Pop $dvorak_ime
+	${NSD_CreateCheckBox} 0 144 110u 17u "$(DESC_IME_COLEMAK_BUTTON)"
+	Pop $colemak_ime
+
+        ${NSD_SetState} $default_ime ${BST_CHECKED}
+
+	nsDialogs::Show
+FunctionEnd
+
+Function EnableImeSettings
+        ${NSD_GetState} $default_ime $0
+        ${If} $0 == 1
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 0,1,1"
+        ${Else}
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 0,0,1"
+        ${EndIf}
+
+        ${NSD_GetState} $dvorak_ime $0
+        ${If} $0 == 1
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 1,1,1"
+        ${Else}
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 1,0,1"
+        ${EndIf}
+
+        ${NSD_GetState} $colemak_ime $0
+        ${If} $0 == 1
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 2,1,1"
+        ${Else}
+	  Exec "RunDll32.exe saenaru.ime,InstallLayout 2,0,1"
+        ${EndIf}
+FunctionEnd
 
 Function OpenInputSetting
 	nsDialogs::Create 1018
@@ -467,12 +556,14 @@ FunctionEnd
 ;Descriptions
 
   LangString DESC_SecBody ${LANG_KOREAN} "새나루 입력기를 위한 기본적인 파일을 설치합니다.$\r$\n구형 IME 및 신형 TSF지원 입력기가 함께 설치됩니다."
+  LangString DESC_SecPrep ${LANG_KOREAN} "VC런타임 파일을 점검/설치합니다.$\r$\nVC런타임이 설치되어있는지 확인하고 필요한 경우 설치합니다."
   LangString DESC_SecSource ${LANG_KOREAN} "새나루 소스를 설치합니다. 새나루는 모든 소스코드가 공개된 자유 소프트웨어입니다.$\r$\n소스코드는 https://github.com/wkpark/saenaru 사이트에서 직접 받으실 수 있습니다."
   LangString DESC_SecDefault ${LANG_KOREAN} "새나루를 기본 입력기로 지정합니다.$\r$\n로그오프 후에 다시 로그인을 하거나 재부팅을 하셔야 설정이 반영됩니다.$\r$\n$\r$\n(윈도우 10 이상에서는 제대로 반영이 안될 수 있습니다)"
   LangString DESC_SecAdd ${LANG_KOREAN} "새나루를 한글 입력기 목록에 추가합니다.$\r$\n이 경우 입력기 상태바에서 새나루를 선택하실 수 있게 됩니다.$\r$\n$\r$\n(윈도우 10 이상에서는 제대로 반영이 안될 수 있습니다)"
   LangString DESC_SecColemak ${LANG_KOREAN} "새나루 콜맥(Colemak)자판 지원을 위한 콜맥 키보드 레이아웃 드라이버 설치 및 설정을 합니다."
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPrep} $(DESC_SecPrep)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecBody} $(DESC_SecBody)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecColemak} $(DESC_SecColemak)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
