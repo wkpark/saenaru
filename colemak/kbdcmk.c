@@ -31,7 +31,13 @@ static ALLOC_SECTION_LDATA USHORT ausVK[] = {
     T10, T11, T12, T13, T14, T15, T16, T17,
     T18, T19, T1A, T1B, T1C, T1D, T1E, T1F,
     T20, T21, T22, T23, T24, T25, T26, T27,
-    T28, T29, T2A, T2B, T2C, T2D, T2E, T2F,
+    T28,
+
+    /*
+     * VK_OEM_3(~) key must have KBDSPECIAL bit set. (NLS key)
+     */
+    T29 | KBDSPECIAL,
+              T2A, T2B, T2C, T2D, T2E, T2F,
     T30, T31, T32, T33, T34, T35,
 
     /*
