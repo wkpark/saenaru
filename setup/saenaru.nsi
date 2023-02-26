@@ -157,15 +157,13 @@ Section "새나루 입력기" SecBody
   Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
   SaenaruDone:
 
-  #File "${DDKBUILDDIR}\SaenaruTip.dll"
-  #IfErrors 0 SaenaruTipDone
+  File "${DDKBUILDDIR}\SaenaruTip.dll"
+  IfErrors 0 SaenaruTipDone
 
-  #GetTempFileName $3
-  #File /oname=$3 "${DDKBUILDDIR}\SaenaruTip.dll"
-  #Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
-  #SaenaruTipDone:
-
-  !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "${DDKBUILDDIR}\SaenaruTip.dll" "$SYSDIR\SaenaruTip.dll" $SYSDIR
+  GetTempFileName $3
+  File /oname=$3 "${DDKBUILDDIR}\SaenaruTip.dll"
+  Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
+  SaenaruTipDone:
 
   File "${DVBUILDDIR}\kbddvk.dll"
   IfErrors 0 kbddvkDone
@@ -190,13 +188,7 @@ Section "새나루 입력기" SecBody
     Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
     Saenaru64Done:
 
-    File "${DDK64BUILDDIR}\SaenaruTip.dll"
-    IfErrors 0 SaenaruTip64Done
-
-    GetTempFileName $3
-    File /oname=$3 "${DDK64BUILDDIR}\SaenaruTip.dll"
-    Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
-    SaenaruTip64Done:
+    !insertmacro InstallLib REGDLL NOTSHARED REBOOT_PROTECTED "${DDK64BUILDDIR}\SaenaruTip.dll" "$SYSDIR\SaenaruTip.dll" $SYSDIR
 
     File "${DV64BUILDDIR}\kbddvk.dll"
     IfErrors 0 kbddvk64Done
