@@ -74,26 +74,16 @@ DWORD string_to_hex(TCHAR* p)
     return ret;
 }
 
+UINT load_keyboard_map_from_buffer(LPTSTR kbuf, WCHAR *keyboard_map);
+
 UINT
 load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard_map)
 {
-    int i;
-    WCHAR *line, *p, *saved_position;
-    WCHAR *save;
-    TCHAR buf[256];
-    //FILE* file;
-    DWORD key, value;
-    UINT type, ctype;
-    INT sz, len;
-    WCHAR name[256];
-    //LPTSTR kbuf=NULL;
+    INT sz;
     LPTSTR kbuf=NULL;
-    WCHAR _map[94];
 
     WCHAR achValue[256]; 
 
-    //NabiKeyboardMap *keyboard_map;
-    //
     if (lpszKeyboard == NULL && nKeyboard <10)
     {
         DWORD cchValue = 256;
@@ -128,33 +118,44 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
     kbuf=(LPTSTR) MEMALLOC(sz);
-    //
+
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read keyboard registry\n")));
             return 0;
     }
 
     GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,kbuf);
-    //keyboard_map = g_malloc(sizeof(NabiKeyboardMap));
+
+    UINT ret = load_keyboard_map_from_buffer(kbuf, keyboard_map);
+    MEMFREE(kbuf);
+    return ret;
+}
+
+UINT
+load_keyboard_map_from_buffer(LPTSTR kbuf, WCHAR *keyboard_map)
+{
+    int i;
+    WCHAR *line, *p, *saved_position;
+    WCHAR *save;
+    DWORD key, value;
+    UINT type, ctype;
+    INT len;
+    WCHAR _map[94];
 
     /* init */
     type = SAENARU_KEYBOARD_3SET;
     ctype = SAENARU_COMPOSE_DEFAULT;
-    //keyboard_map->filename = g_strdup(filename);
-    //name = NULL;
-    //MyDebugPrint((TEXT("Saenaru: %s\n"),kbuf));
 
     for (i = 0; i < 94; i++)
-            _map[i] = i + '!';
-            //_map[i] = 0;
+        _map[i] = i + '!';
 
     for (line = Mystrtok(kbuf, TEXT("\0"), &save);
-         ;
-         line = Mystrtok(saved_position, TEXT("\0"), &save)) {
+            ;
+            line = Mystrtok(saved_position, TEXT("\0"), &save))
+    {
         len=Mylstrlen(line);
         saved_position=line+len+1;
 
-        //MyDebugPrint((TEXT("Saenaru: %s:%d\n"),line,len));
         if (len==0) break;
 
         p = Mystrtok(line, TEXT(" \t\0"), &save);
@@ -167,7 +168,6 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             p = Mystrtok(NULL, TEXT(" \t\0"), &save);
             if (p == NULL)
                 continue;
-            //name = g_strdup(p);
             continue;
         } else if (Mylstrcmp(p, TEXT("Compose:")) == 0) {
             // Set default compose map
@@ -185,7 +185,6 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             } else if (Mylstrcmp(p, TEXT("ahn")) == 0) {
                 ctype = SAENARU_COMPOSE_AHN;
             }
-            //name = g_strdup(p);
             continue;
         } else if (Mylstrcmp(p, TEXT("Type2")) == 0) {
             type = SAENARU_KEYBOARD_2SET;
@@ -211,17 +210,15 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
             _map[key - '!'] = (WCHAR)value;
         }
     }
-    MEMFREE(kbuf);
 
     if (keyboard_map != NULL)
-        for (i=0;i<94;i++) keyboard_map[i]=_map[i];        
-
-    //if (name == NULL)
-    //        name = g_path_get_basename(keyboard_map->filename);
+        for (i = 0; i < 94; i++)
+            keyboard_map[i] = _map[i];
 
     return type | (ctype << 8);
 }
 
+UINT load_compose_map_from_buffer(LPMYSTR kbuf, HangulCompose *compose_map);
 #define SAENARU_AUTOMATA_NONE 1
 #define SAENARU_AUTOMATA_2SET 2
 #define SAENARU_AUTOMATA_3SET 3
@@ -229,23 +226,9 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
 UINT
 load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *compose_map)
 {
-    WCHAR *line, *p, *saved_position;
-    WCHAR *save;
-    TCHAR buf[256];
-    //FILE* file;
-    UINT key1, key2;
-    DWORD value;
-    //NabiComposeItem *citem;
-    UINT map_size;
-    //GSList *list = NULL;
-    INT sz, len;
-    WCHAR name[256];
-    //LPTSTR kbuf=NULL;
+    INT sz;
     LPTSTR kbuf=NULL;
-    UINT _key[256];
-    WCHAR _code[256];
-    UINT id=0,i;
-    UINT type=SAENARU_AUTOMATA_NONE;
+    UINT type;
 
     WCHAR achValue[256];
 
@@ -283,96 +266,91 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
     kbuf=(LPTSTR) MEMALLOC(sz);
-    //
+
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read compose map registry\n")));
             return 0;
     }
 
     GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,kbuf);
-    /* init */
-    //compose_map->name = NULL;
-    //compose_map->map = NULL;
-    //compose_map->size = 0;
+
+    type = load_compose_map_from_buffer(kbuf, compose_map);
+
+    MEMFREE(kbuf);
+
+    return type;
+}
+
+UINT
+load_compose_map_from_buffer(LPMYSTR kbuf, HangulCompose *compose_map)
+{
+    WCHAR *line, *p, *saved_position;
+    WCHAR *save;
+    UINT key1, key2;
+    DWORD value;
+    UINT map_size;
+    INT len;
+    UINT _key[256];
+    WCHAR _code[256];
+    UINT id=0,i;
+    UINT type=SAENARU_AUTOMATA_NONE;
 
     for (line = Mystrtok(kbuf, TEXT("\0"), &save);id<256
-	 ;
-	 line = Mystrtok(saved_position, TEXT("\0"), &save)) {
+            ;
+            line = Mystrtok(saved_position, TEXT("\0"), &save))
+    {
         len=Mylstrlen(line);
         saved_position=line+len+1;
 
         if (len==0) break;
 
-	p = Mystrtok(line, TEXT(" \t\0"), &save);
+        p = Mystrtok(line, TEXT(" \t\0"), &save);
         MyDebugPrint((TEXT("tok: %s\n"),p));
-	/* comment */
-	if (p == NULL || p[0] == '#')
-	    continue;
+        /* comment */
+        if (p == NULL || p[0] == '#')
+            continue;
 
-	if (Mylstrcmp(p, TEXT("Name:")) == 0) {
-	    p = Mystrtok(NULL, TEXT(" \t\0"), &save);
-	    if (p == NULL)
-		continue;
-	    //compose_map->name = g_strdup(p);
-	    continue;
+        if (Mylstrcmp(p, TEXT("Name:")) == 0) {
+            p = Mystrtok(NULL, TEXT(" \t\0"), &save);
+            if (p == NULL)
+                continue;
+            continue;
         } else if (Mylstrcmp(p, TEXT("Type0")) == 0) {
             type = SAENARU_AUTOMATA_RAW;
-	    //compose_map->name = g_strdup(p);
-	    continue;
-	} else {
-	    key1 = string_to_hex(p);
-	    if (key1 == 0)
-		continue;
+            continue;
+        } else {
+            key1 = string_to_hex(p);
+            if (key1 == 0)
+                continue;
 
-	    p = Mystrtok(NULL, TEXT(" \t"), &save);
-	    if (p == NULL)
-		continue;
-	    key2 = string_to_hex(p);
-	    if (key2 == 0)
-		continue;
+            p = Mystrtok(NULL, TEXT(" \t"), &save);
+            if (p == NULL)
+                continue;
+            key2 = string_to_hex(p);
+            if (key2 == 0)
+                continue;
 
-	    p = Mystrtok(NULL, TEXT(" \t"), &save);
-	    if (p == NULL)
-		continue;
-	    value = string_to_hex(p);
-	    if (value == 0)
-		continue;
+            p = Mystrtok(NULL, TEXT(" \t"), &save);
+            if (p == NULL)
+                continue;
+            value = string_to_hex(p);
+            if (value == 0)
+                continue;
 
-	    _key[id] = key1 << 16 | key2;
-	    _code[id] = (WCHAR)value;
+            _key[id] = key1 << 16 | key2;
+            _code[id] = (WCHAR)value;
             id++;
-	}
+        }
     }
-    MEMFREE(kbuf);
     map_size=(UINT)id;
 
-    //if (compose_map == NULL) {
-	/* on error free the list */
-//	while (list != NULL) {
-//	    g_free(list->data);
-//	    list = list->next;
-//	}
-//	g_slist_free(list);
-//
-//	return FALSE;
-//    }
-
-    /* sort compose map */
-//    list = g_slist_reverse(list);
-//    list = g_slist_sort(list, compose_item_compare);
-
     /* move data to map */
-//    map_size = g_slist_length(list);
-//    compose_map->map = (NabiComposeItem**)
-//		g_malloc(map_size * sizeof(NabiComposeItem*));
     for (i = 0; i < map_size; i++) {
-	compose_map[i].key = _key[i];
-	compose_map[i].code = _code[i];
+        compose_map[i].key = _key[i];
+        compose_map[i].code = _code[i];
     }
+    // FIXME sort
     compose_map[map_size].key=(UINT)-1;
-
-    /* free the list */
-    //g_slist_free(list);
 
     return type;
 }
