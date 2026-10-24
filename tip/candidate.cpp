@@ -14,6 +14,7 @@ extern "C" {
 #include "hangul.h"
 int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
+int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
 }
 
@@ -94,17 +95,57 @@ static void GetDicFileName(LPCTSTR lpKey, LPTSTR lpPath, int cch)
 
 //+---------------------------------------------------------------------------
 //
+// GetHangulFromHanja
+//
+// The hangul reading of a hanja word with the HanjaIndex like as ConvHanja().
+//----------------------------------------------------------------------------
+
+static BOOL GetHangulFromHanja(LPCWSTR pszRead, LPWSTR pszHan, int cch)
+{
+    TCHAR szIdx[MAX_PATH];
+    BOOL fHanja = FALSE;
+    int i;
+
+    // no default for the HanjaIndex
+    if (GetRegStringValue(TEXT("\\Dictionary"), TEXT("HanjaIndex"), NULL) <= 2)
+        return FALSE;
+    GetDicFileName(TEXT("HanjaIndex"), szIdx, ARRAYSIZE(szIdx));
+
+    for (i = 0; pszRead[i] != L'\0' && i < cch - 1; i++)
+    {
+        WCHAR c = pszRead[i];
+
+        if (c < 0x3400 || c >= 0xfaff || (c >= 0xa000 && c <= 0xf8ff))
+            pszHan[i] = c; // not a hanja
+        else if (GetHangulFromHanjaIndex((LPWSTR)&pszRead[i], &pszHan[i], 2, szIdx) < 1)
+            return FALSE; // not found in the hanja index
+        else
+            fHanja = TRUE;
+    }
+    pszHan[i] = L'\0';
+    return fHanja;
+}
+
+//+---------------------------------------------------------------------------
+//
 // MakeCandidateList
 //
 // Look up the word, symbol or hanja dictionary like as ConvHanja().
-// The first candidate is the reading itself.
+// The first candidate is the reading itself. A hanja word not found is
+// converted to the hangul, and *puSelect is the candidate of the hanja.
 // pszBuf has CAND_STRSIZE + CAND_BUFSIZE + 2 chars.
 //----------------------------------------------------------------------------
 
-static int MakeCandidateList(LPCWSTR pszRead, LPWSTR pszBuf, BOOL *pfSymbol)
+static BOOL MakeCandidateList(LPCWSTR pszRead, LPWSTR pszBuf, BOOL *pfSymbol, UINT *puSelect)
 {
     TCHAR szDic[MAX_PATH];
-    int len = lstrlenW(pszRead);
+    WCHAR achHan[CAND_STRSIZE];
+    LPCWSTR psz;
+    UINT i;
+    int len, nBufLen;
+
+    len = lstrlenW(pszRead);
+    *puSelect = 0;
 
     // a jamo or an ascii char is converted to symbols
     *pfSymbol = (len == 1 &&
@@ -116,7 +157,29 @@ static int MakeCandidateList(LPCWSTR pszRead, LPWSTR pszBuf, BOOL *pfSymbol)
     len = lstrlenW(pszBuf);
     pszBuf[len + 1] = L'\0';
 
-    return GetCandidateStringsFromDictionary(pszBuf, pszBuf + len + 1, CAND_BUFSIZE, szDic);
+    nBufLen = GetCandidateStringsFromDictionary(pszBuf, pszBuf + len + 1, CAND_BUFSIZE, szDic);
+    if (nBufLen > 1)
+        return TRUE;
+
+    // not found. look up the hangul of the hanja word
+    if (nBufLen == 1 || !GetHangulFromHanja(pszBuf, achHan, ARRAYSIZE(achHan)))
+        return FALSE;
+
+    // the hangul first. it may have no hanja candidate.
+    lstrcpyW(pszBuf, achHan);
+    pszBuf[len + 1] = L'\0';
+    GetCandidateStringsFromDictionary(achHan, pszBuf + len + 1, CAND_BUFSIZE, szDic);
+
+    // select the candidate of the hanja
+    for (i = 1, psz = pszBuf + len + 1; *psz != L'\0'; i++, psz += lstrlenW(psz) + 1)
+    {
+        if (*psz == pszRead[0])
+        {
+            *puSelect = i;
+            break;
+        }
+    }
+    return TRUE;
 }
 
 //+---------------------------------------------------------------------------
@@ -1017,7 +1080,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     WCHAR achBuf[CAND_STRSIZE + CAND_BUFSIZE + 2];
     WCHAR achRead[2];
     BOOL fSymbol;
-    int nBufLen;
+    UINT uSelect;
 
     if (!_IsComposing())
         return FALSE;
@@ -1027,9 +1090,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     if (achRead[0] == 0)
         return FALSE;
 
-    nBufLen = MakeCandidateList(achRead, achBuf, &fSymbol);
-    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_OpenCandidateList() nBufLen = %d\n"), nBufLen));
-    if (nBufLen <= 1)
+    if (!MakeCandidateList(achRead, achBuf, &fSymbol, &uSelect))
         return FALSE; // not found in the dictionary
 
     if (_pCandidateList == NULL && (_pCandidateList = new CCandidateList(this)) == NULL)
@@ -1037,6 +1098,8 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
 
     if (!_pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol, FALSE))
         return FALSE;
+    if (uSelect)
+        _pCandidateList->_SetSelection(uSelect);
 
     // place the candidate window
     _RequestCandidateEditSession(pContext, CAND_ES_LOCATE, NULL, TRUE);
@@ -1351,6 +1414,7 @@ HRESULT CSaenaruTextService::_DoReconvert(TfEditCookie ec, ITfContext *pContext)
     ULONG cFetched, cch;
     LONG cchShift;
     BOOL fEmpty, fSymbol;
+    UINT uSelect;
     int start, len;
     HRESULT hr = S_FALSE;
 
@@ -1377,7 +1441,7 @@ HRESULT CSaenaruTextService::_DoReconvert(TfEditCookie ec, ITfContext *pContext)
     ach[start + len] = L'\0';
 
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoReconvert() %s\n"), ach + start));
-    if (MakeCandidateList(ach + start, achBuf, &fSymbol) <= 1)
+    if (!MakeCandidateList(ach + start, achBuf, &fSymbol, &uSelect))
         goto Exit; // not found in the dictionary
 
     // the range of the word
@@ -1398,6 +1462,8 @@ HRESULT CSaenaruTextService::_DoReconvert(TfEditCookie ec, ITfContext *pContext)
         if ((_pCandidateList != NULL || (_pCandidateList = new CCandidateList(this)) != NULL) &&
                 _pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol, len > 1))
         {
+            if (uSelect)
+                _pCandidateList->_SetSelection(uSelect);
             _LocateCandidateList(ec, pContext, pRange);
             hr = S_OK;
         }

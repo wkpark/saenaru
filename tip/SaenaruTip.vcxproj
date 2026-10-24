@@ -180,6 +180,7 @@
     <ClCompile Include="..\src\reg.c" />
     <ClCompile Include="..\src\strsubs.c" />
     <ClCompile Include="..\src\dicfile.c" />
+    <ClCompile Include="..\src\hanjaidx.c" />
     <ClCompile Include="..\src\immsec.c" />
   </ItemGroup>
   <ItemGroup>
