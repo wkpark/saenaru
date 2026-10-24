@@ -7,7 +7,7 @@ branches:
     - appveyor
 clone_depth: 100
 
-image: Visual Studio 2017
+image: Visual Studio 2026
 
 platform:
   - x64
