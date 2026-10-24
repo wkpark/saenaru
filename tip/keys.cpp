@@ -177,14 +177,11 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleBackspace()\n")));
     DWORD status = GetConversionStatus();
     if (status & CMODE_HANGUL && _IsComposing()) {
+        // shift + backspace deletes the syllable at once like as the IMM IME
+        if (GetKeyState(VK_SHIFT) & 0x8000)
+            hangul_ic_init(&ic);
         if (ic.len) {
-            hangul_ic_pop(&ic); // delete the last jaso
-            WCHAR last = hangul_ic_peek(&ic); // get the last
-            if (last) {
-                if (ic.laststate == 1) ic.cho = 0;
-                else if (ic.laststate == 2) ic.jung = 0;
-                else if (ic.laststate == 3) ic.jong = 0;
-            }
+            hangul_ic_backspace(&ic);
             if (ic.len > 0 && ic.syllable) {
                 ncs = hangul_ic_get(&ic, 0, lcs);
                 if (ncs >= 1) {
@@ -200,13 +197,6 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
             } else {
                 // Middle-aged hangul
                 // FIXME
-            }
-            // change the last state
-            if (last) {
-                if (hangul_is_choseong(last)) ic.laststate = 1;
-                else if (hangul_is_jungseong(last)) ic.laststate = 2;
-                else if (hangul_is_jongseong(last)) ic.laststate = 3;
-                ic.last = last;
             }
         } else {
             // empty preedit
@@ -255,6 +245,10 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
     // we need to apply it to the entire composition, since the
     // display attribute property is static, not static compact
     _SetCompositionDisplayAttributes(ec);
+
+    // the composition is empty
+    if (ch == NULL)
+        _TerminateComposition(ec);
 
 Exit:
     tfSelection.range->Release();

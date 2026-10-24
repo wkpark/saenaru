@@ -82,7 +82,7 @@ static BOOL HasCandidate(LPCWSTR list, LPCWSTR cand)
 static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
 {
     TCHAR lcs[128];
-    WCHAR hkey, last;
+    WCHAR hkey;
     int ncs, n = 0;
 
     hangul_ic_init(&ic);
@@ -97,23 +97,9 @@ static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
                     n--;
                 continue;
             }
-            hangul_ic_pop(&ic);
-            last = hangul_ic_peek(&ic);
-            if (last)
-            {
-                if (ic.laststate == 1) ic.cho = 0;
-                else if (ic.laststate == 2) ic.jung = 0;
-                else if (ic.laststate == 3) ic.jong = 0;
-
-                if (hangul_is_choseong(last)) ic.laststate = 1;
-                else if (hangul_is_jungseong(last)) ic.laststate = 2;
-                else if (hangul_is_jongseong(last)) ic.laststate = 3;
-                ic.last = last;
-            }
-            else
-            {
+            hangul_ic_backspace(&ic);
+            if (!ic.len)
                 hangul_ic_init(&ic);
-            }
             continue;
         }
 
@@ -189,7 +175,7 @@ static void TestBackspace(void)
     TypeKeys("rkq\b\b\b", out, ARRAYSIZE(out));
     CheckStr("backspace: rkq\\b\\b\\b", L"", out);
 
-    // a compound jamo is deleted at once
+    // BACKSPACE_BY_JAMO deletes a compound jamo at once
     TypeKeys("rkqt\b", out, ARRAYSIZE(out));
     CheckStr("backspace: rkqt\\b", L"가", out);
 
@@ -203,6 +189,56 @@ static void TestBackspace(void)
     // not composing
     TypeKeys("rk \b\b", out, ARRAYSIZE(out));
     CheckStr("backspace: rk \\b\\b", L"", out);
+}
+
+// without BACKSPACE_BY_JAMO, restore the jamo before composed
+static void TestBackspaceCompat(void)
+{
+    WCHAR out[64];
+
+    dwOptionFlag &= ~BACKSPACE_BY_JAMO;
+
+    TypeKeys("rkqt\b", out, ARRAYSIZE(out));
+    CheckStr("compat: rkqt\\b", L"갑", out);
+
+    TypeKeys("rkqt\b\b", out, ARRAYSIZE(out));
+    CheckStr("compat: rkqt\\b\\b", L"가", out);
+
+    TypeKeys("rhk\b", out, ARRAYSIZE(out));
+    CheckStr("compat: rhk\\b", L"고", out);
+
+    TypeKeys("rhkq\b\b", out, ARRAYSIZE(out));
+    CheckStr("compat: rhkq\\b\\b", L"고", out);
+
+    TypeKeys("rhk\bl", out, ARRAYSIZE(out));
+    CheckStr("compat: rhk\\bl", L"괴", out);
+
+    TypeKeys("ekfr\bk", out, ARRAYSIZE(out));
+    CheckStr("compat: ekfr\\bk", L"다라", out);
+
+    // 2-set choseong + choseong = jongseong
+    TypeKeys("rt\bk", out, ARRAYSIZE(out));
+    CheckStr("compat: rt\\bk", L"가", out);
+
+    // one key jamo is deleted at once
+    TypeKeys("Rk\b\b", out, ARRAYSIZE(out));
+    CheckStr("compat: Rk\\b\\b", L"", out);
+
+    TypeKeys("goT\b", out, ARRAYSIZE(out));
+    CheckStr("compat: goT\\b", L"해", out);
+
+    set_keyboard(LAYOUT_3FIN);
+    TypeKeys("kkf\b\b", out, ARRAYSIZE(out));
+    CheckStr("compat 3set: kkf\\b\\b", L"ㄱ", out);
+
+    TypeKeys("kfwx\b", out, ARRAYSIZE(out));
+    CheckStr("compat 3set: kfwx\\b", L"갈", out);
+
+    TypeKeys("kf@\b", out, ARRAYSIZE(out));
+    CheckStr("compat 3set: kf@\\b", L"가", out);
+    set_keyboard(LAYOUT_OLD2BUL);
+
+    dwOptionFlag |= BACKSPACE_BY_JAMO;
 }
 
 static void TestHangul3(void)
@@ -312,6 +348,7 @@ int main(void)
 {
     TestHangul2();
     TestBackspace();
+    TestBackspaceCompat();
     TestHangul3();
     TestJamo();
     TestDictionary();
