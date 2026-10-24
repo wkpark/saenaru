@@ -1108,6 +1108,22 @@ void PASCAL HideCandWindow( LPUIEXTRA lpUIExtra)
     SendMessage(g_hwndTip, TTM_TRACKACTIVATE, (WPARAM) FALSE, (LPARAM) &ti);
 }
 
+/* below the caret. TSF applications may not support IMR_QUERYCHARPOSITION. */
+static BOOL GetCandPosFromCaret(LPPOINT lppt)
+{
+    GUITHREADINFO gti;
+
+    gti.cbSize = sizeof(gti);
+    if (!GetGUIThreadInfo(GetCurrentThreadId(), &gti) || gti.hwndCaret == NULL)
+        return FALSE;
+
+    lppt->x = gti.rcCaret.left;
+    lppt->y = gti.rcCaret.bottom + 1;
+    ClientToScreen(gti.hwndCaret, lppt);
+    MyDebugPrint((TEXT("Cand pt from caret %dx%d\n"), lppt->x, lppt->y));
+    return TRUE;
+}
+
 /**********************************************************************/
 /*                                                                    */
 /* MoveCandWindow()                                                   */
@@ -1168,6 +1184,8 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
                 pt.x = lpCP->pt.x;
                 pt.y = lpCP->pt.y + lpCP->cLineHeight + 1; // 글자 높이 + 1
                 MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
+            } else if (GetCandPosFromCaret(&pt)) {
+                // use the caret position
             } else {
                 // IMR_QUERYCHARPOSITION도 지원하지 않으면 root window 스타일로.
                 GetWindowRect(lpIMC->hWnd,&rc);
@@ -1274,6 +1292,8 @@ void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtr
                 pt.x = lpCP->pt.x;
                 pt.y = lpCP->pt.y + lpCP->cLineHeight + 1;
                 MyDebugPrint((TEXT("Cand pt.x :%d\n"),pt.x));
+            } else if (GetCandPosFromCaret(&pt)) {
+                // use the caret position
             } else {
                 // 어떤 어플리케이션은 CompWindow를 가지고 있지 않다.
                 // 워드패드가 대표적인 케이스

@@ -2410,6 +2410,8 @@ BOOL PASCAL MakeGuideLine(HIMC hIMC, DWORD dwID)
 BOOL PASCAL GenerateMessage(HIMC hIMC, LPINPUTCONTEXT lpIMC, LPTRANSMSGLIST lpTransBuf,LPTRANSMSG lpGeneMsg)
 {
     MyDebugPrint((TEXT("GenerateMessage:TransKey %ld\n"),lpGeneMsg->message));
+    // no UI window from IMM in TSF applications
+    NotifyCandUIWindow(hIMC, lpIMC, lpGeneMsg);
     if (lpTransBuf)
         return GenerateMessageToTransKey(lpTransBuf,lpGeneMsg);
     MyDebugPrint((TEXT("GenerateMessage:ImmGenerateMessage %ld\n"),lpGeneMsg->message));

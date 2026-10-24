@@ -399,6 +399,8 @@ void PASCAL CreateCandWindow(HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lpI
 void PASCAL ResizeCandWindow(LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC);
 void PASCAL HideCandWindow( LPUIEXTRA lpUIExtra);
 void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra, BOOL fForceComp);
+void PASCAL NotifyCandUIWindow(HIMC hIMC, LPINPUTCONTEXT lpIMC, LPTRANSMSG lpGeneMsg);
+void PASCAL DestroyCandUIWindow(void);
 
 /* uicomp.c      */
 LRESULT CALLBACK CompStrWndProc(HWND,UINT,WPARAM,LPARAM);

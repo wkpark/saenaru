@@ -55,6 +55,13 @@ void PASCAL DvorakKey(BOOL,WPARAM, LPARAM);
 static HHOOK hHookWnd = 0;
 static HHOOK hConsoleHookID = 0;
 
+/* the UI window created by IMM in this thread */
+static __declspec(thread) HWND hThreadUIWnd = NULL;
+/* our own UI window for the candidate window without the IMM UI window */
+static __declspec(thread) HWND hCandUIWnd = NULL;
+static int nCandUIMark;
+#define CANDUI_MARK ((LPVOID)&nCandUIMark)
+
 #if 0
 void PASCAL HideGuideLine (LPUIEXTRA lpUIExtra);
 void PASCAL CreateGuideLine (HWND, LPUIEXTRA, LPINPUTCONTEXT);
@@ -288,6 +295,14 @@ LPARAM lParam;
             GlobalUnlock(hUIExtra);
 
             SetWindowLongPtr(hWnd,IMMGWLP_PRIVATE,(LONG_PTR)hUIExtra);
+
+            // our own UI window only shows the candidate window.
+            if (((LPCREATESTRUCT)lParam)->lpCreateParams == CANDUI_MARK)
+            {
+                MyDebugPrint((TEXT("WM_CREATE: candidate UI window\n")));
+                break;
+            }
+            hThreadUIWnd = hWnd;
 
             MyDebugPrint((TEXT("WM_CREATE\n")));
             SetHookFunc();
@@ -568,6 +583,15 @@ LPARAM lParam;
 
             GlobalUnlock(hUIExtra);
             GlobalFree(hUIExtra);
+
+            if (hWnd == hCandUIWnd)
+            {
+                // no hook for our own UI window
+                hCandUIWnd = NULL;
+                break;
+            }
+            if (hWnd == hThreadUIWnd)
+                hThreadUIWnd = NULL;
 
             MyDebugPrint((TEXT("WM_DELETE\n")));
             UnsetHookFunc();
@@ -1141,6 +1165,72 @@ void PASCAL DragUI( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
     }
+}
+
+/**********************************************************************/
+/*                                                                    */
+/* NotifyCandUIWindow()                                               */
+/*                                                                    */
+/* IMM does not create the UI window in TSF applications.             */
+/* Then post the candidate notifications to our own UI window.        */
+/*                                                                    */
+/**********************************************************************/
+void PASCAL NotifyCandUIWindow(HIMC hIMC, LPINPUTCONTEXT lpIMC, LPTRANSMSG lpGeneMsg)
+{
+    HGLOBAL hUIExtra;
+    LPUIEXTRA lpUIExtra;
+    HWND hOwner;
+
+    if (lpGeneMsg->message != WM_IME_NOTIFY)
+        return;
+
+    switch (lpGeneMsg->wParam)
+    {
+        case IMN_OPENCANDIDATE:
+        case IMN_CHANGECANDIDATE:
+        case IMN_CLOSECANDIDATE:
+            break;
+        default:
+            return;
+    }
+
+    if (hThreadUIWnd != NULL && IsWindow(hThreadUIWnd))
+        return; // the UI window of IMM handles it
+
+    // owned by the application window not to be hidden behind it
+    hOwner = (lpIMC && IsWindow(lpIMC->hWnd)) ? GetAncestor(lpIMC->hWnd, GA_ROOT) : NULL;
+    if (hCandUIWnd != NULL && GetWindow(hCandUIWnd, GW_OWNER) != hOwner &&
+            lpGeneMsg->wParam == IMN_OPENCANDIDATE)
+        DestroyCandUIWindow();
+
+    if (hCandUIWnd == NULL || !IsWindow(hCandUIWnd))
+    {
+        if (lpGeneMsg->wParam == IMN_CLOSECANDIDATE)
+            return;
+
+        hCandUIWnd = CreateWindowEx(0, szUIClassName, NULL, WS_POPUP | WS_DISABLED,
+                                    0, 0, 0, 0, hOwner, NULL, hInst, CANDUI_MARK);
+        if (hCandUIWnd == NULL)
+            return;
+    }
+
+    SetWindowLongPtr(hCandUIWnd, IMMGWLP_IMC, (LONG_PTR)hIMC);
+    hUIExtra = (HGLOBAL)GetWindowLongPtr(hCandUIWnd, IMMGWLP_PRIVATE);
+    if (hUIExtra && (lpUIExtra = (LPUIEXTRA)GlobalLock(hUIExtra)))
+    {
+        lpUIExtra->hIMC = hIMC;
+        GlobalUnlock(hUIExtra);
+    }
+
+    MyDebugPrint((TEXT("NotifyCandUIWindow: %x\n"), lpGeneMsg->wParam));
+    PostMessage(hCandUIWnd, WM_IME_NOTIFY, lpGeneMsg->wParam, lpGeneMsg->lParam);
+}
+
+void PASCAL DestroyCandUIWindow(void)
+{
+    if (hCandUIWnd != NULL && IsWindow(hCandUIWnd))
+        DestroyWindow(hCandUIWnd);
+    hCandUIWnd = NULL;
 }
 
 /**********************************************************************/

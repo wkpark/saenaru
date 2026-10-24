@@ -977,6 +977,8 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
 #endif
     if (fSelect)
         UpdateIndicIcon(hIMC);
+    else
+        DestroyCandUIWindow();
 
     // it's NULL context.
     if (!hIMC)

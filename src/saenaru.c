@@ -115,6 +115,7 @@ BOOL WINAPI DLLEntry (
             break;
 
         case DLL_PROCESS_DETACH:
+            DestroyCandUIWindow();
             UnregisterClass(szUIClassName,hInst);
             UnregisterClass(szCompStrClassName,hInst);
             UnregisterClass(szCandClassName,hInst);
