@@ -993,6 +993,10 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
                 *pfEaten = _HandleCandidateKey(pContext, VK_HANJA, FALSE);
             } else if ((GetConversionStatus() & CMODE_HANGUL) && _IsComposing()) {
                 *pfEaten = _OpenCandidateList(pContext);
+            } else if (GetConversionStatus() & CMODE_HANGUL) {
+                // convert the selected word like as the reconversion of the IMM IME
+                HRESULT hr = _RequestCandidateEditSession(pContext, CAND_ES_RECONVERT, NULL, TRUE);
+                *pfEaten = (hr == S_OK || hr == TF_S_ASYNC);
             }
         }
     } else {

@@ -94,6 +94,33 @@ static void GetDicFileName(LPCTSTR lpKey, LPTSTR lpPath, int cch)
 
 //+---------------------------------------------------------------------------
 //
+// MakeCandidateList
+//
+// Look up the word, symbol or hanja dictionary like as ConvHanja().
+// The first candidate is the reading itself.
+// pszBuf has CAND_STRSIZE + CAND_BUFSIZE + 2 chars.
+//----------------------------------------------------------------------------
+
+static int MakeCandidateList(LPCWSTR pszRead, LPWSTR pszBuf, BOOL *pfSymbol)
+{
+    TCHAR szDic[MAX_PATH];
+    int len = lstrlenW(pszRead);
+
+    // a jamo or an ascii char is converted to symbols
+    *pfSymbol = (len == 1 &&
+            (pszRead[0] < 0x7f || (pszRead[0] >= 0x3131 && pszRead[0] <= 0x314e)));
+    GetDicFileName((len > 1) ? TEXT("Word") : (*pfSymbol ? TEXT("Symbol") : TEXT("")),
+            szDic, ARRAYSIZE(szDic));
+
+    lstrcpynW(pszBuf, pszRead, CAND_STRSIZE);
+    len = lstrlenW(pszBuf);
+    pszBuf[len + 1] = L'\0';
+
+    return GetCandidateStringsFromDictionary(pszBuf, pszBuf + len + 1, CAND_BUFSIZE, szDic);
+}
+
+//+---------------------------------------------------------------------------
+//
 // ctor/dtor
 //
 //----------------------------------------------------------------------------
@@ -107,6 +134,7 @@ CCandidateList::CCandidateList(CSaenaruTextService *pSaenaru)
     _dwUIElementId = (DWORD)-1;
     _fShown = FALSE;
     _fSymbol = FALSE;
+    _fWord = FALSE;
     _fCodeStyle = FALSE;
     _dwUpdatedFlags = 0;
 
@@ -365,7 +393,7 @@ STDAPI CCandidateList::Abort()
 //
 //----------------------------------------------------------------------------
 
-BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol)
+BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol, BOOL fWord)
 {
     ITfUIElementMgr *pUIElementMgr;
     LPCWSTR psz;
@@ -395,7 +423,8 @@ BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWS
     _uSelection = 0;
     _uPageSize = (_uCount < CAND_PAGESIZE) ? _uCount : CAND_PAGESIZE;
     _fSymbol = fSymbol;
-    _fCodeStyle = fSymbol || s_fCodeStyle;
+    _fWord = fWord;
+    _fCodeStyle = fSymbol || (!fWord && s_fCodeStyle);
 
     _pThreadMgr = pThreadMgr;
     _pThreadMgr->AddRef();
@@ -519,13 +548,13 @@ void CCandidateList::_SetSelection(UINT uIndex)
 // _ToggleStyle
 //
 // VK_TAB toggles the read style (one page) and the code style (all pages).
-// Symbols always use the code style like as ConvHanja().
+// Symbols always use the code style, words the read style like as ConvHanja().
 //----------------------------------------------------------------------------
 
 void CCandidateList::_ToggleStyle()
 {
     s_fCodeStyle = !s_fCodeStyle;
-    _fCodeStyle = _fSymbol || s_fCodeStyle;
+    _fCodeStyle = _fSymbol || (!_fWord && s_fCodeStyle);
     _Update(TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE);
 }
 
@@ -985,9 +1014,8 @@ void CSaenaruTextService::_CloseCandidateList()
 
 BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
 {
-    WCHAR achBuf[CAND_BUFSIZE + 2];
+    WCHAR achBuf[CAND_STRSIZE + CAND_BUFSIZE + 2];
     WCHAR achRead[2];
-    TCHAR szDic[MAX_PATH];
     BOOL fSymbol;
     int nBufLen;
 
@@ -999,16 +1027,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     if (achRead[0] == 0)
         return FALSE;
 
-    // a jamo is converted to symbols
-    fSymbol = (achRead[0] >= 0x3131 && achRead[0] <= 0x314e);
-    GetDicFileName(fSymbol ? TEXT("Symbol") : TEXT(""), szDic, ARRAYSIZE(szDic));
-
-    // the first candidate is the hangul itself
-    achBuf[0] = achRead[0];
-    achBuf[1] = L'\0';
-    achBuf[2] = L'\0';
-
-    nBufLen = GetCandidateStringsFromDictionary(achRead, achBuf + 2, CAND_BUFSIZE, szDic);
+    nBufLen = MakeCandidateList(achRead, achBuf, &fSymbol);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_OpenCandidateList() nBufLen = %d\n"), nBufLen));
     if (nBufLen <= 1)
         return FALSE; // not found in the dictionary
@@ -1016,7 +1035,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     if (_pCandidateList == NULL && (_pCandidateList = new CCandidateList(this)) == NULL)
         return FALSE;
 
-    if (!_pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol))
+    if (!_pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol, FALSE))
         return FALSE;
 
     // place the candidate window
@@ -1024,10 +1043,10 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     return TRUE;
 }
 
-void CSaenaruTextService::_RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync)
+HRESULT CSaenaruTextService::_RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync)
 {
     CCandidateEditSession *pEditSession;
-    HRESULT hr;
+    HRESULT hr = E_FAIL;
 
     if ((pEditSession = new CCandidateEditSession(this, pContext, action, psz)) != NULL)
     {
@@ -1041,6 +1060,7 @@ void CSaenaruTextService::_RequestCandidateEditSession(ITfContext *pContext, int
         DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_RequestCandidateEditSession(%d) hr = 0x%x\n"), action, hr));
         pEditSession->Release();
     }
+    return hr;
 }
 
 //+---------------------------------------------------------------------------
@@ -1223,14 +1243,13 @@ BOOL CSaenaruTextService::_HandleCandidateKey(ITfContext *pContext, WPARAM wPara
 HRESULT CSaenaruTextService::_DoCandidateEditSession(TfEditCookie ec, ITfContext *pContext, int action, LPCWSTR psz)
 {
     ITfRange *pRangeComposition;
-    ITfContextView *pContextView;
     TF_SELECTION tfSelection;
-    GUITHREADINFO gti;
-    RECT rc;
-    BOOL fClipped, fFound;
     LONG cch;
 
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoCandidateEditSession(%d)\n"), action));
+
+    if (action == CAND_ES_RECONVERT)
+        return _DoReconvert(ec, pContext);
 
     if (_pComposition == NULL)
         return S_OK; // already terminated
@@ -1241,32 +1260,7 @@ HRESULT CSaenaruTextService::_DoCandidateEditSession(TfEditCookie ec, ITfContext
     switch (action)
     {
         case CAND_ES_LOCATE:
-            fFound = FALSE;
-            if (pContext->GetActiveView(&pContextView) == S_OK)
-            {
-                if (pContextView->GetTextExt(ec, pRangeComposition, &rc, &fClipped) == S_OK &&
-                        (rc.right != 0 || rc.bottom != 0))
-                    fFound = TRUE;
-                pContextView->Release();
-            }
-            if (!fFound)
-            {
-                // no layout. use the caret position
-                gti.cbSize = sizeof(gti);
-                if (GetGUIThreadInfo(0, &gti) && gti.hwndCaret != NULL)
-                {
-                    rc = gti.rcCaret;
-                    MapWindowPoints(gti.hwndCaret, NULL, (LPPOINT)&rc, 2);
-                }
-                else
-                {
-                    POINT pt;
-                    GetCursorPos(&pt);
-                    SetRect(&rc, pt.x, pt.y, pt.x, pt.y);
-                }
-            }
-            if (_IsCandidateOpen())
-                _pCandidateList->_SetTextRect(&rc);
+            _LocateCandidateList(ec, pContext, pRangeComposition);
             break;
 
         case CAND_ES_PREVIEW:
@@ -1278,7 +1272,8 @@ HRESULT CSaenaruTextService::_DoCandidateEditSession(TfEditCookie ec, ITfContext
             tfSelection.range = pRangeComposition;
             tfSelection.style.ase = TF_AE_NONE;
             tfSelection.style.fInterimChar = (action == CAND_ES_PREVIEW && cch == 1);
-            if (action == CAND_ES_COMMIT)
+            // the caret at the end for a word not to select it
+            if (action == CAND_ES_COMMIT || cch > 1)
                 pRangeComposition->Collapse(ec, TF_ANCHOR_END);
             pContext->SetSelection(ec, 1, &tfSelection);
 
@@ -1291,6 +1286,137 @@ HRESULT CSaenaruTextService::_DoCandidateEditSession(TfEditCookie ec, ITfContext
 
     pRangeComposition->Release();
     return S_OK;
+}
+
+//+---------------------------------------------------------------------------
+//
+// _LocateCandidateList
+//
+// Place the candidate window under the range.
+//----------------------------------------------------------------------------
+
+void CSaenaruTextService::_LocateCandidateList(TfEditCookie ec, ITfContext *pContext, ITfRange *pRange)
+{
+    ITfContextView *pContextView;
+    GUITHREADINFO gti;
+    RECT rc;
+    BOOL fClipped, fFound;
+
+    fFound = FALSE;
+    if (pContext->GetActiveView(&pContextView) == S_OK)
+    {
+        if (pContextView->GetTextExt(ec, pRange, &rc, &fClipped) == S_OK &&
+                (rc.right != 0 || rc.bottom != 0))
+            fFound = TRUE;
+        pContextView->Release();
+    }
+    if (!fFound)
+    {
+        // no layout. use the caret position
+        gti.cbSize = sizeof(gti);
+        if (GetGUIThreadInfo(0, &gti) && gti.hwndCaret != NULL)
+        {
+            rc = gti.rcCaret;
+            MapWindowPoints(gti.hwndCaret, NULL, (LPPOINT)&rc, 2);
+        }
+        else
+        {
+            POINT pt;
+            GetCursorPos(&pt);
+            SetRect(&rc, pt.x, pt.y, pt.x, pt.y);
+        }
+    }
+    if (_IsCandidateOpen())
+        _pCandidateList->_SetTextRect(&rc);
+}
+
+//+---------------------------------------------------------------------------
+//
+// _DoReconvert
+//
+// VK_HANJA without the composition. Convert the first word of the selection,
+// or the word after the caret like as the reconversion of the IMM IME.
+// Returns S_OK if the candidate list is opened.
+//----------------------------------------------------------------------------
+
+HRESULT CSaenaruTextService::_DoReconvert(TfEditCookie ec, ITfContext *pContext)
+{
+    static const WCHAR c_szSep[] = L" \r\n\t";
+    WCHAR achBuf[CAND_STRSIZE + CAND_BUFSIZE + 2];
+    WCHAR ach[CAND_STRSIZE];
+    TF_SELECTION tfSelection;
+    ITfContextComposition *pContextComposition;
+    ITfComposition *pComposition;
+    ITfRange *pRange;
+    ULONG cFetched, cch;
+    LONG cchShift;
+    BOOL fEmpty, fSymbol;
+    int start, len;
+    HRESULT hr = S_FALSE;
+
+    if (_IsComposing())
+        return S_FALSE;
+
+    if (pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) != S_OK || cFetched != 1)
+        return S_FALSE;
+    pRange = tfSelection.range;
+
+    // no selection. the word after the caret
+    if (pRange->IsEmpty(ec, &fEmpty) == S_OK && fEmpty)
+        pRange->ShiftEnd(ec, ARRAYSIZE(ach) - 1, &cchShift, NULL);
+
+    if (pRange->GetText(ec, 0, ach, ARRAYSIZE(ach) - 1, &cch) != S_OK)
+        goto Exit;
+    ach[cch] = L'\0';
+
+    // the first word like as strtok()
+    start = (int)wcsspn(ach, c_szSep);
+    len = (int)wcscspn(ach + start, c_szSep);
+    if (len == 0)
+        goto Exit;
+    ach[start + len] = L'\0';
+
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoReconvert() %s\n"), ach + start));
+    if (MakeCandidateList(ach + start, achBuf, &fSymbol) <= 1)
+        goto Exit; // not found in the dictionary
+
+    // the range of the word
+    pRange->Collapse(ec, TF_ANCHOR_START);
+    pRange->ShiftEnd(ec, start + len, &cchShift, NULL);
+    pRange->ShiftStart(ec, start, &cchShift, NULL);
+
+    if (pContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition) != S_OK)
+        goto Exit;
+
+    pComposition = NULL;
+    if (pContextComposition->StartComposition(ec, pRange, this, &pComposition) == S_OK && pComposition != NULL)
+    {
+        _SetComposition(pComposition);
+        hangul_ic_init(&ic);
+        _SetCompositionDisplayAttributes(ec);
+
+        if ((_pCandidateList != NULL || (_pCandidateList = new CCandidateList(this)) != NULL) &&
+                _pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol, len > 1))
+        {
+            _LocateCandidateList(ec, pContext, pRange);
+            hr = S_OK;
+        }
+        else
+        {
+            _TerminateComposition(ec);
+        }
+
+        // the caret at the end of the word
+        pRange->Collapse(ec, TF_ANCHOR_END);
+        tfSelection.style.ase = TF_AE_NONE;
+        tfSelection.style.fInterimChar = FALSE;
+        pContext->SetSelection(ec, 1, &tfSelection);
+    }
+    pContextComposition->Release();
+
+Exit:
+    pRange->Release();
+    return hr;
 }
 
 /*

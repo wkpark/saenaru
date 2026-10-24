@@ -155,7 +155,7 @@ public:
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, TfGuidAtom gaDisplayAttribute = 0);
 
     // hanja candidate list
-    enum { CAND_ES_LOCATE, CAND_ES_PREVIEW, CAND_ES_COMMIT };
+    enum { CAND_ES_LOCATE, CAND_ES_PREVIEW, CAND_ES_COMMIT, CAND_ES_RECONVERT };
     BOOL _IsCandidateOpen();
     BOOL _OpenCandidateList(ITfContext *pContext);
     void _CloseCandidateList();
@@ -163,8 +163,10 @@ public:
     BOOL _HandleCandidateKey(ITfContext *pContext, WPARAM wParam, BOOL fTest);
     void _UpdateCandidatePreview(ITfContext *pContext, BOOL fSync = TRUE);
     void _CommitCandidate(ITfContext *pContext, BOOL fSync = TRUE);
-    void _RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync);
+    HRESULT _RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync);
     HRESULT _DoCandidateEditSession(TfEditCookie ec, ITfContext *pContext, int action, LPCWSTR psz);
+    HRESULT _DoReconvert(TfEditCookie ec, ITfContext *pContext);
+    void _LocateCandidateList(TfEditCookie ec, ITfContext *pContext, ITfRange *pRange);
 
     // messages for the worker wnd
     enum { WM_DISPLAY_PROPERTY = WM_USER + 1 };

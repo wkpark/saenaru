@@ -48,8 +48,9 @@ public:
     STDMETHODIMP Abort();
 
     // pszList is a double null terminated list. the first item is the hangul.
-    // fSymbol forces the code style (all pages) like as the IMM IME.
-    BOOL _Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol);
+    // fSymbol forces the code style (all pages), fWord forces the read style
+    // like as the IMM IME.
+    BOOL _Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol, BOOL fWord);
     void _Close();
     BOOL _IsOpen()
     {
@@ -95,10 +96,11 @@ private:
     DWORD _dwUIElementId;
     BOOL _fShown;
     BOOL _fSymbol;
+    BOOL _fWord;
     BOOL _fCodeStyle;   // show all pages in columns (IME_CAND_CODE)
     DWORD _dwUpdatedFlags;
 
-    WCHAR _achList[CAND_BUFSIZE + 2];
+    WCHAR _achList[CAND_STRSIZE + CAND_BUFSIZE + 2];
     UINT _rgOffset[CAND_MAXNUM];
     UINT _uCount;
     UINT _uSelection;
