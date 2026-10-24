@@ -28,6 +28,9 @@ set(_xwin_lib "/libpath:${XWIN_DIR}/crt/lib/x86_64 /libpath:${XWIN_DIR}/sdk/lib/
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${_xwin_lib}")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "${_xwin_lib}")
 
+# xwin has no debug CRT (msvcrtd.lib) by default
+set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
+
 # ctest runs the tests with wine
 if(DEFINED ENV{WINE})
     set(CMAKE_CROSSCOMPILING_EMULATOR "$ENV{WINE}")
