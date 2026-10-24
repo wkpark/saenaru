@@ -17,6 +17,7 @@ int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLe
 int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
 int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+UINT PASCAL is_ksx1002(UINT);
 }
 
 // {03E8748F-B232-4E6D-B3B1-F3F266B019B0}
@@ -125,6 +126,37 @@ static BOOL GetHangulFromHanja(LPCWSTR pszRead, LPWSTR pszHan, int cch)
     }
     pszHan[i] = L'\0';
     return fHanja;
+}
+
+//+---------------------------------------------------------------------------
+//
+// GetExtHanjaType
+//
+// The hanja candidate not in the CP949 like as PaintCandWindow() of the IMM
+// IME. 0: not extended, 1: an extended hanja of the KS X 1002, 2: others.
+//----------------------------------------------------------------------------
+
+static int GetExtHanjaType(LPCWSTR psz)
+{
+    WCHAR c = psz[0];
+    char mb[8];
+    BOOL fUsedDefault = FALSE;
+    int len;
+
+    if (!(dwOptionFlag & KSX1002_SUPPORT))
+        return 0;
+
+    // one hanja. a surrogate pair is in the extension B or later.
+    len = (c >= 0xd800 && c <= 0xdbff) ? 2 : 1;
+    if (lstrlenW(psz) != len)
+        return 0;
+    if (len == 1 && (c < 0x3400 || (c >= 0xa000 && c < 0xf900) || c > 0xfaff))
+        return 0;
+
+    WideCharToMultiByte(949, WC_NO_BEST_FIT_CHARS, psz, len, mb, sizeof(mb), NULL, &fUsedDefault);
+    if (!fUsedDefault)
+        return 0;
+    return is_ksx1002(c) ? 1 : 2;
 }
 
 //+---------------------------------------------------------------------------
@@ -774,7 +806,8 @@ BOOL CCandidateList::_CreateWindow()
     {
         ZeroMemory(&ti, sizeof(ti));
         ti.cbSize = TTTOOLINFOW_V2_SIZE; // comctl32 v5 does not know the full size
-        ti.uFlags = TTF_TRACK | TTF_ABSOLUTE;
+        // the mouse goes through the tooltip to the candidates under it
+        ti.uFlags = TTF_TRACK | TTF_ABSOLUTE | TTF_TRANSPARENT;
         ti.hwnd = _hWnd;
         ti.lpszText = (LPWSTR)L"";
         SendMessageW(_hWndTip, TTM_ADDTOOLW, 0, (LPARAM)&ti);
@@ -911,8 +944,8 @@ void CCandidateList::_Layout()
 //
 // _UpdateToolTip
 //
-// Show the meaning of the selected candidate beside the window in the code
-// style. The read style shows the meanings in the list.
+// Show the meaning under the selected candidate in the code style like as
+// the IMM IME. The read style shows the meanings in the list.
 //----------------------------------------------------------------------------
 
 void CCandidateList::_UpdateToolTip()
@@ -923,7 +956,7 @@ void CCandidateList::_UpdateToolTip()
     MONITORINFO mi;
     POINT pt;
     LRESULT lSize;
-    int cx;
+    int cx, cy;
 
     if (_hWndTip == NULL)
         return;
@@ -944,19 +977,27 @@ void CCandidateList::_UpdateToolTip()
     ti.lpszText = ach;
     SendMessageW(_hWndTip, TTM_UPDATETIPTEXTW, 0, (LPARAM)&ti);
 
-    // the right of the window at the row of the selection, not to cover the list
-    GetWindowRect(_hWnd, &rcWnd);
-    pt.x = 0;
-    pt.y = (int)(_uSelection % _uPageSize) * _cyItem;
+    // under the text of the selected candidate
+    pt.x = (int)(_uSelection / _uPageSize) * _cxCol + _cxNum + 4;
+    pt.y = (int)(_uSelection % _uPageSize + 1) * _cyItem;
     ClientToScreen(_hWnd, &pt);
-    pt.x = rcWnd.right + 2;
 
     lSize = SendMessageW(_hWndTip, TTM_GETBUBBLESIZE, 0, (LPARAM)&ti);
     cx = LOWORD(lSize);
+    cy = HIWORD(lSize);
+    GetWindowRect(_hWnd, &rcWnd);
     mi.cbSize = sizeof(mi);
-    if (GetMonitorInfoW(MonitorFromRect(&rcWnd, MONITOR_DEFAULTTONEAREST), &mi) &&
-            pt.x + cx > mi.rcWork.right)
-        pt.x = rcWnd.left - cx - 2; // the left of the window
+    if (GetMonitorInfoW(MonitorFromRect(&rcWnd, MONITOR_DEFAULTTONEAREST), &mi))
+    {
+        if (pt.x + cx > mi.rcWork.right)
+            pt.x = mi.rcWork.right - cx;
+        if (pt.x < mi.rcWork.left)
+            pt.x = mi.rcWork.left;
+        if (pt.y + cy > mi.rcWork.bottom)
+            pt.y -= _cyItem + cy; // above the candidate
+        if (pt.y < mi.rcWork.top)
+            pt.y = mi.rcWork.top;
+    }
 
     SendMessageW(_hWndTip, TTM_TRACKPOSITION, 0, MAKELPARAM(pt.x, pt.y));
     SendMessageW(_hWndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
@@ -972,8 +1013,9 @@ void CCandidateList::_OnPaint(HWND hWnd)
     SIZE sz;
     WCHAR ach[CAND_STRSIZE];
     WCHAR szNum[16];
+    WCHAR achCand[CAND_STRSIZE];
     UINT i, uStart, uEnd, uPages;
-    int x, y, xNum, cxCell, len;
+    int x, y, xNum, cxCell, len, wtype;
 
     hdc = BeginPaint(hWnd, &ps);
     GetClientRect(hWnd, &rc);
@@ -1041,6 +1083,19 @@ void CCandidateList::_OnPaint(HWND hWnd)
         else
             _GetDisplayString(i, ach, ARRAYSIZE(ach));
         SelectObject(hMemDC, _hFont);
+
+        // extended hanja with a shadow and colors like as the IMM IME
+        _GetCandidate(i, achCand, ARRAYSIZE(achCand));
+        wtype = GetExtHanjaType(achCand);
+        if (wtype)
+        {
+            SetTextColor(hMemDC, (i == _uSelection) ? RGB(0, 0, 0) : RGB(220, 220, 220));
+            TextOutW(hMemDC, x + _cxNum + 5, y + 3, ach, lstrlenW(ach));
+            if (i == _uSelection)
+                SetTextColor(hMemDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
+            else
+                SetTextColor(hMemDC, (wtype == 1) ? RGB(16, 83, 239) : RGB(30, 150, 30));
+        }
         TextOutW(hMemDC, x + _cxNum + 4, y + 2, ach, lstrlenW(ach));
     }
 
@@ -1086,9 +1141,18 @@ BOOL CCandidateList::_HitTest(int x, int y, UINT *puIndex)
 
 void CCandidateList::_OnClick(int x, int y)
 {
+    POINT pt;
+    RECT rc;
     UINT uIndex;
 
-    if (!_HitTest(x, y, &uIndex))
+    // a click on the tooltip is for the selected candidate, not the one under it
+    pt.x = x;
+    pt.y = y;
+    ClientToScreen(_hWnd, &pt);
+    if (_hWndTip != NULL && IsWindowVisible(_hWndTip) &&
+            GetWindowRect(_hWndTip, &rc) && PtInRect(&rc, pt))
+        uIndex = _uSelection;
+    else if (!_HitTest(x, y, &uIndex))
         return;
 
     _SetSelection(uIndex);
