@@ -761,20 +761,13 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
             }
             cs = *lpprev;
             *(lpprev+1) = MYTEXT('\0');
-        } else if ( ic.len && (dwOptionFlag & BACKSPACE_BY_JAMO)) {
+        } else if ( ic.len ) {
             // Delete jamos
             if (ic.len > 0) {
                 // 조합중인 글자?
-                WCHAR last;
                 int ncs = 0;
 
-                hangul_ic_pop(&ic); // delete
-                last= hangul_ic_peek(&ic); // get last
-                if (last) {
-                    if (ic.laststate == 1) ic.cho=0;
-                    else if (ic.laststate == 2) ic.jung=0;
-                    else if (ic.laststate == 3) ic.jong=0;
-                }
+                hangul_ic_backspace(&ic);
 
                 if (ic.syllable) {
                     ncs = hangul_ic_get(&ic,0, lpptr);
@@ -821,14 +814,6 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                     }
                     MyDebugPrint((TEXT(">>> CompStr result: %s:%d\r\n"), lpstr, dwCurPos));
                     *lpptr = MYTEXT('\0');
-                }
-                // change last state
-                if (last) {
-                    if (hangul_is_choseong(last)) ic.laststate=1;
-                    else if (hangul_is_jungseong(last)) ic.laststate=2;
-                    else if (hangul_is_jongseong(last)) ic.laststate=3;
-
-                    ic.last = last;
                 }
             } else {
                 // 조합중인 글자가 모두 지워짐.
@@ -1690,20 +1675,7 @@ CONST LPBYTE lpbKeyState;
 #endif
 
                                         if (hangul_is_syllable(*lpDump)) {
-                                            WCHAR l, v, t;
-                                            hangul_syllable_to_jamo(*lpDump, &l, &v, &t);
-                                            if (l && v) {
-                                                hangul_ic_init(&ic);
-                                                ic.cho = l;
-                                                ic.jung = v;
-                                                ic.laststate = 2;
-                                                hangul_ic_push(&ic, l);
-                                                hangul_ic_push(&ic, v);
-                                                if (t) {
-                                                    hangul_ic_push(&ic, t);
-                                                    ic.laststate = 3;
-                                                }
-                                            }
+                                            hangul_ic_set_syllable(&ic, *lpDump);
 
                                             if (!(lpIMC->fdwConversion & IME_CMODE_NATIVE)) {
                                                 ChangeMode(hIMC,TO_CMODE_HANGUL);

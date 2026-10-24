@@ -93,6 +93,7 @@ typedef struct _tagHangulIC {
     UINT  lastvkey;
     int   laststate;
     BOOL  syllable;
+    WCHAR prev[MAXICREADSIZE]; // the jamo before composed
 } HangulIC;
 
 struct _HangulCompose
@@ -116,6 +117,9 @@ WCHAR PASCAL hangul_ic_pop(HangulIC*);
 WCHAR PASCAL hangul_ic_peek(HangulIC*);
 void PASCAL  hangul_ic_init(HangulIC*);
 void hangul_ic_push(HangulIC *, WCHAR);
+void hangul_ic_backspace(HangulIC *);
+BOOL hangul_ic_restorable(HangulIC *);
+void hangul_ic_set_syllable(HangulIC *, WCHAR);
 
 int hangul_del_prev(LPWSTR);
 WCHAR PASCAL keyToHangulKey(WCHAR);

@@ -116,6 +116,8 @@ public:
     HRESULT _HandleArrowKey(TfEditCookie ec, ITfContext *pContext, WPARAM wParam);
     HRESULT _HandleReturn(TfEditCookie ec, ITfContext *pContext);
     HRESULT _HandleBackspace(TfEditCookie ec, ITfContext *pContext);
+    HRESULT _ReconvertSyllable(TfEditCookie ec, ITfContext *pContext, BOOL fTest);
+    BOOL _IsReconvertKey(ITfContext *pContext, WPARAM wParam, BOOL fTest);
     // hangul utils
     HRESULT _HangulCommitComposition(TfEditCookie ec, ITfContext *pContext, WPARAM wParam = 0);
     WCHAR _HangulCommit();

@@ -2543,6 +2543,7 @@ UINT PASCAL hangul_ic_get( HangulIC *ic, UINT mode, LPMYSTR lcs)
 
 void hangul_ic_push( HangulIC *ic, WCHAR ch )
 {
+    ic->prev[ic->len] = 0;
     ic->read[ic->len++] = ch;
     if (ic->last)
 	ic->last0 = ic->last;
@@ -2563,6 +2564,135 @@ WCHAR PASCAL hangul_ic_peek( HangulIC *ic )
 	return 0;
 
     return ic->read[ic->len - 1];
+}
+
+// replace the last jamo with the composed one
+static void hangul_ic_replace( HangulIC *ic, WCHAR ch )
+{
+    WCHAR prev = hangul_ic_pop(ic);
+
+    hangul_ic_push(ic, ch);
+    ic->prev[ic->len - 1] = prev;
+}
+
+// insert the jamo before the last one to fix the order
+static void hangul_ic_push_before( HangulIC *ic, WCHAR ch )
+{
+    WCHAR prev = ic->prev[ic->len - 1];
+    WCHAR last = hangul_ic_pop(ic);
+
+    hangul_ic_push(ic, ch);
+    hangul_ic_push(ic, last);
+    ic->prev[ic->len - 1] = prev;
+}
+
+// can the backspace restore the jamo before composed?
+BOOL hangul_ic_restorable( HangulIC *ic )
+{
+    return ic->len && ic->prev[ic->len - 1] && !(dwOptionFlag & BACKSPACE_BY_JAMO);
+}
+
+/*
+ * Delete the last jamo.
+ * BACKSPACE_BY_JAMO deletes the composed jamo at once, ex) 값 -> 가.
+ * Otherwise restore the jamo before composed like as the other IMEs,
+ * ex) 값 -> 갑.
+ */
+void hangul_ic_backspace( HangulIC *ic )
+{
+    WCHAR prev, last;
+
+    if (!ic->len)
+        return;
+
+    if (hangul_ic_restorable(ic)) {
+        prev = ic->prev[ic->len - 1];
+        last = ic->read[ic->len - 1];
+        if (hangul_is_choseong(last)) ic->cho = 0;
+        else if (hangul_is_jungseong(last)) ic->jung = 0;
+        else ic->jong = 0;
+
+        if (hangul_is_choseong(prev)) { ic->cho = prev; ic->laststate = 1; }
+        else if (hangul_is_jungseong(prev)) { ic->jung = prev; ic->laststate = 2; }
+        else { ic->jong = prev; ic->laststate = 3; }
+
+        ic->read[ic->len - 1] = prev;
+        ic->prev[ic->len - 1] = 0;
+        ic->last = prev;
+
+        // the restored jamo may make a modern syllable again
+        if (!ic->syllable) {
+            if (ic->len == 1)
+                ic->syllable = hangul_is_cjamo(hangul_jamo_to_cjamo(prev));
+            else
+                ic->syllable = hangul_is_syllable(hangul_jamo_to_syllable(ic->cho, ic->jung, ic->jong));
+        }
+        return;
+    }
+
+    hangul_ic_pop(ic); // delete the last jaso
+    last = hangul_ic_peek(ic); // get the last
+    if (last) {
+        if (ic->laststate == 1) ic->cho = 0;
+        else if (ic->laststate == 2) ic->jung = 0;
+        else if (ic->laststate == 3) ic->jong = 0;
+
+        // change the last state
+        if (hangul_is_choseong(last)) ic->laststate = 1;
+        else if (hangul_is_jungseong(last)) ic->laststate = 2;
+        else if (hangul_is_jongseong(last)) ic->laststate = 3;
+        ic->last = last;
+    }
+}
+
+// is the jamo on a key of the current keyboard?
+static BOOL hangul_is_one_key( WCHAR jamo )
+{
+    int i;
+
+    for (i = 0; i < 94; i++) { // from '!' to '~'
+        WCHAR key = keyboard_table[i];
+        if (key == jamo)
+            return TRUE;
+        // 2-set types the jongseong with the choseong key
+        if (hangul_is_choseong(key) && hangul_is_jongseong(jamo) &&
+                hangul_choseong_to_jongseong(key) == jamo)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+ * Set the committed syllable to compose it again.
+ * A compound jamo not on a key remembers the jamo before composed,
+ * like as typed with the current keyboard.
+ */
+void hangul_ic_set_syllable( HangulIC *ic, WCHAR syllable )
+{
+    WCHAR l, v, t, j1, j2;
+
+    hangul_ic_init(ic);
+    hangul_syllable_to_jamo(syllable, &l, &v, &t);
+    if (!l || !v)
+        return;
+
+    ic->cho = l;
+    ic->jung = v;
+    ic->laststate = 2;
+    hangul_ic_push(ic, l);
+    hangul_ic_push(ic, v);
+    hangul_jungseong_dicompose(v, &j1, &j2);
+    if (j2 && !hangul_is_one_key(v))
+        ic->prev[1] = j1;
+
+    if (t) {
+        ic->jong = t;
+        ic->laststate = 3;
+        hangul_ic_push(ic, t);
+        hangul_jongseong_dicompose(t, &j1, &j2);
+        if (j1 && !hangul_is_one_key(t))
+            ic->prev[2] = j1;
+    }
 }
 
 BOOL hangul_ic_insert( HangulIC *ic, WCHAR ch, UINT idx)
@@ -2613,8 +2743,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 if ( comb ) {
 		    if ( hangul_is_choseong(comb) ) {
 		        ic->cho=comb;
-                        hangul_ic_pop(ic);
-                        hangul_ic_push(ic,comb);
+                        hangul_ic_replace(ic,comb);
                         ic->last=jamo;
 
 		        //if (!hangul_jamo_to_syllable(ic->cho, 0x1161,0)) {
@@ -2629,8 +2758,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		        // IME 2002에서 지원하므로
                         ic->jong=comb;
                         ic->cho=0;
-                        hangul_ic_pop(ic);
-                        hangul_ic_push(ic,comb);
+                        hangul_ic_replace(ic,comb);
                         ic->last=jamo;
                         ic->laststate=3;
                         return 0;
@@ -2708,9 +2836,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			return -1;
 		    }
 		    ic->cho=jamo;
-		    hangul_ic_pop(ic);
-		    hangul_ic_push(ic,jamo);
-		    hangul_ic_push(ic,ic->jung);
+		    hangul_ic_push_before(ic,jamo);
                     ic->laststate=2;
 		    return 0;	
                 }
@@ -2745,8 +2871,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( comb && hangul_is_jungseong(comb) ) {
 		    ic->jung=comb;
-		    hangul_ic_pop(ic);
-		    hangul_ic_push(ic,comb);
+		    hangul_ic_replace(ic,comb);
 		    ic->last=jamo;
 
 		    if (ic->len == 1) {
@@ -2825,8 +2950,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
                     {
                         ic->jong=comb;
-                        hangul_ic_pop(ic);
-                        hangul_ic_push(ic,comb);
+                        hangul_ic_replace(ic,comb);
                         ic->last=jong;
                         ic->laststate=3;
                         return 0;
@@ -2936,16 +3060,14 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                     if (hangul_jamo_to_syllable(ic->cho,ic->jung,comb))
                     {
                         ic->jong=comb;
-                        hangul_ic_pop(ic);
-                        hangul_ic_push(ic,comb);
+                        hangul_ic_replace(ic,comb);
                         ic->last=jamo;
                         ic->laststate=3;
                         return 0;
                     }
 		    // 종+종
                     ic->jong=comb;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,comb);
+                    hangul_ic_replace(ic,comb);
                     ic->last=jamo;
                     ic->laststate=3;
                     return 0;
@@ -3026,8 +3148,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
                 if ( hangul_is_choseong(comb) )
                 {
                     ic->cho=comb;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,comb);
+                    hangul_ic_replace(ic,comb);
                     ic->last=jamo;
                     ic->laststate=1;
 
@@ -3100,9 +3221,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			// 여기서 backspace를 누르면 ㄹ이 지워져야 하는가? ㅏ가 지워져야 하는가?
 			// FIXME
                     ic->cho=jamo;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,jamo);
-                    hangul_ic_push(ic,ic->jung);
+                    hangul_ic_push_before(ic,jamo);
 		    ic->last=ic->jung;
 		    ic->laststate=2;
                     return 0;
@@ -3164,8 +3283,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    comb = hangul_compose(jamo,ic->jung);
                 if ( hangul_is_jungseong(comb) ) {
                     ic->jung=comb;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,comb);
+                    hangul_ic_replace(ic,comb);
                     ic->last=jamo;
                     ic->laststate=2;
 
@@ -3272,9 +3390,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    {
 			// XXX
 			ic->cho=jamo;
-			hangul_ic_pop(ic);
-			hangul_ic_push(ic,jamo);
-			hangul_ic_push(ic,ic->jong); // fix order
+			hangul_ic_push_before(ic,jamo); // fix order
 			ic->laststate=3;
 			return 0;
 		    }
@@ -3345,9 +3461,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
 		    {
 			ic->jung=jamo;
-			hangul_ic_pop(ic);
-			hangul_ic_push(ic,jamo);
-			hangul_ic_push(ic,ic->jong); // fix order
+			hangul_ic_push_before(ic,jamo); // fix order
 			ic->laststate=3;
 			return 0;
 		    }
@@ -3422,8 +3536,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    }
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS) {
 			ic->jong=comb;
-			hangul_ic_pop(ic);
-			hangul_ic_push(ic,comb);
+			hangul_ic_replace(ic,comb);
 			ic->last=jamo;
 			ic->laststate=3;
 			return 0;
