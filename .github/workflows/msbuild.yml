@@ -44,6 +44,13 @@ jobs:
         msbuild /m /p:platform=x64 /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
         msbuild /m /p:platform=x86 /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
 
+    - name: Run tests
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cmake -S tests -B build-tests -A x64
+        cmake --build build-tests --config ${{env.BUILD_CONFIGURATION}}
+        ctest --test-dir build-tests -C ${{env.BUILD_CONFIGURATION}} --output-on-failure
+
     - name: Prepare Metadata
       id: setup
       run: |
@@ -102,6 +109,39 @@ jobs:
         path: |
           ${{ github.workspace }}\debuglog\*\Saenaru.ime
           ${{ github.workspace }}\debuglog\*\SaenaruTip.dll
+
+  # the same tests on Linux with clang-cl, the MSVC CRT/SDK of xwin and wine
+  linux-tests:
+    runs-on: ubuntu-latest
+    env:
+      XWIN_VERSION: 0.10.0
+      WINEDEBUG: -all
+      WINEDLLOVERRIDES: mscoree,mshtml=
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends clang-18 lld-18 llvm-18 wine wine64
+        echo "/usr/lib/llvm-18/bin" >> $GITHUB_PATH
+
+    - name: Install the MSVC CRT/SDK with xwin
+      run: |
+        X=xwin-$XWIN_VERSION-x86_64-unknown-linux-musl
+        curl -sSLO https://github.com/Jake-Shadle/xwin/releases/download/$XWIN_VERSION/$X.tar.gz
+        curl -sSLO https://github.com/Jake-Shadle/xwin/releases/download/$XWIN_VERSION/$X.tar.gz.sha256
+        echo "$(cut -d' ' -f1 $X.tar.gz.sha256)  $X.tar.gz" | sha256sum -c
+        tar xzf $X.tar.gz
+        # accepts the Microsoft license of the CRT/SDK
+        ./$X/xwin --accept-license splat --output $HOME/.xwin
+
+    - name: Run tests
+      run: |
+        cmake -S tests -B build-tests -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PWD/tests/clang-cl-xwin.cmake
+        cmake --build build-tests
+        ctest --test-dir build-tests --output-on-failure
 
   make-release:
     name: Create and upload release
