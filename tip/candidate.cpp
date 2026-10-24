@@ -6,6 +6,7 @@
 //
 
 #include "globals.h"
+#include <commctrl.h>
 #include "saenarutip.h"
 #include "editsess.h"
 #include "candidate.h"
@@ -207,6 +208,8 @@ CCandidateList::CCandidateList(CSaenaruTextService *pSaenaru)
     _uPageSize = CAND_PAGESIZE;
 
     _hWnd = NULL;
+    _hWndTip = NULL;
+    _ptMouse.x = _ptMouse.y = 0;
     _hFont = NULL;
     _hNumFont = NULL;
     SetRectEmpty(&_rcText);
@@ -308,6 +311,7 @@ STDAPI CCandidateList::Show(BOOL bShow)
     else if (_hWnd != NULL)
     {
         ShowWindow(_hWnd, SW_HIDE);
+        _UpdateToolTip();
     }
     return S_OK;
 }
@@ -713,6 +717,8 @@ void CCandidateList::_Update(DWORD dwFlags)
 BOOL CCandidateList::_CreateWindow()
 {
     WNDCLASSEXW wc;
+    INITCOMMONCONTROLSEX icc;
+    TOOLINFOW ti;
     LOGFONTW lf;
     HDC hdc;
     int dpi;
@@ -756,11 +762,38 @@ BOOL CCandidateList::_CreateWindow()
     lstrcpyW(lf.lfFaceName, L"Verdana");
     _hNumFont = CreateFontIndirectW(&lf);
 
+    // the tooltip of the meaning like as the IMM candidate window
+    icc.dwSize = sizeof(icc);
+    icc.dwICC = ICC_BAR_CLASSES;
+    InitCommonControlsEx(&icc);
+    _hWndTip = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, TOOLTIPS_CLASSW, NULL,
+                               WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+                               CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+                               _hWnd, NULL, g_hInst, NULL);
+    if (_hWndTip != NULL)
+    {
+        ZeroMemory(&ti, sizeof(ti));
+        ti.cbSize = TTTOOLINFOW_V2_SIZE; // comctl32 v5 does not know the full size
+        ti.uFlags = TTF_TRACK | TTF_ABSOLUTE;
+        ti.hwnd = _hWnd;
+        ti.lpszText = (LPWSTR)L"";
+        SendMessageW(_hWndTip, TTM_ADDTOOLW, 0, (LPARAM)&ti);
+        SendMessageW(_hWndTip, WM_SETFONT, (WPARAM)_hFont, FALSE);
+    }
+
+    // ignore the mouse until it moves
+    GetCursorPos(&_ptMouse);
+
     return TRUE;
 }
 
 void CCandidateList::_DestroyWindow()
 {
+    if (_hWndTip != NULL)
+    {
+        DestroyWindow(_hWndTip);
+        _hWndTip = NULL;
+    }
     if (_hWnd != NULL)
     {
         DestroyWindow(_hWnd);
@@ -790,7 +823,7 @@ void CCandidateList::_Layout()
     MONITORINFO mi;
     WCHAR ach[CAND_STRSIZE];
     UINT i, uStart, uEnd, uPages;
-    int cx, cxStatus, cxMeaning, cxWnd, cyWnd, x, y;
+    int cx, cxStatus, cxWnd, cyWnd, x, y;
 
     if (_hWnd == NULL || _uCount == 0)
         return;
@@ -812,26 +845,17 @@ void CCandidateList::_Layout()
 
     if (_fCodeStyle)
     {
-        // all pages in columns. the status line shows the meaning.
+        // all pages in columns. the tooltip shows the meaning.
         cx = 0;
-        cxMeaning = 0;
         for (i = 0; i < _uCount; i++)
         {
             _GetCandidate(i, ach, ARRAYSIZE(ach));
             GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
             if (sz.cx > cx)
                 cx = sz.cx;
-            // the longest meaning, not to resize the window on every move
-            _GetMeaning(i, ach, ARRAYSIZE(ach));
-            GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
-            if (sz.cx > cxMeaning)
-                cxMeaning = sz.cx;
         }
         _cxCol = _cxNum + cx + 8;
         cx = _cxCol * (int)uPages;
-        cxStatus += cxMeaning + 10;
-        if (_cyStatus < _cyItem)
-            _cyStatus = _cyItem;
     }
     else
     {
@@ -880,6 +904,62 @@ void CCandidateList::_Layout()
 
     SetWindowPos(_hWnd, HWND_TOPMOST, x, y, cxWnd, cyWnd,
                  SWP_NOACTIVATE | (_fShown ? SWP_SHOWWINDOW : 0));
+    _UpdateToolTip();
+}
+
+//+---------------------------------------------------------------------------
+//
+// _UpdateToolTip
+//
+// Show the meaning of the selected candidate beside the window in the code
+// style. The read style shows the meanings in the list.
+//----------------------------------------------------------------------------
+
+void CCandidateList::_UpdateToolTip()
+{
+    TOOLINFOW ti;
+    WCHAR ach[CAND_STRSIZE];
+    RECT rcWnd;
+    MONITORINFO mi;
+    POINT pt;
+    LRESULT lSize;
+    int cx;
+
+    if (_hWndTip == NULL)
+        return;
+
+    ZeroMemory(&ti, sizeof(ti));
+    ti.cbSize = TTTOOLINFOW_V2_SIZE;
+    ti.hwnd = _hWnd;
+
+    ach[0] = L'\0';
+    if (_fShown && _fCodeStyle && _uCount > 0 && IsWindowVisible(_hWnd))
+        _GetMeaning(_uSelection, ach, ARRAYSIZE(ach));
+    if (ach[0] == L'\0')
+    {
+        SendMessageW(_hWndTip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&ti);
+        return;
+    }
+
+    ti.lpszText = ach;
+    SendMessageW(_hWndTip, TTM_UPDATETIPTEXTW, 0, (LPARAM)&ti);
+
+    // the right of the window at the row of the selection, not to cover the list
+    GetWindowRect(_hWnd, &rcWnd);
+    pt.x = 0;
+    pt.y = (int)(_uSelection % _uPageSize) * _cyItem;
+    ClientToScreen(_hWnd, &pt);
+    pt.x = rcWnd.right + 2;
+
+    lSize = SendMessageW(_hWndTip, TTM_GETBUBBLESIZE, 0, (LPARAM)&ti);
+    cx = LOWORD(lSize);
+    mi.cbSize = sizeof(mi);
+    if (GetMonitorInfoW(MonitorFromRect(&rcWnd, MONITOR_DEFAULTTONEAREST), &mi) &&
+            pt.x + cx > mi.rcWork.right)
+        pt.x = rcWnd.left - cx - 2; // the left of the window
+
+    SendMessageW(_hWndTip, TTM_TRACKPOSITION, 0, MAKELPARAM(pt.x, pt.y));
+    SendMessageW(_hWndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 }
 
 void CCandidateList::_OnPaint(HWND hWnd)
@@ -972,15 +1052,6 @@ void CCandidateList::_OnPaint(HWND hWnd)
     GetTextExtentPoint32W(hMemDC, szNum, len, &sz);
     TextOutW(hMemDC, 5, rc.bottom - _cyStatus + (_cyStatus - sz.cy) / 2, szNum, len);
 
-    // the meaning of the selected candidate. (a tooltip in the IMM IME)
-    if (_fCodeStyle)
-    {
-        x = 5 + sz.cx + 10;
-        _GetMeaning(_uSelection, ach, ARRAYSIZE(ach));
-        SelectObject(hMemDC, _hFont);
-        TextOutW(hMemDC, x, rc.bottom - _cyStatus + 2, ach, lstrlenW(ach));
-    }
-
     BitBlt(hdc, 0, 0, rc.right, rc.bottom, hMemDC, 0, 0, SRCCOPY);
 
     SelectObject(hMemDC, hOldFont);
@@ -991,26 +1062,70 @@ void CCandidateList::_OnPaint(HWND hWnd)
     EndPaint(hWnd, &ps);
 }
 
-void CCandidateList::_OnClick(int x, int y)
+BOOL CCandidateList::_HitTest(int x, int y, UINT *puIndex)
 {
     UINT uIndex, uRow;
 
     if (!_IsOpen() || _cyItem <= 0 || _cxCol <= 0 || x < 0 || y < 0)
-        return;
+        return FALSE;
 
     uRow = (UINT)(y / _cyItem);
     if (uRow >= _uPageSize)
-        return;
+        return FALSE;
 
     if (_fCodeStyle)
         uIndex = (UINT)(x / _cxCol) * _uPageSize + uRow;
     else
         uIndex = _GetPageStart() + uRow;
     if (uIndex >= _uCount)
+        return FALSE;
+
+    *puIndex = uIndex;
+    return TRUE;
+}
+
+void CCandidateList::_OnClick(int x, int y)
+{
+    UINT uIndex;
+
+    if (!_HitTest(x, y, &uIndex))
         return;
 
     _SetSelection(uIndex);
     _pSaenaru->_CommitCandidate(_pContext, FALSE);
+}
+
+//+---------------------------------------------------------------------------
+//
+// _OnMouseMove
+//
+// Select the candidate under the mouse like as the IMM candidate window.
+//----------------------------------------------------------------------------
+
+void CCandidateList::_OnMouseMove(int x, int y)
+{
+    POINT pt;
+    UINT uIndex;
+
+    // ignore the fake move when the window is shown or moved under the mouse
+    pt.x = x;
+    pt.y = y;
+    ClientToScreen(_hWnd, &pt);
+    if (pt.x == _ptMouse.x && pt.y == _ptMouse.y)
+        return;
+    _ptMouse = pt;
+
+    if (_HitTest(x, y, &uIndex) && uIndex != _uSelection)
+        SetSelection(uIndex);
+}
+
+void CCandidateList::_OnMouseWheel(int delta)
+{
+    if (!_IsOpen())
+        return;
+
+    _Move((delta > 0) ? -1 : 1);
+    _pSaenaru->_UpdateCandidatePreview(_pContext, FALSE);
 }
 
 /* static */
@@ -1045,6 +1160,16 @@ LRESULT CALLBACK CCandidateList::_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         case WM_LBUTTONDOWN:
             if (_this != NULL)
                 _this->_OnClick((short)LOWORD(lParam), (short)HIWORD(lParam));
+            return 0;
+
+        case WM_MOUSEMOVE:
+            if (_this != NULL)
+                _this->_OnMouseMove((short)LOWORD(lParam), (short)HIWORD(lParam));
+            return 0;
+
+        case WM_MOUSEWHEEL:
+            if (_this != NULL)
+                _this->_OnMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
             return 0;
     }
 

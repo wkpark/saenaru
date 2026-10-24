@@ -87,7 +87,11 @@ private:
     void _DestroyWindow();
     void _Layout();
     void _OnPaint(HWND hWnd);
+    BOOL _HitTest(int x, int y, UINT *puIndex);
     void _OnClick(int x, int y);
+    void _OnMouseMove(int x, int y);
+    void _OnMouseWheel(int delta);
+    void _UpdateToolTip();
     static LRESULT CALLBACK _WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     CSaenaruTextService *_pSaenaru;
@@ -107,6 +111,8 @@ private:
     UINT _uPageSize;
 
     HWND _hWnd;
+    HWND _hWndTip;      // the meaning of the selected candidate
+    POINT _ptMouse;     // the last mouse position on the screen
     HFONT _hFont;
     HFONT _hNumFont;
     RECT _rcText;
