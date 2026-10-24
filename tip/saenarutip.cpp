@@ -6,6 +6,7 @@
 
 #include "globals.h"
 #include "saenarutip.h"
+#include "candidate.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -51,6 +52,9 @@ CSaenaruTextService::CSaenaruTextService()
     _tfClientId = TF_CLIENTID_NULL;
 
     _pComposition = NULL;
+
+    _pCandidateList = NULL;
+    _fCandidateReopen = FALSE;
 
     _fCleaningUp = FALSE;
 
@@ -228,6 +232,9 @@ ExitError:
 
 STDAPI CSaenaruTextService::Deactivate()
 {
+    _CloseCandidateList();
+    SafeReleaseClear(_pCandidateList);
+
     _UninitThreadMgrSink();
     _UninitLanguageBar();
     //_UninitCleanupContextDurationSink();

@@ -3,7 +3,7 @@
  *
  * Copyright (c) 1990-1998 Microsoft Corporation.
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -256,6 +256,10 @@ GetRegStringValue (
     if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
         RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
+    /* dwDataSize must hold the buffer size when lpString is given */
+    dwDataSize = 0 ;
+    if (lpString)
+        RegQueryValueEx (hKey, lpszKey, NULL, NULL, NULL, &dwDataSize) ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
     if (dwRet != ERROR_SUCCESS || dwRegType != REG_SZ)

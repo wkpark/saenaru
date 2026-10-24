@@ -2,7 +2,7 @@
  * This file is part of Saenaru.
  *
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003-2023 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,14 @@
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
+/* VER_GITHASH comes from gitver.h generated at build time */
+#ifdef VER_GITHASH
+#define VER_SNAPSHOT	"1.1.0-GIT-" VER_GITHASH
+#define VER_GITSUFFIX	"-" VER_GITHASH
+#else
 #define VER_SNAPSHOT	"1.1.0-GIT"
+#define VER_GITSUFFIX	""
+#endif
 
 /*
  * vim: et sts=4 sw=4

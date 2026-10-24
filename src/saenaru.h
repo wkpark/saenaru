@@ -3,7 +3,7 @@
  *
  * Copyright (c) 1990-1998 Microsoft Corporation.
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -399,6 +399,8 @@ void PASCAL CreateCandWindow(HWND hUIWnd,LPUIEXTRA lpUIExtra, LPINPUTCONTEXT lpI
 void PASCAL ResizeCandWindow(LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC);
 void PASCAL HideCandWindow( LPUIEXTRA lpUIExtra);
 void PASCAL MoveCandWindow(HWND hUIWnd, LPINPUTCONTEXT lpIMC, LPUIEXTRA lpUIExtra, BOOL fForceComp);
+void PASCAL NotifyCandUIWindow(HIMC hIMC, LPINPUTCONTEXT lpIMC, LPTRANSMSG lpGeneMsg);
+void PASCAL DestroyCandUIWindow(void);
 
 /* uicomp.c      */
 LRESULT CALLBACK CompStrWndProc(HWND,UINT,WPARAM,LPARAM);

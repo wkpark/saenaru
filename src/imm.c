@@ -3,7 +3,7 @@
  *
  * Copyright (c) 1990-1998 Microsoft Corporation.
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -977,6 +977,8 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
 #endif
     if (fSelect)
         UpdateIndicIcon(hIMC);
+    else
+        DestroyCandUIWindow();
 
     // it's NULL context.
     if (!hIMC)

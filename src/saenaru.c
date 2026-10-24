@@ -3,7 +3,7 @@
  *
  * Copyright (c) 1990-1998 Microsoft Corporation.
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,20 +39,6 @@
 
 extern HANDLE hMutex;
 UINT    WM_MSIME_QUERYPOSITION;
-
-int
-PASCAL
-GetSaenaruDirectory(LPTSTR lpDest, int max)
-{
-    static const TCHAR szIMEDir[] = TEXT("\\IME\\Saenaru");
-    LPTSTR lpDestOrig = lpDest;
-
-    lpDest += GetWindowsDirectory(lpDest, 256);
-    memcpy(lpDest, szIMEDir, sizeof(szIMEDir) - sizeof(TCHAR));
-    lpDest += sizeof(szIMEDir) / sizeof(TCHAR) - 1;
-
-    return (int) (lpDest - lpDestOrig);
-}
 
 /**********************************************************************/
 /*    DLLEntry()                                                      */

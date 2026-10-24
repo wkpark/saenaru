@@ -158,6 +158,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="btnshape.cpp" />
     <ClCompile Include="btnime.cpp" />
+    <ClCompile Include="candidate.cpp" />
     <ClCompile Include="cleanup.cpp" />
     <ClCompile Include="compart.cpp" />
     <ClCompile Include="compose.cpp" />
@@ -178,6 +179,9 @@
     <ClCompile Include="..\src\regconf.c" />
     <ClCompile Include="..\src\reg.c" />
     <ClCompile Include="..\src\strsubs.c" />
+    <ClCompile Include="..\src\dicfile.c" />
+    <ClCompile Include="..\src\hanjaidx.c" />
+    <ClCompile Include="..\src\immsec.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="saenarutip.def" />
@@ -185,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="btnshape.h" />
     <ClInclude Include="btnime.h" />
+    <ClInclude Include="candidate.h" />
     <ClInclude Include="langbar.h" />
     <ClInclude Include="editsess.h" />
     <ClInclude Include="globals.h" />
@@ -202,6 +207,24 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <!-- write the commit hash to gitver.h for the version resource -->
+  <Target Name="SaenaruGitVersion" BeforeTargets="ResourceCompile">
+    <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="SaenaruGitHash" />
+      <Output TaskParameter="ExitCode" PropertyName="SaenaruGitExitCode" />
+    </Exec>
+    <PropertyGroup>
+      <SaenaruGitVer Condition="'$(SaenaruGitExitCode)' == '0' And '$(SaenaruGitHash)' != ''">#define VER_GITHASH &quot;$(SaenaruGitHash)&quot;</SaenaruGitVer>
+      <SaenaruGitVer Condition="'$(SaenaruGitVer)' == ''">/* no git */</SaenaruGitVer>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntDir)" />
+    <WriteLinesToFile File="$(IntDir)gitver.h" Lines="$(SaenaruGitVer)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <ResourceCompile>
+        <AdditionalIncludeDirectories>$(IntDir).;%(ResourceCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      </ResourceCompile>
+    </ItemGroup>
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

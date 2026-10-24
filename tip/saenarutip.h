@@ -19,6 +19,7 @@
 class CLangBarItemButton;
 class CLangBarItemShapeButton;
 class CLangBarItemImeButton;
+class CCandidateList;
 
 class CSaenaruTextService : public ITfTextInputProcessor,
                          public ITfDisplayAttributeProvider,
@@ -139,6 +140,7 @@ public:
     }
     void _TerminateComposition(TfEditCookie ec)
     {
+        _CloseCandidateList();
         if (_pComposition != NULL)
         {
             _ClearCompositionDisplayAttributes(ec);
@@ -151,6 +153,20 @@ public:
 
     void _ClearCompositionDisplayAttributes(TfEditCookie ec);
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, TfGuidAtom gaDisplayAttribute = 0);
+
+    // hanja candidate list
+    enum { CAND_ES_LOCATE, CAND_ES_PREVIEW, CAND_ES_COMMIT, CAND_ES_RECONVERT };
+    BOOL _IsCandidateOpen();
+    BOOL _OpenCandidateList(ITfContext *pContext);
+    void _CloseCandidateList();
+    void _CancelCandidateList(ITfContext *pContext);
+    BOOL _HandleCandidateKey(ITfContext *pContext, WPARAM wParam, BOOL fTest);
+    void _UpdateCandidatePreview(ITfContext *pContext, BOOL fSync = TRUE);
+    void _CommitCandidate(ITfContext *pContext, BOOL fSync = TRUE);
+    HRESULT _RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync);
+    HRESULT _DoCandidateEditSession(TfEditCookie ec, ITfContext *pContext, int action, LPCWSTR psz);
+    HRESULT _DoReconvert(TfEditCookie ec, ITfContext *pContext);
+    void _LocateCandidateList(TfEditCookie ec, ITfContext *pContext, ITfRange *pRange);
 
     // messages for the worker wnd
     enum { WM_DISPLAY_PROPERTY = WM_USER + 1 };
@@ -207,6 +223,9 @@ private:
     CLangBarItemButton *_pLangBarModeItem;
     CLangBarItemShapeButton *_pLangBarShapeItem;
     CLangBarItemImeButton *_pLangBarImeItem;
+
+    CCandidateList *_pCandidateList;
+    BOOL _fCandidateReopen; // reopen the list after VK_BACK
 
     DWORD _dwThreadMgrEventSinkCookie;
     DWORD _dwThreadFocusSinkCookie;
