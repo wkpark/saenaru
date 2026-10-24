@@ -2575,6 +2575,23 @@ static void hangul_ic_replace( HangulIC *ic, WCHAR ch )
     ic->prev[ic->len - 1] = prev;
 }
 
+// insert the jamo before the last one to fix the order
+static void hangul_ic_push_before( HangulIC *ic, WCHAR ch )
+{
+    WCHAR prev = ic->prev[ic->len - 1];
+    WCHAR last = hangul_ic_pop(ic);
+
+    hangul_ic_push(ic, ch);
+    hangul_ic_push(ic, last);
+    ic->prev[ic->len - 1] = prev;
+}
+
+// can the backspace restore the jamo before composed?
+BOOL hangul_ic_restorable( HangulIC *ic )
+{
+    return ic->len && ic->prev[ic->len - 1] && !(dwOptionFlag & BACKSPACE_BY_JAMO);
+}
+
 /*
  * Delete the last jamo.
  * BACKSPACE_BY_JAMO deletes the composed jamo at once, ex) 값 -> 가.
@@ -2588,8 +2605,8 @@ void hangul_ic_backspace( HangulIC *ic )
     if (!ic->len)
         return;
 
-    prev = ic->prev[ic->len - 1];
-    if (prev && !(dwOptionFlag & BACKSPACE_BY_JAMO)) {
+    if (hangul_ic_restorable(ic)) {
+        prev = ic->prev[ic->len - 1];
         last = ic->read[ic->len - 1];
         if (hangul_is_choseong(last)) ic->cho = 0;
         else if (hangul_is_jungseong(last)) ic->jung = 0;
@@ -2602,6 +2619,14 @@ void hangul_ic_backspace( HangulIC *ic )
         ic->read[ic->len - 1] = prev;
         ic->prev[ic->len - 1] = 0;
         ic->last = prev;
+
+        // the restored jamo may make a modern syllable again
+        if (!ic->syllable) {
+            if (ic->len == 1)
+                ic->syllable = hangul_is_cjamo(hangul_jamo_to_cjamo(prev));
+            else
+                ic->syllable = hangul_is_syllable(hangul_jamo_to_syllable(ic->cho, ic->jung, ic->jong));
+        }
         return;
     }
 
@@ -2811,9 +2836,7 @@ int hangul_automata2( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			return -1;
 		    }
 		    ic->cho=jamo;
-		    hangul_ic_pop(ic);
-		    hangul_ic_push(ic,jamo);
-		    hangul_ic_push(ic,ic->jung);
+		    hangul_ic_push_before(ic,jamo);
                     ic->laststate=2;
 		    return 0;	
                 }
@@ -3198,9 +3221,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 			// 여기서 backspace를 누르면 ㄹ이 지워져야 하는가? ㅏ가 지워져야 하는가?
 			// FIXME
                     ic->cho=jamo;
-                    hangul_ic_pop(ic);
-                    hangul_ic_push(ic,jamo);
-                    hangul_ic_push(ic,ic->jung);
+                    hangul_ic_push_before(ic,jamo);
 		    ic->last=ic->jung;
 		    ic->laststate=2;
                     return 0;
@@ -3369,9 +3390,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    {
 			// XXX
 			ic->cho=jamo;
-			hangul_ic_pop(ic);
-			hangul_ic_push(ic,jamo);
-			hangul_ic_push(ic,ic->jong); // fix order
+			hangul_ic_push_before(ic,jamo); // fix order
 			ic->laststate=3;
 			return 0;
 		    }
@@ -3442,9 +3461,7 @@ int hangul_automata3( HangulIC *ic, WCHAR jamo, LPMYSTR lcs, int *ncs )
 		    if (ic->syllable || dwOptionFlag & HANGUL_JAMOS)
 		    {
 			ic->jung=jamo;
-			hangul_ic_pop(ic);
-			hangul_ic_push(ic,jamo);
-			hangul_ic_push(ic,ic->jong); // fix order
+			hangul_ic_push_before(ic,jamo); // fix order
 			ic->laststate=3;
 			return 0;
 		    }

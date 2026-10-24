@@ -10,6 +10,7 @@
 int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 extern DWORD dwOptionFlag;
+extern DWORD dwImeFlag;
 
 static int nPassed, nFailed;
 
@@ -77,7 +78,8 @@ static BOOL HasCandidate(LPCWSTR list, LPCWSTR cand)
 
 //
 // Type ASCII keys like as _HandleKeyDown() of the TIP and return the text.
-// '\b' deletes the last jamo like as _HandleBackspace().
+// '\b' deletes the last jamo like as _HandleBackspace(), and a single jamo
+// goes to the application like as OnTestKeyDown().
 //
 static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
 {
@@ -97,8 +99,9 @@ static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
                     n--;
                 continue;
             }
-            hangul_ic_backspace(&ic);
-            if (!ic.len)
+            if (ic.len > 1 || hangul_ic_restorable(&ic))
+                hangul_ic_backspace(&ic);
+            else
                 hangul_ic_init(&ic);
             continue;
         }
@@ -127,6 +130,17 @@ static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
         out[n++] = lcs[ncs - 1];
     hangul_ic_init(&ic);
     out[n] = L'\0';
+}
+
+// compose the keys without commit
+static void ComposeKeys(LPCSTR keys)
+{
+    TCHAR lcs[128];
+    int ncs;
+
+    hangul_ic_init(&ic);
+    for (; *keys; keys++)
+        hangul_automata(&ic, keyToHangulKey((WCHAR)*keys), lcs, &ncs);
 }
 
 static void TestHangul2(void)
@@ -226,6 +240,21 @@ static void TestBackspaceCompat(void)
 
     TypeKeys("goT\b", out, ARRAYSIZE(out));
     CheckStr("compat: goT\\b", L"해", out);
+
+    // the order fixed by COMPOSITE_TYPING keeps the compound jamo
+    dwOptionFlag |= COMPOSITE_TYPING;
+    TypeKeys("hkr\b", out, ARRAYSIZE(out));
+    CheckStr("compat composite: hkr\\b", L"고", out);
+    dwOptionFlag &= ~COMPOSITE_TYPING;
+
+    // the restored modern jamo makes a syllable again
+    set_compose(4);
+    ComposeKeys("rhj");
+    CheckInt("compat old hangul: rhj", 0, ic.syllable);
+    hangul_ic_backspace(&ic);
+    CheckInt("compat old hangul: rhj\\b", 1, ic.syllable);
+    set_keyboard(LAYOUT_OLD2BUL);
+    dwImeFlag |= SAENARU_ONTHESPOT;
 
     set_keyboard(LAYOUT_3FIN);
     TypeKeys("kkf\b\b", out, ARRAYSIZE(out));

@@ -30,6 +30,13 @@ static const TF_PRESERVEDKEY cHanja  = { VK_HANJA, TF_MOD_IGNORE_ALL_MODIFIER };
 static const TF_PRESERVEDKEY cRControl = { VK_CONTROL, TF_MOD_RCONTROL };
 static const WCHAR HanjaDesc[] = L"Hanja";
 
+// shift without ctrl and alt
+static BOOL IsShiftOnly()
+{
+    return (GetKeyState(VK_SHIFT) & 0x8000) &&
+           !(GetKeyState(VK_CONTROL) & 0x8000) && !(GetKeyState(VK_MENU) & 0x8000);
+}
+
 class CReconvertEditSession : public CEditSessionBase
 {
 public:
@@ -204,7 +211,7 @@ HRESULT CSaenaruTextService::_HandleBackspace(TfEditCookie ec, ITfContext *pCont
     DWORD status = GetConversionStatus();
     if (status & CMODE_HANGUL && _IsComposing()) {
         // shift + backspace deletes the syllable at once like as the IMM IME
-        if (GetKeyState(VK_SHIFT) & 0x8000)
+        if (IsShiftOnly())
             hangul_ic_init(&ic);
         if (ic.len) {
             hangul_ic_backspace(&ic);
@@ -368,15 +375,18 @@ Exit:
 // _IsReconvertKey
 //
 // Shift + VK_BACK on the syllable before the caret.
+// Without fTest, only check the key. The edit session checks the syllable.
 //----------------------------------------------------------------------------
 
-BOOL CSaenaruTextService::_IsReconvertKey(ITfContext *pContext, WPARAM wParam)
+BOOL CSaenaruTextService::_IsReconvertKey(ITfContext *pContext, WPARAM wParam, BOOL fTest)
 {
     CReconvertEditSession *pEditSession;
     HRESULT hr = S_FALSE;
 
-    if (wParam != VK_BACK || _IsComposing() || !(GetKeyState(VK_SHIFT) & 0x8000))
+    if (wParam != VK_BACK || _IsComposing() || !IsShiftOnly())
         return FALSE;
+    if (!fTest)
+        return TRUE;
 
     if ((pEditSession = new CReconvertEditSession(this, pContext)) == NULL)
         return FALSE;
@@ -869,10 +879,10 @@ STDAPI CSaenaruTextService::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
         hkey = keyToHangulKey(ch);
 
         if (hkey == 0 || hkey == ch) {
-            if (wParam == VK_BACK && _IsComposing() && ic.len > 1) {
+            if (wParam == VK_BACK && _IsComposing() && (ic.len > 1 || hangul_ic_restorable(&ic))) {
                 *pfEaten = TRUE;
             } else {
-                *pfEaten = _IsReconvertKey(pContext, wParam);
+                *pfEaten = _IsReconvertKey(pContext, wParam, TRUE);
             }
         } else {
             *pfEaten = TRUE;
@@ -919,6 +929,7 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
 
     DWORD hkey = 0;
     WCHAR ch;
+    BOOL fReconvert = FALSE;
 
     if (wParam == VK_SHIFT || wParam == VK_CONTROL || wParam == VK_RWIN || wParam == VK_LWIN || wParam == VK_MENU)
         return S_OK;
@@ -950,10 +961,10 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
         hkey = keyToHangulKey(ch);
 
         if (hkey == 0 || hkey == ch) {
-            if (wParam == VK_BACK && _IsComposing() && ic.len > 1) {
+            if (wParam == VK_BACK && _IsComposing() && (ic.len > 1 || hangul_ic_restorable(&ic))) {
                 *pfEaten = TRUE;
             } else {
-                *pfEaten = _IsReconvertKey(pContext, wParam);
+                *pfEaten = fReconvert = _IsReconvertKey(pContext, wParam, FALSE);
             }
         } else {
             *pfEaten = TRUE;
@@ -997,6 +1008,10 @@ Exit:
     if (hr == S_OK)
     {
         *pfEaten = TRUE;
+    }
+    else if (fReconvert)
+    {
+        *pfEaten = FALSE; // not reconverted. the application deletes the char
     }
 
     // reopen the list for the new syllable like as DicKeydownHandler()
