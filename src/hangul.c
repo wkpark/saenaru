@@ -2620,6 +2620,56 @@ void hangul_ic_backspace( HangulIC *ic )
     }
 }
 
+// is the jamo on a key of the current keyboard?
+static BOOL hangul_is_one_key( WCHAR jamo )
+{
+    int i;
+
+    for (i = 0; i < 94; i++) { // from '!' to '~'
+        WCHAR key = keyboard_table[i];
+        if (key == jamo)
+            return TRUE;
+        // 2-set types the jongseong with the choseong key
+        if (hangul_is_choseong(key) && hangul_is_jongseong(jamo) &&
+                hangul_choseong_to_jongseong(key) == jamo)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+ * Set the committed syllable to compose it again.
+ * A compound jamo not on a key remembers the jamo before composed,
+ * like as typed with the current keyboard.
+ */
+void hangul_ic_set_syllable( HangulIC *ic, WCHAR syllable )
+{
+    WCHAR l, v, t, j1, j2;
+
+    hangul_ic_init(ic);
+    hangul_syllable_to_jamo(syllable, &l, &v, &t);
+    if (!l || !v)
+        return;
+
+    ic->cho = l;
+    ic->jung = v;
+    ic->laststate = 2;
+    hangul_ic_push(ic, l);
+    hangul_ic_push(ic, v);
+    hangul_jungseong_dicompose(v, &j1, &j2);
+    if (j2 && !hangul_is_one_key(v))
+        ic->prev[1] = j1;
+
+    if (t) {
+        ic->jong = t;
+        ic->laststate = 3;
+        hangul_ic_push(ic, t);
+        hangul_jongseong_dicompose(t, &j1, &j2);
+        if (j1 && !hangul_is_one_key(t))
+            ic->prev[2] = j1;
+    }
+}
+
 BOOL hangul_ic_insert( HangulIC *ic, WCHAR ch, UINT idx)
 {
     UINT i;

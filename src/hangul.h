@@ -118,6 +118,7 @@ WCHAR PASCAL hangul_ic_peek(HangulIC*);
 void PASCAL  hangul_ic_init(HangulIC*);
 void hangul_ic_push(HangulIC *, WCHAR);
 void hangul_ic_backspace(HangulIC *);
+void hangul_ic_set_syllable(HangulIC *, WCHAR);
 
 int hangul_del_prev(LPWSTR);
 WCHAR PASCAL keyToHangulKey(WCHAR);

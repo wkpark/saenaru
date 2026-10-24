@@ -1675,20 +1675,7 @@ CONST LPBYTE lpbKeyState;
 #endif
 
                                         if (hangul_is_syllable(*lpDump)) {
-                                            WCHAR l, v, t;
-                                            hangul_syllable_to_jamo(*lpDump, &l, &v, &t);
-                                            if (l && v) {
-                                                hangul_ic_init(&ic);
-                                                ic.cho = l;
-                                                ic.jung = v;
-                                                ic.laststate = 2;
-                                                hangul_ic_push(&ic, l);
-                                                hangul_ic_push(&ic, v);
-                                                if (t) {
-                                                    hangul_ic_push(&ic, t);
-                                                    ic.laststate = 3;
-                                                }
-                                            }
+                                            hangul_ic_set_syllable(&ic, *lpDump);
 
                                             if (!(lpIMC->fdwConversion & IME_CMODE_NATIVE)) {
                                                 ChangeMode(hIMC,TO_CMODE_HANGUL);

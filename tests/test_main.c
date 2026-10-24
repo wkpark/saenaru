@@ -241,6 +241,62 @@ static void TestBackspaceCompat(void)
     dwOptionFlag |= BACKSPACE_BY_JAMO;
 }
 
+// shift + backspace on the committed syllable like as DicKeydownHandler()
+static void BackspaceSyllable(WCHAR syllable, LPWSTR out)
+{
+    TCHAR lcs[128];
+
+    hangul_ic_set_syllable(&ic, syllable);
+    hangul_ic_backspace(&ic);
+    if (hangul_ic_get(&ic, 1, lcs) > 0)
+        lstrcpyW(out, lcs);
+    else
+        out[0] = L'\0';
+}
+
+static void TestBackspaceSyllable(void)
+{
+    WCHAR out[64];
+
+    BackspaceSyllable(L'값', out);
+    CheckStr("syllable: 값", L"가", out);
+
+    BackspaceSyllable(L'과', out);
+    CheckStr("syllable: 과", L"ㄱ", out);
+
+    dwOptionFlag &= ~BACKSPACE_BY_JAMO;
+
+    BackspaceSyllable(L'값', out);
+    CheckStr("syllable compat: 값", L"갑", out);
+
+    BackspaceSyllable(L'과', out);
+    CheckStr("syllable compat: 과", L"고", out);
+
+    BackspaceSyllable(L'닭', out);
+    CheckStr("syllable compat: 닭", L"달", out);
+
+    // one key jamo of 2-set
+    BackspaceSyllable(L'했', out);
+    CheckStr("syllable compat: 했", L"해", out);
+
+    BackspaceSyllable(L'밖', out);
+    CheckStr("syllable compat: 밖", L"바", out);
+
+    BackspaceSyllable(L'걔', out);
+    CheckStr("syllable compat: 걔", L"ㄱ", out);
+
+    // one key jamo of 3-set
+    set_keyboard(LAYOUT_3FIN);
+    BackspaceSyllable(L'값', out);
+    CheckStr("syllable compat 3set: 값", L"가", out);
+
+    BackspaceSyllable(L'과', out);
+    CheckStr("syllable compat 3set: 과", L"고", out);
+    set_keyboard(LAYOUT_OLD2BUL);
+
+    dwOptionFlag |= BACKSPACE_BY_JAMO;
+}
+
 static void TestHangul3(void)
 {
     static const UINT layouts[] = { LAYOUT_3FIN, LAYOUT_390 };
@@ -349,6 +405,7 @@ int main(void)
     TestHangul2();
     TestBackspace();
     TestBackspaceCompat();
+    TestBackspaceSyllable();
     TestHangul3();
     TestJamo();
     TestDictionary();
