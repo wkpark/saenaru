@@ -84,6 +84,25 @@ jobs:
         path: |
           ${{ github.workspace }}\Saenaru-*.exe
 
+    # Release build with DEBUG=1 for DebugView. Debug builds need the debug CRT.
+    - name: Build with debug log
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        $env:CL = '/DDEBUG=1'
+        foreach ($p in 'x64', 'x86') {
+          msbuild /m /p:platform=$p /p:Configuration=${{env.BUILD_CONFIGURATION}} "/p:OutDir=${{ github.workspace }}\debuglog\$p\" "/p:IntDir=debuglog\$p\" ${{env.SOLUTION_FILE_PATH}}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+      shell: pwsh
+
+    - name: Upload Debug Log Build
+      uses: actions/upload-artifact@v7
+      with:
+        name: Saenaru-debuglog-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
+        path: |
+          ${{ github.workspace }}\debuglog\*\Saenaru.ime
+          ${{ github.workspace }}\debuglog\*\SaenaruTip.dll
+
   make-release:
     name: Create and upload release
     runs-on: windows-latest

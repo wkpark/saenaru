@@ -161,6 +161,7 @@ public:
     void _CloseCandidateList();
     void _CancelCandidateList(ITfContext *pContext);
     BOOL _HandleCandidateKey(ITfContext *pContext, WPARAM wParam, BOOL fTest);
+    BOOL _HandleHanjaKey(ITfContext *pContext);
     void _UpdateCandidatePreview(ITfContext *pContext, BOOL fSync = TRUE);
     void _CommitCandidate(ITfContext *pContext, BOOL fSync = TRUE);
     void _RequestCandidateEditSession(ITfContext *pContext, int action, LPCWSTR psz, BOOL fSync);

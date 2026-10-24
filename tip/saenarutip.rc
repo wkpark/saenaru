@@ -10,6 +10,7 @@
 #include "winuser.h"
 #include "resource.h"
 #include "winver.h"
+#include "gitver.h"
 #include "version.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -133,7 +134,7 @@ BEGIN
             VALUE "PrivateBuild", VER_SNAPSHOT "\0"
 #endif
             VALUE "ProductName", "Saenaru TIP\0"
-            VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR "\0"
+            VALUE "ProductVersion", VER_MAJOR_STR "." VER_MINOR_STR "." VER_BUILD_STR "." VER_PATCHLEVEL_STR VER_GITSUFFIX "\0"
         END
     END
 

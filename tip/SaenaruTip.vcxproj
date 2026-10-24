@@ -206,6 +206,24 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <!-- write the commit hash to gitver.h for the version resource -->
+  <Target Name="SaenaruGitVersion" BeforeTargets="ResourceCompile">
+    <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="SaenaruGitHash" />
+      <Output TaskParameter="ExitCode" PropertyName="SaenaruGitExitCode" />
+    </Exec>
+    <PropertyGroup>
+      <SaenaruGitVer Condition="'$(SaenaruGitExitCode)' == '0' And '$(SaenaruGitHash)' != ''">#define VER_GITHASH &quot;$(SaenaruGitHash)&quot;</SaenaruGitVer>
+      <SaenaruGitVer Condition="'$(SaenaruGitVer)' == ''">/* no git */</SaenaruGitVer>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntDir)" />
+    <WriteLinesToFile File="$(IntDir)gitver.h" Lines="$(SaenaruGitVer)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <ResourceCompile>
+        <AdditionalIncludeDirectories>$(IntDir).;%(ResourceCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      </ResourceCompile>
+    </ItemGroup>
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

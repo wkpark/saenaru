@@ -918,8 +918,14 @@ void CSaenaruTextService::_RequestCandidateEditSession(ITfContext *pContext, int
 
     if ((pEditSession = new CCandidateEditSession(this, pContext, action, psz)) != NULL)
     {
-        pContext->RequestEditSession(_tfClientId, pEditSession,
-                (fSync ? TF_ES_SYNC : TF_ES_ASYNCDONTCARE) | TF_ES_READWRITE, &hr);
+        if (!fSync ||
+                pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr) != S_OK ||
+                hr == TF_E_SYNCHRONOUS)
+        {
+            // a sync edit session is not granted everywhere. (OnPreservedKey etc.)
+            pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
+        }
+        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_RequestCandidateEditSession(%d) hr = 0x%x\n"), action, hr));
         pEditSession->Release();
     }
 }
