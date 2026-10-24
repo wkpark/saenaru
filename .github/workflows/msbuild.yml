@@ -24,10 +24,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v3
+
+    - name: Install NSIS
+      run: choco install nsis -y --no-progress
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -75,7 +78,7 @@ jobs:
       shell: pwsh
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v7
       with:
         name: Saenaru-${{ steps.setup.outputs.version }}-${{ steps.setup.outputs.rel }}-${{ steps.setup.outputs.commitHash }}
         path: |
@@ -97,7 +100,7 @@ jobs:
           ## METADATA SCRIPT
           echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
       - name: Download build artifacts
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v8
 
       - name: Generate Checksums
         run: |
@@ -109,7 +112,7 @@ jobs:
           done
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           draft: false
           prerelease: ${{ contains(steps.metadata.outputs.version, 'rc') || contains(steps.metadata.outputs.version, 'beta') }}
