@@ -30,13 +30,6 @@ static const TF_PRESERVEDKEY cHanja  = { VK_HANJA, TF_MOD_IGNORE_ALL_MODIFIER };
 static const TF_PRESERVEDKEY cRControl = { VK_CONTROL, TF_MOD_RCONTROL };
 static const WCHAR HanjaDesc[] = L"Hanja";
 
-// VK_HANJA, or the Hanja key (scan code 0xf1) without the Korean keyboard type
-// like as ImeProcessKey()
-static BOOL IsHanjaKey(WPARAM wParam, LPARAM lParam)
-{
-    return wParam == VK_HANJA || (wParam == 0xff && ((lParam >> 16) & 0xff) == 0xf1);
-}
-
 class CKeystrokeEditSession : public CEditSessionBase
 {
 public:
@@ -729,12 +722,6 @@ STDAPI CSaenaruTextService::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
         return S_OK;
 
     _fCandidateReopen = FALSE;
-    if (IsHanjaKey(wParam, lParam))
-    {
-        *pfEaten = _IsCandidateOpen() || ((GetConversionStatus() & CMODE_HANGUL) && _IsComposing());
-        return S_OK;
-    }
-
     if (_IsCandidateOpen())
     {
         if (_HandleCandidateKey(pContext, wParam, TRUE))
@@ -812,12 +799,6 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
 
     if (wParam == VK_SHIFT || wParam == VK_CONTROL || wParam == VK_RWIN || wParam == VK_LWIN || wParam == VK_MENU)
         return S_OK;
-
-    if (IsHanjaKey(wParam, lParam))
-    {
-        *pfEaten = _HandleHanjaKey(pContext);
-        return S_OK;
-    }
 
     if (_IsCandidateOpen())
     {
@@ -1005,33 +986,19 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
     } else if (IsEqualGUID(rguid, cPreservedKey_GUID_Hanja)) {
         DEBUGPRINTFEX(100, (TEXT("\tHanjaKey\n")));
 
-        *pfEaten = (pContext != NULL) ? _HandleHanjaKey(pContext) : FALSE;
+        *pfEaten = FALSE;
+        if (pContext != NULL) {
+            if (_IsCandidateOpen()) {
+                // next candidate
+                *pfEaten = _HandleCandidateKey(pContext, VK_HANJA, FALSE);
+            } else if ((GetConversionStatus() & CMODE_HANGUL) && _IsComposing()) {
+                *pfEaten = _OpenCandidateList(pContext);
+            }
+        }
     } else {
         *pfEaten = FALSE;
     }
     return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleHanjaKey
-//
-// Open the candidate list, or select the next candidate.
-// Returns TRUE to eat the key.
-//----------------------------------------------------------------------------
-
-BOOL CSaenaruTextService::_HandleHanjaKey(ITfContext *pContext)
-{
-    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleHanjaKey() open = %d, composing = %d\n"),
-                _IsCandidateOpen(), _IsComposing()));
-
-    if (_IsCandidateOpen()) {
-        // next candidate
-        return _HandleCandidateKey(pContext, VK_HANJA, FALSE);
-    } else if ((GetConversionStatus() & CMODE_HANGUL) && _IsComposing()) {
-        return _OpenCandidateList(pContext);
-    }
-    return FALSE;
 }
 
 /*
