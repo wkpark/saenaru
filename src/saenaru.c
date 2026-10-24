@@ -40,20 +40,6 @@
 extern HANDLE hMutex;
 UINT    WM_MSIME_QUERYPOSITION;
 
-int
-PASCAL
-GetSaenaruDirectory(LPTSTR lpDest, int max)
-{
-    static const TCHAR szIMEDir[] = TEXT("\\IME\\Saenaru");
-    LPTSTR lpDestOrig = lpDest;
-
-    lpDest += GetWindowsDirectory(lpDest, 256);
-    memcpy(lpDest, szIMEDir, sizeof(szIMEDir) - sizeof(TCHAR));
-    lpDest += sizeof(szIMEDir) / sizeof(TCHAR) - 1;
-
-    return (int) (lpDest - lpDestOrig);
-}
-
 /**********************************************************************/
 /*    DLLEntry()                                                      */
 /**********************************************************************/

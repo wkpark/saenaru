@@ -721,6 +721,21 @@ STDAPI CSaenaruTextService::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
     if (wParam == VK_SHIFT || wParam == VK_CONTROL || wParam == VK_RWIN || wParam == VK_LWIN || wParam == VK_MENU)
         return S_OK;
 
+    _fCandidateReopen = FALSE;
+    if (_IsCandidateOpen())
+    {
+        if (_HandleCandidateKey(pContext, wParam, TRUE))
+        {
+            *pfEaten = TRUE;
+            return S_OK;
+        }
+        // other keys commit the selected candidate like as the IMM IME
+        if (wParam == VK_BACK)
+            _CancelCandidateList(pContext);
+        else
+            _CommitCandidate(pContext);
+    }
+
     ch = _ConvertVKey((UINT)wParam);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::OnTestKeyDown() VK key ch = 0x%x, %d)\n"), ch, ch));
     if (ch == 0 && (wParam != VK_LEFT && wParam != VK_RIGHT && wParam != VK_UP && wParam != VK_DOWN))
@@ -785,6 +800,19 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
     if (wParam == VK_SHIFT || wParam == VK_CONTROL || wParam == VK_RWIN || wParam == VK_LWIN || wParam == VK_MENU)
         return S_OK;
 
+    if (_IsCandidateOpen())
+    {
+        if (_HandleCandidateKey(pContext, wParam, FALSE))
+        {
+            *pfEaten = TRUE;
+            return S_OK;
+        }
+        if (wParam == VK_BACK)
+            _CancelCandidateList(pContext);
+        else
+            _CommitCandidate(pContext);
+    }
+
     ch = _ConvertVKey((UINT)wParam);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::OnKeyDown() VK key ch = 0x%x, %d)\n"), ch, ch));
 
@@ -846,6 +874,14 @@ Exit:
     if (hr == S_OK)
     {
         *pfEaten = TRUE;
+    }
+
+    // reopen the list for the new syllable like as DicKeydownHandler()
+    if (_fCandidateReopen)
+    {
+        _fCandidateReopen = FALSE;
+        if (wParam == VK_BACK && _IsComposing() && ic.len > 1)
+            _OpenCandidateList(pContext);
     }
     return S_OK;
 }
@@ -926,6 +962,9 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
                 _pLangBarItem->_OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
             }
 
+            // commit the selected hanja first
+            _CommitCandidate(pContext);
+
             if (_IsComposing()) {
                 DEBUGPRINTFEX(100, (TEXT("\tIsComposing\n")));
                 WCHAR ch = _HangulCommit();
@@ -943,6 +982,18 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
         } else {
             DEBUGPRINTFEX(100, (TEXT("\tpContext == NULL ?\n")));
             *pfEaten = FALSE;
+        }
+    } else if (IsEqualGUID(rguid, cPreservedKey_GUID_Hanja)) {
+        DEBUGPRINTFEX(100, (TEXT("\tHanjaKey\n")));
+
+        *pfEaten = FALSE;
+        if (pContext != NULL) {
+            if (_IsCandidateOpen()) {
+                // next candidate
+                *pfEaten = _HandleCandidateKey(pContext, VK_HANJA, FALSE);
+            } else if ((GetConversionStatus() & CMODE_HANGUL) && _IsComposing()) {
+                *pfEaten = _OpenCandidateList(pContext);
+            }
         }
     } else {
         *pfEaten = FALSE;

@@ -40,6 +40,7 @@ SOURCES= \
         config.c \
         data.c \
         dic.c \
+        dicfile.c \
         hangul.c \
         hanjaidx.c \
         saenaru.c \

@@ -40,6 +40,7 @@
     <ClCompile Include="regime.c" />
     <ClCompile Include="data.c" />
     <ClCompile Include="dic.c" />
+    <ClCompile Include="dicfile.c" />
     <ClCompile Include="hangul.c" />
     <ClCompile Include="hansub.c" />
     <ClCompile Include="hanjaidx.c" />

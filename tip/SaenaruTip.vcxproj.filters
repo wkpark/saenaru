@@ -81,6 +81,15 @@
     <ClCompile Include="../src/strsubs.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="candidate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/dicfile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/immsec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="saenarutip.def">
@@ -89,6 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="editsess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="candidate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="globals.h">

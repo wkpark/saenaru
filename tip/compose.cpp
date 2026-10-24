@@ -443,6 +443,7 @@ Exit:
 STDAPI CSaenaruTextService::OnCompositionTerminated(TfEditCookie ecWrite, ITfComposition *pComposition)
 {
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::DoCompositionTerminated(%lu)\n"), ecWrite));
+    _CloseCandidateList();
     // we already have the composition cached, so we can ignore pComposition...
     if (_IsComposing()) {
         ITfRange *pRangeComposition;

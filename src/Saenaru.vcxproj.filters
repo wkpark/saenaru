@@ -60,6 +60,9 @@
     <ClCompile Include="dic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dicfile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="hangul.c">
       <Filter>Source Files</Filter>
     </ClCompile>
