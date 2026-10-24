@@ -2,7 +2,7 @@
  * This file is part of Saenaru.
  *
  * Copyright (c) 2003 Hye-Shik Chang <perky@i18n.org>.
- * Copyright (c) 2003-2023 Won-Kyu Park <wkpark@kldp.org>.
+ * Copyright (c) 2003-2026 Won-Kyu Park <wkpark@kldp.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
