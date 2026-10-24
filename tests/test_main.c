@@ -9,6 +9,7 @@
 
 int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
+extern DWORD dwOptionFlag;
 
 static int nPassed, nFailed;
 
@@ -45,18 +46,77 @@ static void CheckInt(LPCSTR name, int expected, int actual)
     printf("FAIL %s: expected %d, actual %d\n", name, expected, actual);
 }
 
+// compare the NUL separated candidate list
+static void CheckList(LPCSTR name, LPCWSTR expected, LPCWSTR actual)
+{
+    while (*expected && lstrcmpW(expected, actual) == 0)
+    {
+        expected += lstrlenW(expected) + 1;
+        actual += lstrlenW(actual) + 1;
+    }
+    if (!*expected && !*actual)
+    {
+        nPassed++;
+        return;
+    }
+    nFailed++;
+    printf("FAIL %s\n  expected:", name);
+    PrintCodes(expected);
+    printf("\n  actual:  ");
+    PrintCodes(actual);
+    printf("\n");
+}
+
+static BOOL HasCandidate(LPCWSTR list, LPCWSTR cand)
+{
+    for (; *list; list += lstrlenW(list) + 1)
+        if (lstrcmpW(list, cand) == 0)
+            return TRUE;
+    return FALSE;
+}
+
 //
 // Type ASCII keys like as _HandleKeyDown() of the TIP and return the text.
+// '\b' deletes the last jamo like as _HandleBackspace().
 //
 static void TypeKeys(LPCSTR keys, LPWSTR out, int cch)
 {
     TCHAR lcs[128];
-    WCHAR hkey;
+    WCHAR hkey, last;
     int ncs, n = 0;
 
     hangul_ic_init(&ic);
     for (; *keys; keys++)
     {
+        if (*keys == '\b')
+        {
+            if (!ic.len)
+            {
+                // not composing. the application deletes the previous char.
+                if (n > 0)
+                    n--;
+                continue;
+            }
+            hangul_ic_pop(&ic);
+            last = hangul_ic_peek(&ic);
+            if (last)
+            {
+                if (ic.laststate == 1) ic.cho = 0;
+                else if (ic.laststate == 2) ic.jung = 0;
+                else if (ic.laststate == 3) ic.jong = 0;
+
+                if (hangul_is_choseong(last)) ic.laststate = 1;
+                else if (hangul_is_jungseong(last)) ic.laststate = 2;
+                else if (hangul_is_jongseong(last)) ic.laststate = 3;
+                ic.last = last;
+            }
+            else
+            {
+                hangul_ic_init(&ic);
+            }
+            continue;
+        }
+
         hkey = keyToHangulKey((WCHAR)*keys);
         if (hkey >= 0x1100 && hkey <= 0x11ff)
         {
@@ -98,6 +158,89 @@ static void TestHangul2(void)
 
     TypeKeys("rk rk", out, ARRAYSIZE(out));
     CheckStr("2set: rk rk", L"가 가", out);
+
+    TypeKeys("Rk", out, ARRAYSIZE(out));
+    CheckStr("2set: Rk", L"까", out);
+
+    TypeKeys("rhk", out, ARRAYSIZE(out));
+    CheckStr("2set: rhk", L"과", out);
+
+    TypeKeys("ekfr", out, ARRAYSIZE(out));
+    CheckStr("2set: ekfr", L"닭", out);
+
+    // the jongseong moves to the next syllable
+    TypeKeys("rkrk", out, ARRAYSIZE(out));
+    CheckStr("2set: rkrk", L"가가", out);
+
+    TypeKeys("ekfrk", out, ARRAYSIZE(out));
+    CheckStr("2set: ekfrk", L"달가", out);
+}
+
+static void TestBackspace(void)
+{
+    WCHAR out[64];
+
+    TypeKeys("rkq\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rkq\\b", L"가", out);
+
+    TypeKeys("rkq\b\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rkq\\b\\b", L"ㄱ", out);
+
+    TypeKeys("rkq\b\b\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rkq\\b\\b\\b", L"", out);
+
+    // a compound jamo is deleted at once
+    TypeKeys("rkqt\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rkqt\\b", L"가", out);
+
+    TypeKeys("rhk\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rhk\\b", L"ㄱ", out);
+
+    // type again after the backspace
+    TypeKeys("rkq\bs", out, ARRAYSIZE(out));
+    CheckStr("backspace: rkq\\bs", L"간", out);
+
+    // not composing
+    TypeKeys("rk \b\b", out, ARRAYSIZE(out));
+    CheckStr("backspace: rk \\b\\b", L"", out);
+}
+
+static void TestHangul3(void)
+{
+    static const UINT layouts[] = { LAYOUT_3FIN, LAYOUT_390 };
+    WCHAR out[64];
+    UINT i;
+
+    for (i = 0; i < ARRAYSIZE(layouts); i++)
+    {
+        set_keyboard(layouts[i]);
+
+        TypeKeys("mfskgw", out, ARRAYSIZE(out));
+        CheckStr("3set: mfskgw", L"한글", out);
+
+        TypeKeys("jfshea", out, ARRAYSIZE(out));
+        CheckStr("3set: jfshea", L"안녕", out);
+
+        // a choseong key always starts a new syllable
+        TypeKeys("kfkf", out, ARRAYSIZE(out));
+        CheckStr("3set: kfkf", L"가가", out);
+    }
+    set_keyboard(LAYOUT_OLD2BUL);
+}
+
+static void TestJamo(void)
+{
+    WCHAR cho, jung, jong;
+
+    CheckInt("jamo to syllable", L'한', hangul_jamo_to_syllable(0x1112, 0x1161, 0x11ab));
+
+    hangul_syllable_to_jamo(L'닭', &cho, &jung, &jong);
+    CheckInt("syllable to cho", 0x1103, cho);
+    CheckInt("syllable to jung", 0x1161, jung);
+    CheckInt("syllable to jong", 0x11b0, jong);
+
+    CheckInt("choseong to cjamo", L'ㄱ', hangul_jamo_to_cjamo(0x1100));
+    CheckInt("jongseong to cjamo", L'ㄺ', hangul_jamo_to_cjamo(0x11b0));
 }
 
 static void TestDictionary(void)
@@ -119,6 +262,37 @@ static void TestDictionary(void)
 
     n = GetCandidateStringsFromDictionary(L"없는말없는말", buf, 1024, L"word.dic");
     CheckInt("word.dic: not found", 0, n);
+
+    // the meaning is cut at the comma
+    GetCandidateStringsFromDictionary(L"한", buf, 1024, L"nabi.dic");
+    CheckStr("nabi.dic: comma", L"韓:나라 이름 한", buf);
+
+    // hanja out of KS X 1001 only with KSX1002_SUPPORT
+    CheckInt("nabi.dic: KS X 1001", 0, HasCandidate(buf, L"㸁"));
+    dwOptionFlag |= KSX1002_SUPPORT;
+    GetCandidateStringsFromDictionary(L"한", buf, 1024, L"nabi.dic");
+    CheckInt("nabi.dic: KS X 1002", 1, HasCandidate(buf, L"㸁"));
+    dwOptionFlag &= ~KSX1002_SUPPORT;
+
+    n = GetCandidateStringsFromDictionary(L"ㄴ", buf, 1024, L"symwin.dic");
+    CheckInt("symwin.dic: found", 1, n > 1);
+    psz = buf;
+    CheckStr("symwin.dic: 1st", L"＂", psz);
+    psz += lstrlenW(psz) + 1;
+    CheckStr("symwin.dic: 2nd", L"（", psz);
+
+    GetCandidateStringsFromDictionary(L"대한", buf, 1024, L"word.dic");
+    CheckList("word.dic: 대한", L"大寒\0大旱\0", buf);
+
+    // the words starting with the reading
+    dwOptionFlag |= SEARCH_SIMILAR_WORDS;
+    GetCandidateStringsFromDictionary(L"대한", buf, 1024, L"word.dic");
+    CheckList("word.dic: similar 대한", L"大寒\0大旱\0大韓民國\0", buf);
+
+    // the last choseong matches any syllable starting with it
+    GetCandidateStringsFromDictionary(L"대한ㅁ", buf, 1024, L"word.dic");
+    CheckList("word.dic: similar 대한ㅁ", L"大韓民國\0", buf);
+    dwOptionFlag &= ~SEARCH_SIMILAR_WORDS;
 }
 
 static void TestHanjaIndex(void)
@@ -137,6 +311,9 @@ static void TestHanjaIndex(void)
 int main(void)
 {
     TestHangul2();
+    TestBackspace();
+    TestHangul3();
+    TestJamo();
     TestDictionary();
     TestHanjaIndex();
 
