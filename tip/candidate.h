@@ -48,7 +48,8 @@ public:
     STDMETHODIMP Abort();
 
     // pszList is a double null terminated list. the first item is the hangul.
-    BOOL _Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fCodeStyle);
+    // fSymbol forces the code style (all pages) like as the IMM IME.
+    BOOL _Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol);
     void _Close();
     BOOL _IsOpen()
     {
@@ -67,6 +68,7 @@ public:
         return _uSelection;
     }
     void _Move(int offset);
+    void _ToggleStyle();
     void _SelectInPage(int nth);
     void _SetSelection(UINT uIndex);
     void _GetCandidate(UINT uIndex, LPWSTR psz, UINT cch);
@@ -74,6 +76,7 @@ public:
 
 private:
     void _GetDisplayString(UINT uIndex, LPWSTR psz, UINT cch);
+    void _GetMeaning(UINT uIndex, LPWSTR psz, UINT cch);
     UINT _GetPageStart()
     {
         return (_uSelection / _uPageSize) * _uPageSize;
@@ -83,7 +86,7 @@ private:
     void _DestroyWindow();
     void _Layout();
     void _OnPaint(HWND hWnd);
-    void _OnClick(int y);
+    void _OnClick(int x, int y);
     static LRESULT CALLBACK _WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     CSaenaruTextService *_pSaenaru;
@@ -91,7 +94,8 @@ private:
     ITfContext *_pContext;
     DWORD _dwUIElementId;
     BOOL _fShown;
-    BOOL _fCodeStyle;
+    BOOL _fSymbol;
+    BOOL _fCodeStyle;   // show all pages in columns (IME_CAND_CODE)
     DWORD _dwUpdatedFlags;
 
     WCHAR _achList[CAND_BUFSIZE + 2];
@@ -105,6 +109,7 @@ private:
     HFONT _hNumFont;
     RECT _rcText;
     int _cxNum;
+    int _cxCol;
     int _cyItem;
     int _cyStatus;
 

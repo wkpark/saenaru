@@ -27,6 +27,9 @@ static const WCHAR c_szCandDesc[] = L"Saenaru Hanja Candidate";
 #define CAND_WS         (WS_POPUP | WS_BORDER)
 #define CAND_WS_EX      (WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE)
 
+// toggled by VK_TAB and kept like as dwCandStyle of the IMM IME
+static BOOL s_fCodeStyle = FALSE;
+
 class CCandidateEditSession : public CEditSessionBase
 {
 public:
@@ -103,6 +106,7 @@ CCandidateList::CCandidateList(CSaenaruTextService *pSaenaru)
     _pContext = NULL;
     _dwUIElementId = (DWORD)-1;
     _fShown = FALSE;
+    _fSymbol = FALSE;
     _fCodeStyle = FALSE;
     _dwUpdatedFlags = 0;
 
@@ -116,6 +120,7 @@ CCandidateList::CCandidateList(CSaenaruTextService *pSaenaru)
     _hNumFont = NULL;
     SetRectEmpty(&_rcText);
     _cxNum = 0;
+    _cxCol = 0;
     _cyItem = 0;
     _cyStatus = 0;
 
@@ -360,7 +365,7 @@ STDAPI CCandidateList::Abort()
 //
 //----------------------------------------------------------------------------
 
-BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fCodeStyle)
+BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWSTR pszList, BOOL fSymbol)
 {
     ITfUIElementMgr *pUIElementMgr;
     LPCWSTR psz;
@@ -389,7 +394,8 @@ BOOL CCandidateList::_Open(ITfThreadMgr *pThreadMgr, ITfContext *pContext, LPCWS
 
     _uSelection = 0;
     _uPageSize = (_uCount < CAND_PAGESIZE) ? _uCount : CAND_PAGESIZE;
-    _fCodeStyle = fCodeStyle;
+    _fSymbol = fSymbol;
+    _fCodeStyle = fSymbol || s_fCodeStyle;
 
     _pThreadMgr = pThreadMgr;
     _pThreadMgr->AddRef();
@@ -510,6 +516,21 @@ void CCandidateList::_SetSelection(UINT uIndex)
 
 //+---------------------------------------------------------------------------
 //
+// _ToggleStyle
+//
+// VK_TAB toggles the read style (one page) and the code style (all pages).
+// Symbols always use the code style like as ConvHanja().
+//----------------------------------------------------------------------------
+
+void CCandidateList::_ToggleStyle()
+{
+    s_fCodeStyle = !s_fCodeStyle;
+    _fCodeStyle = _fSymbol || s_fCodeStyle;
+    _Update(TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE);
+}
+
+//+---------------------------------------------------------------------------
+//
 // _GetCandidate
 //
 // The candidate string without its meaning. ("漢:한나라 한" -> "漢")
@@ -539,6 +560,28 @@ void CCandidateList::_GetDisplayString(UINT uIndex, LPWSTR psz, UINT cch)
     lstrcpynW(psz, _achList + _rgOffset[uIndex], cch);
     if (psz[0] != L'\0' && (lpTemp = wcschr(psz + 1, L':')) != NULL)
         *lpTemp = L' '; // with meaning
+}
+
+//+---------------------------------------------------------------------------
+//
+// _GetMeaning
+//
+// The meaning, or the code point of a hanja like as the IMM tooltip.
+//----------------------------------------------------------------------------
+
+void CCandidateList::_GetMeaning(UINT uIndex, LPWSTR psz, UINT cch)
+{
+    LPCWSTR lpstr, lpTemp;
+
+    psz[0] = L'\0';
+    if (uIndex >= _uCount)
+        return;
+
+    lpstr = _achList + _rgOffset[uIndex];
+    if (lpstr[0] != L'\0' && (lpTemp = wcschr(lpstr + 1, L':')) != NULL)
+        lstrcpynW(psz, lpTemp + 1, cch);
+    else if (uIndex != 0 && lpstr[0] >= 0x3400 && cch > 6)
+        wsprintfW(psz, L"U+%04X", (UINT)lpstr[0]);
 }
 
 void CCandidateList::_SetTextRect(const RECT *prc)
@@ -654,11 +697,13 @@ void CCandidateList::_Layout()
     RECT rc;
     MONITORINFO mi;
     WCHAR ach[CAND_STRSIZE];
-    UINT i, uStart, uEnd;
-    int cx, cxWnd, cyWnd, x, y;
+    UINT i, uStart, uEnd, uPages;
+    int cx, cxStatus, cxMeaning, cxWnd, cyWnd, x, y;
 
     if (_hWnd == NULL || _uCount == 0)
         return;
+
+    uPages = (_uCount + _uPageSize - 1) / _uPageSize;
 
     hdc = GetDC(_hWnd);
     hOldFont = (HFONT)SelectObject(hdc, _hNumFont);
@@ -667,29 +712,60 @@ void CCandidateList::_Layout()
     _cxNum = sz.cx + 15;
     _cyStatus = sz.cy + 4;
     GetTextExtentPoint32W(hdc, L"300/300", 7, &sz);
-    cx = sz.cx;
+    cxStatus = sz.cx + 10;
 
     SelectObject(hdc, _hFont);
     GetTextMetricsW(hdc, &tm);
     _cyItem = tm.tmHeight + 4; // 4 is line space
 
-    uStart = _GetPageStart();
-    uEnd = uStart + _uPageSize;
-    if (uEnd > _uCount)
-        uEnd = _uCount;
-
-    for (i = uStart; i < uEnd; i++)
+    if (_fCodeStyle)
     {
-        _GetDisplayString(i, ach, ARRAYSIZE(ach));
-        GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
-        if (_cxNum + sz.cx > cx)
-            cx = _cxNum + sz.cx;
+        // all pages in columns. the status line shows the meaning.
+        cx = 0;
+        cxMeaning = 0;
+        for (i = 0; i < _uCount; i++)
+        {
+            _GetCandidate(i, ach, ARRAYSIZE(ach));
+            GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
+            if (sz.cx > cx)
+                cx = sz.cx;
+            // the longest meaning, not to resize the window on every move
+            _GetMeaning(i, ach, ARRAYSIZE(ach));
+            GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
+            if (sz.cx > cxMeaning)
+                cxMeaning = sz.cx;
+        }
+        _cxCol = _cxNum + cx + 8;
+        cx = _cxCol * (int)uPages;
+        cxStatus += cxMeaning + 10;
+        if (_cyStatus < _cyItem)
+            _cyStatus = _cyItem;
     }
+    else
+    {
+        uStart = _GetPageStart();
+        uEnd = uStart + _uPageSize;
+        if (uEnd > _uCount)
+            uEnd = _uCount;
+
+        cx = 0;
+        for (i = uStart; i < uEnd; i++)
+        {
+            _GetDisplayString(i, ach, ARRAYSIZE(ach));
+            GetTextExtentPoint32W(hdc, ach, lstrlenW(ach), &sz);
+            if (sz.cx > cx)
+                cx = sz.cx;
+        }
+        cx += _cxNum + 10;
+        _cxCol = cx;
+    }
+    if (cx < cxStatus)
+        cx = cxStatus;
 
     SelectObject(hdc, hOldFont);
     ReleaseDC(_hWnd, hdc);
 
-    SetRect(&rc, 0, 0, cx + 10, _cyItem * (int)_uPageSize + _cyStatus);
+    SetRect(&rc, 0, 0, cx, _cyItem * (int)_uPageSize + _cyStatus);
     AdjustWindowRectEx(&rc, CAND_WS, FALSE, CAND_WS_EX);
     cxWnd = rc.right - rc.left;
     cyWnd = rc.bottom - rc.top;
@@ -725,7 +801,7 @@ void CCandidateList::_OnPaint(HWND hWnd)
     WCHAR ach[CAND_STRSIZE];
     WCHAR szNum[16];
     UINT i, uStart, uEnd, uPages;
-    int y, len;
+    int x, y, xNum, cxCell, len;
 
     hdc = BeginPaint(hWnd, &ps);
     GetClientRect(hWnd, &rc);
@@ -736,26 +812,41 @@ void CCandidateList::_OnPaint(HWND hWnd)
     hOldBit = (HBITMAP)SelectObject(hMemDC, hBit);
     hOldFont = (HFONT)GetCurrentObject(hMemDC, OBJ_FONT);
 
-    // number area and page area use the button face color
+    // the code style shows all pages, the read style shows the current page.
+    if (_fCodeStyle)
+    {
+        uStart = 0;
+        uEnd = _uCount;
+        xNum = (int)(_uSelection / _uPageSize) * _cxCol;
+        cxCell = _cxCol;
+    }
+    else
+    {
+        uStart = _GetPageStart();
+        uEnd = uStart + _uPageSize;
+        if (uEnd > _uCount)
+            uEnd = _uCount;
+        xNum = 0;
+        cxCell = rc.right;
+    }
+
+    // number area (of the current page) and page area use the button face color
     FillRect(hMemDC, &rc, GetSysColorBrush(COLOR_BTNFACE));
-    rcItem = rc;
-    rcItem.left = _cxNum;
-    rcItem.bottom = rc.bottom - _cyStatus;
+    SetRect(&rcItem, 0, 0, rc.right, rc.bottom - _cyStatus);
     FillRect(hMemDC, &rcItem, GetSysColorBrush(COLOR_WINDOW));
+    SetRect(&rcItem, xNum, 0, xNum + _cxNum, rc.bottom - _cyStatus);
+    FillRect(hMemDC, &rcItem, GetSysColorBrush(COLOR_BTNFACE));
 
     SetBkMode(hMemDC, TRANSPARENT);
 
-    uStart = _GetPageStart();
-    uEnd = uStart + _uPageSize;
-    if (uEnd > _uCount)
-        uEnd = _uCount;
-
-    y = 0;
     for (i = uStart; i < uEnd; i++)
     {
+        x = _fCodeStyle ? (int)(i / _uPageSize) * _cxCol : 0;
+        y = (int)(i % _uPageSize) * _cyItem;
+
         if (i == _uSelection)
         {
-            SetRect(&rcItem, 0, y, rc.right, y + _cyItem);
+            SetRect(&rcItem, x, y, x + cxCell, y + _cyItem);
             FillRect(hMemDC, &rcItem, GetSysColorBrush(COLOR_HIGHLIGHT));
             SetTextColor(hMemDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
         }
@@ -764,16 +855,21 @@ void CCandidateList::_OnPaint(HWND hWnd)
             SetTextColor(hMemDC, GetSysColor(COLOR_WINDOWTEXT));
         }
 
-        len = wsprintfW(szNum, L"%d", (int)(i - uStart + 1));
-        SelectObject(hMemDC, _hNumFont);
-        GetTextExtentPoint32W(hMemDC, szNum, len, &sz);
-        TextOutW(hMemDC, 5, y + (_cyItem - sz.cy) / 2, szNum, len);
+        // numbers only for the current page
+        if (x == xNum)
+        {
+            len = wsprintfW(szNum, L"%d", (int)(i % _uPageSize + 1));
+            SelectObject(hMemDC, _hNumFont);
+            GetTextExtentPoint32W(hMemDC, szNum, len, &sz);
+            TextOutW(hMemDC, x + 5, y + (_cyItem - sz.cy) / 2, szNum, len);
+        }
 
-        _GetDisplayString(i, ach, ARRAYSIZE(ach));
+        if (_fCodeStyle)
+            _GetCandidate(i, ach, ARRAYSIZE(ach));
+        else
+            _GetDisplayString(i, ach, ARRAYSIZE(ach));
         SelectObject(hMemDC, _hFont);
-        TextOutW(hMemDC, _cxNum + 4, y + 2, ach, lstrlenW(ach));
-
-        y += _cyItem;
+        TextOutW(hMemDC, x + _cxNum + 4, y + 2, ach, lstrlenW(ach));
     }
 
     // current page / total pages
@@ -781,7 +877,17 @@ void CCandidateList::_OnPaint(HWND hWnd)
     len = wsprintfW(szNum, L"%d/%d", (int)(_uSelection / _uPageSize + 1), (int)uPages);
     SelectObject(hMemDC, _hNumFont);
     SetTextColor(hMemDC, GetSysColor(COLOR_BTNTEXT));
-    TextOutW(hMemDC, 5, rc.bottom - _cyStatus + 2, szNum, len);
+    GetTextExtentPoint32W(hMemDC, szNum, len, &sz);
+    TextOutW(hMemDC, 5, rc.bottom - _cyStatus + (_cyStatus - sz.cy) / 2, szNum, len);
+
+    // the meaning of the selected candidate. (a tooltip in the IMM IME)
+    if (_fCodeStyle)
+    {
+        x = 5 + sz.cx + 10;
+        _GetMeaning(_uSelection, ach, ARRAYSIZE(ach));
+        SelectObject(hMemDC, _hFont);
+        TextOutW(hMemDC, x, rc.bottom - _cyStatus + 2, ach, lstrlenW(ach));
+    }
 
     BitBlt(hdc, 0, 0, rc.right, rc.bottom, hMemDC, 0, 0, SRCCOPY);
 
@@ -793,15 +899,22 @@ void CCandidateList::_OnPaint(HWND hWnd)
     EndPaint(hWnd, &ps);
 }
 
-void CCandidateList::_OnClick(int y)
+void CCandidateList::_OnClick(int x, int y)
 {
-    UINT uIndex;
+    UINT uIndex, uRow;
 
-    if (!_IsOpen() || _cyItem <= 0 || y < 0)
+    if (!_IsOpen() || _cyItem <= 0 || _cxCol <= 0 || x < 0 || y < 0)
         return;
 
-    uIndex = _GetPageStart() + y / _cyItem;
-    if (uIndex >= _GetPageStart() + _uPageSize || uIndex >= _uCount)
+    uRow = (UINT)(y / _cyItem);
+    if (uRow >= _uPageSize)
+        return;
+
+    if (_fCodeStyle)
+        uIndex = (UINT)(x / _cxCol) * _uPageSize + uRow;
+    else
+        uIndex = _GetPageStart() + uRow;
+    if (uIndex >= _uCount)
         return;
 
     _SetSelection(uIndex);
@@ -839,7 +952,7 @@ LRESULT CALLBACK CCandidateList::_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 
         case WM_LBUTTONDOWN:
             if (_this != NULL)
-                _this->_OnClick((short)HIWORD(lParam));
+                _this->_OnClick((short)LOWORD(lParam), (short)HIWORD(lParam));
             return 0;
     }
 
@@ -875,7 +988,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     WCHAR achBuf[CAND_BUFSIZE + 2];
     WCHAR achRead[2];
     TCHAR szDic[MAX_PATH];
-    BOOL fCodeStyle;
+    BOOL fSymbol;
     int nBufLen;
 
     if (!_IsComposing())
@@ -887,8 +1000,8 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
         return FALSE;
 
     // a jamo is converted to symbols
-    fCodeStyle = (achRead[0] >= 0x3131 && achRead[0] <= 0x314e);
-    GetDicFileName(fCodeStyle ? TEXT("Symbol") : TEXT(""), szDic, ARRAYSIZE(szDic));
+    fSymbol = (achRead[0] >= 0x3131 && achRead[0] <= 0x314e);
+    GetDicFileName(fSymbol ? TEXT("Symbol") : TEXT(""), szDic, ARRAYSIZE(szDic));
 
     // the first candidate is the hangul itself
     achBuf[0] = achRead[0];
@@ -903,7 +1016,7 @@ BOOL CSaenaruTextService::_OpenCandidateList(ITfContext *pContext)
     if (_pCandidateList == NULL && (_pCandidateList = new CCandidateList(this)) == NULL)
         return FALSE;
 
-    if (!_pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fCodeStyle))
+    if (!_pCandidateList->_Open(_pThreadMgr, pContext, achBuf, fSymbol))
         return FALSE;
 
     // place the candidate window
@@ -1003,7 +1116,7 @@ void CSaenaruTextService::_CancelCandidateList(ITfContext *pContext)
 BOOL CSaenaruTextService::_HandleCandidateKey(ITfContext *pContext, WPARAM wParam, BOOL fTest)
 {
     int next = 0, select = 0;
-    BOOL fCommit = FALSE;
+    BOOL fCommit = FALSE, fChanged = FALSE;
     WCHAR ch, hkey;
 
     if (!_IsCandidateOpen())
@@ -1048,6 +1161,9 @@ BOOL CSaenaruTextService::_HandleCandidateKey(ITfContext *pContext, WPARAM wPara
         case VK_RETURN:
             fCommit = TRUE;
             break;
+        case VK_TAB:
+            fChanged = TRUE; // toggle the candidate style
+            break;
         case VK_NUMPAD1:
         case VK_NUMPAD2:
         case VK_NUMPAD3:
@@ -1068,13 +1184,19 @@ BOOL CSaenaruTextService::_HandleCandidateKey(ITfContext *pContext, WPARAM wPara
             break;
     }
 
-    if (!next && !select && !fCommit)
+    if (!next && !select && !fCommit && !fChanged)
         return FALSE;
 
     if (fTest)
         return TRUE;
 
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleCandidateKey() next = %d, select = %d\n"), next, select));
+
+    if (fChanged)
+    {
+        _pCandidateList->_ToggleStyle();
+        return TRUE;
+    }
 
     if (next)
     {
