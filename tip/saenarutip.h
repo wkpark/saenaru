@@ -172,6 +172,7 @@ public:
 
     // the hangul typed in the english mode and the reverse (typoconv.cpp)
     BOOL _HandleEngTypo(ITfContext *pContext, WPARAM wParam, WCHAR ch, BOOL fTest);
+    void _ResetEngTypoWord(BOOL fOff);
     void _ResetEngTypo();
     void _SetHangulMode(BOOL fHangul);
     HRESULT _RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo);
@@ -240,6 +241,7 @@ private:
     WCHAR _achEngTypo[ENGTYPO_BUFSIZE]; // the letters of the word
     int _cchEngTypo;
     BOOL _fEngTypoOff;      // the caret is moved in the word
+    BOOL _fEngTypoHangul;   // the mode of the word
     BOOL _fEngTypoUndo;     // just after the conversion
     BOOL _fEngTypoToEng;    // converted to the english
     WCHAR _achEngTypoEng[ENGTYPO_BUFSIZE];

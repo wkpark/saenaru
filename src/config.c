@@ -710,7 +710,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                     break;
         
                 case PSN_APPLY:
-                    dwTemp = dwOptionFlag & HANENG_AUTOCORRECT; // the TIP only
+                    // the TIP only. it may be changed by the menu of the TIP.
+                    dwTemp = GetDwordFromSetting(TEXT("OptionFlag")) & HANENG_AUTOCORRECT;
                     if (IsDlgButtonChecked(hDlg, IDC_COMPOSITE_TYPING))
                         dwTemp |= COMPOSITE_TYPING;
                     if (IsDlgButtonChecked(hDlg, IDC_CONCURRENT_TYPING))

@@ -378,7 +378,9 @@ static void TestEngTypo(void)
 {
     CheckTypo(L"dkssudgktpdy", L"안녕하세요");
     CheckTypo(L"gksrmf", L"한글");
-    CheckTypo(L"sp", L"네");
+    CheckTypo(L"spt", L"넷");
+    CheckTypo(L"sp", L"");  // 3 letters at least
+    CheckTypo(L"gh", L"");
     CheckTypo(L"Rkt", L"깟"); // shift for the double consonant
 
     // not all syllables

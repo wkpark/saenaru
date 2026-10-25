@@ -29,7 +29,7 @@ static int CompareWord(const void *a, const void *b)
     return strcmp(*(char **)a, *(char **)b);
 }
 
-static BOOL IsSyllables(const char *word, BOOL fCapital)
+static BOOL TypesSyllables(const char *word, BOOL fCapital)
 {
     WCHAR eng[ENGTYPO_MAXLEN + 1], han[ENGTYPO_MAXLEN + 1];
     int i;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         }
         if (i < len)
             continue;
-        if (fDic || IsSyllables(line, FALSE) || IsSyllables(line, TRUE))
+        if (fDic || TypesSyllables(line, FALSE) || TypesSyllables(line, TRUE))
             words[n++] = _strdup(line);
     }
     fclose(fp);

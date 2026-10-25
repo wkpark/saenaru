@@ -181,47 +181,48 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
         _fEngTypoUndo = FALSE;
         hr = _RequestEngTypoEditSession(pContext, TRUE);
         DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() undo hr = 0x%x\n"), hr));
-        if (hr == S_OK)
-            _SetHangulMode(_fEngTypoToEng);
-        return hr == S_OK || hr == S_FALSE;
+        if (hr != S_OK)
+            return FALSE; // not the same text. the application deletes the char.
+        _SetHangulMode(_fEngTypoToEng);
+        return TRUE;
     }
-    if (wParam != VK_SPACE)
-        _fEngTypoUndo = FALSE;
+    // only just after the conversion
+    _fEngTypoUndo = FALSE;
+
+    // a new word in the other mode. the mode is changed in many ways
+    // like as the language bar, <ESC> and the hangul key.
+    if (fHangul != _fEngTypoHangul)
+    {
+        _fEngTypoHangul = fHangul;
+        _ResetEngTypoWord(FALSE);
+    }
 
     if (IsCtrlOrAlt())
     {
         // shortcuts like as <CTRL>-<V>
-        _cchEngTypo = 0;
-        _achEngTypo[0] = L'\0';
-        _fEngTypoOff = TRUE;
+        _ResetEngTypoWord(TRUE);
         return FALSE;
     }
 
     switch (wParam)
     {
         case VK_SPACE:
-            if (fTest)
+            // OnKeyDown() checks it again. it may be called without OnTestKeyDown().
+            if (_fEngTypoOff || _cchEngTypo == 0 ||
+                    (fHangul ? HanTypo(_achEngTypo, achHan, ARRAYSIZE(achHan)) :
+                     hangul_eng_typo(_achEngTypo, achHan, ARRAYSIZE(achHan))) == 0)
             {
-                if (!_fEngTypoOff && _cchEngTypo > 0 &&
-                        (fHangul ? HanTypo(_achEngTypo, achHan, ARRAYSIZE(achHan)) :
-                         hangul_eng_typo(_achEngTypo, achHan, ARRAYSIZE(achHan))) > 0)
-                {
-                    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() %s -> %s\n"), _achEngTypo, achHan));
-                    return TRUE;
-                }
                 DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() not a typo: %s, off = %d\n"), _achEngTypo, _fEngTypoOff));
-                // a new word
-                _cchEngTypo = 0;
-                _achEngTypo[0] = L'\0';
-                _fEngTypoOff = FALSE;
+                _ResetEngTypoWord(FALSE); // a new word
                 return FALSE;
             }
+            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() %s -> %s\n"), _achEngTypo, achHan));
+            if (fTest)
+                return TRUE;
 
             hr = _RequestEngTypoEditSession(pContext, FALSE);
             DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert hr = 0x%x\n"), hr));
-            _cchEngTypo = 0;
-            _achEngTypo[0] = L'\0';
-            _fEngTypoOff = FALSE;
+            _ResetEngTypoWord(FALSE);
             if (hr == S_OK)
             {
                 _fEngTypoUndo = TRUE;
@@ -231,19 +232,13 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
 
         case VK_RETURN:
         case VK_TAB:
-            // a new word
-            _cchEngTypo = 0;
-            _achEngTypo[0] = L'\0';
-            _fEngTypoOff = FALSE;
+            _ResetEngTypoWord(FALSE); // a new word
             break;
 
         case VK_BACK:
             if (fHangul)
             {
-                // a jamo is deleted, not a key
-                _cchEngTypo = 0;
-                _achEngTypo[0] = L'\0';
-                _fEngTypoOff = TRUE;
+                _ResetEngTypoWord(TRUE); // a jamo is deleted, not a key
             }
             else if (fTest)
             {
@@ -267,9 +262,7 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
         case VK_INSERT:
         case VK_ESCAPE:
             // the user moved the caret on purpose. not this word.
-            _cchEngTypo = 0;
-            _achEngTypo[0] = L'\0';
-            _fEngTypoOff = TRUE;
+            _ResetEngTypoWord(TRUE);
             break;
 
         default:
@@ -297,11 +290,16 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     return FALSE;
 }
 
-void CSaenaruTextService::_ResetEngTypo()
+void CSaenaruTextService::_ResetEngTypoWord(BOOL fOff)
 {
     _cchEngTypo = 0;
     _achEngTypo[0] = L'\0';
-    _fEngTypoOff = FALSE;
+    _fEngTypoOff = fOff;
+}
+
+void CSaenaruTextService::_ResetEngTypo()
+{
+    _ResetEngTypoWord(FALSE);
     _fEngTypoUndo = FALSE;
 }
 
@@ -336,8 +334,8 @@ HRESULT CSaenaruTextService::_RequestEngTypoEditSession(ITfContext *pContext, BO
 // _DoEngTypo
 //
 // Convert the word before the caret, or restore it. If the text is not the
-// same, do the key itself: insert the space, or delete a char.
-// Returns S_OK if converted, S_FALSE if the key is done.
+// same, insert the space for the conversion, and nothing for the undo.
+// Returns S_OK if converted, S_FALSE if not.
 //----------------------------------------------------------------------------
 
 HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo)
@@ -431,24 +429,19 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
         }
         hr = S_OK;
     }
+    else if (fUndo)
+    {
+        // the application deletes the char
+        hr = S_FALSE;
+        goto Exit;
+    }
     else
     {
-        // not the same text. do the key itself.
+        // not the same text. insert the space for the key.
         if (fEmpty)
             pRange->Collapse(ec, TF_ANCHOR_END);
-        if (fUndo)
-        {
-            // delete the selection or the char before the caret
-            if (fEmpty && (pRange->ShiftStart(ec, -1, &cchShift, NULL) != S_OK ||
-                    pRange->IsEmpty(ec, &fEmpty) != S_OK || fEmpty))
-                goto Exit;
-            if (pRange->SetText(ec, 0, L"", 0) != S_OK)
-                goto Exit;
-        }
-        else if (pRange->SetText(ec, 0, L" ", 1) != S_OK)
-        {
+        if (pRange->SetText(ec, 0, L" ", 1) != S_OK)
             goto Exit;
-        }
         hr = S_FALSE;
     }
 

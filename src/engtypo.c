@@ -73,7 +73,7 @@ static BOOL IsSyllables(LPCWSTR psz)
 {
     for (; *psz != L'\0'; psz++)
     {
-        if (*psz < 0xac00 || *psz > 0xd7a3)
+        if (!hangul_is_syllable(*psz))
             return FALSE;
     }
     return TRUE;
@@ -113,6 +113,7 @@ static void ToLowerWord(LPCWSTR pszEng, char *pszWord)
 /*
  * The hangul syllables of the english typo. Returns the length of pszHan,
  * 0 if it is not a typo of the hangul or it is an english word.
+ * Two letters like as "gh" (호) are often abbreviations, so 3 letters at least.
  */
 int hangul_eng_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
@@ -120,7 +121,8 @@ int hangul_eng_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
     const char *pszWord = szWord;
     int n;
 
-    if (!hangul_is_old2bul())
+    pszHan[0] = L'\0';
+    if (!hangul_is_old2bul() || lstrlenW(pszEng) < 3)
         return 0;
     if ((n = hangul_eng_to_syllables(pszEng, pszHan, cch)) == 0)
         return 0;

@@ -333,7 +333,7 @@ BEGIN
     IDS_MENU_ESC_ASCII          "&ESC 영문전환"
     IDS_MENU_EDIT_WORD_UNIT     "단어단위 편집(&W)"
     IDS_MENU_HANGUL_TOGGLE      "Shift-SPACE 한/영키 (&H)"
-    IDS_MENU_HANENG_AUTOCORRECT "한/영 자동 교정(&A)"
+    IDS_MENU_HANENG_AUTOCORRECT "한/영 자동 교정(&T)"
     IDS_MENU_SHOW_KEYBOARD      "키보드 보기(&K)"
 
     IDS_MENU_OLD2BUL            "두벌식(&2)"
