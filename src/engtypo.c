@@ -1,8 +1,9 @@
 /*
- * The hangul typed in the english mode, and the english typed in the hangul
- * mode on the 2-set keyboard.
+ * The hangul typed in the english mode on the 2-set keyboard, and the
+ * english typed in the hangul mode on any keyboard.
  * "dkssud" -> "안녕", but not english words like as "the" -> "솓".
- * "ㅗ듸ㅐ" -> "hello". Both check the keys typed with engwords.dic.
+ * "ㅗ듸ㅐ" (2-set), "녀ㅉㅊ" (3-set) -> "hello".
+ * Both check the keys typed with engwords.dic.
  */
 
 #include <windows.h>
@@ -10,8 +11,8 @@
 #include "hangul.h"
 
 /*
- * Type the keys with the hangul automata. Returns the length of pszHan,
- * 0 if a key is not a consonant nor a vowel.
+ * Type the keys with the hangul automata of the keyboard. Returns the length
+ * of pszHan, 0 if a key is not a jamo like as the symbols of the 3-set.
  */
 static int TypeHangul(LPCWSTR pszEng, BOOL fAnyCase, LPWSTR pszHan, int cch)
 {
@@ -38,7 +39,7 @@ static int TypeHangul(LPCWSTR pszEng, BOOL fAnyCase, LPWSTR pszHan, int cch)
         }
 
         hkey = keyToHangulKey(c);
-        if (!hangul_is_choseong(hkey) && !hangul_is_jungseong(hkey))
+        if (!hangul_is_choseong(hkey) && !hangul_is_jungseong(hkey) && !hangul_is_jongseong(hkey))
             return 0;
 
         ncs = 0;
@@ -215,8 +216,9 @@ BOOL hangul_is_eng_word(const char *pszWord)
 }
 
 /*
- * The english word typed in the hangul mode. pszHan is the hangul typed by
- * the keys. Returns the length of pszHan, 0 if it is not an english word.
+ * The english word typed in the hangul mode of any keyboard. pszHan is the
+ * hangul typed by the keys. Returns the length of pszHan, 0 if it is not an
+ * english word.
  * The hangul has a jamo not composed: "해" (go) is not an english typo.
  * 3 letters at least like as the english mode, not the jamos for chatting
  * like as "ㅜㅠ" (nb), "ㅁㅊ" (ac), nor the same jamos like as "ㅋㅋㅋ" (zzz).
@@ -227,7 +229,7 @@ int hangul_han_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
     int i, n;
 
     pszHan[0] = L'\0';
-    if (!hangul_is_old2bul() || lstrlenW(pszEng) < 3)
+    if (lstrlenW(pszEng) < 3)
         return 0;
 
     n = TypeHangul(pszEng, TRUE, pszHan, cch);

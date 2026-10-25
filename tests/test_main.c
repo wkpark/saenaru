@@ -472,9 +472,18 @@ static void TestHanTypo(void)
     CheckHanTypo(L"name", L"");   // 무드, syllables
     dwOptionFlag &= ~COMPOSITE_TYPING;
 
-    // only the standard 2-set keyboard
+    // the 3-set keyboards: the jongseong keys, not the symbols of the shift
     set_keyboard(LAYOUT_3FIN);
-    CheckHanTypo(L"hello", L"");
+    CheckHanTypo(L"hello", L"녀ㅉㅊ");
+    CheckHanTypo(L"window", L"ㄹㅁ시ㅊㄹ"); // w is ㄹ of jongseong
+    CheckHanTypo(L"Hello", L"");             // H is 0
+    set_keyboard(LAYOUT_390);
+    CheckHanTypo(L"hello", L"녀ㅉㅊ");
+    set_keyboard(LAYOUT_3SUN);
+    CheckHanTypo(L"window", L"ㄹㅁ시ㅊㄹ");
+    dwOptionFlag |= COMPOSITE_TYPING;
+    CheckHanTypo(L"window", L"");            // 말시찰, syllables
+    dwOptionFlag &= ~COMPOSITE_TYPING;
     set_keyboard(LAYOUT_OLD2BUL);
 
     // the binary search of the lines
@@ -647,6 +656,11 @@ static void TestTypoKeys(void)
 #endif
     CheckTypoKeys("han: gksrmf", TRUE, "gksrmf ", ".......", TRUE);
 #if ENGTYPO_HAN_TO_ENG
+    set_keyboard(LAYOUT_3FIN);
+    CheckTypoKeys("han 3-set: hello", TRUE, "hello ", ".....C", FALSE);
+    CheckTypoKeys("han 3-set: undo", TRUE, "window \b", "......CU", TRUE);
+    CheckTypoKeys("han 3-set: jfshea", TRUE, "jfshea ", ".......", TRUE); // 안녕
+    set_keyboard(LAYOUT_OLD2BUL);
     // <BACKSPACE> deletes a jamo, not a key. the next word after <ENTER>.
     CheckTypoKeys("han: backspace, then hello", TRUE, "rk\bhello ", ".........", TRUE);
     CheckTypoKeys("han: backspace, enter, then hello", TRUE, "rk\b\nhello ", ".........C", FALSE);
