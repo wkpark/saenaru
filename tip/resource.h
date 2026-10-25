@@ -66,6 +66,7 @@
 #define IDC_HANJA_CAND_SPACE    2011
 #define IDC_SIMILAR_WORDS       2012
 #define IDC_HANGUL_TOGGLE       2013
+#define IDC_ENGTYPO_TO_HANGUL   2014
 
 //#define INDIC_PENINDIC   0
 //#define INDIC_SAENARU    1
@@ -145,6 +146,7 @@
 #define IDS_MENU_EDIT_WORD_UNIT     2134
 #define IDS_MENU_SHOW_KEYBOARD      2135
 #define IDS_MENU_HANGUL_TOGGLE      2136
+#define IDS_MENU_ENGTYPO            2137
 
 #define IDC_STATIC                    -1
 

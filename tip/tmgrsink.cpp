@@ -46,6 +46,7 @@ STDAPI CSaenaruTextService::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocument
 {
     // commit the hanja candidate of the previous document
     _CommitCandidate(NULL, FALSE);
+    _ResetEngTypo();
 
     // we'll track edit changes in the focus document, the only place we start compositions
     _InitTextEditSink(pDocMgrFocus);

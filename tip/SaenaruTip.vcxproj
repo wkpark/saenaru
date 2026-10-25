@@ -175,7 +175,9 @@
     <ClCompile Include="saenarutip.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="tmgrsink.cpp" />
+    <ClCompile Include="typoconv.cpp" />
     <ClCompile Include="..\src\hangul.c" />
+    <ClCompile Include="..\src\engtypo.c" />
     <ClCompile Include="..\src\regconf.c" />
     <ClCompile Include="..\src\reg.c" />
     <ClCompile Include="..\src\strsubs.c" />

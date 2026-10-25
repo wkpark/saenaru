@@ -871,6 +871,13 @@ STDAPI CSaenaruTextService::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 
     ch = _ConvertVKey((UINT)wParam);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::OnTestKeyDown() VK key ch = 0x%x, %d)\n"), ch, ch));
+
+    // the hangul typed in the english mode
+    if (_HandleEngTypo(pContext, wParam, ch, TRUE))
+    {
+        *pfEaten = TRUE;
+        return S_OK;
+    }
     if (ch == 0 && (wParam != VK_LEFT && wParam != VK_RIGHT && wParam != VK_UP && wParam != VK_DOWN))
         return S_OK;
 
@@ -949,6 +956,12 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
 
     ch = _ConvertVKey((UINT)wParam);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::OnKeyDown() VK key ch = 0x%x, %d)\n"), ch, ch));
+
+    if (_HandleEngTypo(pContext, wParam, ch, FALSE))
+    {
+        *pfEaten = TRUE;
+        return S_OK;
+    }
 
     // FIXME
     if (ch == 0 && (wParam != VK_LEFT && wParam != VK_RIGHT && wParam != VK_UP && wParam != VK_DOWN))
@@ -1102,6 +1115,7 @@ STDAPI CSaenaruTextService::OnPreservedKey(ITfContext *pContext, REFGUID rguid, 
 
             // commit the selected hanja first
             _CommitCandidate(pContext);
+            _ResetEngTypo();
 
             if (_IsComposing()) {
                 DEBUGPRINTFEX(100, (TEXT("\tIsComposing\n")));

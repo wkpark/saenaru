@@ -364,6 +364,41 @@ static void TestJamo(void)
     CheckInt("jongseong to cjamo", L'ㄺ', hangul_jamo_to_cjamo(0x11b0));
 }
 
+static void CheckTypo(LPCWSTR eng, LPCWSTR expected)
+{
+    WCHAR han[ENGTYPO_MAXLEN + 1];
+    char name[64];
+
+    hangul_eng_typo(eng, han, ARRAYSIZE(han));
+    wsprintfA(name, "eng typo: %ls", eng);
+    CheckStr(name, expected, han);
+}
+
+static void TestEngTypo(void)
+{
+    CheckTypo(L"dkssudgktpdy", L"안녕하세요");
+    CheckTypo(L"gksrmf", L"한글");
+    CheckTypo(L"sp", L"네");
+    CheckTypo(L"Rkt", L"깟"); // shift for the double consonant
+
+    // not all syllables
+    CheckTypo(L"hello", L"");
+    CheckTypo(L"json", L"");
+    // english words
+    CheckTypo(L"the", L"");
+    CheckTypo(L"with", L"");
+    CheckTypo(L"The", L"");
+    // other upper case letters, digits and too long words
+    CheckTypo(L"Dkssud", L"");
+    CheckTypo(L"dkssud1", L"");
+    CheckTypo(L"dkssudgktpdydkssudgktpdydkssudgkt", L"");
+
+    // only the standard 2-set keyboard
+    set_keyboard(LAYOUT_3FIN);
+    CheckTypo(L"gksrmf", L"");
+    set_keyboard(LAYOUT_OLD2BUL);
+}
+
 static void TestDictionary(void)
 {
     WCHAR buf[1024 + 2];
@@ -437,6 +472,7 @@ int main(void)
     TestBackspaceSyllable();
     TestHangul3();
     TestJamo();
+    TestEngTypo();
     TestDictionary();
     TestHanjaIndex();
 
