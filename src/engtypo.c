@@ -300,6 +300,12 @@ static BOOL IsWordChar(WCHAR c)
     return IsAsciiLetter(c) || (c >= L'0' && c <= L'9') || c == L'_';
 }
 
+static BOOL IsHangul(WCHAR c)
+{
+    return hangul_is_syllable(c) || hangul_is_cjamo(c) ||
+           hangul_is_choseong(c) || hangul_is_jungseong(c) || hangul_is_jongseong(c);
+}
+
 /*
  * A key of the TIP. Returns HANGUL_TYPO_CONVERT for <SPACE> after a typo,
  * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The caller
@@ -332,9 +338,6 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
         t->hangul = fHangul;
         hangul_typo_reset_word(t, FALSE);
     }
-
-    if (fHangul && !ENGTYPO_HAN_TO_ENG)
-        return HANGUL_TYPO_NONE;
 
     if (fCtrlAlt)
     {
@@ -435,16 +438,24 @@ void hangul_typo_end(HangulTypo *t, BOOL fHangul, LPCWSTR pszHan)
  * Is the text before the caret the same as the word typed?
  * For the conversion, pszBefore has one more char for the start of the
  * word, and the word is not a part of an identifier like as "abc_dkssud".
+ * The hangul of the english word is not a part of a hangul word like as
+ * "ㅗ녀ㅈㅍ" typed by "/help" on the 3-set, whose '/' is ㅗ and not kept as
+ * a letter. The english after the hangul like as "녕gktpdy" is converted.
  * For the undo, pszBefore is the word of the conversion and the space.
  */
 BOOL hangul_typo_match(LPCWSTR pszBefore, LPCWSTR pszTyped, BOOL fUndo)
 {
     int n = lstrlenW(pszBefore), len = lstrlenW(pszTyped);
+    WCHAR c;
 
     if (len == 0)
         return FALSE;
     if (fUndo)
         return n == len + 1 && pszBefore[len] == L' ' && wcsncmp(pszBefore, pszTyped, len) == 0;
-    return n >= len && wcscmp(pszBefore + n - len, pszTyped) == 0 &&
-           (n == len || !IsWordChar(pszBefore[n - len - 1]));
+    if (n < len || wcscmp(pszBefore + n - len, pszTyped) != 0)
+        return FALSE;
+    if (n == len)
+        return TRUE;
+    c = pszBefore[n - len - 1];
+    return !IsWordChar(c) && !(IsHangul(c) && IsHangul(pszTyped[0]));
 }

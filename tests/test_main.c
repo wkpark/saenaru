@@ -539,6 +539,9 @@ static void TestTypoMatch(void)
     CheckInt("match: identifier _", FALSE, hangul_typo_match(L"_dkssud", L"dkssud", FALSE));
     CheckInt("match: identifier 1", FALSE, hangul_typo_match(L"1dkssud", L"dkssud", FALSE));
     CheckInt("match: not the same", FALSE, hangul_typo_match(L" dkssux", L"dkssud", FALSE));
+    // not a part of a hangul word like as "/help" (ㅗ녀ㅈㅍ) on the 3-set
+    CheckInt("match: jamo before", FALSE, hangul_typo_match(L"ㅗ녀ㅈㅍ", L"녀ㅈㅍ", FALSE));
+    CheckInt("match: symbol before", TRUE, hangul_typo_match(L"(ㅗ듸ㅐ", L"ㅗ듸ㅐ", FALSE));
     CheckInt("match: too short", FALSE, hangul_typo_match(L"ssud", L"dkssud", FALSE));
     CheckInt("match: empty", FALSE, hangul_typo_match(L" ", L"", FALSE));
 
@@ -648,14 +651,9 @@ static void TestTypoKeys(void)
     CheckTypoKeys("eng: backspace from the previous word", FALSE, "ab \bdkssud ", "...........", FALSE);
 
     // hangul mode
-#if ENGTYPO_HAN_TO_ENG
     CheckTypoKeys("han: hello", TRUE, "hello ", ".....C", FALSE);
     CheckTypoKeys("han: backspace in the word", TRUE, "helo\blo ", "........", TRUE);
-#else
-    CheckTypoKeys("han: hello (off)", TRUE, "hello ", "......", TRUE);
-#endif
     CheckTypoKeys("han: gksrmf", TRUE, "gksrmf ", ".......", TRUE);
-#if ENGTYPO_HAN_TO_ENG
     set_keyboard(LAYOUT_3FIN);
     CheckTypoKeys("han 3-set: hello", TRUE, "hello ", ".....C", FALSE);
     CheckTypoKeys("han 3-set: undo", TRUE, "window \b", "......CU", TRUE);
@@ -664,20 +662,15 @@ static void TestTypoKeys(void)
     // <BACKSPACE> deletes a jamo, not a key. the next word after <ENTER>.
     CheckTypoKeys("han: backspace, then hello", TRUE, "rk\bhello ", ".........", TRUE);
     CheckTypoKeys("han: backspace, enter, then hello", TRUE, "rk\b\nhello ", ".........C", FALSE);
-#endif
 
     // the mode changed not by the hangul key: a new word
     CheckTypoKeys("mode: hangul backspace, then english", TRUE, "rk\b|dkssud ", ".........C", TRUE);
     CheckTypoKeys("mode: hangul keys, then english", TRUE, "rk|dkssud ", "........C", TRUE);
-#if ENGTYPO_HAN_TO_ENG
     CheckTypoKeys("mode: english left, then hangul", FALSE, "dk<|hello ", "........C", FALSE);
-#endif
 
     // undo just after the conversion
     CheckTypoKeys("undo: dkssud", FALSE, "dkssud \b", "......CU", FALSE);
-#if ENGTYPO_HAN_TO_ENG
     CheckTypoKeys("undo: hello", TRUE, "hello \b", ".....CU", TRUE);
-#endif
     CheckTypoKeys("undo: gksrmfdl", FALSE, "gksrmfdl \b", "........CU", FALSE);
     CheckTypoKeys("undo: not after a key", FALSE, "dkssud r\b", "......C..", TRUE);
     CheckTypoKeys("undo: not after a space", FALSE, "dkssud  \b", "......C..", TRUE);
@@ -708,7 +701,6 @@ static void TestTypoKeys(void)
     hangul_typo_key(&t, 'D', L'd', FALSE, FALSE, FALSE, FALSE, FALSE);
     CheckInt("keydown: dkssud", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
     CheckStr("keydown: the word", L"dkssud", t.word);
-#if ENGTYPO_HAN_TO_ENG
     hangul_typo_init(&t);
     hangul_typo_key(&t, 'Y', L'y', TRUE, FALSE, FALSE, FALSE, FALSE);
     hangul_typo_key(&t, 'O', L'o', TRUE, TRUE, FALSE, FALSE, FALSE);
@@ -735,7 +727,6 @@ static void TestTypoKeys(void)
     CheckStr("moachigi: the hangul", L"되ㅒ", t.han);
     CheckStr("moachigi: the english", L"hello", t.eng);
     dwOptionFlag &= ~COMPOSITE_TYPING;
-#endif
 
     // the shift, the composition and the ctrl stop the undo
     hangul_typo_init(&t);

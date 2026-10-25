@@ -12,9 +12,6 @@ extern "C" {
 
 #define ENGTYPO_MAXLEN  32
 
-// the english typed in the hangul mode is converted too
-#define ENGTYPO_HAN_TO_ENG  1
-
 typedef struct _tagHangulTypo {
     WCHAR word[ENGTYPO_MAXLEN + 1]; // the letters of the word
     int   len;

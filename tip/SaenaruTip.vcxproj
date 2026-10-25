@@ -200,6 +200,7 @@
     <ClInclude Include="saenarutip.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="..\src\hangul.h" />
+    <ClInclude Include="..\src\engtypo.h" />
     <ClInclude Include="..\src\debug.h" />
   </ItemGroup>
   <ItemGroup>

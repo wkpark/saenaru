@@ -22,11 +22,12 @@ int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
 class CEngTypoEditSession : public CEditSessionBase
 {
 public:
-    CEngTypoEditSession(CSaenaruTextService *pSaenaru, ITfContext *pContext, BOOL fUndo) : CEditSessionBase(pContext)
+    CEngTypoEditSession(CSaenaruTextService *pSaenaru, ITfContext *pContext, BOOL fUndo, BOOL fCheck) : CEditSessionBase(pContext)
     {
         _pSaenaru = pSaenaru;
         _pSaenaru->AddRef();
         _fUndo = fUndo;
+        _fCheck = fCheck;
     }
     ~CEngTypoEditSession()
     {
@@ -36,12 +37,13 @@ public:
     // ITfEditSession
     STDMETHODIMP DoEditSession(TfEditCookie ec)
     {
-        return _pSaenaru->_DoEngTypo(ec, _pContext, _fUndo);
+        return _pSaenaru->_DoEngTypo(ec, _pContext, _fUndo, _fCheck);
     }
 
 private:
     CSaenaruTextService *_pSaenaru;
     BOOL _fUndo;
+    BOOL _fCheck;
 };
 
 static BOOL IsCtrlOrAlt()
@@ -183,8 +185,8 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     HRESULT hr;
     int action;
 
-    // only <SPACE> and <BACKSPACE> are eaten
-    if (!(dwOptionFlag & HANENG_AUTOCORRECT) ||
+    // only <SPACE> and <BACKSPACE> are eaten. no edit session without a context.
+    if (pContext == NULL || !(dwOptionFlag & HANENG_AUTOCORRECT) ||
             ((wParam == VK_SPACE || wParam == VK_BACK) && IsKeyboardDisabled(pContext)))
     {
         // a new word when it is turned on again, also by the option dialog
@@ -196,36 +198,39 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     if (wParam == VK_SPACE)
         LoadEngWords();
 
-#ifdef DEBUG
+    // not the letters typed, they may be a password
     if (wParam == VK_SPACE)
-    {
-        WCHAR achHan[ENGTYPO_MAXLEN + 1];
-
-        hangul_typo_check(&_typo, fHangul, achHan, ARRAYSIZE(achHan));
-        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo(%d) <SPACE> hangul = %d, word = %s, off = %d, typo = %s\n"),
-                            fTest, fHangul, _typo.word, _typo.off, achHan));
-    }
-#endif
+        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo(%d) <SPACE> hangul = %d, len = %d, off = %d\n"),
+                            fTest, fHangul, _typo.len, _typo.off));
 
     action = hangul_typo_key(&_typo, (UINT)wParam, ch, fHangul, _IsComposing(),
                              IsCtrlOrAlt(), (GetKeyState(VK_SHIFT) & 0x8000) != 0, fTest);
     if (action == HANGUL_TYPO_NONE)
         return FALSE;
     if (fTest)
-        return TRUE;
-
-    if (action == HANGUL_TYPO_UNDO)
     {
-        hr = _RequestEngTypoEditSession(pContext, TRUE);
-        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() undo hr = 0x%x\n"), hr));
-        if (hr != S_OK)
-            return FALSE; // not the same text. the application deletes the char.
-        _SetHangulMode(_typo.toEng);
+        // <BACKSPACE> is eaten only for the conversion before the caret.
+        // the caret may be moved by the mouse.
+        if (action == HANGUL_TYPO_UNDO && _RequestEngTypoEditSession(pContext, TRUE, TRUE) != S_OK)
+        {
+            _typo.undo = FALSE;
+            return FALSE;
+        }
         return TRUE;
     }
 
-    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert %s\n"), _typo.word));
-    hr = _RequestEngTypoEditSession(pContext, FALSE);
+    if (action == HANGUL_TYPO_UNDO)
+    {
+        hr = _RequestEngTypoEditSession(pContext, TRUE, FALSE);
+        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() undo hr = 0x%x\n"), hr));
+        // S_FALSE: not the same text, and the application deletes the char
+        if (hr == S_OK)
+            _SetHangulMode(_typo.toEng);
+        return hr == S_OK;
+    }
+
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert len = %d\n"), _typo.len));
+    hr = _RequestEngTypoEditSession(pContext, FALSE, FALSE);
     DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert hr = 0x%x\n"), hr));
     if (hr != S_OK)
         hangul_typo_end(&_typo, fHangul, NULL);
@@ -252,14 +257,15 @@ void CSaenaruTextService::_SetHangulMode(BOOL fHangul)
     _UpdateLanguageBar(TF_LBI_STATUS | TF_LBI_ICON);
 }
 
-HRESULT CSaenaruTextService::_RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo)
+HRESULT CSaenaruTextService::_RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo, BOOL fCheck)
 {
     CEngTypoEditSession *pEditSession;
     HRESULT hr = E_FAIL;
 
-    if ((pEditSession = new CEngTypoEditSession(this, pContext, fUndo)) == NULL)
+    if ((pEditSession = new CEngTypoEditSession(this, pContext, fUndo, fCheck)) == NULL)
         return E_FAIL;
-    if (pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr) != S_OK)
+    if (pContext->RequestEditSession(_tfClientId, pEditSession,
+                                     TF_ES_SYNC | (fCheck ? TF_ES_READ : TF_ES_READWRITE), &hr) != S_OK)
         hr = E_FAIL;
     pEditSession->Release();
     return hr;
@@ -270,11 +276,13 @@ HRESULT CSaenaruTextService::_RequestEngTypoEditSession(ITfContext *pContext, BO
 // _DoEngTypo
 //
 // Convert the word before the caret, or restore it. If the text is not the
-// same, insert the space for the conversion, and nothing for the undo.
+// same, do the key eaten like as the application: insert the space for the
+// conversion. The key of the undo is not eaten. fCheck only checks the text
+// of the undo in the read only session.
 // Returns S_OK if converted, S_FALSE if not.
 //----------------------------------------------------------------------------
 
-HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo)
+HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo, BOOL fCheck)
 {
     WCHAR ach[ENGTYPO_MAXLEN + 3];
     WCHAR achHan[ENGTYPO_MAXLEN + 1];
@@ -346,11 +354,19 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
                 pRange->GetText(ec, 0, ach, ARRAYSIZE(ach) - 1, &cFetched) == S_OK)
         {
             ach[cFetched] = L'\0';
-            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoEngTypo(%d) text = %s, typed = %s\n"), fUndo, ach, pszTyped));
+            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoEngTypo(%d) text = %d, typed = %d chars\n"), fUndo, cFetched, len));
             fConvert = hangul_typo_match(ach, pszTyped, fUndo) &&
                     (fUndo || (pRange->ShiftStart(ec, (LONG)cFetched - len, &cchShift, NULL) == S_OK &&
                                (fHangul || !IsEngInputScope(ec, pContext, pRange))));
         }
+    }
+
+    // nothing is changed by the check. the undo not the same is not eaten,
+    // and the application deletes the char.
+    if (fUndo && (fCheck || !fConvert))
+    {
+        hr = fConvert ? S_OK : S_FALSE;
+        goto Exit;
     }
 
     if (fConvert)
@@ -363,15 +379,9 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
             hangul_typo_end(&_typo, fHangul, achHan);
         hr = S_OK;
     }
-    else if (fUndo)
-    {
-        // the application deletes the char
-        hr = S_FALSE;
-        goto Exit;
-    }
     else
     {
-        // not the same text. insert the space for the key.
+        // not the same text. do the key eaten: insert the space.
         if (fEmpty)
             pRange->Collapse(ec, TF_ANCHOR_END);
         if (pRange->SetText(ec, 0, L" ", 1) != S_OK)

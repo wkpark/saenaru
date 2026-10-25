@@ -762,6 +762,9 @@ DWORD
 CLangBarItemImeButton::_MenuItem_GetToggleEngTypoFlag(CLangBarItemImeButton *_this, UINT wID)
 {
     UNUSED(_this);
+    // the option saved by the menu of another application, like as the option dialog
+    dwOptionFlag = (dwOptionFlag & ~HANENG_AUTOCORRECT) |
+                   (GetDwordFromSetting((LPTSTR)TEXT("OptionFlag")) & HANENG_AUTOCORRECT);
     return (dwOptionFlag & HANENG_AUTOCORRECT) ? 1 : 0;
 }
 

@@ -176,8 +176,8 @@ public:
     BOOL _HandleEngTypo(ITfContext *pContext, WPARAM wParam, WCHAR ch, BOOL fTest);
     void _ResetEngTypo();
     void _SetHangulMode(BOOL fHangul);
-    HRESULT _RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo);
-    HRESULT _DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo);
+    HRESULT _RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo, BOOL fCheck);
+    HRESULT _DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo, BOOL fCheck);
 
     // messages for the worker wnd
     enum { WM_DISPLAY_PROPERTY = WM_USER + 1 };

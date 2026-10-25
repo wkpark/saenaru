@@ -250,10 +250,13 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
 
+  # the error flag of the files above is kept. ReadRegDWORD does not clear it.
+  ClearErrors
   ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "OptionFlag" 
   IfErrors 0 regDone
   WriteRegDWORD HKCU "${REGISTRY_PATH}" "OptionFlag" 41
   regDone:
+  ClearErrors
   ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "HangulToggle" 
   IfErrors 0 regDone2
   WriteRegDWORD HKCU "${REGISTRY_PATH}" "HangulToggle" 65568
