@@ -189,7 +189,7 @@ void hangul_free_eng_words(void)
     s_pWords = s_pWordsEnd = NULL;
 }
 
-static BOOL IsEngWord(const char *pszWord)
+BOOL hangul_is_eng_word(const char *pszWord)
 {
     const char *lo = s_pWords, *hi = s_pWordsEnd;
     const char *start, *end, *next;
@@ -258,10 +258,199 @@ int hangul_han_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
         pszHan[0] = L'\0';
         return 0; // the same letters
     }
-    if (!IsEngWord(szWord))
+    if (!hangul_is_eng_word(szWord))
     {
         pszHan[0] = L'\0';
         return 0;
     }
     return n;
+}
+
+/*
+ * The state of the word typed for the TIP. The TIP calls hangul_typo_key()
+ * in OnTestKeyDown() (fTest) and OnKeyDown(). OnKeyDown() is called only
+ * for the keys eaten by OnTestKeyDown(), and the letters are eaten in the
+ * hangul mode, so they are kept in OnKeyDown() in the hangul mode.
+ */
+void hangul_typo_init(HangulTypo *t)
+{
+    ZeroMemory(t, sizeof(*t));
+}
+
+void hangul_typo_reset_word(HangulTypo *t, BOOL fOff)
+{
+    t->len = 0;
+    t->word[0] = L'\0';
+    t->off = fOff;
+}
+
+/*
+ * The conversion of the word. pszHan is the hangul typed in the english
+ * mode, or the hangul typed by the keys in the hangul mode.
+ * engwords.dic should be loaded for the hangul mode.
+ */
+int hangul_typo_check(HangulTypo *t, BOOL fHangul, LPWSTR pszHan, int cch)
+{
+    pszHan[0] = L'\0';
+    if (t->off || t->len == 0)
+        return 0;
+    return fHangul ? hangul_han_typo(t->word, pszHan, cch) : hangul_eng_typo(t->word, pszHan, cch);
+}
+
+static BOOL IsAsciiLetter(WCHAR c)
+{
+    return (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z');
+}
+
+static BOOL IsWordChar(WCHAR c)
+{
+    return IsAsciiLetter(c) || (c >= L'0' && c <= L'9') || c == L'_';
+}
+
+/*
+ * A key of the TIP. Returns HANGUL_TYPO_CONVERT for <SPACE> after a typo,
+ * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The caller
+ * converts it and calls hangul_typo_end() after HANGUL_TYPO_CONVERT.
+ */
+int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fComposing,
+                    BOOL fCtrlAlt, BOOL fShift, BOOL fTest)
+{
+    WCHAR achHan[ENGTYPO_MAXLEN + 1];
+
+    // <BACKSPACE> just after the conversion restores the word and the mode
+    if (vk == VK_BACK && t->undo)
+    {
+        if (fHangul == t->toEng || fComposing || fCtrlAlt || fShift)
+        {
+            t->undo = FALSE;
+            return HANGUL_TYPO_NONE;
+        }
+        if (!fTest)
+            t->undo = FALSE;
+        return HANGUL_TYPO_UNDO;
+    }
+    // only just after the conversion
+    t->undo = FALSE;
+
+    // a new word in the other mode. the mode is changed in many ways
+    // like as the language bar, <ESC> and the hangul key.
+    if (fHangul != t->hangul)
+    {
+        t->hangul = fHangul;
+        hangul_typo_reset_word(t, FALSE);
+    }
+
+    if (fHangul && !ENGTYPO_HAN_TO_ENG)
+        return HANGUL_TYPO_NONE;
+
+    if (fCtrlAlt)
+    {
+        // shortcuts like as <CTRL>-<V>
+        hangul_typo_reset_word(t, TRUE);
+        return HANGUL_TYPO_NONE;
+    }
+
+    switch (vk)
+    {
+        case VK_SPACE:
+            // checked again in OnKeyDown(). it may be called without OnTestKeyDown().
+            if (hangul_typo_check(t, fHangul, achHan, ARRAYSIZE(achHan)) == 0)
+            {
+                hangul_typo_reset_word(t, FALSE); // a new word
+                return HANGUL_TYPO_NONE;
+            }
+            return HANGUL_TYPO_CONVERT;
+
+        case VK_RETURN:
+        case VK_TAB:
+            hangul_typo_reset_word(t, FALSE); // a new word
+            break;
+
+        case VK_BACK:
+            if (fHangul)
+            {
+                hangul_typo_reset_word(t, TRUE); // a jamo is deleted, not a key
+            }
+            else if (fTest)
+            {
+                // a typo fixed in the word
+                if (t->len > 0)
+                    t->word[--t->len] = L'\0';
+                else
+                    t->off = TRUE; // back in the previous word
+            }
+            break;
+
+        case VK_LEFT:
+        case VK_RIGHT:
+        case VK_UP:
+        case VK_DOWN:
+        case VK_HOME:
+        case VK_END:
+        case VK_PRIOR:
+        case VK_NEXT:
+        case VK_DELETE:
+        case VK_INSERT:
+        case VK_ESCAPE:
+            // the user moved the caret on purpose. not this word.
+            hangul_typo_reset_word(t, TRUE);
+            break;
+
+        default:
+            if (IsAsciiLetter(ch))
+            {
+                // OnKeyDown() for the letters eaten in the hangul mode
+                if (fTest == fHangul)
+                    break;
+                if (t->len < ENGTYPO_MAXLEN)
+                {
+                    t->word[t->len++] = ch;
+                    t->word[t->len] = L'\0';
+                }
+                else
+                {
+                    t->off = TRUE; // too long
+                }
+            }
+            else if (ch != 0 && t->len > 0)
+            {
+                t->off = TRUE; // digits, punctuations in the word
+            }
+            break;
+    }
+    return HANGUL_TYPO_NONE;
+}
+
+/*
+ * The end of the word after HANGUL_TYPO_CONVERT. pszHan is the hangul of
+ * the conversion, NULL if not converted.
+ */
+void hangul_typo_end(HangulTypo *t, BOOL fHangul, LPCWSTR pszHan)
+{
+    if (pszHan != NULL)
+    {
+        lstrcpynW(t->eng, t->word, ARRAYSIZE(t->eng));
+        lstrcpynW(t->han, pszHan, ARRAYSIZE(t->han));
+        t->toEng = fHangul;
+        t->undo = TRUE;
+    }
+    hangul_typo_reset_word(t, FALSE);
+}
+
+/*
+ * Is the text before the caret the same as the word typed?
+ * For the conversion, pszBefore has one more char for the start of the
+ * word, and the word is not a part of an identifier like as "abc_dkssud".
+ * For the undo, pszBefore is the word of the conversion and the space.
+ */
+BOOL hangul_typo_match(LPCWSTR pszBefore, LPCWSTR pszTyped, BOOL fUndo)
+{
+    int n = lstrlenW(pszBefore), len = lstrlenW(pszTyped);
+
+    if (len == 0)
+        return FALSE;
+    if (fUndo)
+        return n == len + 1 && pszBefore[len] == L' ' && wcsncmp(pszBefore, pszTyped, len) == 0;
+    return n >= len && wcscmp(pszBefore + n - len, pszTyped) == 0 &&
+           (n == len || !IsWordChar(pszBefore[n - len - 1]));
 }

@@ -5,6 +5,7 @@
 // mode. At <SPACE>, the word before the caret like as "dkssud" is converted
 // to "안녕" and the hangul mode is turned on, or "ㅗ듸ㅐ" to "hello" and the
 // english mode. <BACKSPACE> just after it restores the word and the mode.
+// The state of the word is hangul_typo_key() of engtypo.c.
 //
 
 #include "globals.h"
@@ -17,8 +18,6 @@ extern "C" {
 #include "hangul.h"
 int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
 }
-
-C_ASSERT(ENGTYPO_BUFSIZE == ENGTYPO_MAXLEN + 1);
 
 class CEngTypoEditSession : public CEditSessionBase
 {
@@ -45,16 +44,6 @@ private:
     BOOL _fUndo;
 };
 
-static BOOL IsAsciiLetter(WCHAR c)
-{
-    return (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z');
-}
-
-static BOOL IsWordChar(WCHAR c)
-{
-    return IsAsciiLetter(c) || (c >= L'0' && c <= L'9') || c == L'_';
-}
-
 static BOOL IsCtrlOrAlt()
 {
     return (GetKeyState(VK_CONTROL) & 0x8000) || (GetKeyState(VK_MENU) & 0x8000);
@@ -62,33 +51,32 @@ static BOOL IsCtrlOrAlt()
 
 //+---------------------------------------------------------------------------
 //
-// HanTypo
+// LoadEngWords
 //
-// hangul_han_typo() with engwords.dic loaded at the first use.
+// engwords.dic for the hangul mode, loaded at the first use.
 //----------------------------------------------------------------------------
 
-static int HanTypo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
+static void LoadEngWords()
 {
     static BOOL s_fLoaded = FALSE;
     TCHAR szPath[MAX_PATH];
     int len;
 
+    if (s_fLoaded)
+        return;
+
+    EnterCriticalSection(&g_cs);
     if (!s_fLoaded)
     {
-        EnterCriticalSection(&g_cs);
-        if (!s_fLoaded)
-        {
-            len = GetSaenaruDirectory(szPath, MAX_PATH - 16);
-            if (len > 0 && szPath[len - 1] != TEXT('\\'))
-                szPath[len++] = TEXT('\\');
-            lstrcpy(szPath + len, TEXT("engwords.dic"));
-            if (!hangul_load_eng_words(szPath))
-                DEBUGPRINTFEX(100, (TEXT("HanTypo() %s not loaded\n"), szPath));
-            s_fLoaded = TRUE;
-        }
-        LeaveCriticalSection(&g_cs);
+        len = GetSaenaruDirectory(szPath, MAX_PATH - 16);
+        if (len > 0 && szPath[len - 1] != TEXT('\\'))
+            szPath[len++] = TEXT('\\');
+        lstrcpy(szPath + len, TEXT("engwords.dic"));
+        if (!hangul_load_eng_words(szPath))
+            DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s not loaded\n"), szPath));
+        s_fLoaded = TRUE;
     }
-    return hangul_han_typo(pszEng, pszHan, cch);
+    LeaveCriticalSection(&g_cs);
 }
 
 //+---------------------------------------------------------------------------
@@ -148,159 +136,52 @@ static BOOL IsEngInputScope(TfEditCookie ec, ITfContext *pContext, ITfRange *pRa
 //
 // _HandleEngTypo
 //
-// Called by OnTestKeyDown() and OnKeyDown(). OnKeyDown() is called only for
-// the keys eaten by OnTestKeyDown(). OnTestKeyDown() only tracks the letters
-// of the word without an edit session, and gives the same answer if it is
-// called again for the key. OnKeyDown() does the conversion.
-// The letters are eaten in the hangul mode, so OnKeyDown() tracks them.
-// Returns TRUE to eat the key.
+// Called by OnTestKeyDown() (fTest) and OnKeyDown(). Returns TRUE to eat the key.
 //----------------------------------------------------------------------------
 
 BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WCHAR ch, BOOL fTest)
 {
-    WCHAR achHan[ENGTYPO_BUFSIZE];
     BOOL fHangul;
     HRESULT hr;
+    int action;
 
     if (!(dwOptionFlag & HANENG_AUTOCORRECT))
         return FALSE;
 
     fHangul = (GetConversionStatus() & CMODE_HANGUL) != 0;
+    if (fHangul && ENGTYPO_HAN_TO_ENG)
+        LoadEngWords();
 
-    // <BACKSPACE> just after the conversion restores the word and the mode
-    if (wParam == VK_BACK && _fEngTypoUndo)
+    action = hangul_typo_key(&_typo, (UINT)wParam, ch, fHangul, _IsComposing(),
+                             IsCtrlOrAlt(), (GetKeyState(VK_SHIFT) & 0x8000) != 0, fTest);
+    if (action == HANGUL_TYPO_NONE)
+        return FALSE;
+    if (fTest)
+        return TRUE;
+
+    if (action == HANGUL_TYPO_UNDO)
     {
-        if (fHangul == _fEngTypoToEng || _IsComposing() || IsCtrlOrAlt() || (GetKeyState(VK_SHIFT) & 0x8000))
-        {
-            _fEngTypoUndo = FALSE;
-            return FALSE;
-        }
-        if (fTest)
-            return TRUE;
-
-        _fEngTypoUndo = FALSE;
         hr = _RequestEngTypoEditSession(pContext, TRUE);
         DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() undo hr = 0x%x\n"), hr));
         if (hr != S_OK)
             return FALSE; // not the same text. the application deletes the char.
-        _SetHangulMode(_fEngTypoToEng);
+        _SetHangulMode(_typo.toEng);
         return TRUE;
     }
-    // only just after the conversion
-    _fEngTypoUndo = FALSE;
 
-    // a new word in the other mode. the mode is changed in many ways
-    // like as the language bar, <ESC> and the hangul key.
-    if (fHangul != _fEngTypoHangul)
-    {
-        _fEngTypoHangul = fHangul;
-        _ResetEngTypoWord(FALSE);
-    }
-
-    if (IsCtrlOrAlt())
-    {
-        // shortcuts like as <CTRL>-<V>
-        _ResetEngTypoWord(TRUE);
-        return FALSE;
-    }
-
-    switch (wParam)
-    {
-        case VK_SPACE:
-            // OnKeyDown() checks it again. it may be called without OnTestKeyDown().
-            if (_fEngTypoOff || _cchEngTypo == 0 ||
-                    (fHangul ? HanTypo(_achEngTypo, achHan, ARRAYSIZE(achHan)) :
-                     hangul_eng_typo(_achEngTypo, achHan, ARRAYSIZE(achHan))) == 0)
-            {
-                DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() not a typo: %s, off = %d\n"), _achEngTypo, _fEngTypoOff));
-                _ResetEngTypoWord(FALSE); // a new word
-                return FALSE;
-            }
-            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() %s -> %s\n"), _achEngTypo, achHan));
-            if (fTest)
-                return TRUE;
-
-            hr = _RequestEngTypoEditSession(pContext, FALSE);
-            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert hr = 0x%x\n"), hr));
-            _ResetEngTypoWord(FALSE);
-            if (hr == S_OK)
-            {
-                _fEngTypoUndo = TRUE;
-                _SetHangulMode(!fHangul);
-            }
-            return hr == S_OK || hr == S_FALSE;
-
-        case VK_RETURN:
-        case VK_TAB:
-            _ResetEngTypoWord(FALSE); // a new word
-            break;
-
-        case VK_BACK:
-            if (fHangul)
-            {
-                _ResetEngTypoWord(TRUE); // a jamo is deleted, not a key
-            }
-            else if (fTest)
-            {
-                // a typo fixed in the word
-                if (_cchEngTypo > 0)
-                    _achEngTypo[--_cchEngTypo] = L'\0';
-                else
-                    _fEngTypoOff = TRUE; // back in the previous word
-            }
-            break;
-
-        case VK_LEFT:
-        case VK_RIGHT:
-        case VK_UP:
-        case VK_DOWN:
-        case VK_HOME:
-        case VK_END:
-        case VK_PRIOR:
-        case VK_NEXT:
-        case VK_DELETE:
-        case VK_INSERT:
-        case VK_ESCAPE:
-            // the user moved the caret on purpose. not this word.
-            _ResetEngTypoWord(TRUE);
-            break;
-
-        default:
-            if (IsAsciiLetter(ch))
-            {
-                // OnKeyDown() for the letters eaten in the hangul mode
-                if (fTest == fHangul)
-                    break;
-                if (_cchEngTypo < ENGTYPO_MAXLEN)
-                {
-                    _achEngTypo[_cchEngTypo++] = ch;
-                    _achEngTypo[_cchEngTypo] = L'\0';
-                }
-                else
-                {
-                    _fEngTypoOff = TRUE; // too long
-                }
-            }
-            else if (ch != 0 && _cchEngTypo > 0)
-            {
-                _fEngTypoOff = TRUE; // digits, punctuations in the word
-            }
-            break;
-    }
-    return FALSE;
-}
-
-void CSaenaruTextService::_ResetEngTypoWord(BOOL fOff)
-{
-    _cchEngTypo = 0;
-    _achEngTypo[0] = L'\0';
-    _fEngTypoOff = fOff;
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert %s\n"), _typo.word));
+    hr = _RequestEngTypoEditSession(pContext, FALSE);
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo() convert hr = 0x%x\n"), hr));
+    if (hr != S_OK)
+        hangul_typo_end(&_typo, fHangul, NULL);
+    else
+        _SetHangulMode(!fHangul);
+    return hr == S_OK || hr == S_FALSE;
 }
 
 void CSaenaruTextService::_ResetEngTypo()
 {
-    _ResetEngTypoWord(FALSE);
-    _fEngTypoUndo = FALSE;
+    hangul_typo_init(&_typo);
 }
 
 void CSaenaruTextService::_SetHangulMode(BOOL fHangul)
@@ -340,9 +221,9 @@ HRESULT CSaenaruTextService::_RequestEngTypoEditSession(ITfContext *pContext, BO
 
 HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo)
 {
-    WCHAR ach[ENGTYPO_BUFSIZE + 2];
-    WCHAR achHan[ENGTYPO_BUFSIZE];
-    WCHAR achNew[ENGTYPO_BUFSIZE + 1];
+    WCHAR ach[ENGTYPO_MAXLEN + 3];
+    WCHAR achHan[ENGTYPO_MAXLEN + 1];
+    WCHAR achNew[ENGTYPO_MAXLEN + 2];
     TF_SELECTION tfSelection;
     ITfRange *pRange;
     LPCWSTR pszTyped, pszNew;
@@ -372,46 +253,28 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     pszTyped = pszNew = NULL;
     if (fUndo)
     {
-        pszTyped = _fEngTypoToEng ? _achEngTypoEng : _achEngTypoHan;
-        pszNew = _fEngTypoToEng ? _achEngTypoHan : _achEngTypoEng;
+        pszTyped = _typo.toEng ? _typo.eng : _typo.han;
+        pszNew = _typo.toEng ? _typo.han : _typo.eng;
     }
-    else if (_cchEngTypo > 0 &&
-            (fHangul ? HanTypo(_achEngTypo, achHan, ARRAYSIZE(achHan)) :
-             hangul_eng_typo(_achEngTypo, achHan, ARRAYSIZE(achHan))) > 0)
+    else if (hangul_typo_check(&_typo, fHangul, achHan, ARRAYSIZE(achHan)) > 0)
     {
-        pszTyped = fHangul ? achHan : _achEngTypo;
-        pszNew = fHangul ? _achEngTypo : achHan;
+        pszTyped = fHangul ? achHan : _typo.word;
+        pszNew = fHangul ? _typo.word : achHan;
     }
 
-    // the number of the chars is checked by GetText(), not by the shift
+    // one more char before the word: the space of the undo, or the start of
+    // the word. the number of the chars is checked by GetText(), not by the shift.
     if (fEmpty && pszTyped != NULL)
     {
-        if (fUndo)
+        len = lstrlenW(pszTyped);
+        if (pRange->ShiftStart(ec, -(len + 1), &cchShift, NULL) == S_OK &&
+                pRange->GetText(ec, 0, ach, ARRAYSIZE(ach) - 1, &cFetched) == S_OK)
         {
-            // the word and the space inserted by the conversion
-            len = lstrlenW(pszTyped) + 1;
-            if (pRange->ShiftStart(ec, -len, &cchShift, NULL) == S_OK &&
-                    pRange->GetText(ec, 0, ach, ARRAYSIZE(ach) - 1, &cFetched) == S_OK && cFetched == (ULONG)len)
-            {
-                ach[cFetched] = L'\0';
-                DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoEngTypo() undo text = %s\n"), ach));
-                fConvert = ach[len - 1] == L' ' && wcsncmp(ach, pszTyped, len - 1) == 0;
-            }
-        }
-        else
-        {
-            // one more char for the start of the word
-            len = lstrlenW(pszTyped);
-            if (pRange->ShiftStart(ec, -(len + 1), &cchShift, NULL) == S_OK &&
-                    pRange->GetText(ec, 0, ach, ARRAYSIZE(ach) - 1, &cFetched) == S_OK && cFetched >= (ULONG)len)
-            {
-                ach[cFetched] = L'\0';
-                DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoEngTypo() text = %s, typed = %s\n"), ach, pszTyped));
-                fConvert = wcscmp(ach + cFetched - len, pszTyped) == 0 &&
-                        (cFetched == (ULONG)len || !IsWordChar(ach[0])) &&
-                        pRange->ShiftStart(ec, (LONG)cFetched - len, &cchShift, NULL) == S_OK &&
-                        (fHangul || !IsEngInputScope(ec, pContext, pRange));
-            }
+            ach[cFetched] = L'\0';
+            DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_DoEngTypo(%d) text = %s, typed = %s\n"), fUndo, ach, pszTyped));
+            fConvert = hangul_typo_match(ach, pszTyped, fUndo) &&
+                    (fUndo || (pRange->ShiftStart(ec, (LONG)cFetched - len, &cchShift, NULL) == S_OK &&
+                               (fHangul || !IsEngInputScope(ec, pContext, pRange))));
         }
     }
 
@@ -422,11 +285,7 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
         if (pRange->SetText(ec, 0, achNew, lstrlenW(achNew)) != S_OK)
             goto Exit;
         if (!fUndo)
-        {
-            lstrcpyW(_achEngTypoEng, _achEngTypo);
-            lstrcpyW(_achEngTypoHan, achHan);
-            _fEngTypoToEng = fHangul;
-        }
+            hangul_typo_end(&_typo, fHangul, achHan);
         hr = S_OK;
     }
     else if (fUndo)

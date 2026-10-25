@@ -122,14 +122,8 @@ void hangul_ic_backspace(HangulIC *);
 BOOL hangul_ic_restorable(HangulIC *);
 void hangul_ic_set_syllable(HangulIC *, WCHAR);
 
-// the hangul typed in the english mode and the reverse (engtypo.c)
-#define ENGTYPO_MAXLEN  32
-BOOL hangul_is_old2bul(void);
-int hangul_eng_to_syllables(LPCWSTR, LPWSTR, int);
-int hangul_eng_typo(LPCWSTR, LPWSTR, int);
-BOOL hangul_load_eng_words(LPCTSTR);
-void hangul_free_eng_words(void);
-int hangul_han_typo(LPCWSTR, LPWSTR, int);
+// the hangul typed in the english mode and the reverse
+#include "engtypo.h"
 
 int hangul_del_prev(LPWSTR);
 WCHAR PASCAL keyToHangulKey(WCHAR);
