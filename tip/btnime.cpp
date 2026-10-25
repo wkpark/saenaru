@@ -61,7 +61,7 @@ const struct
     {IDS_MENU_HANGUL_TOGGLE,
      CLangBarItemImeButton::_MenuItem_GetToggleHanEngFlag,
      CLangBarItemImeButton::_Menu_ToggleHanEng},
-    {IDS_MENU_ENGTYPO,
+    {IDS_MENU_HANENG_AUTOCORRECT,
      CLangBarItemImeButton::_MenuItem_GetToggleEngTypoFlag,
      CLangBarItemImeButton::_Menu_ToggleEngTypo},
     {IDS_MENU_EDIT_WORD_UNIT,
@@ -709,9 +709,9 @@ void CLangBarItemImeButton::_Menu_ToggleEngTypo(CLangBarItemImeButton *_this, UI
 {
     DWORD dwFlag;
 
-    dwOptionFlag ^= ENGTYPO_TO_HANGUL;
+    dwOptionFlag ^= HANENG_AUTOCORRECT;
     dwFlag = GetDwordFromSetting((LPTSTR)TEXT("OptionFlag"));
-    dwFlag = (dwFlag & ~ENGTYPO_TO_HANGUL) | (dwOptionFlag & ENGTYPO_TO_HANGUL);
+    dwFlag = (dwFlag & ~HANENG_AUTOCORRECT) | (dwOptionFlag & HANENG_AUTOCORRECT);
     SetDwordToSetting(TEXT("OptionFlag"), dwFlag);
     _this->_pSaenaru->_ResetEngTypo();
 }
@@ -762,7 +762,7 @@ DWORD
 CLangBarItemImeButton::_MenuItem_GetToggleEngTypoFlag(CLangBarItemImeButton *_this, UINT wID)
 {
     UNUSED(_this);
-    return (dwOptionFlag & ENGTYPO_TO_HANGUL) ? 1 : 0;
+    return (dwOptionFlag & HANENG_AUTOCORRECT) ? 1 : 0;
 }
 
 DWORD

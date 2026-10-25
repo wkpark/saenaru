@@ -170,7 +170,7 @@ public:
     HRESULT _DoReconvert(TfEditCookie ec, ITfContext *pContext);
     void _LocateCandidateList(TfEditCookie ec, ITfContext *pContext, ITfRange *pRange);
 
-    // the hangul typed in the english mode (typoconv.cpp)
+    // the hangul typed in the english mode and the reverse (typoconv.cpp)
     BOOL _HandleEngTypo(ITfContext *pContext, WPARAM wParam, WCHAR ch, BOOL fTest);
     void _ResetEngTypo();
     void _SetHangulMode(BOOL fHangul);
@@ -241,6 +241,7 @@ private:
     int _cchEngTypo;
     BOOL _fEngTypoOff;      // the caret is moved in the word
     BOOL _fEngTypoUndo;     // just after the conversion
+    BOOL _fEngTypoToEng;    // converted to the english
     WCHAR _achEngTypoEng[ENGTYPO_BUFSIZE];
     WCHAR _achEngTypoHan[ENGTYPO_BUFSIZE];
 

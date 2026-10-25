@@ -399,6 +399,38 @@ static void TestEngTypo(void)
     set_keyboard(LAYOUT_OLD2BUL);
 }
 
+static void CheckHanTypo(LPCWSTR eng, LPCWSTR expected)
+{
+    WCHAR han[ENGTYPO_MAXLEN + 1];
+    char name[64];
+
+    hangul_han_typo(eng, han, ARRAYSIZE(han));
+    wsprintfA(name, "han typo: %ls", eng);
+    CheckStr(name, expected, han);
+}
+
+static void TestHanTypo(void)
+{
+    CheckHanTypo(L"hello", L"");    // no dictionary
+    CheckInt("engwords.dic: load", TRUE, hangul_load_eng_words(TEXT("engwords.dic")));
+
+    CheckHanTypo(L"hello", L"ㅗ듸ㅐ"); // ㅣ+ㅣ is composed
+    CheckHanTypo(L"Hello", L"ㅗ듸ㅐ"); // any upper case letters
+    CheckHanTypo(L"ok", L"ㅐㅏ");       // vowels only
+    CheckHanTypo(L"water", L"ㅈㅁㅅㄷㄱ"); // consonants only
+
+    // syllables, not english words, the jamos for chatting
+    CheckHanTypo(L"go", L"");     // 해
+    CheckHanTypo(L"dkssud", L""); // 안녕
+    CheckHanTypo(L"zzz", L"");    // ㅋㅋㅋ
+    CheckHanTypo(L"bb", L"");     // ㅠㅠ
+    CheckHanTypo(L"dd", L"");     // ㅇㅇ
+    CheckHanTypo(L"ac", L"");     // ㅁㅊ
+
+    hangul_free_eng_words();
+    CheckHanTypo(L"hello", L"");
+}
+
 static void TestDictionary(void)
 {
     WCHAR buf[1024 + 2];
@@ -473,6 +505,7 @@ int main(void)
     TestHangul3();
     TestJamo();
     TestEngTypo();
+    TestHanTypo();
     TestDictionary();
     TestHanjaIndex();
 

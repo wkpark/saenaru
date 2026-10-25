@@ -62,7 +62,7 @@
 #define HANJA_CAND_WITH_SPACE  0x00001000
 #define SEARCH_SIMILAR_WORDS   0x00002000
 #define USE_CTRL_SPACE         0x00004000
-#define ENGTYPO_TO_HANGUL      0x00008000
+#define HANENG_AUTOCORRECT      0x00008000
 #define SCANCODE_BASED         0x00010000
 
 #define SAENARU_ONTHESPOT      0x00020000
@@ -122,11 +122,14 @@ void hangul_ic_backspace(HangulIC *);
 BOOL hangul_ic_restorable(HangulIC *);
 void hangul_ic_set_syllable(HangulIC *, WCHAR);
 
-// the hangul typed in the english mode (engtypo.c)
+// the hangul typed in the english mode and the reverse (engtypo.c)
 #define ENGTYPO_MAXLEN  32
 BOOL hangul_is_old2bul(void);
 int hangul_eng_to_syllables(LPCWSTR, LPWSTR, int);
 int hangul_eng_typo(LPCWSTR, LPWSTR, int);
+BOOL hangul_load_eng_words(LPCTSTR);
+void hangul_free_eng_words(void);
+int hangul_han_typo(LPCWSTR, LPWSTR, int);
 
 int hangul_del_prev(LPWSTR);
 WCHAR PASCAL keyToHangulKey(WCHAR);

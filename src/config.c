@@ -710,7 +710,7 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                     break;
         
                 case PSN_APPLY:
-                    dwTemp = dwOptionFlag & ENGTYPO_TO_HANGUL; // the TIP only
+                    dwTemp = dwOptionFlag & HANENG_AUTOCORRECT; // the TIP only
                     if (IsDlgButtonChecked(hDlg, IDC_COMPOSITE_TYPING))
                         dwTemp |= COMPOSITE_TYPING;
                     if (IsDlgButtonChecked(hDlg, IDC_CONCURRENT_TYPING))
