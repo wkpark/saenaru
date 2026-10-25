@@ -2,14 +2,12 @@
  * The hangul typed in the english mode, and the english typed in the hangul
  * mode on the 2-set keyboard.
  * "dkssud" -> "안녕", but not english words like as "the" -> "솓".
- * "ㅗ디ㅣㅐ" -> "hello" with the english words of engwords.dic.
+ * "ㅗ듸ㅐ" -> "hello". Both check the keys typed with engwords.dic.
  */
 
 #include <windows.h>
-#include <stdlib.h>
 #include <string.h>
 #include "hangul.h"
-#include "engwords.h"
 
 /*
  * Type the keys with the hangul automata. *pfCho and *pfJung are set if the
@@ -96,11 +94,6 @@ int hangul_eng_to_syllables(LPCWSTR pszEng, LPWSTR pszHan, int cch)
     return n;
 }
 
-static int CompareWord(const void *a, const void *b)
-{
-    return strcmp(*(const char **)a, *(const char **)b);
-}
-
 static void ToLowerWord(LPCWSTR pszEng, char *pszWord)
 {
     int i;
@@ -111,24 +104,33 @@ static void ToLowerWord(LPCWSTR pszEng, char *pszWord)
 }
 
 /*
+ * The english words of engwords.dic, the sorted lower case words, one per
+ * line, after the comment lines starting with '#'. The file is mapped, so
+ * the pages are shared by the processes and only the pages searched are read.
+ */
+static const char *s_pWordFile;
+static const char *s_pWords;
+static const char *s_pWordsEnd;
+
+/*
  * The hangul syllables of the english typo. Returns the length of pszHan,
- * 0 if it is not a typo of the hangul or it is an english word.
+ * 0 if it is not a typo of the hangul, it is an english word, or
+ * engwords.dic is not loaded.
  * Two letters like as "gh" (호) are often abbreviations, so 3 letters at least.
  */
 int hangul_eng_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
     char szWord[ENGTYPO_MAXLEN + 1];
-    const char *pszWord = szWord;
     int n;
 
     pszHan[0] = L'\0';
-    if (!hangul_is_old2bul() || lstrlenW(pszEng) < 3)
+    if (s_pWords == NULL || !hangul_is_old2bul() || lstrlenW(pszEng) < 3)
         return 0;
     if ((n = hangul_eng_to_syllables(pszEng, pszHan, cch)) == 0)
         return 0;
 
     ToLowerWord(pszEng, szWord);
-    if (bsearch(&pszWord, eng_words, ARRAYSIZE(eng_words), sizeof(eng_words[0]), CompareWord) != NULL)
+    if (hangul_is_eng_word(szWord))
     {
         pszHan[0] = L'\0';
         return 0;
@@ -136,38 +138,30 @@ int hangul_eng_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
     return n;
 }
 
-/*
- * The english words for the english typed in the hangul mode.
- * engwords.dic has the sorted lower case words, one per line,
- * after the comment lines starting with '#'.
- */
-static char *s_pWordFile;
-static const char *s_pWords;
-static const char *s_pWordsEnd;
-
 BOOL hangul_load_eng_words(LPCTSTR pszFile)
 {
-    HANDLE hFile;
-    DWORD cb, cbRead;
-    char *p;
+    HANDLE hFile, hMap;
+    DWORD cb;
+    const char *p;
 
     if (s_pWords != NULL)
         return TRUE;
 
-    hFile = CreateFile(pszFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    hFile = CreateFile(pszFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, OPEN_EXISTING,
+                       FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE)
         return FALSE;
 
     cb = GetFileSize(hFile, NULL);
-    p = (cb != INVALID_FILE_SIZE && cb > 0) ? (char *)HeapAlloc(GetProcessHeap(), 0, cb) : NULL;
-    if (p == NULL || !ReadFile(hFile, p, cb, &cbRead, NULL) || cbRead != cb)
-    {
-        if (p != NULL)
-            HeapFree(GetProcessHeap(), 0, p);
-        CloseHandle(hFile);
-        return FALSE;
-    }
+    hMap = (cb != INVALID_FILE_SIZE && cb > 0) ? CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL) : NULL;
     CloseHandle(hFile);
+    if (hMap == NULL)
+        return FALSE;
+    // the view keeps the mapping
+    p = (const char *)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+    CloseHandle(hMap);
+    if (p == NULL)
+        return FALSE;
 
     s_pWordFile = p;
     s_pWordsEnd = p + cb;
@@ -184,7 +178,7 @@ BOOL hangul_load_eng_words(LPCTSTR pszFile)
 void hangul_free_eng_words(void)
 {
     if (s_pWordFile != NULL)
-        HeapFree(GetProcessHeap(), 0, s_pWordFile);
+        UnmapViewOfFile(s_pWordFile);
     s_pWordFile = NULL;
     s_pWords = s_pWordsEnd = NULL;
 }

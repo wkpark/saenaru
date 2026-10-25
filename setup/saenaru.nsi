@@ -209,7 +209,17 @@ Section "새나루 입력기" SecBody
   File "${RESOURCEDIR}\symwin.dic"
   File "${RESOURCEDIR}\nabi.dic"
   File "${RESOURCEDIR}\jinsuk.dic"
+  # engwords.dic is mapped by the applications using the TIP.
+  # if it can not be replaced, rename it on next reboot.
+  ClearErrors
+  SetOverwrite try
   File "${RESOURCEDIR}\engwords.dic"
+  IfErrors 0 EngWordsDone
+  GetTempFileName $3 $INSTDIR
+  File /oname=$3 "${RESOURCEDIR}\engwords.dic"
+  Rename /REBOOTOK $3 $INSTDIR\engwords.dic
+  EngWordsDone:
+  SetOverwrite lastused
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
   File "${RESOURCEDIR}\old2set3set.reg"

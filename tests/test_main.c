@@ -376,6 +376,10 @@ static void CheckTypo(LPCWSTR eng, LPCWSTR expected)
 
 static void TestEngTypo(void)
 {
+    // the english words are not known without engwords.dic
+    CheckTypo(L"dkssud", L"");
+    CheckInt("engwords.dic: load for the english mode", TRUE, hangul_load_eng_words(TEXT("engwords.dic")));
+
     CheckTypo(L"dkssudgktpdy", L"안녕하세요");
     CheckTypo(L"gksrmf", L"한글");
     CheckTypo(L"gksrmfdl", L"한글이");
@@ -397,10 +401,25 @@ static void TestEngTypo(void)
     CheckTypo(L"gksrmfgksrmfgksrmfgksrmfgksrmfrk", L"한글한글한글한글한글가"); // 32 letters
     CheckTypo(L"dkssudgktpdydkssudgktpdydkssudgkt", L"");  // 33 letters
 
+    // COMPOSITE_TYPING types more english words into syllables
+    dwOptionFlag |= COMPOSITE_TYPING;
+    CheckTypo(L"dkssud", L"안녕");
+    CheckTypo(L"able", L"");
+    CheckTypo(L"name", L"");    // 무드
+    CheckTypo(L"window", L"");  // 쟈우재
+    dwOptionFlag &= ~COMPOSITE_TYPING;
+
+    // and the compose maps of the language bar
+    set_compose(3);
+    CheckTypo(L"chord", L"");   // 쵂
+    set_keyboard(LAYOUT_OLD2BUL);
+
     // only the standard 2-set keyboard
     set_keyboard(LAYOUT_3FIN);
     CheckTypo(L"gksrmf", L"");
     set_keyboard(LAYOUT_OLD2BUL);
+
+    hangul_free_eng_words();
 }
 
 static void CheckHanTypo(LPCWSTR eng, LPCWSTR expected)
@@ -434,6 +453,13 @@ static void TestHanTypo(void)
     // the jamos for chatting converted now (review). not english words would be better.
     CheckHanTypo(L"nb", L"ㅜㅠ");
     CheckHanTypo(L"gee", L"ㅎㄸ"); // ㄷ+ㄷ is composed
+
+    // the same keys are composed by the options
+    dwOptionFlag |= COMPOSITE_TYPING;
+    CheckHanTypo(L"hello", L"되ㅒ");
+    CheckHanTypo(L"korea", L"ㅏ갣ㅁ");
+    CheckHanTypo(L"name", L"");   // 무드, syllables
+    dwOptionFlag &= ~COMPOSITE_TYPING;
 
     // only the standard 2-set keyboard
     set_keyboard(LAYOUT_3FIN);
@@ -584,6 +610,7 @@ static void TestTypoKeys(void)
     HangulTypo t;
     BOOL fHangul;
     char actions[64];
+    LPCSTR keys;
 
     hangul_load_eng_words(TEXT("engwords.dic"));
 
@@ -608,6 +635,11 @@ static void TestTypoKeys(void)
     CheckTypoKeys("han: hello (off)", TRUE, "hello ", "......", TRUE);
 #endif
     CheckTypoKeys("han: gksrmf", TRUE, "gksrmf ", ".......", TRUE);
+#if ENGTYPO_HAN_TO_ENG
+    // <BACKSPACE> deletes a jamo, not a key. the next word after <ENTER>.
+    CheckTypoKeys("han: backspace, then hello", TRUE, "rk\bhello ", ".........", TRUE);
+    CheckTypoKeys("han: backspace, enter, then hello", TRUE, "rk\b\nhello ", ".........C", FALSE);
+#endif
 
     // the mode changed not by the hangul key: a new word
     CheckTypoKeys("mode: hangul backspace, then english", TRUE, "rk\b|dkssud ", ".........C", TRUE);
@@ -651,6 +683,33 @@ static void TestTypoKeys(void)
     hangul_typo_key(&t, 'D', L'd', FALSE, FALSE, FALSE, FALSE, FALSE);
     CheckInt("keydown: dkssud", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
     CheckStr("keydown: the word", L"dkssud", t.word);
+#if ENGTYPO_HAN_TO_ENG
+    hangul_typo_init(&t);
+    hangul_typo_key(&t, 'O', L'o', TRUE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'K', L'k', TRUE, TRUE, FALSE, FALSE, FALSE);
+    CheckInt("keydown: han ok", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', TRUE, TRUE, FALSE, FALSE, FALSE));
+
+    // OnTestKeyDown() twice for a letter eaten in the hangul mode
+    hangul_typo_init(&t);
+    for (keys = "hello"; *keys; keys++)
+    {
+        hangul_typo_key(&t, (UINT)(*keys - 'a' + 'A'), (WCHAR)*keys, TRUE, TRUE, FALSE, FALSE, TRUE);
+        hangul_typo_key(&t, (UINT)(*keys - 'a' + 'A'), (WCHAR)*keys, TRUE, TRUE, FALSE, FALSE, TRUE);
+        hangul_typo_key(&t, (UINT)(*keys - 'a' + 'A'), (WCHAR)*keys, TRUE, TRUE, FALSE, FALSE, FALSE);
+    }
+    CheckStr("test twice: han word", L"hello", t.word);
+
+    // the word of the undo is the hangul typed with the options
+    dwOptionFlag |= COMPOSITE_TYPING;
+    hangul_typo_init(&t);
+    fHangul = TRUE;
+    TypoKeys(&t, &fHangul, "hello ", actions);
+    CheckInt("moachigi: hello", 0, lstrcmpA(actions, ".....C"));
+    CheckInt("moachigi: the english mode", FALSE, fHangul);
+    CheckStr("moachigi: the hangul", L"되ㅒ", t.han);
+    CheckStr("moachigi: the english", L"hello", t.eng);
+    dwOptionFlag &= ~COMPOSITE_TYPING;
+#endif
 
     // the shift, the composition and the ctrl stop the undo
     hangul_typo_init(&t);

@@ -53,13 +53,14 @@ static BOOL IsCtrlOrAlt()
 //
 // LoadEngWords
 //
-// engwords.dic for the hangul mode, loaded at the first use.
+// engwords.dic for both of the directions, mapped at the first <SPACE>.
+// It is tried again at the next <SPACE> if not loaded.
 //----------------------------------------------------------------------------
 
 static void LoadEngWords()
 {
     static BOOL s_fLoaded = FALSE;
-    TCHAR szPath[MAX_PATH];
+    TCHAR szPath[MAX_PATH + 32]; // GetSaenaruDirectory() does not check the size
     int len;
 
     if (s_fLoaded)
@@ -68,19 +69,15 @@ static void LoadEngWords()
     EnterCriticalSection(&g_cs);
     if (!s_fLoaded)
     {
-        len = GetSaenaruDirectory(szPath, MAX_PATH - 16);
-        if (len > 0 && szPath[len - 1] != TEXT('\\'))
-            szPath[len++] = TEXT('\\');
-        lstrcpy(szPath + len, TEXT("engwords.dic"));
-        if (hangul_load_eng_words(szPath))
+        len = GetSaenaruDirectory(szPath, MAX_PATH);
+        if (len > 0 && len < MAX_PATH)
         {
-            DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s loaded\n"), szPath));
+            if (szPath[len - 1] != TEXT('\\'))
+                szPath[len++] = TEXT('\\');
+            lstrcpy(szPath + len, TEXT("engwords.dic"));
+            s_fLoaded = hangul_load_eng_words(szPath);
+            DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s loaded = %d\n"), szPath, s_fLoaded));
         }
-        else
-        {
-            DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s not loaded\n"), szPath));
-        }
-        s_fLoaded = TRUE;
     }
     LeaveCriticalSection(&g_cs);
 }
@@ -155,7 +152,7 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
         return FALSE;
 
     fHangul = (GetConversionStatus() & CMODE_HANGUL) != 0;
-    if (fHangul && ENGTYPO_HAN_TO_ENG)
+    if (wParam == VK_SPACE)
         LoadEngWords();
 
 #ifdef DEBUG
