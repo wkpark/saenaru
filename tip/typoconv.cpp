@@ -54,21 +54,23 @@ static BOOL IsCtrlOrAlt()
 // LoadEngWords
 //
 // engwords.dic for both of the directions, mapped at the first <SPACE>.
-// It is tried again at the next <SPACE> if not loaded.
+// If it is not loaded, it is tried again a minute later, not at every <SPACE>.
 //----------------------------------------------------------------------------
 
 static void LoadEngWords()
 {
     static BOOL s_fLoaded = FALSE;
+    static DWORD s_dwTried = 0; // the tick of the last try, 0 for none
     TCHAR szPath[MAX_PATH + 32]; // GetSaenaruDirectory() does not check the size
     int len;
 
-    if (s_fLoaded)
+    if (s_fLoaded || (s_dwTried != 0 && GetTickCount() - s_dwTried < 60 * 1000))
         return;
 
     EnterCriticalSection(&g_cs);
-    if (!s_fLoaded)
+    if (!s_fLoaded && (s_dwTried == 0 || GetTickCount() - s_dwTried >= 60 * 1000))
     {
+        s_dwTried = GetTickCount() | 1;
         len = GetSaenaruDirectory(szPath, MAX_PATH);
         if (len > 0 && len < MAX_PATH)
         {
@@ -80,6 +82,39 @@ static void LoadEngWords()
         }
     }
     LeaveCriticalSection(&g_cs);
+}
+
+//+---------------------------------------------------------------------------
+//
+// IsKeyboardDisabled
+//
+// The keyboard disabled by the application, like as ImmAssociateContext(NULL).
+// The open/close compartment is not checked. The modes are not kept there.
+//----------------------------------------------------------------------------
+
+static BOOL IsKeyboardDisabled(ITfContext *pContext)
+{
+    static const GUID *c_rgGuid[] = {&GUID_COMPARTMENT_KEYBOARD_DISABLED, &GUID_COMPARTMENT_EMPTYCONTEXT};
+    ITfCompartmentMgr *pCompartmentMgr;
+    ITfCompartment *pCompartment;
+    VARIANT var;
+    BOOL fDisabled = FALSE;
+    UINT i;
+
+    if (pContext == NULL || pContext->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
+        return FALSE;
+    for (i = 0; i < ARRAYSIZE(c_rgGuid) && !fDisabled; i++)
+    {
+        if (pCompartmentMgr->GetCompartment(*c_rgGuid[i], &pCompartment) != S_OK)
+            continue;
+        VariantInit(&var);
+        if (pCompartment->GetValue(&var) == S_OK && var.vt == VT_I4 && var.lVal != 0)
+            fDisabled = TRUE;
+        VariantClear(&var);
+        pCompartment->Release();
+    }
+    pCompartmentMgr->Release();
+    return fDisabled;
 }
 
 //+---------------------------------------------------------------------------
@@ -148,7 +183,9 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     HRESULT hr;
     int action;
 
-    if (!(dwOptionFlag & HANENG_AUTOCORRECT))
+    // only <SPACE> and <BACKSPACE> are eaten
+    if (!(dwOptionFlag & HANENG_AUTOCORRECT) ||
+            ((wParam == VK_SPACE || wParam == VK_BACK) && IsKeyboardDisabled(pContext)))
     {
         // a new word when it is turned on again, also by the option dialog
         _ResetEngTypo();
@@ -247,14 +284,15 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     LPCWSTR pszTyped, pszNew;
     ULONG cFetched;
     LONG cchShift;
-    BOOL fHangul, fEmpty, fConvert = FALSE;
+    BOOL fHangul, fComposing, fEmpty, fConvert = FALSE;
     int len;
     HRESULT hr = E_FAIL;
 
     fHangul = (GetConversionStatus() & CMODE_HANGUL) != 0;
 
     // the syllable composing is a part of the word
-    if (_IsComposing())
+    fComposing = _IsComposing();
+    if (fComposing)
     {
         if (_pComposition->GetRange(&pRangeComposition) != S_OK)
             pRangeComposition = NULL;
@@ -276,6 +314,11 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
         pRange->ShiftEndToRange(ec, pRangeComposition, TF_ANCHOR_END);
         pRange->Collapse(ec, TF_ANCHOR_END);
         pRangeComposition->Release();
+    }
+    else if (fComposing)
+    {
+        // no range of the composition. the selection covering it.
+        pRange->Collapse(ec, TF_ANCHOR_END);
     }
 
     if (pRange->IsEmpty(ec, &fEmpty) != S_OK)

@@ -33,7 +33,7 @@ static int ReadWords(FILE *fp, int n)
     char line[256];
     int i, len;
 
-    while (fgets(line, sizeof(line), fp) != NULL && n < MAXWORDS)
+    while (fgets(line, sizeof(line), fp) != NULL)
     {
         line[strcspn(line, "\r\n")] = '\0';
         len = (int)strlen(line);
@@ -48,6 +48,11 @@ static int ReadWords(FILE *fp, int n)
         }
         if (i < len)
             continue;
+        if (n >= MAXWORDS)
+        {
+            fprintf(stderr, "gen_engwords: more than %d words\n", MAXWORDS);
+            exit(1);
+        }
         words[n++] = _strdup(line);
     }
     return n;

@@ -166,6 +166,8 @@ BOOL hangul_load_eng_words(LPCTSTR pszFile)
         while (p < s_pWordsEnd && *p++ != '\n')
             ;
     }
+    // the other threads read s_pWords without the lock
+    MemoryBarrier();
     s_pWords = p;
     return TRUE;
 }
@@ -180,13 +182,15 @@ void hangul_free_eng_words(void)
 
 BOOL hangul_is_eng_word(const char *pszWord)
 {
-    const char *lo = s_pWords, *hi = s_pWordsEnd;
+    const char *lo = s_pWords, *hi;
     const char *start, *end, *next;
     size_t len = strlen(pszWord), n;
     int cmp;
 
     if (lo == NULL)
         return FALSE;
+    MemoryBarrier(); // s_pWordsEnd is set before s_pWords
+    hi = s_pWordsEnd;
 
     // binary search of the lines in [lo, hi)
     while (lo < hi)
