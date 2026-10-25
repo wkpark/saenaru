@@ -641,6 +641,16 @@ static void TestTypoKeys(void)
     // OnKeyDown() without OnTestKeyDown()
     hangul_typo_init(&t);
     CheckInt("keydown: space", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
+    hangul_typo_key(&t, 'D', L'd', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'K', L'k', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'S', L's', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'S', L's', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'X', L'x', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, VK_BACK, L'\b', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'U', L'u', FALSE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'D', L'd', FALSE, FALSE, FALSE, FALSE, FALSE);
+    CheckInt("keydown: dkssud", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
+    CheckStr("keydown: the word", L"dkssud", t.word);
 
     // the shift, the composition and the ctrl stop the undo
     hangul_typo_init(&t);

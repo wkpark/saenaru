@@ -371,7 +371,7 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
             {
                 hangul_typo_reset_word(t, TRUE); // a jamo is deleted, not a key
             }
-            else if (fTest)
+            else
             {
                 // a typo fixed in the word
                 if (t->len > 0)
@@ -399,8 +399,9 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
         default:
             if (IsAsciiLetter(ch))
             {
-                // OnKeyDown() for the letters eaten in the hangul mode
-                if (fTest == fHangul)
+                // OnKeyDown() for the letters eaten in the hangul mode.
+                // some applications call OnKeyDown() without OnTestKeyDown().
+                if (fHangul && fTest)
                     break;
                 if (t->len < ENGTYPO_MAXLEN)
                 {
