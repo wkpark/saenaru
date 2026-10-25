@@ -395,6 +395,11 @@ static void TestEngTypo(void)
     CheckTypo(L"the", L"");
     CheckTypo(L"with", L"");
     CheckTypo(L"The", L"");
+    // the commands and terms of engwords-extra.txt
+    CheckTypo(L"git", L"");     // 햣
+    CheckTypo(L"sudo", L"");    // 녀애
+    CheckTypo(L"env", L"");     // 둪
+    CheckTypo(L"dir", L"");     // 약
     // other upper case letters, digits and too long words
     CheckTypo(L"Dkssud", L"");
     CheckTypo(L"dkssud1", L"");
@@ -439,7 +444,9 @@ static void TestHanTypo(void)
 
     CheckHanTypo(L"hello", L"ㅗ듸ㅐ"); // ㅣ+ㅣ is composed
     CheckHanTypo(L"Hello", L"ㅗ듸ㅐ"); // any upper case letters
-    CheckHanTypo(L"ok", L"ㅐㅏ");       // vowels only
+    CheckHanTypo(L"you", L"ㅛㅐㅕ");    // vowels only
+    CheckHanTypo(L"npm", L"ㅞㅡ");      // engwords-extra.txt
+    CheckHanTypo(L"git", L"");          // 햣
     CheckHanTypo(L"water", L"ㅈㅁㅅㄷㄱ"); // consonants only
 
     // syllables, not english words, the jamos for chatting
@@ -449,9 +456,13 @@ static void TestHanTypo(void)
     CheckHanTypo(L"bb", L"");     // ㅠㅠ
     CheckHanTypo(L"dd", L"");     // ㅇㅇ
     CheckHanTypo(L"ac", L"");     // ㅁㅊ
+    // 3 letters at least like as the english mode
+    CheckHanTypo(L"ok", L"");     // ㅐㅏ
+    CheckHanTypo(L"nb", L"");     // ㅜㅠ
+    CheckHanTypo(L"mn", L"");     // ㅡㅜ
+    CheckHanTypo(L"ml", L"");     // ㅢ
 
-    // the jamos for chatting converted now (review). not english words would be better.
-    CheckHanTypo(L"nb", L"ㅜㅠ");
+    // 3 letters of the jamos for chatting converted now. not english words would be better.
     CheckHanTypo(L"gee", L"ㅎㄸ"); // ㄷ+ㄷ is composed
 
     // the same keys are composed by the options
@@ -685,9 +696,10 @@ static void TestTypoKeys(void)
     CheckStr("keydown: the word", L"dkssud", t.word);
 #if ENGTYPO_HAN_TO_ENG
     hangul_typo_init(&t);
-    hangul_typo_key(&t, 'O', L'o', TRUE, FALSE, FALSE, FALSE, FALSE);
-    hangul_typo_key(&t, 'K', L'k', TRUE, TRUE, FALSE, FALSE, FALSE);
-    CheckInt("keydown: han ok", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', TRUE, TRUE, FALSE, FALSE, FALSE));
+    hangul_typo_key(&t, 'Y', L'y', TRUE, FALSE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'O', L'o', TRUE, TRUE, FALSE, FALSE, FALSE);
+    hangul_typo_key(&t, 'U', L'u', TRUE, TRUE, FALSE, FALSE, FALSE);
+    CheckInt("keydown: han you", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', TRUE, TRUE, FALSE, FALSE, FALSE));
 
     // OnTestKeyDown() twice for a letter eaten in the hangul mode
     hangul_typo_init(&t);

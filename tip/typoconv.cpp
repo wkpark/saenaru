@@ -149,7 +149,11 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     int action;
 
     if (!(dwOptionFlag & HANENG_AUTOCORRECT))
+    {
+        // a new word when it is turned on again, also by the option dialog
+        _ResetEngTypo();
         return FALSE;
+    }
 
     fHangul = (GetConversionStatus() & CMODE_HANGUL) != 0;
     if (wParam == VK_SPACE)

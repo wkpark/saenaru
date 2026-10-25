@@ -10,17 +10,16 @@
 #include "hangul.h"
 
 /*
- * Type the keys with the hangul automata. *pfCho and *pfJung are set if the
- * keys have consonants and vowels. Returns the length of pszHan.
+ * Type the keys with the hangul automata. Returns the length of pszHan,
+ * 0 if a key is not a consonant nor a vowel.
  */
-static int TypeHangul(LPCWSTR pszEng, BOOL fAnyCase, LPWSTR pszHan, int cch, BOOL *pfCho, BOOL *pfJung)
+static int TypeHangul(LPCWSTR pszEng, BOOL fAnyCase, LPWSTR pszHan, int cch)
 {
     HangulIC hic;
     TCHAR lcs[128];
     WCHAR c, hkey;
     int i, n = 0, ncs;
 
-    *pfCho = *pfJung = FALSE;
     if (hangul_automata == NULL || lstrlenW(pszEng) > ENGTYPO_MAXLEN)
         return 0;
 
@@ -39,11 +38,7 @@ static int TypeHangul(LPCWSTR pszEng, BOOL fAnyCase, LPWSTR pszHan, int cch, BOO
         }
 
         hkey = keyToHangulKey(c);
-        if (hangul_is_choseong(hkey))
-            *pfCho = TRUE;
-        else if (hangul_is_jungseong(hkey))
-            *pfJung = TRUE;
-        else
+        if (!hangul_is_choseong(hkey) && !hangul_is_jungseong(hkey))
             return 0;
 
         ncs = 0;
@@ -83,8 +78,7 @@ static BOOL IsSyllables(LPCWSTR psz)
  */
 int hangul_eng_to_syllables(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
-    BOOL fCho, fJung;
-    int n = TypeHangul(pszEng, FALSE, pszHan, cch, &fCho, &fJung);
+    int n = TypeHangul(pszEng, FALSE, pszHan, cch);
 
     if (n == 0 || !IsSyllables(pszHan))
     {
@@ -224,21 +218,20 @@ BOOL hangul_is_eng_word(const char *pszWord)
  * The english word typed in the hangul mode. pszHan is the hangul typed by
  * the keys. Returns the length of pszHan, 0 if it is not an english word.
  * The hangul has a jamo not composed: "해" (go) is not an english typo.
- * Not the jamos for chatting: the same jamos like as "ㅠㅠ" (bb), "ㅇㅇ" (dd),
- * and two consonants like as "ㅁㅊ" (ac).
+ * 3 letters at least like as the english mode, not the jamos for chatting
+ * like as "ㅜㅠ" (nb), "ㅁㅊ" (ac), nor the same jamos like as "ㅋㅋㅋ" (zzz).
  */
 int hangul_han_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
     char szWord[ENGTYPO_MAXLEN + 1];
-    BOOL fCho, fJung;
     int i, n;
 
     pszHan[0] = L'\0';
-    if (!hangul_is_old2bul())
+    if (!hangul_is_old2bul() || lstrlenW(pszEng) < 3)
         return 0;
 
-    n = TypeHangul(pszEng, TRUE, pszHan, cch, &fCho, &fJung);
-    if (n == 0 || IsSyllables(pszHan) || (!fJung && lstrlenW(pszEng) < 3))
+    n = TypeHangul(pszEng, TRUE, pszHan, cch);
+    if (n == 0 || IsSyllables(pszHan))
     {
         pszHan[0] = L'\0';
         return 0;
