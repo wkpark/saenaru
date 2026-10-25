@@ -72,8 +72,14 @@ static void LoadEngWords()
         if (len > 0 && szPath[len - 1] != TEXT('\\'))
             szPath[len++] = TEXT('\\');
         lstrcpy(szPath + len, TEXT("engwords.dic"));
-        if (!hangul_load_eng_words(szPath))
+        if (hangul_load_eng_words(szPath))
+        {
+            DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s loaded\n"), szPath));
+        }
+        else
+        {
             DEBUGPRINTFEX(100, (TEXT("LoadEngWords() %s not loaded\n"), szPath));
+        }
         s_fLoaded = TRUE;
     }
     LeaveCriticalSection(&g_cs);
@@ -152,6 +158,17 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     if (fHangul && ENGTYPO_HAN_TO_ENG)
         LoadEngWords();
 
+#ifdef DEBUG
+    if (wParam == VK_SPACE)
+    {
+        WCHAR achHan[ENGTYPO_MAXLEN + 1];
+
+        hangul_typo_check(&_typo, fHangul, achHan, ARRAYSIZE(achHan));
+        DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_HandleEngTypo(%d) <SPACE> hangul = %d, word = %s, off = %d, typo = %s\n"),
+                            fTest, fHangul, _typo.word, _typo.off, achHan));
+    }
+#endif
+
     action = hangul_typo_key(&_typo, (UINT)wParam, ch, fHangul, _IsComposing(),
                              IsCtrlOrAlt(), (GetKeyState(VK_SHIFT) & 0x8000) != 0, fTest);
     if (action == HANGUL_TYPO_NONE)
@@ -225,7 +242,7 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     WCHAR achHan[ENGTYPO_MAXLEN + 1];
     WCHAR achNew[ENGTYPO_MAXLEN + 2];
     TF_SELECTION tfSelection;
-    ITfRange *pRange;
+    ITfRange *pRange, *pRangeComposition = NULL;
     LPCWSTR pszTyped, pszNew;
     ULONG cFetched;
     LONG cchShift;
@@ -238,13 +255,27 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     // the syllable composing is a part of the word
     if (_IsComposing())
     {
+        if (_pComposition->GetRange(&pRangeComposition) != S_OK)
+            pRangeComposition = NULL;
         _TerminateComposition(ec);
         hangul_ic_init(&ic);
     }
 
     if (pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) != S_OK || cFetched != 1)
+    {
+        SafeRelease(pRangeComposition);
         return E_FAIL;
+    }
     pRange = tfSelection.range;
+
+    // the word ends at the syllable composed. the selection may cover it
+    // (fInterimChar) or may be the caret before it.
+    if (pRangeComposition != NULL)
+    {
+        pRange->ShiftEndToRange(ec, pRangeComposition, TF_ANCHOR_END);
+        pRange->Collapse(ec, TF_ANCHOR_END);
+        pRangeComposition->Release();
+    }
 
     if (pRange->IsEmpty(ec, &fEmpty) != S_OK)
         goto Exit;
