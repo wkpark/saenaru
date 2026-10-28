@@ -702,28 +702,34 @@ static void TestTypoKeys(void)
     CheckInt("twice: not a typo 1", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
     CheckInt("twice: not a typo 2", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
 
-    // the conversion checked at <SPACE> is kept for the TIP
+    // the word checked at <SPACE> is kept in typo for the TIP, not for the undo
     hangul_typo_init(&t);
+    fHangul = FALSE;
     TypoKeys(&t, &fHangul, "dkssud", actions);
-    CheckInt("check: test", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
-    CheckStr("check: the hangul", L"안녕", t.han);
-    CheckStr("check: the english", L"dkssud", t.eng);
+    CheckInt("check: test", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', fHangul, FALSE, FALSE, FALSE, TRUE));
+    CheckStr("check: the hangul", L"안녕", t.typo);
+    CheckStr("check: no undo", L"", t.han);
 
-    // not the same text on the screen. the application gets the <SPACE>.
+    // not the same text on the screen. the application gets the <SPACE>, and
+    // the undo of the conversion before is kept.
+    hangul_typo_init(&t);
+    fHangul = FALSE;
+    TypoKeys(&t, &fHangul, "dkssud |rkd", actions);
+    CheckInt("not the same: test", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', fHangul, FALSE, FALSE, FALSE, TRUE));
     hangul_typo_end(&t, FALSE);
-    CheckInt("not the same: no undo", FALSE, t.undo);
-    CheckInt("not the same: keydown", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
-    // not changed by the word not converted
-    TypoKeys(&t, &fHangul, "hello ", actions);
-    CheckStr("check: the hangul kept", L"안녕", t.han);
+    CheckStr("not the same: the word", L"", t.typo);
+    CheckStr("not the same: the hangul of the undo", L"안녕", t.han);
+    CheckStr("not the same: the english of the undo", L"dkssud", t.eng);
+    CheckInt("not the same: keydown", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', fHangul, FALSE, FALSE, FALSE, FALSE));
 
     // OnKeyDown() checks the word again, like as after the layout changed
     // for the <SPACE> eaten without OnKeyDown()
     hangul_typo_init(&t);
+    fHangul = FALSE;
     TypoKeys(&t, &fHangul, "dkssud", actions);
-    hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE);
+    CheckInt("keydown: test", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', fHangul, FALSE, FALSE, FALSE, TRUE));
     set_keyboard(LAYOUT_3FIN);
-    CheckInt("keydown: the layout changed", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
+    CheckInt("keydown: the layout changed", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', fHangul, FALSE, FALSE, FALSE, FALSE));
     set_keyboard(LAYOUT_OLD2BUL);
 
     // OnKeyDown() without OnTestKeyDown()

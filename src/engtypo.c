@@ -281,27 +281,20 @@ static void hangul_typo_reset_word(HangulTypo *t, BOOL fOff)
     t->len = 0;
     t->word[0] = L'\0';
     t->off = fOff;
+    t->typo[0] = L'\0';
 }
 
 /*
- * The conversion of the word, kept in eng and han for the TIP. They are not
- * changed for the word not converted. han is the hangul typed in the english
- * mode, or the hangul typed by the keys in the hangul mode.
- * engwords.dic should be loaded for both of the modes.
+ * The conversion of the word, kept in typo with the word for the TIP. typo
+ * is the hangul typed in the english mode, or the hangul typed by the keys
+ * in the hangul mode. engwords.dic should be loaded for both of the modes.
  */
 static BOOL hangul_typo_check(HangulTypo *t, BOOL fHangul)
 {
-    WCHAR achHan[ENGTYPO_MAXLEN + 1];
-
     if (t->off || t->len == 0)
         return FALSE;
-    if ((fHangul ? hangul_han_typo(t->word, achHan, ARRAYSIZE(achHan)) :
-                   hangul_eng_typo(t->word, achHan, ARRAYSIZE(achHan))) == 0)
-        return FALSE;
-    lstrcpynW(t->eng, t->word, ARRAYSIZE(t->eng));
-    lstrcpynW(t->han, achHan, ARRAYSIZE(t->han));
-    t->toEng = fHangul;
-    return TRUE;
+    return (fHangul ? hangul_han_typo(t->word, t->typo, ARRAYSIZE(t->typo)) :
+                      hangul_eng_typo(t->word, t->typo, ARRAYSIZE(t->typo))) > 0;
 }
 
 static BOOL IsAsciiLetter(WCHAR c)
@@ -322,10 +315,10 @@ static BOOL IsHangul(WCHAR c)
 
 /*
  * A key of the TIP. Returns HANGUL_TYPO_CONVERT for <SPACE> after a typo,
- * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The TIP checks
- * the text before the caret for them. It calls hangul_typo_end() after
- * HANGUL_TYPO_CONVERT, when OnKeyDown() converts the word or the text is
- * not the same.
+ * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The TIP eats
+ * the key only for the text before the caret, and calls hangul_typo_end()
+ * after HANGUL_TYPO_CONVERT, converted or not. The word of <SPACE> eaten
+ * without OnKeyDown() goes on.
  */
 int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fComposing,
                     BOOL fCtrlAlt, BOOL fShift, BOOL fTest)
@@ -428,12 +421,18 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
 }
 
 /*
- * The end of the word after HANGUL_TYPO_CONVERT. fConverted for the undo of
- * the conversion in eng and han.
+ * The end of the word after HANGUL_TYPO_CONVERT. The conversion is kept in
+ * eng and han for the undo only if converted.
  */
 void hangul_typo_end(HangulTypo *t, BOOL fConverted)
 {
-    t->undo = fConverted;
+    if (fConverted)
+    {
+        lstrcpynW(t->eng, t->word, ARRAYSIZE(t->eng));
+        lstrcpynW(t->han, t->typo, ARRAYSIZE(t->han));
+        t->toEng = t->hangul;
+        t->undo = TRUE;
+    }
     hangul_typo_reset_word(t, FALSE);
 }
 

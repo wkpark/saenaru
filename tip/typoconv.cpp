@@ -214,10 +214,9 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
     if (fTest)
     {
         // eaten only for the text before the caret. the caret may be moved
-        // by the mouse, and the field may be in english. <SPACE> not checked
-        // without the lock is eaten, and OnKeyDown() checks it again.
-        hr = _RequestEngTypoEditSession(pContext, action == HANGUL_TYPO_UNDO, TRUE);
-        if (hr == S_OK || (action == HANGUL_TYPO_CONVERT && hr == TF_E_SYNCHRONOUS))
+        // by the mouse, and the field may be in english. not eaten without
+        // the check, like as _IsReconvertKey().
+        if (_RequestEngTypoEditSession(pContext, action == HANGUL_TYPO_UNDO, TRUE) == S_OK)
             return TRUE;
         if (action == HANGUL_TYPO_UNDO)
         {
@@ -307,7 +306,7 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     LPCWSTR pszTyped, pszNew;
     ULONG cFetched;
     LONG cchShift;
-    BOOL fHangul, fToEng, fComposing, fEmpty, fConvert = FALSE;
+    BOOL fHangul, fComposing, fEmpty, fConvert = FALSE;
     int len;
     HRESULT hr = E_FAIL;
 
@@ -350,11 +349,18 @@ HRESULT CSaenaruTextService::_DoEngTypo(TfEditCookie ec, ITfContext *pContext, B
     if (pRange->IsEmpty(ec, &fEmpty) != S_OK)
         goto Exit;
 
-    // the text typed before the caret and the new text of the conversion
-    // checked at <SPACE>, the reverse for the undo
-    fToEng = _typo.toEng != fUndo;
-    pszTyped = fToEng ? _typo.han : _typo.eng;
-    pszNew = fToEng ? _typo.eng : _typo.han;
+    // the text typed before the caret and the new text. the word is checked
+    // at <SPACE> by hangul_typo_key() just before it.
+    if (fUndo)
+    {
+        pszTyped = _typo.toEng ? _typo.eng : _typo.han;
+        pszNew = _typo.toEng ? _typo.han : _typo.eng;
+    }
+    else
+    {
+        pszTyped = fHangul ? _typo.typo : _typo.word;
+        pszNew = fHangul ? _typo.word : _typo.typo;
+    }
 
     // one more char before the word: the space of the undo, or the start of
     // the word. the number of the chars is checked by GetText(), not by the shift.

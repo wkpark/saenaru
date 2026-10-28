@@ -17,10 +17,11 @@ typedef struct _tagHangulTypo {
     int   len;
     BOOL  off;      // the caret is moved in the word
     BOOL  hangul;   // the mode of the word
+    WCHAR typo[ENGTYPO_MAXLEN + 1]; // the hangul of the word checked at <SPACE>
     BOOL  undo;     // just after the conversion
-    BOOL  toEng;    // the conversion of eng and han is to the english
-    WCHAR eng[ENGTYPO_MAXLEN + 1];  // the words of the conversion checked at
-    WCHAR han[ENGTYPO_MAXLEN + 1];  // <SPACE>, also for the undo after it
+    BOOL  toEng;    // converted to the english
+    WCHAR eng[ENGTYPO_MAXLEN + 1];  // the words of the conversion
+    WCHAR han[ENGTYPO_MAXLEN + 1];
 } HangulTypo;
 
 // the actions of hangul_typo_key(). the TIP checks the text to eat the key.
