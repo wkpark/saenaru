@@ -129,6 +129,7 @@ int hangul_del_prev(LPWSTR);
 WCHAR PASCAL keyToHangulKey(WCHAR);
 WORD PASCAL checkDvorak(WORD);
 int PASCAL set_keyboard(UINT);
+BOOL hangul_is_old2bul(void);
 int PASCAL set_compose(UINT);
 int PASCAL set_automata(UINT);
 WCHAR PASCAL hangul_compose(WCHAR first, WCHAR last);

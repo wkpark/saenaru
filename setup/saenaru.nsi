@@ -773,7 +773,7 @@ Section "Uninstall"
   RMDir "$INSTDIR\Source\doc"
   RMDir "$INSTDIR\Source"
   RMDir "$INSTDIR\help"
-  RMDir "$INSTDIR"
+  RMDir /REBOOTOK "$INSTDIR"
 
   Delete "${SMPATH}\*.*"
   RMDir "${SMPATH}"

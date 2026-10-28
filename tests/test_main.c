@@ -400,6 +400,13 @@ static void TestEngTypo(void)
     CheckTypo(L"sudo", L"");    // 녀애
     CheckTypo(L"env", L"");     // 둪
     CheckTypo(L"dir", L"");     // 약
+    CheckTypo(L"div", L"");     // 얖
+    CheckTypo(L"goto", L"");    // 해새
+    CheckTypo(L"gpt", L"");     // 헷
+    CheckTypo(L"tty", L"");     // 쑈
+    // the words typed into the korean words are converted, except the commands
+    CheckTypo(L"chr", L"촉");
+    CheckTypo(L"dns", L"운");
     // other upper case letters, digits and too long words
     CheckTypo(L"Dkssud", L"");
     CheckTypo(L"dkssud1", L"");
@@ -461,6 +468,11 @@ static void TestHanTypo(void)
     CheckHanTypo(L"nb", L"");     // ㅜㅠ
     CheckHanTypo(L"mn", L"");     // ㅡㅜ
     CheckHanTypo(L"ml", L"");     // ㅢ
+    // the faces of the jamos
+    CheckHanTypo(L"dad", L"");    // ㅇㅁㅇ
+    CheckHanTypo(L"gag", L"");    // ㅎㅁㅎ
+    CheckHanTypo(L"dvd", L"");    // ㅇㅍㅇ
+    CheckHanTypo(L"add", L"ㅁㅇㅇ");
 
     // 3 letters of the jamos for chatting converted now. not english words would be better.
     CheckHanTypo(L"gee", L"ㅎㄸ"); // ㄷ+ㄷ is composed
@@ -675,6 +687,10 @@ static void TestTypoKeys(void)
     CheckTypoKeys("undo: not after a key", FALSE, "dkssud r\b", "......C..", TRUE);
     CheckTypoKeys("undo: not after a space", FALSE, "dkssud  \b", "......C..", TRUE);
     CheckTypoKeys("undo: once", FALSE, "dkssud \b\b", "......CU.", FALSE);
+    // not the undo, the <BACKSPACE> back in the previous word
+    CheckTypoKeys("undo: mode changed back", FALSE, "dkssud |\brkd ", "......C.....", FALSE);
+    CheckTypoKeys("undo: hangul mode changed back", TRUE, "hello |\bhello ", ".....C.......", TRUE);
+    CheckTypoKeys("undo: ctrl", TRUE, "hello ^\bdkssud ", ".....C........", FALSE);
 
     // OnTestKeyDown() twice gives the same answer
     hangul_typo_init(&t);

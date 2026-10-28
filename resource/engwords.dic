@@ -462,6 +462,7 @@ abrupter
 abruptest
 abruptly
 abruptness
+abs
 absalom
 abscess
 abscessed
@@ -504,6 +505,7 @@ absorbents
 absorbing
 absorbs
 absorption
+abspath
 abstain
 abstained
 abstainer
@@ -4349,6 +4351,7 @@ autocrat
 autocratic
 autocratically
 autocrats
+autofocus
 autograph
 autographed
 autographing
@@ -10559,6 +10562,7 @@ chagrining
 chagrinned
 chagrinning
 chagrins
+chai
 chain
 chained
 chaining
@@ -10670,6 +10674,7 @@ changeable
 changed
 changeling
 changelings
+changelog
 changeover
 changeovers
 changes
@@ -10875,6 +10880,8 @@ chauvinistic
 chauvinists
 chavez
 chayefsky
+chcp
+chdir
 che
 cheap
 cheapen
@@ -11047,6 +11054,7 @@ chews
 chewy
 cheyenne
 cheyennes
+chfn
 chgrp
 chi
 chianti
@@ -11243,6 +11251,8 @@ chivalry
 chivas
 chive
 chives
+chk
+chkdsk
 chloe
 chloride
 chlorides
@@ -11403,6 +11413,7 @@ chronologies
 chronology
 chronometer
 chronometers
+chroot
 chrysalides
 chrysalis
 chrysalises
@@ -11412,6 +11423,7 @@ chrysler
 chrysostom
 chrystal
 chsh
+cht
 chubbier
 chubbiest
 chubbiness
@@ -12172,8 +12184,11 @@ clydesdale
 clytemnestra
 cm
 cmake
+cmath
 cmd
+cname
 cnn
+cnt
 co
 coach
 coached
@@ -14858,8 +14873,10 @@ coziness
 cozumel
 cozy
 cpa
+cpan
 cpi
 cpo
+cpp
 cpr
 cpu
 cr
@@ -17885,6 +17902,7 @@ dextrously
 dhaka
 dharma
 dhaulagiri
+dhcp
 dhoti
 dhotis
 dhs
@@ -18317,6 +18335,7 @@ dirigible
 dirigibles
 dirk
 dirks
+dirname
 dirt
 dirtball
 dirtballs
@@ -18796,6 +18815,7 @@ dislodging
 disloyal
 disloyally
 disloyalty
+dism
 dismal
 dismally
 dismantle
@@ -19184,6 +19204,7 @@ diuretic
 diuretics
 diurnal
 diurnally
+div
 diva
 divan
 divans
@@ -19288,6 +19309,7 @@ djinni
 djinns
 dll
 dmca
+dmg
 dmitri
 dmz
 dna
@@ -20863,6 +20885,7 @@ ejecting
 ejection
 ejections
 ejects
+ejs
 eke
 eked
 ekes
@@ -20985,6 +21008,7 @@ elegiac
 elegiacs
 elegies
 elegy
+elem
 element
 elemental
 elementary
@@ -21102,6 +21126,7 @@ eloy
 elroy
 elsa
 else
+elseif
 elsewhere
 elsie
 elsif
@@ -21560,6 +21585,7 @@ ending
 endings
 endive
 endives
+endl
 endless
 endlessly
 endlessness
@@ -21984,6 +22010,7 @@ envisioning
 envisions
 envoy
 envoys
+envp
 envy
 envying
 enzyme
@@ -24245,6 +24272,7 @@ filches
 filching
 file
 filed
+filename
 files
 filet
 filets
@@ -24713,6 +24741,7 @@ flatiron
 flatirons
 flatly
 flatness
+flatpak
 flats
 flatt
 flatted
@@ -25133,6 +25162,7 @@ flywheels
 fm
 fmri
 fms
+fmt
 fnma
 foal
 foaled
@@ -25704,6 +25734,7 @@ fourteenths
 fourth
 fourthly
 fourths
+fov
 fowl
 fowled
 fowler
@@ -25729,6 +25760,7 @@ foxy
 foyer
 foyers
 fpo
+fps
 fr
 fracas
 fracases
@@ -27454,6 +27486,7 @@ gismos
 gist
 git
 github
+gitk
 giuliani
 giuseppe
 give
@@ -27468,6 +27501,7 @@ gizmo
 gizmos
 gizzard
 gizzards
+glab
 glacial
 glacially
 glacier
@@ -28011,6 +28045,7 @@ gotham
 gothic
 gothics
 goths
+goto
 gotta
 gotten
 gouda
@@ -28060,6 +28095,7 @@ gp
 gpa
 gpg
 gps
+gpt
 gpu
 gr
 grab
@@ -55967,6 +56003,7 @@ rowing
 rowland
 rowling
 rows
+rowspan
 roxanne
 roxie
 roxy
@@ -55980,6 +56017,7 @@ royalties
 royalty
 royce
 rozelle
+rpc
 rpm
 rps
 rr
@@ -56955,6 +56993,7 @@ saying
 sayings
 says
 sb
+sbt
 sc
 scab
 scabbard
@@ -58986,6 +59025,7 @@ shorthorns
 shorting
 shortish
 shortlist
+shortlog
 shortly
 shortness
 shorts
@@ -59308,6 +59348,7 @@ sids
 siege
 sieges
 siegfried
+siem
 siemens
 sierpinski
 sierra
@@ -60191,6 +60232,7 @@ slowpoke
 slowpokes
 slows
 slr
+sls
 sludge
 slue
 slued
@@ -60401,6 +60443,7 @@ smoulder
 smouldered
 smouldering
 smoulders
+smtp
 smudge
 smudged
 smudges
@@ -60726,6 +60769,7 @@ sobriety
 sobriquet
 sobriquets
 sobs
+soc
 socastee
 soccer
 sociability
@@ -61482,6 +61526,7 @@ spew
 spewed
 spewing
 spews
+spf
 sphere
 spheres
 spherical
@@ -64690,6 +64735,7 @@ syringing
 syrup
 syrups
 syrupy
+sys
 sysadmin
 sysadmins
 sysctl
@@ -66300,6 +66346,7 @@ ticklish
 ticks
 ticonderoga
 tics
+tid
 tidal
 tidbit
 tidbits
@@ -66334,6 +66381,7 @@ tiffany
 tiffed
 tiffing
 tiffs
+tig
 tiger
 tigers
 tight
@@ -66357,6 +66405,7 @@ tigris
 tijuana
 tike
 tikes
+til
 tilde
 tildes
 tile
@@ -66641,6 +66690,7 @@ toddles
 toddling
 toddy
 todo
+todos
 toe
 toed
 toefl
@@ -67987,6 +68037,7 @@ tsunami
 tsunamis
 tswana
 tsx
+tty
 ttys
 tuamotu
 tuareg
@@ -70418,6 +70469,7 @@ vax
 vaxes
 vazquez
 vba
+vbc
 vcr
 vd
 vdt
@@ -70960,6 +71012,7 @@ virile
 virility
 virology
 virtual
+virtualenv
 virtually
 virtue
 virtues
@@ -71030,6 +71083,7 @@ visualizes
 visualizing
 visually
 visuals
+visudo
 vital
 vitality
 vitalize
@@ -71093,6 +71147,7 @@ vlad
 vladimir
 vladivostok
 vlaminck
+vlan
 vlasic
 vlf
 vocabularies
@@ -71248,6 +71303,7 @@ vp
 vs
 vt
 vtol
+vue
 vuitton
 vulcan
 vulcanization
@@ -71813,6 +71869,7 @@ waysides
 wayward
 waywardly
 waywardness
+wbr
 wc
 we
 weak
@@ -72136,6 +72193,7 @@ what
 whatchamacallit
 whatchamacallits
 whatever
+whatis
 whatnot
 whats
 whatsoever
@@ -72836,6 +72894,7 @@ wk
 wkly
 wm
 wmd
+wndproc
 wobble
 wobbled
 wobbles
@@ -73033,6 +73092,7 @@ workbook
 workbooks
 workday
 workdays
+workdir
 worked
 worker
 workers

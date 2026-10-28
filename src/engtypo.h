@@ -28,8 +28,6 @@ typedef struct _tagHangulTypo {
 #define HANGUL_TYPO_CONVERT 1   // eat <SPACE> to convert the word
 #define HANGUL_TYPO_UNDO    2   // eat <BACKSPACE> to restore the word
 
-BOOL hangul_is_old2bul(void);
-int hangul_eng_to_syllables(LPCWSTR, LPWSTR, int);
 int hangul_eng_typo(LPCWSTR, LPWSTR, int);
 BOOL hangul_load_eng_words(LPCTSTR);
 void hangul_free_eng_words(void);
@@ -37,7 +35,6 @@ BOOL hangul_is_eng_word(const char *);
 int hangul_han_typo(LPCWSTR, LPWSTR, int);
 
 void hangul_typo_init(HangulTypo *);
-void hangul_typo_reset_word(HangulTypo *, BOOL);
 int hangul_typo_check(HangulTypo *, BOOL, LPWSTR, int);
 int hangul_typo_key(HangulTypo *, UINT, WCHAR, BOOL, BOOL, BOOL, BOOL, BOOL);
 void hangul_typo_end(HangulTypo *, BOOL, LPCWSTR);
