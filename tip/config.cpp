@@ -559,6 +559,8 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                         dwTemp |= SEARCH_SIMILAR_WORDS;
                     if (IsDlgButtonChecked(hDlg, IDC_HANJA_CAND_SPACE))
                         dwTemp |= HANJA_CAND_WITH_SPACE;
+                    if (IsDlgButtonChecked(hDlg, IDC_HANENG_AUTOCORRECT))
+                        dwTemp |= HANENG_AUTOCORRECT;
                     dwOptionFlag = dwTemp;
 
                     SetDwordToSetting(TEXT("OptionFlag"), dwOptionFlag);
@@ -714,6 +716,9 @@ INT_PTR CALLBACK GeneralDlgProc(HWND hDlg, UINT message , WPARAM wParam, LPARAM 
                                 (dwOptionFlag & SEARCH_SIMILAR_WORDS) ? 1 : 0);
             CheckDlgButton(hDlg, IDC_HANJA_CAND_SPACE,
                                 (dwOptionFlag & HANJA_CAND_WITH_SPACE) ? 1 : 0);
+            // the menu of another application may have changed it
+            CheckDlgButton(hDlg, IDC_HANENG_AUTOCORRECT,
+                                (GetDwordFromSetting((LPTSTR)TEXT("OptionFlag")) & HANENG_AUTOCORRECT) ? 1 : 0);
 
             if (dwToggleKey) {
                 TCHAR szName[128];

@@ -209,6 +209,17 @@ Section "새나루 입력기" SecBody
   File "${RESOURCEDIR}\symwin.dic"
   File "${RESOURCEDIR}\nabi.dic"
   File "${RESOURCEDIR}\jinsuk.dic"
+  # engwords.dic is mapped by the applications using the TIP.
+  # if it can not be replaced, rename it on next reboot.
+  ClearErrors
+  SetOverwrite try
+  File "${RESOURCEDIR}\engwords.dic"
+  IfErrors 0 EngWordsDone
+  GetTempFileName $3 $INSTDIR
+  File /oname=$3 "${RESOURCEDIR}\engwords.dic"
+  Rename /REBOOTOK $3 $INSTDIR\engwords.dic
+  EngWordsDone:
+  SetOverwrite lastused
   File "${RESOURCEDIR}\2set3set.reg"
   File "${RESOURCEDIR}\ahnmatae.reg"
   File "${RESOURCEDIR}\old2set3set.reg"
@@ -239,10 +250,13 @@ Section "새나루 입력기" SecBody
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "Word" "word.dic"
   WriteRegStr HKCU "${REGISTRY_PATH}\Dictionary" "HanjaIndex" "jinsuk.dic"
 
+  # the error flag of the files above is kept. ReadRegDWORD does not clear it.
+  ClearErrors
   ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "OptionFlag" 
   IfErrors 0 regDone
   WriteRegDWORD HKCU "${REGISTRY_PATH}" "OptionFlag" 41
   regDone:
+  ClearErrors
   ReadRegDWORD $1 HKCU "${REGISTRY_PATH}" "HangulToggle" 
   IfErrors 0 regDone2
   WriteRegDWORD HKCU "${REGISTRY_PATH}" "HangulToggle" 65568
@@ -606,6 +620,7 @@ Section "Uninstall"
   Delete /REBOOTOK "$INSTDIR\symwin.dic"
   Delete /REBOOTOK "$INSTDIR\word.dic"
   Delete /REBOOTOK "$INSTDIR\jinsuk.dic"
+  Delete /REBOOTOK "$INSTDIR\engwords.dic"
   Delete "$INSTDIR\2set3set.reg"
   Delete "$INSTDIR\ahnmatae.reg"
   Delete "$INSTDIR\comp_default.reg"
@@ -648,6 +663,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\resource\nabi.dic"
   Delete "$INSTDIR\Source\resource\word.dic"
   Delete "$INSTDIR\Source\resource\jinsuk.dic"
+  Delete "$INSTDIR\Source\resource\engwords.dic"
   Delete "$INSTDIR\Source\resource\saenaru.dlg"
   Delete "$INSTDIR\Source\resource\saenaru.ico"
   Delete "$INSTDIR\Source\resource\saenaru.rcv"
@@ -671,6 +687,8 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\src\data.c"
   Delete "$INSTDIR\Source\src\dic.c"
   Delete "$INSTDIR\Source\src\dic2.c"
+  Delete "$INSTDIR\Source\src\engtypo.c"
+  Delete "$INSTDIR\Source\src\engtypo.h"
   Delete "$INSTDIR\Source\src\fdebug.c"
   Delete "$INSTDIR\Source\src\debug.h"
   Delete "$INSTDIR\Source\src\hangul.h"
@@ -730,6 +748,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Source\tip\saenarutip.cpp"
   Delete "$INSTDIR\Source\tip\server.cpp"
   Delete "$INSTDIR\Source\tip\tmgrsink.cpp"
+  Delete "$INSTDIR\Source\tip\typoconv.cpp"
   Delete "$INSTDIR\Source\tip\btnime.h"
   Delete "$INSTDIR\Source\tip\btnshape.h"
   Delete "$INSTDIR\Source\tip\editsess.h"

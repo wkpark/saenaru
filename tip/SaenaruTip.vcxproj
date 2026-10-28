@@ -175,7 +175,9 @@
     <ClCompile Include="saenarutip.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="tmgrsink.cpp" />
+    <ClCompile Include="typoconv.cpp" />
     <ClCompile Include="..\src\hangul.c" />
+    <ClCompile Include="..\src\engtypo.c" />
     <ClCompile Include="..\src\regconf.c" />
     <ClCompile Include="..\src\reg.c" />
     <ClCompile Include="..\src\strsubs.c" />
@@ -198,6 +200,7 @@
     <ClInclude Include="saenarutip.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="..\src\hangul.h" />
+    <ClInclude Include="..\src\engtypo.h" />
     <ClInclude Include="..\src\debug.h" />
   </ItemGroup>
   <ItemGroup>

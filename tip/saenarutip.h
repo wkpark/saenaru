@@ -7,6 +7,8 @@
 #ifndef SAENARUTIP_H
 #define SAENARUTIP_H
 
+#include "engtypo.h"
+
 #define CMODE_ALPHANUMERIC  0x0000
 #define CMODE_HANGUL        0x0001
 #define CMODE_HANJA         0x0002
@@ -170,6 +172,13 @@ public:
     HRESULT _DoReconvert(TfEditCookie ec, ITfContext *pContext);
     void _LocateCandidateList(TfEditCookie ec, ITfContext *pContext, ITfRange *pRange);
 
+    // the hangul typed in the english mode and the reverse (typoconv.cpp)
+    BOOL _HandleEngTypo(ITfContext *pContext, WPARAM wParam, WCHAR ch, BOOL fTest);
+    void _ResetEngTypo();
+    void _SetHangulMode(BOOL fHangul);
+    HRESULT _RequestEngTypoEditSession(ITfContext *pContext, BOOL fUndo, BOOL fCheck);
+    HRESULT _DoEngTypo(TfEditCookie ec, ITfContext *pContext, BOOL fUndo, BOOL fCheck);
+
     // messages for the worker wnd
     enum { WM_DISPLAY_PROPERTY = WM_USER + 1 };
     // property methods
@@ -228,6 +237,8 @@ private:
 
     CCandidateList *_pCandidateList;
     BOOL _fCandidateReopen; // reopen the list after VK_BACK
+
+    HangulTypo _typo;       // the word for the auto correction
 
     DWORD _dwThreadMgrEventSinkCookie;
     DWORD _dwThreadFocusSinkCookie;

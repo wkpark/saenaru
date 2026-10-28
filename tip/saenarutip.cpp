@@ -55,6 +55,7 @@ CSaenaruTextService::CSaenaruTextService()
 
     _pCandidateList = NULL;
     _fCandidateReopen = FALSE;
+    _ResetEngTypo();
 
     _fCleaningUp = FALSE;
 

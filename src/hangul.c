@@ -2343,6 +2343,12 @@ WORD code;
     return code;
 }
 
+// the standard 2-set keyboard
+BOOL hangul_is_old2bul(void)
+{
+    return keyboard_table == (WCHAR *)keyboard_table_2;
+}
+
 WCHAR PASCAL keyToHangulKey(code)
 WORD code;
 {

@@ -20,6 +20,7 @@ add_executable(saenaru_tests
     test_main.c
     test_globals.c
     ${SRC}/hangul.c
+    ${SRC}/engtypo.c
     ${SRC}/regconf.c
     ${SRC}/reg.c
     ${SRC}/strsubs.c
@@ -30,6 +31,11 @@ target_include_directories(saenaru_tests PRIVATE ${SRC})
 target_compile_definitions(saenaru_tests PRIVATE WIN32 _WINDOWS UNICODE _UNICODE)
 target_compile_options(saenaru_tests PRIVATE /utf-8)
 target_link_libraries(saenaru_tests PRIVATE advapi32 user32)
+
+# generate resource/engwords.dic from a word list. see gen_engwords.c
+add_executable(gen_engwords gen_engwords.c)
+target_include_directories(gen_engwords PRIVATE ${SRC})
+target_compile_definitions(gen_engwords PRIVATE WIN32 _WINDOWS UNICODE _UNICODE)
 
 enable_testing()
 # the dictionaries are read from the resource directory

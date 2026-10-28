@@ -37,6 +37,7 @@ class CLangBarItemImeButton : public ITfLangBarItemButton, public ITfSource
     static void _Menu_ToggleShowKeyboard(CLangBarItemImeButton *, UINT);
     static void _Menu_ToggleDvorak(CLangBarItemImeButton *, UINT);
     static void _Menu_ToggleEscEng(CLangBarItemImeButton *, UINT);
+    static void _Menu_ToggleEngTypo(CLangBarItemImeButton *, UINT);
     static void _Menu_ToggleHanEng(CLangBarItemImeButton *, UINT);
     static void _Menu_ToggleOnTheSpot(CLangBarItemImeButton *, UINT);
     static void _Menu_SelectKeyboard(CLangBarItemImeButton *, UINT);
@@ -48,6 +49,7 @@ class CLangBarItemImeButton : public ITfLangBarItemButton, public ITfSource
     static DWORD _MenuItem_GetToggleComposeFlag(CLangBarItemImeButton *, UINT);
     static DWORD _MenuItem_GetToggleDvorakFlag(CLangBarItemImeButton *, UINT);
     static DWORD _MenuItem_GetToggleEscEngFlag(CLangBarItemImeButton *, UINT);
+    static DWORD _MenuItem_GetToggleEngTypoFlag(CLangBarItemImeButton *, UINT);
     static DWORD _MenuItem_GetToggleHanEngFlag(CLangBarItemImeButton *, UINT);
     static DWORD _MenuItem_GetToggleOnTheSpotFlag(CLangBarItemImeButton *, UINT);
     static DWORD _UserKeyboardMenu_GetKeyboardFlag(CLangBarItemImeButton *, UINT);

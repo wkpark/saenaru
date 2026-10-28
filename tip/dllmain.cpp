@@ -12,6 +12,7 @@ DWORD PASCAL GetDwordFromSetting(LPTSTR lpszFlag);
 long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR);
 void SetRegMultiString(LPCTSTR lpszFlag, DWORD dwFlag);
 long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+void hangul_free_eng_words(void);
 }
 
 void PASCAL SetGlobalFlags()
@@ -61,6 +62,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
 
         case DLL_PROCESS_DETACH:
 
+            hangul_free_eng_words();
             DeleteCriticalSection(&g_cs);
 
             break;

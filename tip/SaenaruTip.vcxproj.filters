@@ -93,6 +93,12 @@
     <ClCompile Include="../src/immsec.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="typoconv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../src/engtypo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="saenarutip.def">
@@ -131,6 +137,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="../src/debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../src/engtypo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

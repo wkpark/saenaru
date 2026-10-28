@@ -37,6 +37,8 @@ extern "C"
 {
 #include "hangul.h"
     BOOL GetRegKeyHandle(LPCTSTR, HKEY *);
+    void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
+    DWORD PASCAL GetDwordFromSetting(LPTSTR lpszFlag);
     BOOL WINAPI ImeConfigure(HKL hKL,HWND hWnd, DWORD dwMode, LPVOID lpData);
 }
 
@@ -59,6 +61,9 @@ const struct
     {IDS_MENU_HANGUL_TOGGLE,
      CLangBarItemImeButton::_MenuItem_GetToggleHanEngFlag,
      CLangBarItemImeButton::_Menu_ToggleHanEng},
+    {IDS_MENU_HANENG_AUTOCORRECT,
+     CLangBarItemImeButton::_MenuItem_GetToggleEngTypoFlag,
+     CLangBarItemImeButton::_Menu_ToggleEngTypo},
     {IDS_MENU_EDIT_WORD_UNIT,
      CLangBarItemImeButton::_MenuItem_GetToggleOnTheSpotFlag,
      CLangBarItemImeButton::_Menu_ToggleOnTheSpot},
@@ -699,6 +704,18 @@ void CLangBarItemImeButton::_Menu_ToggleEscEng(CLangBarItemImeButton *_this, UIN
     return;
 }
 
+// saved for the applications started later like as the option dialog
+void CLangBarItemImeButton::_Menu_ToggleEngTypo(CLangBarItemImeButton *_this, UINT wID)
+{
+    DWORD dwFlag;
+
+    dwOptionFlag ^= HANENG_AUTOCORRECT;
+    dwFlag = GetDwordFromSetting((LPTSTR)TEXT("OptionFlag"));
+    dwFlag = (dwFlag & ~HANENG_AUTOCORRECT) | (dwOptionFlag & HANENG_AUTOCORRECT);
+    SetDwordToSetting(TEXT("OptionFlag"), dwFlag);
+    _this->_pSaenaru->_ResetEngTypo();
+}
+
 void CLangBarItemImeButton::_Menu_ToggleOnTheSpot(CLangBarItemImeButton *_this, UINT wID)
 {
     UNUSED(_this);
@@ -739,6 +756,16 @@ CLangBarItemImeButton::_MenuItem_GetToggleEscEngFlag(CLangBarItemImeButton *_thi
 {
     UNUSED(_this);
     return (dwOptionFlag & ESCENG_SUPPORT) ? 1 : 0;
+}
+
+DWORD
+CLangBarItemImeButton::_MenuItem_GetToggleEngTypoFlag(CLangBarItemImeButton *_this, UINT wID)
+{
+    UNUSED(_this);
+    // the option saved by the menu of another application, like as the option dialog
+    dwOptionFlag = (dwOptionFlag & ~HANENG_AUTOCORRECT) |
+                   (GetDwordFromSetting((LPTSTR)TEXT("OptionFlag")) & HANENG_AUTOCORRECT);
+    return (dwOptionFlag & HANENG_AUTOCORRECT) ? 1 : 0;
 }
 
 DWORD
