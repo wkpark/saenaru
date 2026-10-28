@@ -399,6 +399,21 @@ BOOL CSaenaruTextService::_IsReconvertKey(ITfContext *pContext, WPARAM wParam, B
 
 //+---------------------------------------------------------------------------
 //
+// _HandleEscEng
+//
+// <ESC> to the english mode like as ImeProcessKey(). The key is eaten only by
+// the candidate list. Called after the hangul is committed, since the automata
+// is initialized.
+//----------------------------------------------------------------------------
+
+void CSaenaruTextService::_HandleEscEng(WPARAM wParam)
+{
+    if (wParam == VK_ESCAPE && (dwOptionFlag & ESCENG_SUPPORT) && (GetConversionStatus() & CMODE_HANGUL))
+        _SetHangulMode(FALSE);
+}
+
+//+---------------------------------------------------------------------------
+//
 // _HangulCommitComposition /* not used */
 //
 // commit the given preedit char and terminate composition
@@ -908,6 +923,8 @@ STDAPI CSaenaruTextService::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
         _EndCompositionInContext(pContext, ch);
         hangul_ic_init(&ic);
     }
+    // OnKeyDown() is not called for the key not eaten
+    _HandleEscEng(wParam);
 
     DEBUGPRINTFEX(100, (TEXT("\tEaten = %d\n"), *pfEaten));
     return S_OK;
@@ -946,6 +963,7 @@ STDAPI CSaenaruTextService::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
         if (_HandleCandidateKey(pContext, wParam, FALSE))
         {
             *pfEaten = TRUE;
+            _HandleEscEng(wParam); // the hangul is committed by <ESC>
             return S_OK;
         }
         if (wParam == VK_BACK)
@@ -1034,6 +1052,8 @@ Exit:
         if (wParam == VK_BACK && _IsComposing() && ic.len > 1)
             _OpenCandidateList(pContext);
     }
+    // for the applications calling OnKeyDown() without OnTestKeyDown()
+    _HandleEscEng(wParam);
     return S_OK;
 }
 
