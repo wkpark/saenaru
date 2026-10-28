@@ -573,7 +573,6 @@ static void TestTypoMatch(void)
  */
 static void TypoKeys(HangulTypo *t, BOOL *pfHangul, LPCSTR keys, LPSTR actions)
 {
-    WCHAR han[ENGTYPO_MAXLEN + 1];
     BOOL fCtrl = FALSE, fLetter;
     UINT vk;
     WCHAR ch;
@@ -605,8 +604,7 @@ static void TypoKeys(HangulTypo *t, BOOL *pfHangul, LPCSTR keys, LPSTR actions)
         if (action == HANGUL_TYPO_CONVERT)
         {
             // the text is the same
-            hangul_typo_check(t, *pfHangul, han, ARRAYSIZE(han));
-            hangul_typo_end(t, *pfHangul, han);
+            hangul_typo_end(t, TRUE);
             *pfHangul = !*pfHangul;
             *actions++ = 'C';
         }
@@ -703,6 +701,30 @@ static void TestTypoKeys(void)
     TypoKeys(&t, &fHangul, "hi", actions);
     CheckInt("twice: not a typo 1", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
     CheckInt("twice: not a typo 2", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
+
+    // the conversion checked at <SPACE> is kept for the TIP
+    hangul_typo_init(&t);
+    TypoKeys(&t, &fHangul, "dkssud", actions);
+    CheckInt("check: test", HANGUL_TYPO_CONVERT, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE));
+    CheckStr("check: the hangul", L"안녕", t.han);
+    CheckStr("check: the english", L"dkssud", t.eng);
+
+    // not the same text on the screen. the application gets the <SPACE>.
+    hangul_typo_end(&t, FALSE);
+    CheckInt("not the same: no undo", FALSE, t.undo);
+    CheckInt("not the same: keydown", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
+    // not changed by the word not converted
+    TypoKeys(&t, &fHangul, "hello ", actions);
+    CheckStr("check: the hangul kept", L"안녕", t.han);
+
+    // OnKeyDown() checks the word again, like as after the layout changed
+    // for the <SPACE> eaten without OnKeyDown()
+    hangul_typo_init(&t);
+    TypoKeys(&t, &fHangul, "dkssud", actions);
+    hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, TRUE);
+    set_keyboard(LAYOUT_3FIN);
+    CheckInt("keydown: the layout changed", HANGUL_TYPO_NONE, hangul_typo_key(&t, VK_SPACE, L' ', FALSE, FALSE, FALSE, FALSE, FALSE));
+    set_keyboard(LAYOUT_OLD2BUL);
 
     // OnKeyDown() without OnTestKeyDown()
     hangul_typo_init(&t);

@@ -18,15 +18,15 @@ typedef struct _tagHangulTypo {
     BOOL  off;      // the caret is moved in the word
     BOOL  hangul;   // the mode of the word
     BOOL  undo;     // just after the conversion
-    BOOL  toEng;    // converted to the english
-    WCHAR eng[ENGTYPO_MAXLEN + 1];  // the words of the conversion
-    WCHAR han[ENGTYPO_MAXLEN + 1];
+    BOOL  toEng;    // the conversion of eng and han is to the english
+    WCHAR eng[ENGTYPO_MAXLEN + 1];  // the words of the conversion checked at
+    WCHAR han[ENGTYPO_MAXLEN + 1];  // <SPACE>, also for the undo after it
 } HangulTypo;
 
-// the actions of hangul_typo_key()
+// the actions of hangul_typo_key(). the TIP checks the text to eat the key.
 #define HANGUL_TYPO_NONE    0
-#define HANGUL_TYPO_CONVERT 1   // eat <SPACE> to convert the word
-#define HANGUL_TYPO_UNDO    2   // eat <BACKSPACE> to restore the word
+#define HANGUL_TYPO_CONVERT 1   // <SPACE> to convert the word
+#define HANGUL_TYPO_UNDO    2   // <BACKSPACE> to restore the word
 
 int hangul_eng_typo(LPCWSTR, LPWSTR, int);
 BOOL hangul_load_eng_words(LPCTSTR);
@@ -35,9 +35,8 @@ BOOL hangul_is_eng_word(const char *);
 int hangul_han_typo(LPCWSTR, LPWSTR, int);
 
 void hangul_typo_init(HangulTypo *);
-int hangul_typo_check(HangulTypo *, BOOL, LPWSTR, int);
 int hangul_typo_key(HangulTypo *, UINT, WCHAR, BOOL, BOOL, BOOL, BOOL, BOOL);
-void hangul_typo_end(HangulTypo *, BOOL, LPCWSTR);
+void hangul_typo_end(HangulTypo *, BOOL);
 BOOL hangul_typo_match(LPCWSTR, LPCWSTR, BOOL);
 
 #ifdef __cplusplus

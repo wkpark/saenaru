@@ -284,16 +284,24 @@ static void hangul_typo_reset_word(HangulTypo *t, BOOL fOff)
 }
 
 /*
- * The conversion of the word. pszHan is the hangul typed in the english
+ * The conversion of the word, kept in eng and han for the TIP. They are not
+ * changed for the word not converted. han is the hangul typed in the english
  * mode, or the hangul typed by the keys in the hangul mode.
- * engwords.dic should be loaded for the hangul mode.
+ * engwords.dic should be loaded for both of the modes.
  */
-int hangul_typo_check(HangulTypo *t, BOOL fHangul, LPWSTR pszHan, int cch)
+static BOOL hangul_typo_check(HangulTypo *t, BOOL fHangul)
 {
-    pszHan[0] = L'\0';
+    WCHAR achHan[ENGTYPO_MAXLEN + 1];
+
     if (t->off || t->len == 0)
-        return 0;
-    return fHangul ? hangul_han_typo(t->word, pszHan, cch) : hangul_eng_typo(t->word, pszHan, cch);
+        return FALSE;
+    if ((fHangul ? hangul_han_typo(t->word, achHan, ARRAYSIZE(achHan)) :
+                   hangul_eng_typo(t->word, achHan, ARRAYSIZE(achHan))) == 0)
+        return FALSE;
+    lstrcpynW(t->eng, t->word, ARRAYSIZE(t->eng));
+    lstrcpynW(t->han, achHan, ARRAYSIZE(t->han));
+    t->toEng = fHangul;
+    return TRUE;
 }
 
 static BOOL IsAsciiLetter(WCHAR c)
@@ -314,14 +322,14 @@ static BOOL IsHangul(WCHAR c)
 
 /*
  * A key of the TIP. Returns HANGUL_TYPO_CONVERT for <SPACE> after a typo,
- * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The caller
- * converts it and calls hangul_typo_end() after HANGUL_TYPO_CONVERT.
+ * HANGUL_TYPO_UNDO for <BACKSPACE> just after the conversion. The TIP checks
+ * the text before the caret for them. It calls hangul_typo_end() after
+ * HANGUL_TYPO_CONVERT, when OnKeyDown() converts the word or the text is
+ * not the same.
  */
 int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fComposing,
                     BOOL fCtrlAlt, BOOL fShift, BOOL fTest)
 {
-    WCHAR achHan[ENGTYPO_MAXLEN + 1];
-
     // <BACKSPACE> just after the conversion restores the word and the mode
     if (vk == VK_BACK && t->undo && fHangul != t->toEng && !fComposing && !fCtrlAlt && !fShift)
     {
@@ -351,7 +359,7 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
     {
         case VK_SPACE:
             // checked again in OnKeyDown(). it may be called without OnTestKeyDown().
-            if (hangul_typo_check(t, fHangul, achHan, ARRAYSIZE(achHan)) == 0)
+            if (!hangul_typo_check(t, fHangul))
             {
                 hangul_typo_reset_word(t, FALSE); // a new word
                 return HANGUL_TYPO_NONE;
@@ -420,18 +428,12 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
 }
 
 /*
- * The end of the word after HANGUL_TYPO_CONVERT. pszHan is the hangul of
- * the conversion, NULL if not converted.
+ * The end of the word after HANGUL_TYPO_CONVERT. fConverted for the undo of
+ * the conversion in eng and han.
  */
-void hangul_typo_end(HangulTypo *t, BOOL fHangul, LPCWSTR pszHan)
+void hangul_typo_end(HangulTypo *t, BOOL fConverted)
 {
-    if (pszHan != NULL)
-    {
-        lstrcpynW(t->eng, t->word, ARRAYSIZE(t->eng));
-        lstrcpynW(t->han, pszHan, ARRAYSIZE(t->han));
-        t->toEng = fHangul;
-        t->undo = TRUE;
-    }
+    t->undo = fConverted;
     hangul_typo_reset_word(t, FALSE);
 }
 
