@@ -259,9 +259,8 @@ void CSaenaruTextService::_InitKeyboardCompartment()
     {
         if (pCompartmentMgr->GetCompartment(*c_rgKeyboardCompartment[i], &pCompartment) != S_OK)
             continue;
-        if (!AdviseSink(pCompartment, (ITfCompartmentEventSink *)this,
-                        IID_ITfCompartmentEventSink, &_dwKeyboardCompartmentSinkCookie[i]))
-            _dwKeyboardCompartmentSinkCookie[i] = TF_INVALID_COOKIE;
+        AdviseSink(pCompartment, (ITfCompartmentEventSink *)this,
+                   IID_ITfCompartmentEventSink, &_dwKeyboardCompartmentSinkCookie[i]);
         pCompartment->Release();
     }
     pCompartmentMgr->Release();
@@ -346,17 +345,21 @@ STDAPI CSaenaruTextService::OnChange(REFGUID rguidCompartment)
     // commit the hangul like as the hangul key
     _CommitCandidate(NULL);
     _ResetEngTypo();
-    if (_IsComposing() && _GetComposition()->GetRange(&pRangeComposition) == S_OK)
+    if (_IsComposing())
     {
-        if (pRangeComposition->GetContext(&pContext) == S_OK)
+        if (_GetComposition()->GetRange(&pRangeComposition) == S_OK)
         {
-            WCHAR ch = _HangulCommit();
-            _EndCompositionInContext(pContext, ch);
-            pContext->Release();
+            if (pRangeComposition->GetContext(&pContext) == S_OK)
+            {
+                WCHAR ch = _HangulCommit();
+                _EndCompositionInContext(pContext, ch);
+                pContext->Release();
+            }
+            pRangeComposition->Release();
         }
-        pRangeComposition->Release();
+        // ic is shared with the other threads. only for the composition here
+        hangul_ic_init(&ic);
     }
-    hangul_ic_init(&ic);
 
     // not by SetConversionStatus(). the native mode is kept while closed.
     if (fHangul)
