@@ -286,9 +286,6 @@ STDAPI CLangBarItemButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
     ITfRange *pRangeComposition;
     ITfContext *pCompositionContext;
 
-    // HACK generate VK_ESCAPE to close the default IME popup menu.
-    keybd_event(VK_ESCAPE, 0x0, 0, 0);
-
     switch (click)
     {
         case TF_LBI_CLK_LEFT:
@@ -316,6 +313,9 @@ STDAPI CLangBarItemButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
             _pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
             return S_OK;
         case TF_LBI_CLK_RIGHT:
+            // HACK generate VK_ESCAPE to close the default IME popup menu.
+            // not for the left click, the application gets it without the menu.
+            keybd_event(VK_ESCAPE, 0x0, 0, 0);
             DEBUGPRINTFEX(100, (TEXT("CLangBarItemButton::OnClick()\n")));
             {
                 UINT checked = 0;
