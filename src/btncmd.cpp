@@ -294,9 +294,6 @@ CLangBarItemCModeButton::OnClick (
 	HMENU hMenu;
 	int i;
 
-	// HACK generate VK_ESCAPE to close the default IME popup menu.
-	keybd_event(VK_ESCAPE, 0x0, 0, 0);
-
 	hIMC = _GetCurrentHIMC();
 	switch (click)
 	{
@@ -323,6 +320,9 @@ CLangBarItemCModeButton::OnClick (
 			break;
 
 		case TF_LBI_CLK_RIGHT:
+			// HACK generate VK_ESCAPE to close the default IME popup menu.
+			// not for the left click, the application gets it without the menu.
+			keybd_event(VK_ESCAPE, 0x0, 0, 0);
 			if (hIMC == NULL)
 				return S_OK;
 
@@ -660,6 +660,9 @@ _Menu_ToAscII    (void)
 	register HIMC	hIMC	= _GetCurrentHIMC () ;
 	if (! hIMC)
 		return ;
+	// commit the hangul like as VK_HANGUL. it is flushed by closing the IME.
+	if (IsCompStr(hIMC))
+		MakeResultString(hIMC, TRUE);
 	_Menu_ToCMode (IME_CMODE_ROMAN) ;
 
 	LPINPUTCONTEXT lpIMC;

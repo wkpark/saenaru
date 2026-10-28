@@ -120,6 +120,7 @@ public:
     HRESULT _HandleBackspace(TfEditCookie ec, ITfContext *pContext);
     HRESULT _ReconvertSyllable(TfEditCookie ec, ITfContext *pContext, BOOL fTest);
     BOOL _IsReconvertKey(ITfContext *pContext, WPARAM wParam, BOOL fTest);
+    void _HandleEscEng(WPARAM wParam);
     // hangul utils
     HRESULT _HangulCommitComposition(TfEditCookie ec, ITfContext *pContext, WPARAM wParam = 0);
     WCHAR _HangulCommit();
