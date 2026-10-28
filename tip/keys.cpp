@@ -99,6 +99,7 @@ DWORD CSaenaruTextService::SetConversionStatus(DWORD status)
 
     // FIXME
     _dwConversionStatus = status;
+    _SetKeyboardCompartment(status);
     return _dwConversionStatus;
 }
 

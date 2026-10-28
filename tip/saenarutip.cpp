@@ -68,6 +68,9 @@ CSaenaruTextService::CSaenaruTextService()
     _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
     _dwTextEditSinkCookie = TF_INVALID_COOKIE;
     _dwGlobalCompartmentEventSinkCookie = TF_INVALID_COOKIE;
+    _dwKeyboardCompartmentSinkCookie[0] = TF_INVALID_COOKIE;
+    _dwKeyboardCompartmentSinkCookie[1] = TF_INVALID_COOKIE;
+    _fSettingKeyboardCompartment = FALSE;
 
     _pTextEditSinkContext = NULL;
 
@@ -218,6 +221,8 @@ STDAPI CSaenaruTextService::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
     if (!_InitKeystrokeSink())
         goto ExitError;
 
+    _InitKeyboardCompartment();
+
     return S_OK;
 
 ExitError:
@@ -243,6 +248,7 @@ STDAPI CSaenaruTextService::Deactivate()
     //_UninitWorkerWnd();
     _UninitKeystrokeSink();
     _UninitPreservedKey();
+    _UninitKeyboardCompartment();
 
     _InitTextEditSink(NULL);
 

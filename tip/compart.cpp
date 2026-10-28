@@ -6,6 +6,9 @@
 
 #include "globals.h"
 #include "saenarutip.h"
+extern "C" {
+#include "hangul.h"
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -202,15 +205,165 @@ void CSaenaruTextService::_UninitGlobalCompartment()
 
 //+---------------------------------------------------------------------------
 //
+// The keyboard compartments
+//
+// ImmGetOpenStatus() and ImmGetConversionStatus() of the IMM applications are
+// the keyboard compartments of the thread. Like as the IMM IME, the hangul
+// mode is open with the native mode. gvim changes them to the english at
+// <ESC>, and back to the mode saved at the insert mode.
+//----------------------------------------------------------------------------
+
+static const GUID *c_rgKeyboardCompartment[] = {
+    &GUID_COMPARTMENT_KEYBOARD_OPENCLOSE,
+    &GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION,
+};
+
+static DWORD GetCompartmentDword(ITfCompartmentMgr *pCompartmentMgr, REFGUID rguid)
+{
+    ITfCompartment *pCompartment;
+    VARIANT var;
+    DWORD dw = 0;
+
+    if (pCompartmentMgr->GetCompartment(rguid, &pCompartment) != S_OK)
+        return 0;
+    VariantInit(&var);
+    if (pCompartment->GetValue(&var) == S_OK && var.vt == VT_I4)
+        dw = (DWORD)var.lVal;
+    VariantClear(&var);
+    pCompartment->Release();
+    return dw;
+}
+
+static void SetCompartmentDword(ITfCompartmentMgr *pCompartmentMgr, TfClientId tfClientId, REFGUID rguid, DWORD dw)
+{
+    ITfCompartment *pCompartment;
+    VARIANT var;
+
+    if (pCompartmentMgr->GetCompartment(rguid, &pCompartment) != S_OK)
+        return;
+    var.vt = VT_I4;
+    var.lVal = (LONG)dw;
+    pCompartment->SetValue(tfClientId, &var);
+    pCompartment->Release();
+}
+
+void CSaenaruTextService::_InitKeyboardCompartment()
+{
+    ITfCompartmentMgr *pCompartmentMgr;
+    ITfCompartment *pCompartment;
+    int i;
+
+    if (_pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
+        return;
+    for (i = 0; i < ARRAYSIZE(c_rgKeyboardCompartment); i++)
+    {
+        if (pCompartmentMgr->GetCompartment(*c_rgKeyboardCompartment[i], &pCompartment) != S_OK)
+            continue;
+        if (!AdviseSink(pCompartment, (ITfCompartmentEventSink *)this,
+                        IID_ITfCompartmentEventSink, &_dwKeyboardCompartmentSinkCookie[i]))
+            _dwKeyboardCompartmentSinkCookie[i] = TF_INVALID_COOKIE;
+        pCompartment->Release();
+    }
+    pCompartmentMgr->Release();
+
+    _SetKeyboardCompartment(GetConversionStatus());
+}
+
+void CSaenaruTextService::_UninitKeyboardCompartment()
+{
+    ITfCompartmentMgr *pCompartmentMgr;
+    ITfCompartment *pCompartment;
+    int i;
+
+    if (_pThreadMgr == NULL || _pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
+        return;
+    for (i = 0; i < ARRAYSIZE(c_rgKeyboardCompartment); i++)
+    {
+        if (pCompartmentMgr->GetCompartment(*c_rgKeyboardCompartment[i], &pCompartment) != S_OK)
+            continue;
+        UnadviseSink(pCompartment, &_dwKeyboardCompartmentSinkCookie[i]);
+        pCompartment->Release();
+    }
+    pCompartmentMgr->Release();
+}
+
+// the english mode keeps the open status like as the IMM IME
+void CSaenaruTextService::_SetKeyboardCompartment(DWORD status)
+{
+    ITfCompartmentMgr *pCompartmentMgr;
+    DWORD dwConversion, dwNew;
+
+    if (_pThreadMgr == NULL || _pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
+        return;
+
+    _fSettingKeyboardCompartment = TRUE;
+    dwConversion = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
+    if (status & CMODE_HANGUL)
+    {
+        if (!GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE))
+            SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE, TRUE);
+        dwNew = dwConversion | TF_CONVERSIONMODE_NATIVE;
+    }
+    else
+    {
+        dwNew = dwConversion & ~TF_CONVERSIONMODE_NATIVE;
+    }
+    if (dwNew != dwConversion)
+        SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION, dwNew);
+    _fSettingKeyboardCompartment = FALSE;
+
+    pCompartmentMgr->Release();
+}
+
+//+---------------------------------------------------------------------------
+//
 // ITfCompartmentEventSink::OnChange
 //
-// TSF calls this method anytime our private global compartment is modified,
-// even from other threads/processes.
+// The keyboard compartments changed by the application, like as
+// ImmSetConversionStatus() and ImmSetOpenStatus() of gvim.
 //----------------------------------------------------------------------------
 
 STDAPI CSaenaruTextService::OnChange(REFGUID rguidCompartment)
 {
-    // nothing to do in this sample
+    ITfCompartmentMgr *pCompartmentMgr;
+    ITfRange *pRangeComposition;
+    ITfContext *pContext;
+    BOOL fHangul;
+
+    if (_fSettingKeyboardCompartment || _pThreadMgr == NULL ||
+        !(IsEqualGUID(rguidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE) ||
+          IsEqualGUID(rguidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION)))
+        return S_OK;
+    if (_pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
+        return S_OK;
+    fHangul = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE) &&
+              (GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) & TF_CONVERSIONMODE_NATIVE);
+    pCompartmentMgr->Release();
+
+    if (fHangul == ((GetConversionStatus() & CMODE_HANGUL) != 0))
+        return S_OK;
+
+    // commit the hangul like as the hangul key
+    _CommitCandidate(NULL);
+    _ResetEngTypo();
+    if (_IsComposing() && _GetComposition()->GetRange(&pRangeComposition) == S_OK)
+    {
+        if (pRangeComposition->GetContext(&pContext) == S_OK)
+        {
+            WCHAR ch = _HangulCommit();
+            _EndCompositionInContext(pContext, ch);
+            pContext->Release();
+        }
+        pRangeComposition->Release();
+    }
+    hangul_ic_init(&ic);
+
+    // not by SetConversionStatus(). the native mode is kept while closed.
+    if (fHangul)
+        _dwConversionStatus |= CMODE_HANGUL;
+    else
+        _dwConversionStatus &= ~CMODE_HANGUL;
+    _UpdateLanguageBar(TF_LBI_STATUS | TF_LBI_ICON);
     return S_OK;
 }
 
