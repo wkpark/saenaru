@@ -660,6 +660,9 @@ _Menu_ToAscII    (void)
 	register HIMC	hIMC	= _GetCurrentHIMC () ;
 	if (! hIMC)
 		return ;
+	// commit the hangul like as VK_HANGUL. it is flushed by closing the IME.
+	if (IsCompStr(hIMC))
+		MakeResultString(hIMC, TRUE);
 	_Menu_ToCMode (IME_CMODE_ROMAN) ;
 
 	LPINPUTCONTEXT lpIMC;
