@@ -156,7 +156,11 @@ static BOOL IsEngInputScope(TfEditCookie ec, ITfContext *pContext, ITfRange *pRa
                     case IS_LOGINNAME:
                     case IS_PASSWORD:
                     case IS_ALPHANUMERIC_HALFWIDTH:
+                    case IS_ALPHANUMERIC_FULLWIDTH:
                     case IS_NUMERIC_PASSWORD:
+                    case IS_EMAILNAME_OR_ADDRESS:
+                    case IS_ALPHANUMERIC_PIN:
+                    case IS_ALPHANUMERIC_PIN_SET:
                         fEng = TRUE;
                         break;
                     default:
@@ -213,7 +217,9 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
         // the caret may be moved by the mouse.
         if (action == HANGUL_TYPO_UNDO && _RequestEngTypoEditSession(pContext, TRUE, TRUE) != S_OK)
         {
+            // not the undo, the <BACKSPACE> of the word
             _typo.undo = FALSE;
+            hangul_typo_key(&_typo, (UINT)wParam, ch, fHangul, FALSE, FALSE, FALSE, fTest);
             return FALSE;
         }
         return TRUE;
@@ -226,6 +232,8 @@ BOOL CSaenaruTextService::_HandleEngTypo(ITfContext *pContext, WPARAM wParam, WC
         // S_FALSE: not the same text, and the application deletes the char
         if (hr == S_OK)
             _SetHangulMode(_typo.toEng);
+        else
+            hangul_typo_key(&_typo, (UINT)wParam, ch, fHangul, FALSE, FALSE, FALSE, fTest);
         return hr == S_OK;
     }
 

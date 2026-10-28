@@ -296,7 +296,9 @@ void SetDwordToSetting(LPCTSTR lpszKey, DWORD dwFlag)
     HKEY hkey;
     DWORD dwDataSize, dwRet;
 
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, KEY_WRITE, &hkey)) {
+    // the key is created for the users other than the user who installed it
+    if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, g_szRegInfoPath, 0, NULL, REG_OPTION_NON_VOLATILE,
+                                        KEY_WRITE, NULL, &hkey, NULL)) {
         dwRet = RegSetValueEx(hkey, lpszKey, 0, REG_DWORD, (CONST BYTE *) &dwFlag, sizeof(DWORD));
         RegCloseKey(hkey);
     }

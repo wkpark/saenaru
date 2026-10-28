@@ -77,7 +77,7 @@ static BOOL IsSyllables(LPCWSTR psz)
  * Type the keys with the hangul automata and get the syllables.
  * Returns the length of pszHan, 0 and empty if they are not all syllables.
  */
-int hangul_eng_to_syllables(LPCWSTR pszEng, LPWSTR pszHan, int cch)
+static int hangul_eng_to_syllables(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
     int n = TypeHangul(pszEng, FALSE, pszHan, cch);
 
@@ -225,7 +225,8 @@ BOOL hangul_is_eng_word(const char *pszWord)
  * english word.
  * The hangul has a jamo not composed: "해" (go) is not an english typo.
  * 3 letters at least like as the english mode, not the jamos for chatting
- * like as "ㅜㅠ" (nb), "ㅁㅊ" (ac), nor the same jamos like as "ㅋㅋㅋ" (zzz).
+ * like as "ㅜㅠ" (nb), "ㅁㅊ" (ac), nor the same jamos like as "ㅋㅋㅋ" (zzz),
+ * nor the faces like as "ㅇㅁㅇ" (dad), "ㅎㅁㅎ" (gag).
  */
 int hangul_han_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
 {
@@ -241,6 +242,11 @@ int hangul_han_typo(LPCWSTR pszEng, LPWSTR pszHan, int cch)
     {
         pszHan[0] = L'\0';
         return 0;
+    }
+    if (n == 3 && pszHan[0] == pszHan[2] && !hangul_is_syllable(pszHan[0]) && !hangul_is_syllable(pszHan[1]))
+    {
+        pszHan[0] = L'\0';
+        return 0; // a face of the jamos
     }
 
     ToLowerWord(pszEng, szWord);
@@ -270,7 +276,7 @@ void hangul_typo_init(HangulTypo *t)
     ZeroMemory(t, sizeof(*t));
 }
 
-void hangul_typo_reset_word(HangulTypo *t, BOOL fOff)
+static void hangul_typo_reset_word(HangulTypo *t, BOOL fOff)
 {
     t->len = 0;
     t->word[0] = L'\0';
@@ -317,18 +323,13 @@ int hangul_typo_key(HangulTypo *t, UINT vk, WCHAR ch, BOOL fHangul, BOOL fCompos
     WCHAR achHan[ENGTYPO_MAXLEN + 1];
 
     // <BACKSPACE> just after the conversion restores the word and the mode
-    if (vk == VK_BACK && t->undo)
+    if (vk == VK_BACK && t->undo && fHangul != t->toEng && !fComposing && !fCtrlAlt && !fShift)
     {
-        if (fHangul == t->toEng || fComposing || fCtrlAlt || fShift)
-        {
-            t->undo = FALSE;
-            return HANGUL_TYPO_NONE;
-        }
         if (!fTest)
             t->undo = FALSE;
         return HANGUL_TYPO_UNDO;
     }
-    // only just after the conversion
+    // only just after the conversion. the other <BACKSPACE> is of the word.
     t->undo = FALSE;
 
     // a new word in the other mode. the mode is changed in many ways

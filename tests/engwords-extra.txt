@@ -1,6 +1,8 @@
 # Words not in the word list but typed in the english mode, for engwords.dic.
 # Commands and terms like as "git" (햣), "sudo" (녀애) are not converted to
 # the hangul, and "npm" (ㅞㅡ) is converted to the english in the hangul mode.
+# A word typed into a korean word is not added, like as "chr" (촉) and
+# "dns" (운), except the commands like as "dir" (약) and "cls" (친).
 # One word per line, 3 letters at least. See gen_engwords.c.
 
 # commands
@@ -14,19 +16,27 @@ brew
 bun
 cargo
 cat
+chcp
+chfn
 chgrp
+chkdsk
 chmod
 choco
 chown
+chroot
 chsh
+cht
 clang
 cmake
 cmd
+cpan
 crontab
 curl
 deno
 diff
 dir
+dirname
+dism
 dnf
 docker
 dotnet
@@ -42,10 +52,14 @@ fastboot
 fgrep
 find
 fish
+flatpak
+fmt
 gcc
 gem
 git
+glab
 gofmt
+goto
 gpg
 gradle
 grep
@@ -107,10 +121,12 @@ rsync
 ruby
 rustc
 rustup
+sbt
 scp
 screen
 sed
 sftp
+sls
 sort
 source
 sqlite
@@ -124,19 +140,25 @@ tar
 taskkill
 tasklist
 tee
+tig
 tmux
 top
 touch
 traceroute
 tracert
+tty
 uname
 uniq
 unset
 unzip
 useradd
 usermod
+vbc
 vim
+virtualenv
+visudo
 wget
+whatis
 whereis
 which
 whoami
@@ -160,6 +182,7 @@ clone
 commit
 config
 fetch
+gitk
 init
 merge
 pull
@@ -169,6 +192,7 @@ remote
 reset
 restore
 revert
+shortlog
 stash
 status
 submodule
@@ -177,6 +201,8 @@ tag
 worktree
 
 # programming and file formats
+abs
+abspath
 admin
 api
 argc
@@ -185,30 +211,51 @@ argv
 ascii
 async
 auth
+autofocus
 await
 bool
 calloc
 cfg
+chai
+changelog
+chdir
+chk
 cli
 cls
+cmath
+cname
+cnt
 conf
 const
+cpp
 crate
 css
 csv
 def
 dev
+dhcp
+div
 dll
+dmg
 dst
 dto
 dyn
+ejs
+elem
 elif
+elseif
 elsif
 endif
+endl
 enum
+envp
+filename
 fixme
+fov
+fps
 func
 gif
+gpt
 gui
 guid
 html
@@ -255,10 +302,16 @@ ref
 regex
 repo
 repos
+rowspan
+rpc
 scss
 sdk
 self
+siem
 sizeof
+smtp
+soc
+spf
 sprintf
 sql
 src
@@ -273,9 +326,13 @@ strcpy
 strlen
 struct
 svg
+sys
 temp
+tid
+til
 tmp
 todo
+todos
 toml
 tsx
 txt
@@ -288,7 +345,12 @@ utf
 uuid
 var
 vec
+vlan
+vue
+wbr
 wip
+wndproc
+workdir
 xml
 yaml
 yield
