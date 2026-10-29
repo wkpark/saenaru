@@ -254,6 +254,9 @@ void CSaenaruTextService::_InitKeyboardCompartment()
     ITfCompartment *pCompartment;
     int i;
 
+    static_assert(ARRAYSIZE(c_rgKeyboardCompartment) == ARRAYSIZE(_dwKeyboardCompartmentSinkCookie),
+                  "a cookie for each compartment");
+
     if (_pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
         return;
     for (i = 0; i < ARRAYSIZE(c_rgKeyboardCompartment); i++)
