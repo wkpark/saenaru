@@ -16,7 +16,7 @@ extern "C" {
 int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 int PASCAL GetSaenaruDirectory(LPTSTR lpDest, int max);
 int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
-long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR,DWORD);
 UINT PASCAL is_ksx1002(UINT);
 }
 
@@ -80,14 +80,14 @@ static void GetDicFileName(LPCTSTR lpKey, LPTSTR lpPath, int cch)
         *lpDic++ = TEXT('\\');
     *lpDic = TEXT('\0');
 
-    sz = GetRegStringValue(TEXT("\\Dictionary"), lpKey, NULL);
+    sz = GetRegStringValue(TEXT("\\Dictionary"), lpKey, NULL, 0);
     if (sz <= 2 && *lpKey != TEXT('\0')) {
         lpKey = TEXT("");
-        sz = GetRegStringValue(TEXT("\\Dictionary"), lpKey, NULL);
+        sz = GetRegStringValue(TEXT("\\Dictionary"), lpKey, NULL, 0);
     }
 
     if (sz > 2 && sz <= (long)sizeof(szName) &&
-            GetRegStringValue(TEXT("\\Dictionary"), lpKey, szName) > 2)
+            GetRegStringValue(TEXT("\\Dictionary"), lpKey, szName, ARRAYSIZE(szName)) > 2)
         lstrcpyn(lpDic, szName, cch - (int)(lpDic - lpPath));
     else
         lstrcpyn(lpDic, TEXT("SAENARU.DIC"), cch - (int)(lpDic - lpPath));
@@ -109,7 +109,7 @@ static BOOL GetHangulFromHanja(LPCWSTR pszRead, LPWSTR pszHan, int cch)
     int i;
 
     // no default for the HanjaIndex
-    if (GetRegStringValue(TEXT("\\Dictionary"), TEXT("HanjaIndex"), NULL) <= 2)
+    if (GetRegStringValue(TEXT("\\Dictionary"), TEXT("HanjaIndex"), NULL, 0) <= 2)
         return FALSE;
     GetDicFileName(TEXT("HanjaIndex"), szIdx, ARRAYSIZE(szIdx));
 

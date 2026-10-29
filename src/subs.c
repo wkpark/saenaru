@@ -581,7 +581,7 @@ HFONT CheckNativeCharset(HDC hDC)
     lpFont = font;
 
     if (font[0] == TEXT('\0')) {
-        ret = GetRegStringValue(NULL, TEXT("CandFont"), lpFont);
+        ret = GetRegStringValue(NULL, TEXT("CandFont"), lpFont, ARRAYSIZE(font));
         if (ret == -1)
             /* 기본값을 새굴림으로 한다 */
             lpFont = TEXT("New Gulim");
@@ -592,7 +592,7 @@ HFONT CheckNativeCharset(HDC hDC)
 
     lfFont.lfWeight = FW_NORMAL;
     lfFont.lfCharSet = NATIVE_CHARSET;
-    Mylstrcpy(lfFont.lfFaceName,lpFont);
+    Mylstrcpyn(lfFont.lfFaceName,lpFont,LF_FACESIZE);
     hTemp = CreateFontIndirect(&lfFont);
     hOldFont = SelectObject(hDC, hTemp);
     /* 아무 글꼴이 없으면 기본 값을 가져온다 */

@@ -312,7 +312,7 @@ LPARAM lParam;
                             lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[ii]);
 
                             lpmystr = (LPTSTR) mybuf;
-                            Mylstrcpy(lpmystr, lpstr);
+                            Mylstrcpyn(lpmystr, lpstr, ARRAYSIZE(mybuf));
                             if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':')))) {
                                 *lpTemp = MYTEXT('\0');
                                 wsprintf(buf, TEXT("%s"), (lpTemp + 1));
@@ -815,7 +815,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                     lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[i]);
 
                     lpmystr = (LPTSTR) mybuf;
-                    Mylstrcpy(lpmystr, lpstr);
+                    Mylstrcpyn(lpmystr, lpstr, ARRAYSIZE(mybuf));
                     lpmystr[MAXCANDSTRSIZE]=MYTEXT('\0'); // force terminate str
                     if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':')))) {
                         mean = TRUE;
@@ -1048,7 +1048,7 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 TCHAR buf[128];
 
                 lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[i]);
-                Mylstrcpy(buf, lpstr);
+                Mylstrcpyn(buf, lpstr, ARRAYSIZE(buf));
 
                 if (lpCandList->dwStyle == IME_CAND_CODE && (NULL != (lpTemp = Mystrchr(buf, MYTEXT(':'))))) {
                     *lpTemp = MYTEXT('\0');

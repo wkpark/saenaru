@@ -95,11 +95,13 @@ BOOL WINAPI DLLEntry (
                 TCHAR lpKey[128];
                 LoadString( hInst, IDS_DIC_KEY, lpKey, 128);
 
-                sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
-                if (sz <= 2) {
+                sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL,0);
+                // the default also for a name too long for szDicFileName
+                if (sz <= 2 ||
+                        GetRegStringValue(TEXT("\\Dictionary"),lpKey,lpDicFileName,
+                            256 - (DWORD)(lpDicFileName - szDicFileName)) <= 2) {
                     LoadString( hInst, IDS_DICFILENAME, lpDicFileName, 128);
-                } else
-                    GetRegStringValue(TEXT("\\Dictionary"),lpKey,lpDicFileName);
+                }
                 MyDebugPrint((TEXT("Saenaru: dicfile %s:%d\n"), lpDicFileName,sz));
             }
 

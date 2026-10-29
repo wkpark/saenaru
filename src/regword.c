@@ -92,7 +92,7 @@ UINT    WINAPI ImeEnumRegisterWord(REGISTERWORDENUMPROC lpfn, LPCTSTR lpRead, DW
         if (lpRead)
         {
             nBufLen = GetPrivateProfileString(lpRead, NULL,(LPTSTR)"",
-                            (LPTSTR)szBuf,sizeof(szBuf),(LPTSTR)szDicFileName );
+                            (LPTSTR)szBuf,sizeof(szBuf)/sizeof(TCHAR),(LPTSTR)szDicFileName );
 
             if (nBufLen)
             {
