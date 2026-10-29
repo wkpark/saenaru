@@ -215,7 +215,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     int cnt;
     BOOL bRc = FALSE;
     WCHAR cs=0;
-    LPMYSTR lpmystr, lpTemp;
+    LPMYSTR lpmystr, lpTemp, lpCand;
     MYCHAR myBuf[256];
     WCHAR *save;
     BOOL isasc=FALSE;
@@ -268,7 +268,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 
         if (lpCandList->dwSelection == 0) {
             lpmy = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
-            Mylstrcpy(buf, lpmy); // hangul word
+            Mylstrcpyn(buf, lpmy, ARRAYSIZE(buf)); // hangul word
 
             if (0 != Mylstrcmp(lpmy, lpT2)) {
                 // need to update candidate info.
@@ -311,16 +311,19 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
         lpDic += GetSaenaruDirectory(lpDic,256);
         if (*(lpDic-1) != TEXT('\\')) *lpDic++ = TEXT('\\');
 
-        sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
-        if (sz <= 2) {
+        sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL,0);
+        // the main dictionary also for a name too long for szDic
+        if (sz <= 2 ||
+                GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpDic,
+                    ARRAYSIZE(szDic) - (DWORD)(lpDic - szDic)) <= 2) {
             lpDic = (LPTSTR)&szDic;
             lstrcpy (szDic, szDicFileName) ;
-        } else
-            GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpDic);
+        }
         MyDebugPrint((TEXT("Saenaru: %s Dic %s:%d\n"), lpKey, szDic,sz));
 
+        // the candidates after the reading, before the double terminator
         nBufLen = GetCandidateStringsFromDictionary(lpT2,
-                szBuf+Mylstrlen(lpT2)+1, 1024, (LPTSTR)szDic);
+                szBuf+Mylstrlen(lpT2)+1, 1024 - (Mylstrlen(lpT2) + 1), (LPTSTR)szDic);
 
         //
         // 사전에서 발견되지 않음. 한자가 섞여있거나 한자단어이면 이것을 한글로 변환 시도.
@@ -336,9 +339,10 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
             lpIdx += GetSaenaruDirectory(lpIdx,256);
             if (*(lpIdx-1) != TEXT('\\')) *lpIdx++ = TEXT('\\');
 
-            sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL);
+            sz= GetRegStringValue(TEXT("\\Dictionary"),lpKey,NULL,0);
             if (sz > 2) {
-                sz= GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpIdx);
+                sz= GetRegStringValue(TEXT("\\Dictionary"),(LPTSTR)lpKey,lpIdx,
+                        ARRAYSIZE(szIdx) - (DWORD)(lpIdx - szIdx));
                 MyDebugPrint((TEXT("Saenaru: %s Idx %s:%d\n"),lpKey, szIdx,sz));
             } else {
                 break; // hanjaidx not found
@@ -367,7 +371,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 
                 // get hanja list for this hangul
                 nBufLen = GetCandidateStringsFromDictionary(han,
-                        szBuf+Mylstrlen(han)+1, 1024, (LPTSTR)szDic);
+                        szBuf+Mylstrlen(han)+1, 1024 - (Mylstrlen(han) + 1), (LPTSTR)szDic);
                 if (nBufLen == 0) { // not found in the dic
                     nBufLen=1;
                     szBuf[Mylstrlen(han) + 1]= 0; // double terminate
@@ -470,7 +474,8 @@ set_compstr:
                 // Set the composition string to the structure.
                 //
 
-                Mylstrcpy(lpmystr,lpstr);
+                // at most the composition buffers of MAXCOMPSIZE chars
+                Mylstrcpyn(lpmystr,lpstr,MAXCOMPSIZE);
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':'))))
                     *lpTemp = MYTEXT('\0');
 
@@ -574,14 +579,17 @@ set_compstr:
                 (DWORD)((LPSTR)&((LPMYCAND)lpCandInfo)->cl - (LPSTR)lpCandInfo);
             lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
             lpdw = (LPDWORD)&(lpCandList->dwOffset);
+            // packed in szCand, where all of szBuf fits
+            lpCand = (LPMYSTR)((LPMYCAND)lpCandInfo)->szCand;
             while (*lpstr)
             {
                 lpCandList->dwOffset[i] =
-                    (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-                Mylstrcpy(lpmystr,lpstr);
+                    (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
+                Mylstrcpyn(lpmystr,lpstr,ARRAYSIZE(myBuf));
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
-                Mylstrcpy((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr);
+                Mylstrcpy(lpCand,lpmystr);
+                lpCand += Mylstrlen(lpCand) + 1;
 
                 if (fHanja && *lpmystr == *lpT2) {
                     // 한자를 한글로 변환하는 경우.
@@ -1717,7 +1725,8 @@ CONST LPBYTE lpbKeyState;
                 int ns=0;
                 DWORD dwSize = (DWORD)MyImmRequestMessage(hIMC, IMR_RECONVERTSTRING, 0);
 
-                ns=GetModuleFileName(NULL,(LPTSTR)szFname,sizeof(szFname));
+                // in chars. szFname[ns] is read below
+                ns=GetModuleFileName(NULL,(LPTSTR)szFname,ARRAYSIZE(szFname) - 1);
                 if (ns > 0) {
                     // check application names
                     int i;
@@ -2227,11 +2236,16 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
 
             while (lpCandList->dwSelection != 0) {
                 lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
-                Mylstrcpy(buf, lpstr); // hangul word
+                // the first candidate of NI_OPENCANDIDATE is an entry of the dictionary
+                Mylstrcpyn(buf, lpstr, ARRAYSIZE(buf)); // hangul word
                 if (*lpstr >= 0x3131 && *lpstr <=0x314e)
                     break;
 
                 Mylstrcpy(buf2, GETLPCOMPSTR(lpCompStr)); // hanja
+
+                // only if it fits retbuf and the composition string
+                if (Mylstrlen(buf) + Mylstrlen(buf2) + 2 >= MAXCOMPSIZE)
+                    break;
 
                 if (dwHanjaMode == 1) {
                     wsprintf(retbuf, TEXT("%s(%s)"), buf, buf2); // hangul(hanja)

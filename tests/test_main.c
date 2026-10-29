@@ -9,6 +9,7 @@
 
 int GetCandidateStringsFromDictionary(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
 int GetHangulFromHanjaIndex(LPWSTR lpRead, LPWSTR lpBuf, DWORD dwBufLen, LPTSTR lpFilename);
+UINT load_compose_map_from_buffer(LPWSTR kbuf, HangulCompose *compose_map);
 extern DWORD dwOptionFlag;
 extern DWORD dwImeFlag;
 
@@ -852,6 +853,47 @@ static void TestHanjaIndex(void)
     CheckStr("jinsuk.dic: 大 -> 대", L"대", han);
 }
 
+// a blank line before each word made the carried-over text of the parser
+// grow on every read, past its stack buffer
+static void TestDictionaryCarry(void)
+{
+    WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
+    WCHAR buf[1024 + 2];
+    HANDLE hFile;
+    DWORD dw;
+    int i, n;
+
+    GetTempPathW(MAX_PATH, szDir);
+    GetTempFileNameW(szDir, L"sdc", 0, szPath);
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 2000; i++)
+        WriteFile(hFile, L"\n가\n", 3 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+
+    n = GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckInt("crafted dic: found", 1, n > 1);
+    CheckStr("crafted dic: 1st", L"가", buf);
+    DeleteFileW(szPath);
+}
+
+// the terminator of a compose map of 256 entries stays in the map
+static void TestComposeMapSize(void)
+{
+    static WCHAR kbuf[256 * 16 + 2];
+    HangulCompose map[256 + 1];
+    LPWSTR p = kbuf;
+    int i;
+
+    for (i = 0; i < 256; i++)
+        p += wsprintfW(p, L"1100 %X AC00", 0x1000 + i) + 1;
+    *p = L'\0';
+    map[256].key = 0x5a5a5a5a;
+    load_compose_map_from_buffer(kbuf, map);
+    CheckInt("compose map: 256 entries", 0x5a5a5a5a, (int)map[256].key);
+    CheckInt("compose map: terminator", -1, (int)map[255].key);
+}
+
 int main(void)
 {
     TestHangul2();
@@ -867,6 +909,8 @@ int main(void)
     TestTypoKeys();
     TestDictionary();
     TestHanjaIndex();
+    TestDictionaryCarry();
+    TestComposeMapSize();
 
     printf("%d passed, %d failed\n", nPassed, nFailed);
     return nFailed ? 1 : 0;

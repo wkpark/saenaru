@@ -212,7 +212,10 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     if (found != 1)
         return 0;
 
-    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL)) {
+    // the carried-over text has to leave room for the next read and its
+    // terminator, a crafted file can make it grow on every read
+    while (llen + 2048 / sizeof(MYCHAR) < ARRAYSIZE(myBuf) &&
+            ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL)) {
         DWORD dwW;
         DWORD len;
         UINT force = 0;

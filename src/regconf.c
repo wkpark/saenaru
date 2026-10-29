@@ -47,7 +47,7 @@
 #define SAENARU_COMPOSE_YET      4
 
 BOOL GetRegKeyHandle(LPCTSTR lpszSubKey, HKEY *hKey);
-long PASCAL GetRegMultiStringValue(LPCTSTR lpszSubKey, LPCTSTR lpszKey, LPTSTR lpString);
+long PASCAL GetRegMultiStringValue(LPCTSTR lpszSubKey, LPCTSTR lpszKey, LPTSTR lpString, DWORD cchString);
 
 static
 DWORD string_to_hex(TCHAR* p)
@@ -110,21 +110,23 @@ load_keyboard_map_from_reg(LPCTSTR lpszKeyboard, UINT nKeyboard, WCHAR *keyboard
         lpszKeyboard = (LPCTSTR) &achValue;
     }
 
-    sz= GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,NULL);
+    sz= GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,NULL,0);
     if (sz <= 0) {
             MyDebugPrint((TEXT("Saenaru: Keyboard not found\n")));
             return 0;
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) MEMALLOC(sz);
+    // with the two terminators
+    sz = sz / sizeof(TCHAR) + 2;
+    kbuf=(LPTSTR) MEMALLOC(sz * sizeof(TCHAR));
 
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read keyboard registry\n")));
             return 0;
     }
 
-    GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,kbuf);
+    GetRegMultiStringValue(TEXT("\\Keyboard"),lpszKeyboard,kbuf,sz);
 
     UINT ret = load_keyboard_map_from_buffer(kbuf, keyboard_map);
     MEMFREE(kbuf);
@@ -258,21 +260,23 @@ load_compose_map_from_reg(LPCTSTR lpszCompose, UINT nCompose, HangulCompose *com
         lpszCompose = (LPCTSTR) &achValue;
     }
 
-    sz= GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,NULL);
+    sz= GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,NULL,0);
     if (sz <= 0) {
             MyDebugPrint((TEXT("Saenaru: ComposeMap not found\n")));
             return 0;
     }
 
     MyDebugPrint((TEXT("Saenaru: reg size %d\n"), sz));
-    kbuf=(LPTSTR) MEMALLOC(sz);
+    // with the two terminators
+    sz = sz / sizeof(TCHAR) + 2;
+    kbuf=(LPTSTR) MEMALLOC(sz * sizeof(TCHAR));
 
     if (kbuf == (LPTSTR)NULL) {
             MyDebugPrint((TEXT("Saenaru: Can't read compose map registry\n")));
             return 0;
     }
 
-    GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,kbuf);
+    GetRegMultiStringValue(TEXT("\\Compose"),lpszCompose,kbuf,sz);
 
     type = load_compose_map_from_buffer(kbuf, compose_map);
 
@@ -295,7 +299,8 @@ load_compose_map_from_buffer(LPMYSTR kbuf, HangulCompose *compose_map)
     UINT id=0,i;
     UINT type=SAENARU_AUTOMATA_NONE;
 
-    for (line = Mystrtok(kbuf, TEXT("\0"), &save);id<256
+    // room for the terminator in the map of 256 entries
+    for (line = Mystrtok(kbuf, TEXT("\0"), &save);id<255
             ;
             line = Mystrtok(saved_position, TEXT("\0"), &save))
     {

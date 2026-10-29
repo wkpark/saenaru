@@ -9,9 +9,9 @@
 extern "C" {
 void SetDwordToSetting(LPCTSTR lpszFlag, DWORD dwFlag);
 DWORD PASCAL GetDwordFromSetting(LPTSTR lpszFlag);
-long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+long PASCAL GetRegMultiStringValue (LPCTSTR,LPCTSTR,LPTSTR,DWORD);
 void SetRegMultiString(LPCTSTR lpszFlag, DWORD dwFlag);
-long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR);
+long PASCAL GetRegStringValue (LPCTSTR,LPCTSTR,LPTSTR,DWORD);
 void hangul_free_eng_words(void);
 }
 

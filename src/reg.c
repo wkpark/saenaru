@@ -92,7 +92,8 @@ long    PASCAL
 GetRegMultiStringValue (
     register LPCTSTR        lpszSubKey,
     register LPCTSTR        lpszKey,
-    register LPTSTR         lpString)
+    register LPTSTR         lpString,
+    DWORD                   cchString)
 {
     HKEY    hKey ;
     DWORD    dwRegType, dwData, dwDataSize, dwRet ;
@@ -107,11 +108,29 @@ GetRegMultiStringValue (
     if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
         RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
+    dwDataSize = 0 ;
+    if (lpString)
+        dwDataSize = cchString * sizeof(TCHAR) ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
 
-    if (dwRet != ERROR_SUCCESS || dwRegType != REG_MULTI_SZ)
+    if (dwRet != ERROR_SUCCESS || dwRegType != REG_MULTI_SZ) {
+        if (lpString)
+            lpString[0] = lpString[1] = TEXT('\0') ;
         return    -1 ;
+    }
+    if (lpString) {
+        DWORD n = dwDataSize / sizeof(TCHAR) ;
+
+        /* the value may have no terminators */
+        while (n < cchString &&
+                (n < 2 || lpString[n - 1] != TEXT('\0') || lpString[n - 2] != TEXT('\0')))
+            lpString[n++] = TEXT('\0') ;
+        if (n < 2 || lpString[n - 1] != TEXT('\0') || lpString[n - 2] != TEXT('\0')) {
+            lpString[0] = lpString[1] = TEXT('\0') ;
+            return    -1 ;
+        }
+    }
         MyDebugPrint((TEXT("OK %s\n"), lpszKey));
     return    (long)dwDataSize ;
 }
@@ -240,7 +259,8 @@ long    PASCAL
 GetRegStringValue (
     register LPCTSTR        lpszSubKey,
     register LPCTSTR        lpszKey,
-    register LPTSTR            lpString)
+    register LPTSTR            lpString,
+    DWORD                   cchString)
 {
     HKEY    hKey ;
     DWORD    dwRegType, dwData, dwDataSize, dwRet ;
@@ -256,14 +276,27 @@ GetRegStringValue (
     if (RegOpenKeyEx (HKEY_CURRENT_USER, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS &&
         RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegInfoPath, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         return    -1 ;
-    /* dwDataSize must hold the buffer size when lpString is given */
     dwDataSize = 0 ;
     if (lpString)
-        RegQueryValueEx (hKey, lpszKey, NULL, NULL, NULL, &dwDataSize) ;
+        dwDataSize = cchString * sizeof(TCHAR) ;
     dwRet    = RegQueryValueEx (hKey, lpszKey, NULL, &dwRegType, (LPBYTE)lpString, &dwDataSize) ;
     RegCloseKey (hKey) ;
-    if (dwRet != ERROR_SUCCESS || dwRegType != REG_SZ)
+    if (dwRet != ERROR_SUCCESS || dwRegType != REG_SZ) {
+        if (lpString)
+            *lpString = TEXT('\0') ;
         return    -1 ;
+    }
+    if (lpString) {
+        DWORD n = dwDataSize / sizeof(TCHAR) ;
+
+        /* the value may have no terminator */
+        if (n < cchString) {
+            lpString[n] = TEXT('\0') ;
+        } else if (lpString[n - 1] != TEXT('\0')) {
+            *lpString = TEXT('\0') ;
+            return    -1 ;
+        }
+    }
     return    (long)dwDataSize ;
 }
 
