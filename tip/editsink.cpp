@@ -6,6 +6,9 @@
 
 #include "globals.h"
 #include "saenarutip.h"
+extern "C" {
+#include "hangul.h"
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -93,6 +96,9 @@ STDAPI CSaenaruTextService::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 CancelComposition:
         // we need a write edit session to cancel the composition
         _EndCompositionInContext(pContext);
+        // the next key is a new syllable, not of the composition ended
+        if (!_IsComposing())
+            hangul_ic_init(&ic);
     }
 
 Exit:
