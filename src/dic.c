@@ -1795,6 +1795,11 @@ CONST LPBYTE lpbKeyState;
                                 GlobalFree((HANDLE)lpRS);
                                 break;
                             }
+                            // too long for the composition buffers
+                            if (Mylstrlen(lpToken) >= MAXCOMPSIZE) {
+                                GlobalFree((HANDLE)lpRS);
+                                break;
+                            }
                             MyDebugPrint((TEXT(">>>>>>lpToken ='%s'\n"), lpToken));
 
                             lpRS->dwCompStrOffset += (DWORD)(lpToken - lpDump)*sizeof(MYCHAR);
