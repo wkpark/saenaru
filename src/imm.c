@@ -754,6 +754,7 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      //
                      // Get the candidate strings from dic file.
                      //
+                     szBuf[0] = MYTEXT('\0'); // no candidate if not found
                      nBufLen = GetCandidateStringsFromDictionary(GETLPCOMPREADSTR(lpCompStr),
                                                                  (LPMYSTR)szBuf,256,
                                                                  (LPTSTR)szDicFileName );
@@ -781,7 +782,8 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      {
                          lpCandList->dwOffset[i] =
                                 (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-                         Mylstrcpy((LPMYSTR)((LPMYSTR)lpCandList+lpCandList->dwOffset[i]),lpstr);
+                         // dwOffset is in bytes. cut to the slot like as ConvHanja()
+                         Mylstrcpyn((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpstr,MAXCANDSTRSIZE);
                          lpstr += (Mylstrlen(lpstr) + 1);
                          i++;
                      }
@@ -1131,10 +1133,11 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));
-                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,dwComp);
+                    // at most the composition buffers of MAXCOMPSIZE chars
+                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,min(dwComp,MAXCOMPSIZE));
                 } else if (lpRead != NULL && dwRead >0) {
                     MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
-                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,dwRead / sizeof(TCHAR));
+                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,min(dwRead / sizeof(TCHAR),MAXCOMPSIZE));
                     if (!Mylstrlen(lpRead)) {
                         // 고고타자의 행동을 분석해서 얻은 결론:
                         // lpRead가 지워지면 다시 조합에 들어감.
