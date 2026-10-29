@@ -123,8 +123,13 @@ Section "VC런타임 점검" SecPrep
   Delete "$INSTDIR\vc_redist.x86.exe"
   VCRuntimeNext:
   ${If} ${RunningX64}
-    IfFileExists $SYSDIR\vcruntime140.dll 0 +2
+    # the x64 runtime is in System32, not in SysWOW64 of the redirection
+    ${DisableX64FSRedirection}
+    IfFileExists $SYSDIR\vcruntime140.dll 0 VCRuntime64None
+    ${EnableX64FSRedirection}
     Goto VCRuntimePass
+    VCRuntime64None:
+    ${EnableX64FSRedirection}
     MessageBox MB_YESNOCANCEL|MB_ICONINFORMATION "$(DESC_VCRUNTIME_MSG)" IDYES +4 IDNO +3
     MessageBox MB_OK|MB_ICONSTOP "$(DESC_END_INSTALL)"
     Quit
