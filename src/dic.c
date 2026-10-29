@@ -2242,6 +2242,10 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
 
                 Mylstrcpy(buf2, GETLPCOMPSTR(lpCompStr)); // hanja
 
+                // only if it fits retbuf and the composition string
+                if (Mylstrlen(buf) + Mylstrlen(buf2) + 2 >= MAXCOMPSIZE)
+                    break;
+
                 if (dwHanjaMode == 1) {
                     wsprintf(retbuf, TEXT("%s(%s)"), buf, buf2); // hangul(hanja)
                 } else {
