@@ -70,13 +70,18 @@ jobs:
       shell: bash
 
     - name: Build package
+      env:
+        # not a snapshot for the release tags without rc or beta
+        RELEASE: ${{ startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc') && !contains(github.ref, 'beta') }}
       run: |
         $env:PATH += ';C:\Program Files (x86)\NSIS\'
         cd setup
 
         echo "!undef RELVERSION" > ver.nsi
         echo "!define RELVERSION ""${{ steps.setup.outputs.version }}""" >> ver.nsi
-        echo "!define DEVREL" >> ver.nsi
+        if ($env:RELEASE -ne 'true') {
+          echo "!define DEVREL" >> ver.nsi
+        }
 
         cat ver.nsi
 

@@ -40,4 +40,4 @@
 #define VER_PATCHLEVEL	     0
 #define VER_PATCHLEVEL_STR  "0"
 
-#define VER_SNAPSHOT	"1.3.0-GIT"
+#define VER_SNAPSHOT	"1.3.0"
