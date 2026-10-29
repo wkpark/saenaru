@@ -385,9 +385,15 @@ LPARAM lParam;
                 // XXX not occur
                 break;
 
-            lpIMC = ImmLockIMC(hIMC);
+            if (!(lpIMC = ImmLockIMC(hIMC)))
+                break;
 
-            lpCandInfo= (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo);
+            // no candidates after ClearCandidate()
+            if (!IsCandidate(lpIMC) ||
+                !(lpCandInfo= (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))) {
+                ImmUnlockIMC(hIMC);
+                break;
+            }
             lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
             sel = lpCandList->dwSelection % lpCandList->dwPageSize;
             // get the current selected number
@@ -667,7 +673,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
     HIMC hIMC;
     LPINPUTCONTEXT lpIMC;
     LPCANDIDATEINFO lpCandInfo;
-    LPCANDIDATELIST lpCandList;
+    LPCANDIDATELIST lpCandList = NULL;
     HBRUSH hbr;
     HDC hDC;
     // double buffering
@@ -742,11 +748,13 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
 
     hSvrWnd = (HWND)GetWindowLongPtr(hCandWnd,FIGWL_SVRWND);
 
-    if (hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC))
+    if ((hIMC = (HIMC)GetWindowLongPtr(hSvrWnd,IMMGWLP_IMC)) &&
+        (lpIMC = ImmLockIMC(hIMC)))
     {
-        lpIMC = ImmLockIMC(hIMC);       
         hOldFont = CheckNativeCharset(hMemDC);
-        if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
+        // no candidates after ClearCandidate()
+        if (IsCandidate(lpIMC) &&
+            (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo)))
         {
             UINT start, end;
             UINT left, width;
@@ -939,7 +947,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         DeleteObject(SelectObject(hMemDC, hOldFont));
     }
 
-    if (lpCandList->dwCount > 1) {
+    if (lpCandList && lpCandList->dwCount > 1) {
         int pages,page;
         int pos;
         TCHAR num[10];
@@ -964,7 +972,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
         SetScrollPos(hCandWnd,SB_VERT,pos,TRUE);
     }
 
-    if (lpCandList->dwStyle == IME_CAND_READ) {
+    if (lpCandList && lpCandList->dwStyle == IME_CAND_READ) {
         // hanjamod icon text
         hbmpHanja = (HBITMAP)GetWindowLongPtr(hCandWnd,FIGWL_HANJA_MODEBMP);
         hbmpOld = SelectObject(hTempDC,hbmpHanja);
