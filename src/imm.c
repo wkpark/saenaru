@@ -890,8 +890,12 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
 
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
-                 if (dwValue > MAXCANDPAGESIZE)
+                 // the candidate window divides by the page size
+                 if (!dwValue || dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
                      return FALSE;
+                 }
 
 
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
@@ -923,7 +927,10 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
                  if (dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
                      return FALSE;
+                 }
 
 
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
@@ -1138,9 +1145,16 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
             lpIMC = ImmLockIMC (hIMC) ;
             if (!lpIMC)
                 break ;
+            if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR)) {
+                ImmUnlockIMC (hIMC) ;
+                break ;
+            }
 
             lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
             if (lpCompStr != NULL) {
+                // the offsets are 0 before the first composition
+                if (!lpCompStr->dwCompStrOffset)
+                    InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));
