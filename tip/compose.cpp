@@ -116,6 +116,40 @@ void CSaenaruTextService::_EndCompositionInContext(ITfContext *pContext, WPARAM 
 
 //+---------------------------------------------------------------------------
 //
+// _SetCaretAfterComposition
+//
+// The syllable is selected while composing (fInterimChar). The caret goes
+// after it when the composition is ended without a char, like as the commit,
+// but not for the selection moved out of the composition.
+//----------------------------------------------------------------------------
+
+void CSaenaruTextService::_SetCaretAfterComposition(TfEditCookie ec, ITfContext *pContext)
+{
+    ITfRange *pRangeComposition;
+    TF_SELECTION tfSelection;
+    ULONG cFetched;
+
+    if (_pComposition == NULL || _pComposition->GetRange(&pRangeComposition) != S_OK)
+        return;
+    if (pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) == S_OK && cFetched == 1)
+    {
+        BOOL fCovered = IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+
+        tfSelection.range->Release();
+        if (fCovered && pRangeComposition->Collapse(ec, TF_ANCHOR_END) == S_OK)
+        {
+            DEBUGPRINTFEX(100, (TEXT("\tthe caret after the composition\n")));
+            tfSelection.range = pRangeComposition;
+            tfSelection.style.ase = TF_AE_NONE;
+            tfSelection.style.fInterimChar = FALSE;
+            pContext->SetSelection(ec, 1, &tfSelection);
+        }
+    }
+    pRangeComposition->Release();
+}
+
+//+---------------------------------------------------------------------------
+//
 // _Menu_OnComposition
 //
 // Callback for the "Start/End Composition" menu item.
@@ -323,6 +357,8 @@ STDAPI CEndCompositionEditSession::DoEditSession(TfEditCookie ec)
         DEBUGPRINTFEX(100, (TEXT("\tTerminateCompositon !!\n")));
     }
 #else
+    if (!_wParam)
+        _pSaenaru->_SetCaretAfterComposition(ec, _pContext);
     _pSaenaru->_TerminateComposition(ec);
     DEBUGPRINTFEX(100, (TEXT("\t_TerminateCompositon() !!\n")));
 #endif
@@ -461,6 +497,7 @@ STDAPI CSaenaruTextService::OnCompositionTerminated(TfEditCookie ecWrite, ITfCom
             return S_OK;
         }
         DEBUGPRINTFEX(100, (TEXT("\tCall TerminateComposition\r\n")));
+        _SetCaretAfterComposition(ecWrite, pContext);
         _EndCompositionInContext(pContext, 0);
         // init hangul ic
         hangul_ic_init(&ic);
