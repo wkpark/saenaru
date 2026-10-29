@@ -306,6 +306,8 @@ void CSaenaruTextService::_SetKeyboardCompartment(DWORD status)
         dwNew = dwConversion | TF_CONVERSIONMODE_NATIVE;
     else
         dwNew = dwConversion & ~TF_CONVERSIONMODE_NATIVE;
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::_SetKeyboardCompartment(0x%x) tid = %d, conversion = 0x%x -> 0x%x\n"),
+                        status, GetCurrentThreadId(), dwConversion, dwNew));
     if (dwNew != dwConversion)
         SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION, dwNew);
     _fSettingKeyboardCompartment = FALSE;
@@ -326,17 +328,24 @@ STDAPI CSaenaruTextService::OnChange(REFGUID rguidCompartment)
     ITfCompartmentMgr *pCompartmentMgr;
     ITfRange *pRangeComposition;
     ITfContext *pContext;
+    DWORD dwOpen, dwConversion;
     BOOL fHangul;
 
+    DEBUGPRINTFEX(100, (TEXT("CSaenaruTextService::OnChange(openclose = %d) tid = %d, by the TIP = %d\n"),
+                        IsEqualGUID(rguidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE),
+                        GetCurrentThreadId(), _fSettingKeyboardCompartment));
     if (_fSettingKeyboardCompartment || _pThreadMgr == NULL ||
         !(IsEqualGUID(rguidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE) ||
           IsEqualGUID(rguidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION)))
         return S_OK;
     if (_pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
         return S_OK;
-    fHangul = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE) &&
-              (GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) & TF_CONVERSIONMODE_NATIVE);
+    dwOpen = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    dwConversion = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
     pCompartmentMgr->Release();
+    fHangul = dwOpen && (dwConversion & TF_CONVERSIONMODE_NATIVE);
+    DEBUGPRINTFEX(100, (TEXT("\topen = %d, conversion = 0x%x, status = 0x%x, composing = %d\n"),
+                        dwOpen, dwConversion, GetConversionStatus(), _IsComposing()));
 
     if (fHangul == ((GetConversionStatus() & CMODE_HANGUL) != 0))
         return S_OK;
