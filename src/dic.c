@@ -474,7 +474,8 @@ set_compstr:
                 // Set the composition string to the structure.
                 //
 
-                Mylstrcpy(lpmystr,lpstr);
+                // at most the composition buffers of MAXCOMPSIZE chars
+                Mylstrcpyn(lpmystr,lpstr,MAXCOMPSIZE);
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(':'))))
                     *lpTemp = MYTEXT('\0');
 
