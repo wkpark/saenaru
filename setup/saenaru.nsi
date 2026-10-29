@@ -3,7 +3,7 @@
 
 Unicode true
 
-!define RELVERSION      "1.2.0-GIT"
+!define RELVERSION      "1.3.1-GIT"
 !include /NONFATAL ".\ver.nsi"
 !ifndef DEVREL
   !define APPNAME         "새나루 ${RELVERSION}"

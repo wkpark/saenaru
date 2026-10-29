@@ -35,15 +35,15 @@
 
 #define VER_BUILD	 1025
 #define VER_BUILD_STR	"1025"
-#define VER_PATCHLEVEL	     0
-#define VER_PATCHLEVEL_STR  "0"
+#define VER_PATCHLEVEL	     1
+#define VER_PATCHLEVEL_STR  "1"
 
 /* VER_GITHASH comes from gitver.h generated at build time */
 #ifdef VER_GITHASH
-#define VER_SNAPSHOT	"1.1.0-" VER_GITHASH
+#define VER_SNAPSHOT	"1.1.1-GIT-" VER_GITHASH
 #define VER_GITSUFFIX	"-" VER_GITHASH
 #else
-#define VER_SNAPSHOT	"1.1.0"
+#define VER_SNAPSHOT	"1.1.1-GIT"
 #define VER_GITSUFFIX	""
 #endif
 
