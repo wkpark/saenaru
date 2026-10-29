@@ -268,7 +268,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
 
         if (lpCandList->dwSelection == 0) {
             lpmy = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
-            Mylstrcpy(buf, lpmy); // hangul word
+            Mylstrcpyn(buf, lpmy, ARRAYSIZE(buf)); // hangul word
 
             if (0 != Mylstrcmp(lpmy, lpT2)) {
                 // need to update candidate info.
@@ -2236,7 +2236,8 @@ BOOL WINAPI MakeResultString( HIMC hIMC, BOOL fFlag)
 
             while (lpCandList->dwSelection != 0) {
                 lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[0]);
-                Mylstrcpy(buf, lpstr); // hangul word
+                // the first candidate of NI_OPENCANDIDATE is an entry of the dictionary
+                Mylstrcpyn(buf, lpstr, ARRAYSIZE(buf)); // hangul word
                 if (*lpstr >= 0x3131 && *lpstr <=0x314e)
                     break;
 

@@ -1054,7 +1054,8 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                     *lpTemp = MYTEXT('\0');
                     MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(buf),&sz); // show only candidates
                 } else {
-                    MyGetTextExtentPoint(hDC,lpstr,Mylstrlen(lpstr),&sz); // with meanings
+                    // with meanings, cut like as PaintCandWindow()
+                    MyGetTextExtentPoint(hDC,lpstr,min(Mylstrlen(lpstr),MAXCANDSTRSIZE),&sz);
                 }
                 if (width < sz.cx)
                     width = sz.cx;
