@@ -209,8 +209,9 @@ void CSaenaruTextService::_UninitGlobalCompartment()
 //
 // ImmGetOpenStatus() and ImmGetConversionStatus() of the IMM applications are
 // the keyboard compartments of the thread. Like as the IMM IME, the hangul
-// mode is open with the native mode. gvim changes them to the english at
-// <ESC>, and back to the mode saved at the insert mode.
+// mode is open with the native mode, and the english mode is closed. gvim
+// changes them to the english at <ESC>, and back to the mode saved at the
+// insert mode.
 //----------------------------------------------------------------------------
 
 static const GUID *c_rgKeyboardCompartment[] = {
@@ -286,27 +287,25 @@ void CSaenaruTextService::_UninitKeyboardCompartment()
     pCompartmentMgr->Release();
 }
 
-// the english mode keeps the open status like as the IMM IME
+// like as the hangul key of the IMM IME, the english mode is closed without
+// the native mode
 void CSaenaruTextService::_SetKeyboardCompartment(DWORD status)
 {
     ITfCompartmentMgr *pCompartmentMgr;
     DWORD dwConversion, dwNew;
+    BOOL fHangul = (status & CMODE_HANGUL) != 0;
 
     if (_pThreadMgr == NULL || _pThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void **)&pCompartmentMgr) != S_OK)
         return;
 
     _fSettingKeyboardCompartment = TRUE;
+    if ((GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE) != 0) != fHangul)
+        SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE, fHangul);
     dwConversion = GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
-    if (status & CMODE_HANGUL)
-    {
-        if (!GetCompartmentDword(pCompartmentMgr, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE))
-            SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE, TRUE);
+    if (fHangul)
         dwNew = dwConversion | TF_CONVERSIONMODE_NATIVE;
-    }
     else
-    {
         dwNew = dwConversion & ~TF_CONVERSIONMODE_NATIVE;
-    }
     if (dwNew != dwConversion)
         SetCompartmentDword(pCompartmentMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION, dwNew);
     _fSettingKeyboardCompartment = FALSE;
