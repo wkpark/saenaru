@@ -91,7 +91,7 @@ UINT    WINAPI ImeEnumRegisterWord(REGISTERWORDENUMPROC lpfn, LPCTSTR lpRead, DW
     {
         if (lpRead)
         {
-            nBufLen = GetPrivateProfileString(lpRead, NULL,(LPTSTR)"",
+            nBufLen = GetPrivateProfileString(lpRead, NULL,TEXT(""),
                             (LPTSTR)szBuf,sizeof(szBuf)/sizeof(TCHAR),(LPTSTR)szDicFileName );
 
             if (nBufLen)
@@ -99,7 +99,10 @@ UINT    WINAPI ImeEnumRegisterWord(REGISTERWORDENUMPROC lpfn, LPCTSTR lpRead, DW
                 while (*lpBuf)
                 {
                     if (lpStr && lstrcmp(lpStr, lpBuf))
+                    {
+                        lpBuf += (lstrlen(lpBuf) + 1);
                         continue;
+                    }
 
                     uRet = (*lpfn)(lpRead, dw, lpBuf, lpData);
                     lpBuf += (lstrlen(lpBuf) + 1);

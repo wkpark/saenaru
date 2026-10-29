@@ -215,7 +215,7 @@ BOOL PASCAL ConvHanja(HIMC hIMC, int offset, int select)
     int cnt;
     BOOL bRc = FALSE;
     WCHAR cs=0;
-    LPMYSTR lpmystr, lpTemp;
+    LPMYSTR lpmystr, lpTemp, lpCand;
     MYCHAR myBuf[256];
     WCHAR *save;
     BOOL isasc=FALSE;
@@ -578,15 +578,17 @@ set_compstr:
                 (DWORD)((LPSTR)&((LPMYCAND)lpCandInfo)->cl - (LPSTR)lpCandInfo);
             lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
             lpdw = (LPDWORD)&(lpCandList->dwOffset);
+            // packed in szCand, where all of szBuf fits
+            lpCand = (LPMYSTR)((LPMYCAND)lpCandInfo)->szCand;
             while (*lpstr)
             {
                 lpCandList->dwOffset[i] =
-                    (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
+                    (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
                 Mylstrcpyn(lpmystr,lpstr,ARRAYSIZE(myBuf));
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
-                // a long meaning is cut to the candidate slot
-                Mylstrcpyn((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpmystr,MAXCANDSTRSIZE);
+                Mylstrcpy(lpCand,lpmystr);
+                lpCand += Mylstrlen(lpCand) + 1;
 
                 if (fHanja && *lpmystr == *lpT2) {
                     // 한자를 한글로 변환하는 경우.
