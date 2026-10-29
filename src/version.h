@@ -37,7 +37,7 @@
 
 #define VER_BUILD	 2056
 #define VER_BUILD_STR	"2056"
-#define VER_PATCHLEVEL	     0
-#define VER_PATCHLEVEL_STR  "0"
+#define VER_PATCHLEVEL	     1
+#define VER_PATCHLEVEL_STR  "1"
 
-#define VER_SNAPSHOT	"1.3.0"
+#define VER_SNAPSHOT	"1.3.1-GIT"
