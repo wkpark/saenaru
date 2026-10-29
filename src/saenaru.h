@@ -457,7 +457,7 @@ void PASCAL MakeAttrClause( LPCOMPOSITIONSTRING lpCompStr);
 void PASCAL HandleShiftArrow( HIMC hIMC, BOOL fArrow);
 
 /* hansub.c       */
-DWORD PASCAL checkHangulKey(HIMC,UINT,LPARAM,LPBYTE);
+DWORD PASCAL checkHangulKey(HIMC,WPARAM,LPARAM,LPBYTE);
 void PASCAL hangulKeyHandler(HIMC,WPARAM,LPARAM,CONST LPBYTE);
 
 /* hanjaidx.c       */
