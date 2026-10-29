@@ -153,6 +153,7 @@ public:
             SafeReleaseClear(_pComposition);
         }
     }
+    void _SetCaretAfterComposition(TfEditCookie ec, ITfContext *pContext);
     void _StartCompositionInContext(ITfContext *pContext, WPARAM wParam = 0);
     void _EndCompositionInContext(ITfContext *pContext, WPARAM wParam = 0);
 

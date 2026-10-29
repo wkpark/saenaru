@@ -6,6 +6,9 @@
 
 #include "globals.h"
 #include "saenarutip.h"
+extern "C" {
+#include "hangul.h"
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -58,16 +61,10 @@ STDAPI CSaenaruTextService::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
         if (pContext->GetSelection(ecReadOnly, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) == S_OK &&
             cFetched == 1)
         {
-            if (_pComposition->GetRange(&pRangeComposition) == S_OK)
+            // the range of the composition above, released at Exit
+            if (!IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
             {
-                fResult = IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition);
-
-                pRangeComposition->Release();
-
-                if (!fResult)
-                {
-                    fCancelComposition = TRUE;
-                }
+                fCancelComposition = TRUE;
             }
             tfSelection.range->Release();
         }
@@ -93,6 +90,9 @@ STDAPI CSaenaruTextService::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 CancelComposition:
         // we need a write edit session to cancel the composition
         _EndCompositionInContext(pContext);
+        // the next key is a new syllable, not of the composition ended
+        if (!_IsComposing())
+            hangul_ic_init(&ic);
     }
 
 Exit:
