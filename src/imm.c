@@ -671,7 +671,7 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
     LPCANDIDATELIST     lpCandList;
     MYCHAR              szBuf[256];
     int                 nBufLen;
-    LPMYSTR             lpstr;
+    LPMYSTR             lpstr, lpCand;
     TRANSMSG             GnMsg;
     int                 i = 0;
     LPDWORD             lpdw;
@@ -778,12 +778,14 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      lpdw = (LPDWORD)&(lpCandList->dwOffset);
 
                      lpstr = &szBuf[0];
+                     // packed in szCand like as ConvHanja(), where all of szBuf fits
+                     lpCand = (LPMYSTR)((LPMYCAND)lpCandInfo)->szCand;
                      while (*lpstr && (i < MAXCANDSTRNUM))
                      {
                          lpCandList->dwOffset[i] =
-                                (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-                         // dwOffset is in bytes. cut to the slot like as ConvHanja()
-                         Mylstrcpyn((LPMYSTR)((LPSTR)lpCandList+lpCandList->dwOffset[i]),lpstr,MAXCANDSTRSIZE);
+                                (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
+                         Mylstrcpy(lpCand,lpstr);
+                         lpCand += Mylstrlen(lpCand) + 1;
                          lpstr += (Mylstrlen(lpstr) + 1);
                          i++;
                      }
@@ -811,10 +813,11 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
                      ImmUnlockIMCC(lpIMC->hCandInfo);
-                     ImmUnlockIMC(hIMC);
 
                      bRet = TRUE;
                  }
+                 ImmUnlockIMCC(lpIMC->hCompStr);
+                 ImmUnlockIMC(hIMC);
              }
              break;
 
@@ -1133,11 +1136,12 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));
-                    // at most the composition buffers of MAXCOMPSIZE chars
-                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,min(dwComp,MAXCOMPSIZE));
+                    // in bytes, maybe without the terminator: at most the
+                    // composition buffers of MAXCOMPSIZE chars
+                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,min(dwComp / sizeof(TCHAR) + 1,MAXCOMPSIZE));
                 } else if (lpRead != NULL && dwRead >0) {
                     MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
-                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,min(dwRead / sizeof(TCHAR),MAXCOMPSIZE));
+                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,min(dwRead / sizeof(TCHAR) + 1,MAXCOMPSIZE));
                     if (!Mylstrlen(lpRead)) {
                         // 고고타자의 행동을 분석해서 얻은 결론:
                         // lpRead가 지워지면 다시 조합에 들어감.
