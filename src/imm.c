@@ -758,6 +758,14 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      nBufLen = GetCandidateStringsFromDictionary(GETLPCOMPREADSTR(lpCompStr),
                                                                  (LPMYSTR)szBuf,256,
                                                                  (LPTSTR)szDicFileName );
+                     // no candidate window without candidates
+                     if (!szBuf[0])
+                     {
+                         ImmUnlockIMCC(lpIMC->hCandInfo);
+                         ImmUnlockIMCC(lpIMC->hCompStr);
+                         ImmUnlockIMC(hIMC);
+                         break;
+                     }
 
                      //
                      // generate WM_IME_NOTFIY IMN_OPENCANDIDATE message.
@@ -1142,7 +1150,8 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
                 } else if (lpRead != NULL && dwRead >0) {
                     MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
                     Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,min(dwRead / sizeof(TCHAR) + 1,MAXCOMPSIZE));
-                    if (!Mylstrlen(lpRead)) {
+                    // lpRead may have no terminator
+                    if (!Mylstrlen(GETLPCOMPREADSTR(lpCompStr))) {
                         // 고고타자의 행동을 분석해서 얻은 결론:
                         // lpRead가 지워지면 다시 조합에 들어감.
                         // ImeSetCompostionString()을 쓰는 어플이 많지 않아서
