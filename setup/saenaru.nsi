@@ -114,9 +114,13 @@ Section "VC런타임 점검" SecPrep
   Quit
   Goto VCRuntimeNo
   DetailPrint "$(DESC_VCREDIST86_DOWNLOAD)"
-  NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$Temp\vc_redist.x86.exe"
+  # NSISdl has no HTTPS, and the user can write the files in $TEMP
+  CreateDirectory "$INSTDIR"
+  System::Call 'urlmon::URLDownloadToFileW(p 0, w "https://aka.ms/vs/17/release/vc_redist.x86.exe", w "$INSTDIR\vc_redist.x86.exe", i 0, p 0) i .r0'
+  StrCmp $0 0 0 VCRuntimeNo
   DetailPrint "$(DESC_VCREDIST86_INSTALL)"
-  ExecWait '"$Temp\vc_redist.x86.exe" /norestart'
+  ExecWait '"$INSTDIR\vc_redist.x86.exe" /norestart'
+  Delete "$INSTDIR\vc_redist.x86.exe"
   VCRuntimeNext:
   ${If} ${RunningX64}
     IfFileExists $SYSDIR\vcruntime140.dll 0 +2
@@ -126,9 +130,12 @@ Section "VC런타임 점검" SecPrep
     Quit
     Goto VCRuntimeNo
     DetailPrint "$(DESC_VCREDIST_DOWNLOAD)"
-    NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x64.exe" "$Temp\vc_redist.x64.exe"
+    CreateDirectory "$INSTDIR"
+    System::Call 'urlmon::URLDownloadToFileW(p 0, w "https://aka.ms/vs/17/release/vc_redist.x64.exe", w "$INSTDIR\vc_redist.x64.exe", i 0, p 0) i .r0'
+    StrCmp $0 0 0 VCRuntimeNo
     DetailPrint "$(DESC_VCREDIST_INSTALL)"
-    ExecWait '"$Temp\vc_redist.x64.exe" /norestart'
+    ExecWait '"$INSTDIR\vc_redist.x64.exe" /norestart'
+    Delete "$INSTDIR\vc_redist.x64.exe"
   ${EndIf}
 
   Goto VCRuntimePass
@@ -152,7 +159,8 @@ Section "새나루 입력기" SecBody
 
   # Can't copy saenaru.ime, create it under another name and rename it on
   # next reboot.
-  GetTempFileName $3
+  # in $SYSDIR, not in $TEMP where the user can replace it before the reboot
+  GetTempFileName $3 $SYSDIR
   File /oname=$3 "${DDKBUILDDIR}\saenaru.ime"
   Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
   SaenaruDone:
@@ -160,7 +168,7 @@ Section "새나루 입력기" SecBody
   File "${DDKBUILDDIR}\SaenaruTip.dll"
   IfErrors 0 SaenaruTipDone
 
-  GetTempFileName $3
+  GetTempFileName $3 $SYSDIR
   File /oname=$3 "${DDKBUILDDIR}\SaenaruTip.dll"
   Rename /REBOOTOK $3 $SYSDIR\SaenaruTip.dll
   SaenaruTipDone:
@@ -168,7 +176,7 @@ Section "새나루 입력기" SecBody
   File "${DVBUILDDIR}\kbddvk.dll"
   IfErrors 0 kbddvkDone
 
-  GetTempFileName $3
+  GetTempFileName $3 $SYSDIR
   File /oname=$3 "${DVBUILDDIR}\kbddvk.dll"
   Rename /REBOOTOK $3 $SYSDIR\kbddvk.dll
   kbddvkDone:
@@ -183,7 +191,7 @@ Section "새나루 입력기" SecBody
 
     # Can't copy saenaru.ime, create it under another name and rename it on
     # next reboot.
-    GetTempFileName $3
+    GetTempFileName $3 $SYSDIR
     File /oname=$3 "${DDK64BUILDDIR}\saenaru.ime"
     Rename /REBOOTOK $3 $SYSDIR\saenaru.ime
     Saenaru64Done:
@@ -193,7 +201,7 @@ Section "새나루 입력기" SecBody
     File "${DV64BUILDDIR}\kbddvk.dll"
     IfErrors 0 kbddvk64Done
 
-    GetTempFileName $3
+    GetTempFileName $3 $SYSDIR
     File /oname=$3 "${DV64BUILDDIR}\kbddvk.dll"
     Rename /REBOOTOK $3 $SYSDIR\kbddvk.dll
     kbddvk64Done:
@@ -298,7 +306,7 @@ Section /o "새나루 콜맥(Colemak)" SecColemak
   File "${CMBUILDDIR}\kbdcmk.dll"
   IfErrors 0 kbdcmkDone
 
-  GetTempFileName $3
+  GetTempFileName $3 $SYSDIR
   File /oname=$3 "${CMBUILDDIR}\kbdcmk.dll"
   Rename /REBOOTOK $3 $SYSDIR\kbdcmk.dll
   kbdcmkDone:
@@ -312,7 +320,7 @@ Section /o "새나루 콜맥(Colemak)" SecColemak
     File "${CM64BUILDDIR}\kbdcmk.dll"
     IfErrors 0 kbdcmk64Done
 
-    GetTempFileName $3
+    GetTempFileName $3 $SYSDIR
     File /oname=$3 "${CM64BUILDDIR}\kbdcmk.dll"
     Rename /REBOOTOK $3 $SYSDIR\kbdcmk.dll
     kbdcmk64Done:
@@ -403,7 +411,7 @@ Section /o "기본 한글입력기로 지정" SecDefault
   !appendfile "${FILE}" 'InputLocale="0412:e0120412","0412:e0130412"$\r$\n'
   !appendfile "${FILE}" 'UserLocale_DefaultUser=0412$\r$\n'
   !appendfile "${FILE}" ';InputLocale_DefaultUser="0412:e0010412"$\r$\n'
-  Exec 'RunDll32.exe shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
+  Exec '"$SYSDIR\RunDll32.exe" shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
   !undef FILE
   exit:
 SectionEnd
@@ -434,7 +442,7 @@ Section "한글입력기 목록에 추가" SecAdd
   !appendfile "${FILE}" 'InputLocale="$2:$1","0412:e0120412","0412:e0130412"$\r$\n'
   !appendfile "${FILE}" 'UserLocale_DefaultUser=0412$\r$\n'
   !appendfile "${FILE}" ';InputLocale_DefaultUser="$2:$1"$\r$\n'
-  Exec 'RunDll32.exe shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
+  Exec '"$SYSDIR\RunDll32.exe" shell32.dll,Control_RunDLL intl.cpl,,/f:"${FILE}"'
   !undef FILE
   exit:
 SectionEnd
@@ -485,23 +493,23 @@ FunctionEnd
 Function EnableImeSettings
         ${NSD_GetState} $default_ime $0
         ${If} $0 == 1
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 0,1,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 0,1,1'
         ${Else}
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 0,0,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 0,0,1'
         ${EndIf}
 
         ${NSD_GetState} $dvorak_ime $0
         ${If} $0 == 1
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 1,1,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 1,1,1'
         ${Else}
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 1,0,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 1,0,1'
         ${EndIf}
 
         ${NSD_GetState} $colemak_ime $0
         ${If} $0 == 1
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 2,1,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 2,1,1'
         ${Else}
-	  Exec "RunDll32.exe saenaru.ime,InstallLayout 2,0,1"
+	  Exec '"$SYSDIR\RunDll32.exe" saenaru.ime,InstallLayout 2,0,1'
         ${EndIf}
 FunctionEnd
 
@@ -517,7 +525,7 @@ Function OpenInputSetting
 FunctionEnd
 
 Function OpenKeyboardSettings
-	Exec "RunDll32.exe shell32.dll,Control_RunDLL input.dll"
+	Exec '"$SYSDIR\RunDll32.exe" shell32.dll,Control_RunDLL input.dll'
 FunctionEnd
 
 Var old_kbd
@@ -525,6 +533,7 @@ Var new_kbd
 Var nk_kbd
 Var user1_kbd
 Var dialog
+Var regedit
 Function OpenUserKeyboard
 	nsDialogs::Create 1018
         Pop $dialog
@@ -544,24 +553,29 @@ Function OpenUserKeyboard
 FunctionEnd
 
 Function OpenUserKbdSettings
+        # the regedit found by name, without the installer and current dirs
+        StrCpy $regedit "$WINDIR\regedit.exe"
+        IfFileExists "$SYSDIR\regedit.exe" 0 +2
+        StrCpy $regedit "$SYSDIR\regedit.exe"
+
         ${NSD_GetState} $old_kbd $0
         ${If} $0 == 1
-	  Exec "Regedit /s $INSTDIR\old2set3set.reg"
+	  Exec '"$regedit" /s $INSTDIR\old2set3set.reg'
         ${EndIf}
 
         ${NSD_GetState} $new_kbd $0
         ${If} $0 == 1
-	  Exec "Regedit /s $INSTDIR\2set3set.reg"
+	  Exec '"$regedit" /s $INSTDIR\2set3set.reg'
         ${EndIf}
 
         ${NSD_GetState} $nk_kbd $0
         ${If} $0 == 1
-	  Exec "Regedit /s $INSTDIR\nk2set.reg"
+	  Exec '"$regedit" /s $INSTDIR\nk2set.reg'
         ${EndIf}
 
         ${NSD_GetState} $user1_kbd $0
         ${If} $0 == 1
-	  Exec "Regedit /s $INSTDIR\user1.reg"
+	  Exec '"$regedit" /s $INSTDIR\user1.reg'
         ${EndIf}
 FunctionEnd
 
@@ -775,7 +789,11 @@ Section "Uninstall"
   RMDir "$INSTDIR\help"
   RMDir /REBOOTOK "$INSTDIR"
 
-  Delete "${SMPATH}\*.*"
+  # only the files of the installer: the user can redirect ${SMPATH}
+  Delete "${SMPATH}\새나루 프로젝트.url"
+  Delete "${SMPATH}\열린 한글 프로젝트.url"
+  Delete "${SMPATH}\새나루 Uninstall.lnk"
+  Delete "${SMPATH}\Uninstall.lnk"
   RMDir "${SMPATH}"
 
   DeleteRegKey HKLM "System\CurrentControlSet\Control\Keyboard Layouts\E0120412"
