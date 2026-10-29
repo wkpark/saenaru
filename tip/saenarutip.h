@@ -202,6 +202,7 @@ private:
     BOOL _InitWorkerWnd();
     BOOL _InitKeystrokeSink();
     BOOL _InitPreservedKey();
+    void _InitKeyboardCompartment();
 
     // uninit methods
     void _UninitLanguageBar();
@@ -213,6 +214,10 @@ private:
     void _UninitWorkerWnd();
     void _UninitKeystrokeSink();
     void _UninitPreservedKey();
+    void _UninitKeyboardCompartment();
+
+    // the mode for the IMM applications like as gvim
+    void _SetKeyboardCompartment(DWORD status);
 
     // property methods
     void _RequestPropertyEditSession(ULONG ulCallback);
@@ -246,6 +251,8 @@ private:
     DWORD _dwThreadFocusSinkCookie;
     DWORD _dwTextEditSinkCookie;
     DWORD _dwGlobalCompartmentEventSinkCookie;
+    DWORD _dwKeyboardCompartmentSinkCookie[2]; // OPENCLOSE, INPUTMODE_CONVERSION
+    BOOL _fSettingKeyboardCompartment; // not changed back by OnChange()
 
     DWORD _dwConversionStatus;
 

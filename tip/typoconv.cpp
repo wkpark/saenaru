@@ -91,7 +91,7 @@ static void LoadEngWords()
 // IsKeyboardDisabled
 //
 // The keyboard disabled by the application, like as ImmAssociateContext(NULL).
-// The open/close compartment is not checked. The modes are not kept there.
+// The open/close compartment is not checked. It is closed in the english mode.
 //----------------------------------------------------------------------------
 
 static BOOL IsKeyboardDisabled(ITfContext *pContext)

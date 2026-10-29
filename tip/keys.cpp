@@ -98,7 +98,11 @@ DWORD CSaenaruTextService::SetConversionStatus(DWORD status)
 //        return 0;
 
     // FIXME
+    DWORD dwChanged = _dwConversionStatus ^ status;
     _dwConversionStatus = status;
+    // only the hangul mode. the native mode is kept while closed
+    if (dwChanged & CMODE_HANGUL)
+        _SetKeyboardCompartment(status);
     return _dwConversionStatus;
 }
 
