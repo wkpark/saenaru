@@ -696,7 +696,7 @@ CONST LPBYTE lpbKeyState;
                 DWORD ch = ConvJunja(hkey, 0);
                 MyDebugPrint((TEXT("JUNJA Vkey: %lx => %x\r\n"), hkey, ch));
                 if (ch != 0)
-                    code = (WORD) hkey = ch;
+                    code = (WORD) (hkey = ch);
             }
 
 	    /* */
