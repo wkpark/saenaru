@@ -40,10 +40,10 @@
 
 /* VER_GITHASH comes from gitver.h generated at build time */
 #ifdef VER_GITHASH
-#define VER_SNAPSHOT	"1.1.0-GIT-" VER_GITHASH
+#define VER_SNAPSHOT	"1.1.0-" VER_GITHASH
 #define VER_GITSUFFIX	"-" VER_GITHASH
 #else
-#define VER_SNAPSHOT	"1.1.0-GIT"
+#define VER_SNAPSHOT	"1.1.0"
 #define VER_GITSUFFIX	""
 #endif
 
