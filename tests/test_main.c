@@ -817,6 +817,10 @@ static void TestDictionary(void)
         CheckInt("symwin.dic: a double consonant", 1, n > 1);
     }
 
+    // a meaning of one char, without the CR it was counted with
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, L"saenaru.dic");
+    CheckStr("saenaru.dic: a meaning of one char", L"伽:伽", buf);
+
     // the meaning is cut at the comma
     GetCandidateStringsFromDictionary(L"한", buf, 1024, L"nabi.dic");
     CheckStr("nabi.dic: comma", L"韓:나라 이름 한", buf);
@@ -896,6 +900,7 @@ static void TestDictionaryCutHeader(void)
 {
     WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
     WCHAR buf[1024 + 2];
+    LPCWSTR psz;
     HANDLE hFile;
     DWORD dw;
     int i, n;
@@ -923,6 +928,75 @@ static void TestDictionaryCutHeader(void)
     GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
     CheckStr("last line: 2nd", L"家:집 가", buf + lstrlenW(buf) + 1);
     DeleteFileW(szPath);
+
+    // the end of the file at the end of a read, cut there: 4 + 1021 * 2 + 2
+    // chars after the BOM, the words out of KS X 1001 are skipped
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 1021; i++)
+        WriteFile(hFile, L"\x4000\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"可家", 2 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("end at a read: last line", L"可家", buf);
+    DeleteFileW(szPath);
+
+    // CR LF: no empty line as a candidate
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\r\n\r\n可=옳을 가\r\n\r\n家=집 가\r\n", 25 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("CR LF: 1st", L"可:옳을 가", buf);
+    psz = buf + lstrlenW(buf) + 1;
+    CheckStr("CR LF: 2nd", L"家:집 가", psz);
+    CheckStr("CR LF: no more", L"", psz + lstrlenW(psz) + 1);
+    DeleteFileW(szPath);
+
+    // a read ends between CR and LF: 5 + 338 * 3 chars after the BOM, so
+    // [나라] is at 1020 and its CR at 1024
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\r\n", 6 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 338; i++)
+        WriteFile(hFile, L"可\r\n", 3 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]\r\n那=어찌 나\r\n", 14 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckStr("CR LF: a read ends between CR and LF", L"那:어찌 나", buf);
+    DeleteFileW(szPath);
+}
+
+// the search stops at a section greater than the reading
+static void TestDictionaryOrder(void)
+{
+    static const LPCSTR names[] = { "nabi.dic", "word.dic", "symwin.dic", "saenaru.dic" };
+    int i;
+
+    for (i = 0; i < ARRAYSIZE(names); i++) {
+        HANDLE hFile = CreateFileA(names[i], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+        DWORD dwSize = GetFileSize(hFile, NULL), dw = 0;
+        LPWSTR lpText = (LPWSTR)HeapAlloc(GetProcessHeap(), 0, dwSize + sizeof(WCHAR));
+        LPWSTR p;
+        WCHAR last = 0;
+        int sorted = 1;
+
+        ReadFile(hFile, lpText, dwSize, &dw, NULL);
+        CloseHandle(hFile);
+        lpText[dw / sizeof(WCHAR)] = L'\0';
+        for (p = lpText; p != NULL; p = wcschr(p, L'\n')) {
+            if (*p == L'\n')
+                p++;
+            if (*p == L'[') {
+                if (p[1] < last)
+                    sorted = 0;
+                last = p[1];
+            }
+        }
+        CheckInt(names[i], 1, sorted && last != 0);
+        HeapFree(GetProcessHeap(), 0, lpText);
+    }
 }
 
 // the terminator of a compose map of 256 entries stays in the map
@@ -959,6 +1033,7 @@ int main(void)
     TestHanjaIndex();
     TestDictionaryCarry();
     TestDictionaryCutHeader();
+    TestDictionaryOrder();
     TestComposeMapSize();
 
     printf("%d passed, %d failed\n", nPassed, nFailed);
