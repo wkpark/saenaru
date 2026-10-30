@@ -98,50 +98,6 @@ void PASCAL InitCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag)
 
 /**********************************************************************/
 /*                                                                    */
-/*      ClearCompStr()                                                */
-/*                                                                    */
-/**********************************************************************/
-void PASCAL ClearCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag)
-{
-    lpCompStr->dwSize = sizeof(MYCOMPSTR);
-
-    if (dwClrFlag & CLR_UNDET)
-    {
-        lpCompStr->dwCompStrOffset = 0;
-        lpCompStr->dwCompClauseOffset = 0;
-        lpCompStr->dwCompAttrOffset = 0;
-        lpCompStr->dwCompReadStrOffset = 0;
-        lpCompStr->dwCompReadClauseOffset = 0;
-        lpCompStr->dwCompReadAttrOffset = 0;
-        lpCompStr->dwCompStrLen = 0;
-        lpCompStr->dwCompClauseLen = 0;
-        lpCompStr->dwCompAttrLen = 0;
-        lpCompStr->dwCompReadStrLen = 0;
-        lpCompStr->dwCompReadClauseLen = 0;
-        lpCompStr->dwCompReadAttrLen = 0;
-        ((LPMYCOMPSTR)lpCompStr)->szCompStr[0] = MYTEXT('\0');
-        ((LPMYCOMPSTR)lpCompStr)->szCompReadStr[0] = MYTEXT('\0');
-        lpCompStr->dwCursorPos = 0;
-    }
-
-    if (dwClrFlag & CLR_RESULT)
-    {
-        lpCompStr->dwResultStrOffset = 0;
-        lpCompStr->dwResultClauseOffset = 0;
-        lpCompStr->dwResultReadStrOffset = 0;
-        lpCompStr->dwResultReadClauseOffset = 0;
-        lpCompStr->dwResultStrLen = 0;
-        lpCompStr->dwResultClauseLen = 0;
-        lpCompStr->dwResultReadStrLen = 0;
-        lpCompStr->dwResultReadClauseLen = 0;
-        ((LPMYCOMPSTR)lpCompStr)->szResultStr[0] = MYTEXT('\0');
-        ((LPMYCOMPSTR)lpCompStr)->szResultReadStr[0] = MYTEXT('\0');
-    }
-
-}
-
-/**********************************************************************/
-/*                                                                    */
 /*      ClearCandidate()                                              */
 /*                                                                    */
 /**********************************************************************/

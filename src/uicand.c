@@ -809,7 +809,7 @@ void PASCAL PaintCandWindow( HWND hCandWnd)
                 wsprintf(num, TEXT("%d "), i % lpCandList->dwPageSize + 1);
 
                 if (i >= lpCandList->dwCount) 
-                    lpstr=(LPMYSTR)(LPSTR)" ";
+                    lpstr=(LPMYSTR)TEXT(" ");
                 else {
 
                     lpstr=(LPMYSTR)((LPSTR)lpCandList +lpCandList->dwOffset[i]);
@@ -1047,7 +1047,11 @@ void PASCAL ResizeCandWindow( LPUIEXTRA lpUIExtra,LPINPUTCONTEXT lpIMC )
                 LPTSTR lpTemp;
                 TCHAR buf[128];
 
-                lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[i]);
+                // an empty line past the last candidate, as PaintCandWindow()
+                if (i >= lpCandList->dwCount)
+                    lpstr = TEXT(" ");
+                else
+                    lpstr = (LPMYSTR)((LPSTR)lpCandList + lpCandList->dwOffset[i]);
                 Mylstrcpyn(buf, lpstr, ARRAYSIZE(buf));
 
                 if (lpCandList->dwStyle == IME_CAND_CODE && (NULL != (lpTemp = Mystrchr(buf, MYTEXT(':'))))) {

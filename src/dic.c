@@ -97,7 +97,7 @@ void PASCAL FlushText(HIMC hIMC)
         //
         // Flush composition strings.
         //
-        ClearCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
         ImmUnlockIMCC(lpIMC->hCompStr);
 
         GnMsg.message = WM_IME_COMPOSITION;
@@ -585,7 +585,9 @@ set_compstr:
             {
                 lpCandList->dwOffset[i] =
                     (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
-                Mylstrcpyn(lpmystr,lpstr,ARRAYSIZE(myBuf));
+                // a candidate fits the composition string and the buffers of
+                // MAXCOMPSIZE chars it is copied into
+                Mylstrcpyn(lpmystr,lpstr,MAXCOMPSIZE);
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
                 Mylstrcpy(lpCand,lpmystr);
@@ -932,7 +934,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }
 
-            ClearCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+            InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
@@ -990,7 +992,7 @@ WORD code;
         dwSize = sizeof(MYCOMPSTR);
         lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
         lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-        lpCompStr->dwSize = dwSize;
+        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
     }
     else
     {

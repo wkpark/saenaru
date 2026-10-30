@@ -792,7 +792,8 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      {
                          lpCandList->dwOffset[i] =
                                 (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
-                         Mylstrcpy(lpCand,lpstr);
+                         // at most MAXCOMPSIZE chars like as ConvHanja()
+                         Mylstrcpyn(lpCand,lpstr,MAXCOMPSIZE);
                          lpCand += Mylstrlen(lpCand) + 1;
                          lpstr += (Mylstrlen(lpstr) + 1);
                          i++;
@@ -802,15 +803,18 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                           (MAXCANDSTRNUM * (sizeof(DWORD) + MAXCANDSTRSIZE));
                      lpCandList->dwStyle = IME_CAND_READ;
                      lpCandList->dwCount = i;
-                     lpCandList->dwPageStart = 0;
                      if (i < MAXCANDPAGESIZE)
                          lpCandList->dwPageSize  = i;
                      else
                          lpCandList->dwPageSize  = MAXCANDPAGESIZE;
 
                      lpCandList->dwSelection++;
-                     if (lpCandList->dwSelection == (DWORD)i)
+                     // the selection of the old list may be past the new one
+                     if (lpCandList->dwSelection >= (DWORD)i)
                          lpCandList->dwSelection = 0;
+                     // the page of the selection, like as ConvHanja()
+                     lpCandList->dwPageStart = lpCandList->dwSelection -
+                         lpCandList->dwSelection % lpCandList->dwPageSize;
 
                      //
                      // Generate messages.
@@ -1033,7 +1037,24 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,sizeof(MYCOMPSTR));
             if (lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr))
             {
-                lpCompStr->dwSize = sizeof(MYCOMPSTR);
+                // the offsets of MYCOMPSTR, which all the strings are written
+                // through, unless the context has them: a new one has none,
+                // and those of another IME may point past the block
+#define MYOFFSET(f) ((DWORD)FIELD_OFFSET(MYCOMPSTR, f))
+                if (lpCompStr->dwCompStrOffset != MYOFFSET(szCompStr) ||
+                        lpCompStr->dwCompAttrOffset != MYOFFSET(bCompAttr) ||
+                        lpCompStr->dwCompClauseOffset != MYOFFSET(dwCompClause) ||
+                        lpCompStr->dwCompReadStrOffset != MYOFFSET(szCompReadStr) ||
+                        lpCompStr->dwCompReadAttrOffset != MYOFFSET(bCompReadAttr) ||
+                        lpCompStr->dwCompReadClauseOffset != MYOFFSET(dwCompReadClause) ||
+                        lpCompStr->dwResultStrOffset != MYOFFSET(szResultStr) ||
+                        lpCompStr->dwResultClauseOffset != MYOFFSET(dwResultClause) ||
+                        lpCompStr->dwResultReadStrOffset != MYOFFSET(szResultReadStr) ||
+                        lpCompStr->dwResultReadClauseOffset != MYOFFSET(dwResultReadClause))
+                    InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+#undef MYOFFSET
+                else
+                    lpCompStr->dwSize = sizeof(MYCOMPSTR);
                 ImmUnlockIMCC(lpIMC->hCompStr);
             }
             lpIMC->hCandInfo = ImmReSizeIMCC(lpIMC->hCandInfo,sizeof(MYCAND));
@@ -1152,9 +1173,6 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
 
             lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
             if (lpCompStr != NULL) {
-                // the offsets are 0 before the first composition
-                if (!lpCompStr->dwCompStrOffset)
-                    InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));

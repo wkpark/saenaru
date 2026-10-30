@@ -364,7 +364,7 @@ CONST LPBYTE lpbKeyState;
         dwSize = sizeof(MYCOMPSTR);
         lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
         lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-        lpCompStr->dwSize = dwSize;
+        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 	fModeInit=TRUE;
 
         hangul_ic_init(&ic);
@@ -838,7 +838,7 @@ ac_exit:
             SetClause(GETLPRESULTCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTSTR(lpCompStr)));
             SetClause(GETLPRESULTREADCLAUSE(lpCompStr),Mylstrlen(GETLPRESULTREADSTR(lpCompStr)));
 
-            ClearCompStr(lpCompStr,CLR_UNDET);
+            InitCompStr(lpCompStr,CLR_UNDET);
 	}
 
         //if (((dwImeFlag & SAENARU_ONTHESPOT) && !(dwOptionFlag & HANGUL_JAMOS)) && resultlen)
