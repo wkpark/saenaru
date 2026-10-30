@@ -966,6 +966,36 @@ static void TestDictionaryCutHeader(void)
     GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
     CheckStr("CR LF: a read ends between CR and LF", L"那:어찌 나", buf);
     DeleteFileW(szPath);
+
+    // [나라말] across the first read joins [나라] for the similar words only:
+    // 5 + 7 + 505 * 2 chars after the BOM, so [나라말] is at 1023
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[나라]\n那=어찌 나\n", 13 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 505; i++)
+        WriteFile(hFile, L"\x4000\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라말]\n國=나라 국\n", 13 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckStr("cut header: the section only", L"", buf + lstrlenW(buf) + 1);
+    dwOptionFlag |= SEARCH_SIMILAR_WORDS;
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    dwOptionFlag &= ~SEARCH_SIMILAR_WORDS;
+    CheckStr("cut header: the similar words", L"國:나라 국", buf + lstrlenW(buf) + 1);
+    DeleteFileW(szPath);
+
+    // a header that ends the file at the end of a read: 4 + 508 * 2 + 4
+    // chars after the BOM; found, with no candidate
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 508; i++)
+        WriteFile(hFile, L"可\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]", 4 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    n = GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckInt("end at a read: the last header found", 1, n);
+    DeleteFileW(szPath);
 }
 
 // the search stops at a section greater than the reading
@@ -976,16 +1006,22 @@ static void TestDictionaryOrder(void)
 
     for (i = 0; i < ARRAYSIZE(names); i++) {
         HANDLE hFile = CreateFileA(names[i], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-        DWORD dwSize = GetFileSize(hFile, NULL), dw = 0;
-        LPWSTR lpText = (LPWSTR)HeapAlloc(GetProcessHeap(), 0, dwSize + sizeof(WCHAR));
-        LPWSTR p;
+        DWORD dwSize, dw = 0;
+        LPWSTR lpText, p;
         WCHAR last = 0;
         int sorted = 1;
 
+        if (hFile == INVALID_HANDLE_VALUE) {
+            CheckInt(names[i], 1, 0);
+            continue;
+        }
+        dwSize = GetFileSize(hFile, NULL);
+        lpText = (LPWSTR)HeapAlloc(GetProcessHeap(), 0, dwSize + sizeof(WCHAR));
         ReadFile(hFile, lpText, dwSize, &dw, NULL);
         CloseHandle(hFile);
         lpText[dw / sizeof(WCHAR)] = L'\0';
-        for (p = lpText; p != NULL; p = wcschr(p, L'\n')) {
+        // the first line after the BOM
+        for (p = lpText + (lpText[0] == 0xfeff); p != NULL; p = wcschr(p, L'\n')) {
             if (*p == L'\n')
                 p++;
             if (*p == L'[') {

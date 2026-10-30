@@ -97,11 +97,24 @@ hangul_cho_to_jamo(WCHAR key)
     return 0;
 }
 
+// terminate the text of a read of 2048 bytes at lpText, without a byte of
+// half a char; returns its end if its last line is cut by the read, NULL
+// if the read ended a line or the file
+static LPMYSTR EndOfRead(LPMYSTR lpText, DWORD dwRead)
+{
+    LPMYSTR lpEnd = lpText + dwRead / sizeof(MYCHAR);
+
+    *lpEnd = MYTEXT('\0');
+    if (dwRead < 2048 || *(lpEnd - 1) == MYTEXT('\n'))
+        return NULL;
+    return lpEnd;
+}
+
 int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, int iFlag)
 {
     DWORD dwWritten = 0;
     MYCHAR  myBuf[4098];
-    LPMYSTR lpDic, lpSection, lpTemp, lpTemp2;
+    LPMYSTR lpDic, lpSection, lpTemp;
     WCHAR *save;
     MYCHAR  myBase[128];
     LPMYSTR lpReadBase;
@@ -156,13 +169,10 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     myBuf[0] = MYTEXT('\0');
     lpDic = myBuf;
 
-    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && dwRead > 0)
+    // a line carried over at the end of the file is read once more
+    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && (dwRead > 0 || llen > 0))
     {
-        *(LPMYSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
-        // the last line is cut by the read unless it ends the file
-        lpCut = lpDic + llen + dwRead / sizeof(MYCHAR);
-        if (dwRead < 2048 || *(lpCut - 1) == MYTEXT('\n'))
-            lpCut = NULL;
+        lpCut = EndOfRead(lpDic + llen, dwRead);
 
         lpToken = Mystrtok(lpDic, szSep, &save);
         while (NULL != lpToken) {
@@ -234,11 +244,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         DWORD len;
         UINT force = 0;
 
-        *(LPWSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
-        // the last line is cut by the read unless it ends the file
-        lpCut = lpDic + llen + dwRead / sizeof(MYCHAR);
-        if (dwRead < 2048 || *(lpCut - 1) == MYTEXT('\n'))
-            lpCut = NULL;
+        lpCut = EndOfRead(lpDic + llen, dwRead);
 
         lpToken = Mystrtok(lpDic, szSep, &save);
 
@@ -317,9 +323,6 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 // 뜻이 길 경우는 잘라냄. FIXME
                 if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
-                // strip \r
-                else if (NULL != (lpTemp2 = Mystrchr(lpToken, MYTEXT('\r'))))
-                    *lpTemp2 = MYTEXT('\0');
 
                 len = Mylstrlen(lpToken);
             }
