@@ -97,7 +97,7 @@ void PASCAL FlushText(HIMC hIMC)
         //
         // Flush composition strings.
         //
-        ClearCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
         ImmUnlockIMCC(lpIMC->hCompStr);
 
         GnMsg.message = WM_IME_COMPOSITION;
@@ -934,7 +934,7 @@ void PASCAL DeleteChar( HIMC hIMC ,UINT uVKey)
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }
 
-            ClearCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+            InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
 
             GnMsg.message = WM_IME_COMPOSITION;
             GnMsg.wParam = 0;
@@ -992,7 +992,7 @@ WORD code;
         dwSize = sizeof(MYCOMPSTR);
         lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
         lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-        lpCompStr->dwSize = dwSize;
+        InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
     }
     else
     {
@@ -1586,7 +1586,7 @@ CONST LPBYTE lpbKeyState;
                                     lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
                                     lpCompStr =
                                         (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                                    lpCompStr->dwSize = dwSize;
+                                    InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
                                 } else
                                     lpCompStr =
                                         (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
@@ -1839,7 +1839,7 @@ CONST LPBYTE lpbKeyState;
                                 lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
                                 lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                                lpCompStr->dwSize = dwSize;
+                                InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
                             } else
         		        lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;

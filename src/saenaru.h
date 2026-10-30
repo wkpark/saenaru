@@ -346,7 +346,6 @@ int PASCAL Init(void);
 
 /*   subs.c     */
 void PASCAL InitCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag);
-void PASCAL ClearCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag);
 void PASCAL ClearCandidate(LPCANDIDATEINFO lpCandInfo);
 void PASCAL ChangeMode(HIMC hIMC,DWORD dwToMode);
 void PASCAL ChangeCompStr(HIMC hIMC,DWORD dwToMode);

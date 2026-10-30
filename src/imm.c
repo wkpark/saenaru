@@ -200,7 +200,7 @@ LRESULT WINAPI ImeEscape(HIMC hIMC,UINT uSubFunc,LPVOID lpData)
                                 lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
                                 lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                                lpCompStr->dwSize = dwSize;
+                                InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
                             } else
         		        lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
@@ -813,6 +813,9 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      // the selection of the old list may be past the new one
                      if (lpCandList->dwSelection >= (DWORD)i)
                          lpCandList->dwSelection = 0;
+                     // the page of the selection, like as ConvHanja()
+                     lpCandList->dwPageStart = lpCandList->dwSelection -
+                         lpCandList->dwSelection % lpCandList->dwPageSize;
 
                      //
                      // Generate messages.
@@ -929,7 +932,13 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
 
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
-                 // the page start is an index of the candidates
+                 if (dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
+                     return FALSE;
+                 }
+
+
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
                  {
                      lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
@@ -1028,15 +1037,17 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             }
 
             lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,sizeof(MYCOMPSTR));
+            // the context starts empty: no string or candidate of another
+            // IME, and the offsets of MYCOMPSTR before any string is written
             if (lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr))
             {
-                // the offsets of MYCOMPSTR before any string is written
                 InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
                 ImmUnlockIMCC(lpIMC->hCompStr);
             }
             lpIMC->hCandInfo = ImmReSizeIMCC(lpIMC->hCandInfo,sizeof(MYCAND));
             if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
             {
+                ClearCandidate(lpCandInfo);
                 lpCandInfo->dwSize = sizeof(MYCAND);
                 ImmUnlockIMCC(lpIMC->hCandInfo);
             }

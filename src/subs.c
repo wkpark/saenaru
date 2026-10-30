@@ -98,18 +98,6 @@ void PASCAL InitCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag)
 
 /**********************************************************************/
 /*                                                                    */
-/*      ClearCompStr()                                                */
-/*                                                                    */
-/**********************************************************************/
-void PASCAL ClearCompStr(LPCOMPOSITIONSTRING lpCompStr,DWORD dwClrFlag)
-{
-    // the strings are written through the offsets, so they stay on the
-    // buffers of MYCOMPSTR; the lengths of 0 tell that there is no string
-    InitCompStr(lpCompStr,dwClrFlag);
-}
-
-/**********************************************************************/
-/*                                                                    */
 /*      ClearCandidate()                                              */
 /*                                                                    */
 /**********************************************************************/
