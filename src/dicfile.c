@@ -97,16 +97,30 @@ hangul_cho_to_jamo(WCHAR key)
     return 0;
 }
 
+// terminate the text of a read of 2048 bytes at lpText, without a byte of
+// half a char; returns its end if its last line is cut by the read, NULL
+// if the read ended a line or the file
+static LPMYSTR EndOfRead(LPMYSTR lpText, DWORD dwRead)
+{
+    LPMYSTR lpEnd = lpText + dwRead / sizeof(MYCHAR);
+
+    *lpEnd = MYTEXT('\0');
+    if (dwRead < 2048 || *(lpEnd - 1) == MYTEXT('\n'))
+        return NULL;
+    return lpEnd;
+}
+
 int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpBuf, DWORD dwBufLen, int iFlag)
 {
     DWORD dwWritten = 0;
     MYCHAR  myBuf[4098];
-    LPMYSTR lpDic, lpSection, lpTemp, lpTemp2;
+    LPMYSTR lpDic, lpSection, lpTemp;
     WCHAR *save;
     MYCHAR  myBase[128];
     LPMYSTR lpReadBase;
-    const LPMYSTR szSep = MYTEXT("\n");
-    LPMYSTR lpToken = NULL, lpNext = NULL;
+    // CR too: no empty line of CR LF, no CR at the end of a line
+    const LPMYSTR szSep = MYTEXT("\r\n");
+    LPMYSTR lpToken = NULL, lpCut;
     DWORD llen = 0, dwRead;
     int found = 0;
     LPMYSTR lpWrite = lpBuf;
@@ -155,12 +169,16 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     myBuf[0] = MYTEXT('\0');
     lpDic = myBuf;
 
-    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && dwRead > 0)
+    // a line carried over at the end of the file is read once more
+    while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && (dwRead > 0 || llen > 0))
     {
-        *(LPMYSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
+        lpCut = EndOfRead(lpDic + llen, dwRead);
 
         lpToken = Mystrtok(lpDic, szSep, &save);
         while (NULL != lpToken) {
+            // read it again with the next part, a header may be cut
+            if (lpToken + Mylstrlen(lpToken) == lpCut)
+                break;
             if (MYTEXT('[') == *lpToken)
             {
                 lpSection = lpToken + 1;
@@ -172,6 +190,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                     MyDebugPrint((TEXT(">>>>FOUND %s\n"), lpSection));
                     break; // found it.
                 } else if ( *(lpSection) > *(lpRead) ) {
+                    // the sections are sorted by their first char
                     found = -1; // not found
                     break;
                 } else if ( *(lpSection) == *(lpRead) && iFlag) {
@@ -196,8 +215,15 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             }
             lpToken = Mystrtok(NULL, szSep, &save);
         }
-        lpToken = Mystrtok(NULL, MYTEXT(""), &save);
+        if (found < 0)
+            break;
+        // the cut line, or the text after the section found
+        if (found)
+            lpToken = Mystrtok(NULL, MYTEXT(""), &save);
         llen = Mylstrlen(lpToken);
+        // not a header that long, and room for the next read
+        if (!found && llen >= 2048 / sizeof(MYCHAR))
+            llen = 0;
         if (llen > 0) {
             Mylstrcpy(lpDic, lpToken); // copy last
             llen = Mylstrlen(lpDic); // adjust XXX
@@ -213,18 +239,14 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         return 0;
 
     // the carried-over text has to leave room for the next read and its
-    // terminator, a crafted file can make it grow on every read
+    // terminator, a line longer than the reads makes it grow
     while (llen + 2048 / sizeof(MYCHAR) < ARRAYSIZE(myBuf) &&
             ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL)) {
         DWORD dwW;
         DWORD len;
         UINT force = 0;
 
-        *(LPWSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
-        lpNext = Mystrchr(lpDic, MYTEXT('\n'));
-        if (lpNext != NULL) lpNext++; // point to next line
-
-        //MyDebugPrint((TEXT(">>>>lpDic=%d, lpNext=%d\n"), lpDic, lpNext));
+        lpCut = EndOfRead(lpDic + llen, dwRead);
 
         lpToken = Mystrtok(lpDic, szSep, &save);
 
@@ -232,9 +254,12 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 (lpWrite == NULL || (dwBufLen - dwWritten) > 1))
         {
             INT isasc, skip;
-            LPMYSTR lpNext2;
             isasc=FALSE;
             skip=FALSE;
+
+            // read it again with the next part
+            if (lpToken + Mylstrlen(lpToken) == lpCut)
+                break;
 
             if (*lpToken == MYTEXT('[')) {
                 if (iFlag) {
@@ -293,16 +318,13 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                     skip = TRUE;
                 }
             }
-            // 뜻이 있으면
-            if ( !skip && lpTemp && Mylstrlen(lpTemp+1) > 1) {
+            // 뜻이 있으면 (the CR at the end of a line is a separator now)
+            if ( !skip && lpTemp && Mylstrlen(lpTemp+1) > 0) {
                 *lpTemp = MYTEXT(':');
 
                 // 뜻이 길 경우는 잘라냄. FIXME
                 if (NULL != (lpTemp = Mystrchr(lpToken, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
-                // strip \r
-                else if (NULL != (lpTemp2 = Mystrchr(lpToken, MYTEXT('\r'))))
-                    *lpTemp2 = MYTEXT('\0');
 
                 len = Mylstrlen(lpToken);
             }
@@ -322,15 +344,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                 dwWritten += dwW;
             }
 
-            if (lpNext == NULL) break; // empty line.
-            lpNext2 = Mystrchr(lpNext, MYTEXT('\n'));
-            if (lpNext2 == NULL) // have no CR
-                break;
-            else
-                lpNext2++; // point to next line
-
-            lpToken = Mystrtok(lpNext, szSep, &save);
-            lpNext = lpNext2;
+            lpToken = Mystrtok(NULL, szSep, &save);
         }
 
         if ((lpToken != NULL && (iFlag == 0 && MYTEXT('[') == *lpToken)) ||
@@ -339,16 +353,10 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             break;
         }
 
-        if (lpToken != NULL) {
-            lpToken = Mystrtok(NULL, MYTEXT(""), &save);
-            llen = Mylstrlen(lpToken);
-            if (llen > 0) {
-                Mylstrcpy(lpDic, lpToken); // copy last
-                llen = Mylstrlen(lpDic); // adjust XXX
-            }
-        } else {
-            llen = 0;
-        }
+        // the cut line
+        llen = Mylstrlen(lpToken);
+        if (llen > 0)
+            Mylstrcpy(lpDic, lpToken); // copy last
     }
     if (lpWrite != NULL) {
         *lpWrite = MYTEXT('\0');

@@ -808,6 +808,19 @@ static void TestDictionary(void)
     n = GetCandidateStringsFromDictionary(L"없는말없는말", buf, 1024, L"word.dic");
     CheckInt("word.dic: not found", 0, n);
 
+    // the double consonants were after ㅎ, past the end of the search
+    for (psz = L"ㄲㄸㅃㅆ"; *psz; psz++) {
+        WCHAR read[2];
+        read[0] = *psz;
+        read[1] = L'\0';
+        n = GetCandidateStringsFromDictionary(read, buf, 1024, L"symwin.dic");
+        CheckInt("symwin.dic: a double consonant", 1, n > 1);
+    }
+
+    // a meaning of one char, without the CR it was counted with
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, L"saenaru.dic");
+    CheckStr("saenaru.dic: a meaning of one char", L"伽:伽", buf);
+
     // the meaning is cut at the comma
     GetCandidateStringsFromDictionary(L"한", buf, 1024, L"nabi.dic");
     CheckStr("nabi.dic: comma", L"韓:나라 이름 한", buf);
@@ -859,6 +872,7 @@ static void TestDictionaryCarry(void)
 {
     WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
     WCHAR buf[1024 + 2];
+    LPCWSTR psz;
     HANDLE hFile;
     DWORD dw;
     int i, n;
@@ -874,7 +888,153 @@ static void TestDictionaryCarry(void)
     n = GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
     CheckInt("crafted dic: found", 1, n > 1);
     CheckStr("crafted dic: 1st", L"가", buf);
+    // the words up to the buffer, not a few of them
+    for (i = 0, psz = buf; n > 0 && *psz; psz += lstrlenW(psz) + 1)
+        i++;
+    CheckInt("crafted dic: the buffer filled", 1, i >= 500);
     DeleteFileW(szPath);
+}
+
+// a header cut by a read of 1024 chars was not found
+static void TestDictionaryCutHeader(void)
+{
+    WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
+    WCHAR buf[1024 + 2];
+    LPCWSTR psz;
+    HANDLE hFile;
+    DWORD dw;
+    int i, n;
+
+    GetTempPathW(MAX_PATH, szDir);
+    GetTempFileNameW(szDir, L"sdc", 0, szPath);
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    // 5 + 509 * 2 chars: [나라] starts at 1023, the first read ends at 1024
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 509; i++)
+        WriteFile(hFile, L"可\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]\n那=어찌 나\n", 12 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+
+    n = GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckInt("cut header: found", 1, n > 1);
+    CheckStr("cut header: 1st", L"那:어찌 나", buf);
+    DeleteFileW(szPath);
+
+    // the last line of a file without its line end
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n可=옳을 가\n家=집 가", 17 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("last line: 2nd", L"家:집 가", buf + lstrlenW(buf) + 1);
+    DeleteFileW(szPath);
+
+    // the end of the file at the end of a read, cut there: 4 + 1021 * 2 + 2
+    // chars after the BOM, the words out of KS X 1001 are skipped
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 1021; i++)
+        WriteFile(hFile, L"\x4000\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"可家", 2 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("end at a read: last line", L"可家", buf);
+    DeleteFileW(szPath);
+
+    // CR LF: no empty line as a candidate
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\r\n\r\n可=옳을 가\r\n\r\n家=집 가\r\n", 25 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("CR LF: 1st", L"可:옳을 가", buf);
+    psz = buf + lstrlenW(buf) + 1;
+    CheckStr("CR LF: 2nd", L"家:집 가", psz);
+    CheckStr("CR LF: no more", L"", psz + lstrlenW(psz) + 1);
+    DeleteFileW(szPath);
+
+    // a read ends between CR and LF: 5 + 338 * 3 chars after the BOM, so
+    // [나라] is at 1020 and its CR at 1024
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\r\n", 6 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 338; i++)
+        WriteFile(hFile, L"可\r\n", 3 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]\r\n那=어찌 나\r\n", 14 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckStr("CR LF: a read ends between CR and LF", L"那:어찌 나", buf);
+    DeleteFileW(szPath);
+
+    // [나라말] across the first read joins [나라] for the similar words only:
+    // 5 + 7 + 505 * 2 chars after the BOM, so [나라말] is at 1023
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[나라]\n那=어찌 나\n", 13 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 505; i++)
+        WriteFile(hFile, L"\x4000\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라말]\n國=나라 국\n", 13 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckStr("cut header: the section", L"那:어찌 나", buf);
+    CheckStr("cut header: the section only", L"", buf + lstrlenW(buf) + 1);
+    dwOptionFlag |= SEARCH_SIMILAR_WORDS;
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    dwOptionFlag &= ~SEARCH_SIMILAR_WORDS;
+    CheckStr("cut header: the similar words, 1st", L"那:어찌 나", buf);
+    CheckStr("cut header: the similar words", L"國:나라 국", buf + lstrlenW(buf) + 1);
+    DeleteFileW(szPath);
+
+    // a header that ends the file at the end of a read: 4 + 508 * 2 + 4
+    // chars after the BOM; found, with no candidate
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 508; i++)
+        WriteFile(hFile, L"可\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]", 4 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    n = GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckInt("end at a read: the last header found", 1, n);
+    DeleteFileW(szPath);
+}
+
+// the search stops at a section greater than the reading
+static void TestDictionaryOrder(void)
+{
+    static const LPCSTR names[] = { "nabi.dic", "word.dic", "symwin.dic", "saenaru.dic" };
+    int i;
+
+    for (i = 0; i < ARRAYSIZE(names); i++) {
+        HANDLE hFile = CreateFileA(names[i], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+        DWORD dwSize, dw = 0;
+        LPWSTR lpText, p;
+        WCHAR last = 0;
+        int sorted = 1;
+
+        if (hFile == INVALID_HANDLE_VALUE) {
+            CheckInt(names[i], 1, 0);
+            continue;
+        }
+        dwSize = GetFileSize(hFile, NULL);
+        lpText = (LPWSTR)HeapAlloc(GetProcessHeap(), 0, dwSize + sizeof(WCHAR));
+        ReadFile(hFile, lpText, dwSize, &dw, NULL);
+        CloseHandle(hFile);
+        lpText[dw / sizeof(WCHAR)] = L'\0';
+        // the first line after the BOM
+        for (p = lpText + (lpText[0] == 0xfeff); p != NULL; p = wcschr(p, L'\n')) {
+            if (*p == L'\n')
+                p++;
+            if (*p == L'[') {
+                if (p[1] < last)
+                    sorted = 0;
+                last = p[1];
+            }
+        }
+        CheckInt(names[i], 1, sorted && last != 0);
+        HeapFree(GetProcessHeap(), 0, lpText);
+    }
 }
 
 // the terminator of a compose map of 256 entries stays in the map
@@ -910,6 +1070,8 @@ int main(void)
     TestDictionary();
     TestHanjaIndex();
     TestDictionaryCarry();
+    TestDictionaryCutHeader();
+    TestDictionaryOrder();
     TestComposeMapSize();
 
     printf("%d passed, %d failed\n", nPassed, nFailed);
