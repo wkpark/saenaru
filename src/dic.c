@@ -1586,7 +1586,7 @@ CONST LPBYTE lpbKeyState;
                                     lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
                                     lpCompStr =
                                         (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                                    InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+                                    lpCompStr->dwSize = dwSize;
                                 } else
                                     lpCompStr =
                                         (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
@@ -1839,7 +1839,7 @@ CONST LPBYTE lpbKeyState;
                                 lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,dwSize);
                                 lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr);
-                                InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+                                lpCompStr->dwSize = dwSize;
                             } else
         		        lpCompStr =
                                     (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
