@@ -977,11 +977,13 @@ static void TestDictionaryCutHeader(void)
     CloseHandle(hFile);
     buf[0] = buf[1] = L'\0';
     GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckStr("cut header: the section", L"那:어찌 나", buf);
     CheckStr("cut header: the section only", L"", buf + lstrlenW(buf) + 1);
     dwOptionFlag |= SEARCH_SIMILAR_WORDS;
     buf[0] = buf[1] = L'\0';
     GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
     dwOptionFlag &= ~SEARCH_SIMILAR_WORDS;
+    CheckStr("cut header: the similar words, 1st", L"那:어찌 나", buf);
     CheckStr("cut header: the similar words", L"國:나라 국", buf + lstrlenW(buf) + 1);
     DeleteFileW(szPath);
 

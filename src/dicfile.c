@@ -215,6 +215,8 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             }
             lpToken = Mystrtok(NULL, szSep, &save);
         }
+        if (found < 0)
+            break;
         // the cut line, or the text after the section found
         if (found)
             lpToken = Mystrtok(NULL, MYTEXT(""), &save);
