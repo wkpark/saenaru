@@ -436,7 +436,7 @@ CLangBarItemImeButton::OnMenuSelect(UINT wID)
     {
         if (wID >= 30)
             wID -= 28;
-        if (c_rgMenuItems[wID].pfnHandler != NULL)
+        if (wID < ARRAYSIZE(c_rgMenuItems) && c_rgMenuItems[wID].pfnHandler != NULL)
         {
             c_rgMenuItems[wID].pfnHandler(this, wID);
         }

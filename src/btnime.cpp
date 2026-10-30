@@ -565,7 +565,7 @@ CLangBarItemImeButton::OnMenuSelect (
 
     if (wID == 0 || wID >= 30 ){
         if (wID >= 30) wID-= 28;
-        if (c_rgMenuItems [wID].pfnHandler != NULL) {
+        if (wID < ARRAYSIZE (c_rgMenuItems) && c_rgMenuItems [wID].pfnHandler != NULL) {
             c_rgMenuItems [wID].pfnHandler (wID);
 	    if (wID != 0)
 		UpdateLanguageBar();

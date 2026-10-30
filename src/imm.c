@@ -671,7 +671,7 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
     LPCANDIDATELIST     lpCandList;
     MYCHAR              szBuf[256];
     int                 nBufLen;
-    LPMYSTR             lpstr;
+    LPMYSTR             lpstr, lpCand;
     TRANSMSG             GnMsg;
     int                 i = 0;
     LPDWORD             lpdw;
@@ -754,9 +754,18 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      //
                      // Get the candidate strings from dic file.
                      //
+                     szBuf[0] = MYTEXT('\0'); // no candidate if not found
                      nBufLen = GetCandidateStringsFromDictionary(GETLPCOMPREADSTR(lpCompStr),
                                                                  (LPMYSTR)szBuf,256,
                                                                  (LPTSTR)szDicFileName );
+                     // no candidate window without candidates
+                     if (!szBuf[0])
+                     {
+                         ImmUnlockIMCC(lpIMC->hCandInfo);
+                         ImmUnlockIMCC(lpIMC->hCompStr);
+                         ImmUnlockIMC(hIMC);
+                         break;
+                     }
 
                      //
                      // generate WM_IME_NOTFIY IMN_OPENCANDIDATE message.
@@ -777,11 +786,14 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      lpdw = (LPDWORD)&(lpCandList->dwOffset);
 
                      lpstr = &szBuf[0];
+                     // packed in szCand like as ConvHanja(), where all of szBuf fits
+                     lpCand = (LPMYSTR)((LPMYCAND)lpCandInfo)->szCand;
                      while (*lpstr && (i < MAXCANDSTRNUM))
                      {
                          lpCandList->dwOffset[i] =
-                                (DWORD)((LPSTR)((LPMYCAND)lpCandInfo)->szCand[i] - (LPSTR)lpCandList);
-                         Mylstrcpy((LPMYSTR)((LPMYSTR)lpCandList+lpCandList->dwOffset[i]),lpstr);
+                                (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
+                         Mylstrcpy(lpCand,lpstr);
+                         lpCand += Mylstrlen(lpCand) + 1;
                          lpstr += (Mylstrlen(lpstr) + 1);
                          i++;
                      }
@@ -809,10 +821,11 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      GenerateMessage(hIMC, lpIMC, lpCurTransKey,(LPTRANSMSG)&GnMsg);
 
                      ImmUnlockIMCC(lpIMC->hCandInfo);
-                     ImmUnlockIMC(hIMC);
 
                      bRet = TRUE;
                  }
+                 ImmUnlockIMCC(lpIMC->hCompStr);
+                 ImmUnlockIMC(hIMC);
              }
              break;
 
@@ -877,8 +890,12 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
 
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
-                 if (dwValue > MAXCANDPAGESIZE)
+                 // the candidate window divides by the page size
+                 if (!dwValue || dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
                      return FALSE;
+                 }
 
 
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
@@ -910,7 +927,10 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
                  if (dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
                      return FALSE;
+                 }
 
 
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
@@ -1125,17 +1145,27 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
             lpIMC = ImmLockIMC (hIMC) ;
             if (!lpIMC)
                 break ;
+            if (ImmGetIMCCSize (lpIMC->hCompStr) < sizeof (MYCOMPSTR)) {
+                ImmUnlockIMC (hIMC) ;
+                break ;
+            }
 
             lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
             if (lpCompStr != NULL) {
+                // the offsets are 0 before the first composition
+                if (!lpCompStr->dwCompStrOffset)
+                    InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));
-                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,dwComp);
+                    // in bytes, maybe without the terminator: at most the
+                    // composition buffers of MAXCOMPSIZE chars
+                    Mylstrcpyn(GETLPCOMPSTR(lpCompStr),lpComp,min(dwComp / sizeof(TCHAR) + 1,MAXCOMPSIZE));
                 } else if (lpRead != NULL && dwRead >0) {
                     MyDebugPrint((TEXT(" * LPREAD %s:%d\n"),lpRead,dwRead));
-                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,dwRead / sizeof(TCHAR));
-                    if (!Mylstrlen(lpRead)) {
+                    Mylstrcpyn(GETLPCOMPREADSTR(lpCompStr),lpRead,min(dwRead / sizeof(TCHAR) + 1,MAXCOMPSIZE));
+                    // lpRead may have no terminator
+                    if (!Mylstrlen(GETLPCOMPREADSTR(lpCompStr))) {
                         // 고고타자의 행동을 분석해서 얻은 결론:
                         // lpRead가 지워지면 다시 조합에 들어감.
                         // ImeSetCompostionString()을 쓰는 어플이 많지 않아서

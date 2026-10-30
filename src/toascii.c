@@ -49,7 +49,6 @@ UINT WINAPI ImeToAsciiEx (UINT uVKey,UINT uScanCode,CONST LPBYTE lpbKeyState,LPT
 
     ImeLog(LOGF_KEY | LOGF_API, TEXT("ImeToAsciiEx"));
 
-    lpCurTransKey = lpTransBuf;
     lParam = ((DWORD)uScanCode << 16) + 1L;
     
     // Init uNumTransKey here.
@@ -70,6 +69,9 @@ UINT WINAPI ImeToAsciiEx (UINT uVKey,UINT uScanCode,CONST LPBYTE lpbKeyState,LPT
     if (!fOpen && vkey != VK_BACK)
         goto itae_exit;
 
+    // only for the handlers: the early exits above kept it pointing to
+    // lpTransBuf of imm32 after the return
+    lpCurTransKey = lpTransBuf;
     if (uScanCode & 0x8000)
         IMEKeyupHandler( hIMC, uVKey, lParam, lpbKeyState);
     else
