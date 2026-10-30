@@ -861,9 +861,6 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      if (lpCandList->dwCount > dwValue)
                      {
                          lpCandList->dwSelection = dwValue;
-                         // the page of the selection, like as ConvHanja()
-                         if (lpCandList->dwPageSize)
-                             lpCandList->dwPageStart = dwValue - dwValue % lpCandList->dwPageSize;
                          bRet = TRUE;
 
                          //
@@ -908,13 +905,9 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
                  {
                      lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
-                     // like as the lists of ConvHanja(), a page may hold them all
-                     if (lpCandList->dwCount >= dwValue)
+                     if (lpCandList->dwCount > dwValue)
                      {
                          lpCandList->dwPageSize = dwValue;
-                         // the page of the selection on the new pages
-                         lpCandList->dwPageStart = lpCandList->dwSelection -
-                             lpCandList->dwSelection % dwValue;
                          bRet = TRUE;
 
                          //
@@ -937,13 +930,17 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
 
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
+                 if (dwValue > MAXCANDPAGESIZE)
+                 {
+                     ImmUnlockIMC(hIMC);
+                     return FALSE;
+                 }
+
+
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
                  {
                      lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
-                     // the start of a page: the candidate window numbers the
-                     // candidates by pages of dwPageSize
-                     if (lpCandList->dwCount > dwValue && lpCandList->dwPageSize &&
-                             dwValue % lpCandList->dwPageSize == 0)
+                     if (lpCandList->dwCount > dwValue)
                      {
                          lpCandList->dwPageStart = dwValue;
                          bRet = TRUE;
@@ -1041,11 +1038,21 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             if (lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr))
             {
                 // the offsets of MYCOMPSTR, which all the strings are written
-                // through, unless the context has them: a new one has none
-                if (lpCompStr->dwCompStrOffset != (DWORD)FIELD_OFFSET(MYCOMPSTR, szCompStr) ||
-                        lpCompStr->dwCompReadStrOffset != (DWORD)FIELD_OFFSET(MYCOMPSTR, szCompReadStr) ||
-                        lpCompStr->dwResultStrOffset != (DWORD)FIELD_OFFSET(MYCOMPSTR, szResultStr))
+                // through, unless the context has them: a new one has none,
+                // and those of another IME may point past the block
+#define MYOFFSET(f) ((DWORD)FIELD_OFFSET(MYCOMPSTR, f))
+                if (lpCompStr->dwCompStrOffset != MYOFFSET(szCompStr) ||
+                        lpCompStr->dwCompAttrOffset != MYOFFSET(bCompAttr) ||
+                        lpCompStr->dwCompClauseOffset != MYOFFSET(dwCompClause) ||
+                        lpCompStr->dwCompReadStrOffset != MYOFFSET(szCompReadStr) ||
+                        lpCompStr->dwCompReadAttrOffset != MYOFFSET(bCompReadAttr) ||
+                        lpCompStr->dwCompReadClauseOffset != MYOFFSET(dwCompReadClause) ||
+                        lpCompStr->dwResultStrOffset != MYOFFSET(szResultStr) ||
+                        lpCompStr->dwResultClauseOffset != MYOFFSET(dwResultClause) ||
+                        lpCompStr->dwResultReadStrOffset != MYOFFSET(szResultReadStr) ||
+                        lpCompStr->dwResultReadClauseOffset != MYOFFSET(dwResultReadClause))
                     InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
+#undef MYOFFSET
                 else
                     lpCompStr->dwSize = sizeof(MYCOMPSTR);
                 ImmUnlockIMCC(lpIMC->hCompStr);
