@@ -792,7 +792,8 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                      {
                          lpCandList->dwOffset[i] =
                                 (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
-                         Mylstrcpy(lpCand,lpstr);
+                         // at most MAXCOMPSIZE chars like as ConvHanja()
+                         Mylstrcpyn(lpCand,lpstr,MAXCOMPSIZE);
                          lpCand += Mylstrlen(lpCand) + 1;
                          lpstr += (Mylstrlen(lpstr) + 1);
                          i++;
@@ -809,7 +810,8 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                          lpCandList->dwPageSize  = MAXCANDPAGESIZE;
 
                      lpCandList->dwSelection++;
-                     if (lpCandList->dwSelection == (DWORD)i)
+                     // the selection of the old list may be past the new one
+                     if (lpCandList->dwSelection >= (DWORD)i)
                          lpCandList->dwSelection = 0;
 
                      //
@@ -901,7 +903,8 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
                  {
                      lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
-                     if (lpCandList->dwCount > dwValue)
+                     // like as the lists of ConvHanja(), a page may hold them all
+                     if (lpCandList->dwCount >= dwValue)
                      {
                          lpCandList->dwPageSize = dwValue;
                          bRet = TRUE;
@@ -926,13 +929,7 @@ BOOL WINAPI NotifyIME(HIMC hIMC,DWORD dwAction,DWORD dwIndex,DWORD dwValue)
 
              if (dwIndex == 1 && IsCandidate(lpIMC))
              {
-                 if (dwValue > MAXCANDPAGESIZE)
-                 {
-                     ImmUnlockIMC(hIMC);
-                     return FALSE;
-                 }
-
-
+                 // the page start is an index of the candidates
                  if (lpCandInfo = (LPCANDIDATEINFO)ImmLockIMCC(lpIMC->hCandInfo))
                  {
                      lpCandList = (LPCANDIDATELIST)((LPSTR)lpCandInfo  + lpCandInfo->dwOffset[0]);
@@ -1033,7 +1030,8 @@ BOOL WINAPI ImeSelect(HIMC hIMC, BOOL fSelect)
             lpIMC->hCompStr = ImmReSizeIMCC(lpIMC->hCompStr,sizeof(MYCOMPSTR));
             if (lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC(lpIMC->hCompStr))
             {
-                lpCompStr->dwSize = sizeof(MYCOMPSTR);
+                // the offsets of MYCOMPSTR before any string is written
+                InitCompStr(lpCompStr,CLR_RESULT_AND_UNDET);
                 ImmUnlockIMCC(lpIMC->hCompStr);
             }
             lpIMC->hCandInfo = ImmReSizeIMCC(lpIMC->hCandInfo,sizeof(MYCAND));
@@ -1152,9 +1150,6 @@ BOOL WINAPI ImeSetCompositionString(HIMC hIMC, DWORD dwIndex, LPVOID lpComp, DWO
 
             lpCompStr = (LPCOMPOSITIONSTRING)ImmLockIMCC (lpIMC->hCompStr) ;
             if (lpCompStr != NULL) {
-                // the offsets are 0 before the first composition
-                if (!lpCompStr->dwCompStrOffset)
-                    InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                 if (lpComp != NULL && dwComp > 0) {
                     //InitCompStr (lpCompStr, CLR_RESULT_AND_UNDET);
                     MyDebugPrint((TEXT(" * LPCOMP %s:%d\n"),lpComp,dwComp / sizeof(TCHAR)));

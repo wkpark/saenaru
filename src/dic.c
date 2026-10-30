@@ -585,7 +585,9 @@ set_compstr:
             {
                 lpCandList->dwOffset[i] =
                     (DWORD)((LPSTR)lpCand - (LPSTR)lpCandList);
-                Mylstrcpyn(lpmystr,lpstr,ARRAYSIZE(myBuf));
+                // a candidate fits the composition string and the buffers of
+                // MAXCOMPSIZE chars it is copied into
+                Mylstrcpyn(lpmystr,lpstr,MAXCOMPSIZE);
                 if (NULL != (lpTemp = Mystrchr(lpmystr, MYTEXT(','))))
                     *lpTemp = MYTEXT('\0');
                 Mylstrcpy(lpCand,lpmystr);
