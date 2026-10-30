@@ -106,7 +106,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     MYCHAR  myBase[128];
     LPMYSTR lpReadBase;
     const LPMYSTR szSep = MYTEXT("\n");
-    LPMYSTR lpToken = NULL, lpNext = NULL;
+    LPMYSTR lpToken = NULL, lpNext = NULL, lpCut;
     DWORD llen = 0, dwRead;
     int found = 0;
     LPMYSTR lpWrite = lpBuf;
@@ -158,9 +158,16 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
     while (ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL) && dwRead > 0)
     {
         *(LPMYSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
+        // the last line is cut by the read unless it ends the file
+        lpCut = lpDic + llen + dwRead / sizeof(MYCHAR);
+        if (dwRead < 2048 || *(lpCut - 1) == MYTEXT('\n'))
+            lpCut = NULL;
 
         lpToken = Mystrtok(lpDic, szSep, &save);
         while (NULL != lpToken) {
+            // read it again with the next part, a header may be cut
+            if (lpToken + Mylstrlen(lpToken) == lpCut)
+                break;
             if (MYTEXT('[') == *lpToken)
             {
                 lpSection = lpToken + 1;
@@ -172,6 +179,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
                     MyDebugPrint((TEXT(">>>>FOUND %s\n"), lpSection));
                     break; // found it.
                 } else if ( *(lpSection) > *(lpRead) ) {
+                    // the sections are sorted by their first char
                     found = -1; // not found
                     break;
                 } else if ( *(lpSection) == *(lpRead) && iFlag) {
@@ -196,8 +204,13 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             }
             lpToken = Mystrtok(NULL, szSep, &save);
         }
-        lpToken = Mystrtok(NULL, MYTEXT(""), &save);
+        // the cut line, or the text after the section found
+        if (found || lpToken == NULL)
+            lpToken = Mystrtok(NULL, MYTEXT(""), &save);
         llen = Mylstrlen(lpToken);
+        // not a header that long, and room for the next read
+        if (!found && llen >= 2048 / sizeof(MYCHAR))
+            llen = 0;
         if (llen > 0) {
             Mylstrcpy(lpDic, lpToken); // copy last
             llen = Mylstrlen(lpDic); // adjust XXX
@@ -213,7 +226,7 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         return 0;
 
     // the carried-over text has to leave room for the next read and its
-    // terminator, a crafted file can make it grow on every read
+    // terminator, a line longer than the reads makes it grow
     while (llen + 2048 / sizeof(MYCHAR) < ARRAYSIZE(myBuf) &&
             ReadFile(hFile, lpDic + llen, 2048, &dwRead, NULL)) {
         DWORD dwW;
@@ -221,7 +234,11 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
         UINT force = 0;
 
         *(LPWSTR)(((LPBYTE)(lpDic + llen)) + dwRead) = MYTEXT('\0');
-        lpNext = Mystrchr(lpDic, MYTEXT('\n'));
+        // the line after the first token: Mystrtok() skips empty lines
+        lpNext = lpDic;
+        while (*lpNext == MYTEXT('\n'))
+            lpNext++;
+        lpNext = Mystrchr(lpNext, MYTEXT('\n'));
         if (lpNext != NULL) lpNext++; // point to next line
 
         //MyDebugPrint((TEXT(">>>>lpDic=%d, lpNext=%d\n"), lpDic, lpNext));
@@ -323,11 +340,14 @@ int CopyCandidateStringsFromDictionary(HANDLE hFile, LPMYSTR lpRead, LPMYSTR lpB
             }
 
             if (lpNext == NULL) break; // empty line.
+            while (*lpNext == MYTEXT('\n')) // skipped by Mystrtok() too
+                lpNext++;
             lpNext2 = Mystrchr(lpNext, MYTEXT('\n'));
-            if (lpNext2 == NULL) // have no CR
-                break;
-            else
+            if (lpNext2 != NULL)
                 lpNext2++; // point to next line
+            else if (dwRead == 2048) // have no CR, cut by the read
+                break;
+            // else the last line of the file, which may have no CR
 
             lpToken = Mystrtok(lpNext, szSep, &save);
             lpNext = lpNext2;

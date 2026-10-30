@@ -808,6 +808,15 @@ static void TestDictionary(void)
     n = GetCandidateStringsFromDictionary(L"없는말없는말", buf, 1024, L"word.dic");
     CheckInt("word.dic: not found", 0, n);
 
+    // the double consonants were after ㅎ, past the end of the search
+    for (psz = L"ㄲㄸㅃㅆ"; *psz; psz++) {
+        WCHAR read[2];
+        read[0] = *psz;
+        read[1] = L'\0';
+        n = GetCandidateStringsFromDictionary(read, buf, 1024, L"symwin.dic");
+        CheckInt("symwin.dic: a double consonant", 1, n > 1);
+    }
+
     // the meaning is cut at the comma
     GetCandidateStringsFromDictionary(L"한", buf, 1024, L"nabi.dic");
     CheckStr("nabi.dic: comma", L"韓:나라 이름 한", buf);
@@ -859,6 +868,7 @@ static void TestDictionaryCarry(void)
 {
     WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
     WCHAR buf[1024 + 2];
+    LPCWSTR psz;
     HANDLE hFile;
     DWORD dw;
     int i, n;
@@ -874,6 +884,44 @@ static void TestDictionaryCarry(void)
     n = GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
     CheckInt("crafted dic: found", 1, n > 1);
     CheckStr("crafted dic: 1st", L"가", buf);
+    // the words up to the buffer, not a few of them
+    for (i = 0, psz = buf; n > 0 && *psz; psz += lstrlenW(psz) + 1)
+        i++;
+    CheckInt("crafted dic: the buffer filled", 1, i >= 500);
+    DeleteFileW(szPath);
+}
+
+// a header cut by a read of 1024 chars was not found
+static void TestDictionaryCutHeader(void)
+{
+    WCHAR szDir[MAX_PATH], szPath[MAX_PATH];
+    WCHAR buf[1024 + 2];
+    HANDLE hFile;
+    DWORD dw;
+    int i, n;
+
+    GetTempPathW(MAX_PATH, szDir);
+    GetTempFileNameW(szDir, L"sdc", 0, szPath);
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    // 5 + 509 * 2 chars: [나라] starts at 1023, the first read ends at 1024
+    WriteFile(hFile, L"\xfeff[가]\n", 5 * sizeof(WCHAR), &dw, NULL);
+    for (i = 0; i < 509; i++)
+        WriteFile(hFile, L"可\n", 2 * sizeof(WCHAR), &dw, NULL);
+    WriteFile(hFile, L"[나라]\n那=어찌 나\n", 12 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+
+    n = GetCandidateStringsFromDictionary(L"나라", buf, 1024, szPath);
+    CheckInt("cut header: found", 1, n > 1);
+    CheckStr("cut header: 1st", L"那:어찌 나", buf);
+    DeleteFileW(szPath);
+
+    // the last line of a file without its line end
+    hFile = CreateFileW(szPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    WriteFile(hFile, L"\xfeff[가]\n可=옳을 가\n家=집 가", 17 * sizeof(WCHAR), &dw, NULL);
+    CloseHandle(hFile);
+    buf[0] = buf[1] = L'\0';
+    GetCandidateStringsFromDictionary(L"가", buf, 1024, szPath);
+    CheckStr("last line: 2nd", L"家:집 가", buf + lstrlenW(buf) + 1);
     DeleteFileW(szPath);
 }
 
@@ -910,6 +958,7 @@ int main(void)
     TestDictionary();
     TestHanjaIndex();
     TestDictionaryCarry();
+    TestDictionaryCutHeader();
     TestComposeMapSize();
 
     printf("%d passed, %d failed\n", nPassed, nFailed);
